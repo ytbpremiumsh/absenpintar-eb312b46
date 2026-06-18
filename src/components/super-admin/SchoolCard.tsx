@@ -8,6 +8,7 @@ export interface SchoolData {
   id: string;
   name: string;
   address: string | null;
+  slug?: string | null;
   npsn: string | null;
   city: string | null;
   province: string | null;
