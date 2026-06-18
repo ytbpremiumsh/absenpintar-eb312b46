@@ -1731,6 +1731,7 @@ export type Database = {
           name: string
           npsn: string | null
           province: string | null
+          slug: string
           timezone: string | null
         }
         Insert: {
@@ -1744,6 +1745,7 @@ export type Database = {
           name: string
           npsn?: string | null
           province?: string | null
+          slug: string
           timezone?: string | null
         }
         Update: {
@@ -1757,6 +1759,7 @@ export type Database = {
           name?: string
           npsn?: string | null
           province?: string | null
+          slug?: string
           timezone?: string | null
         }
         Relationships: [
@@ -2646,10 +2649,12 @@ export type Database = {
         Returns: boolean
       }
       increment_shortlink_click: { Args: { _code: string }; Returns: undefined }
+      is_reserved_slug: { Args: { _slug: string }; Returns: boolean }
       notify_admin_wa: {
         Args: { _event_type: string; _payload: Json }
         Returns: undefined
       }
+      slugify: { Args: { _input: string }; Returns: string }
     }
     Enums: {
       app_role:
