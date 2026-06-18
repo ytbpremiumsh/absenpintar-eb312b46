@@ -1,79 +1,147 @@
+# Panduan VPS Wildcard Subdomain ATSkolla
 
-# Plan: Auto Wildcard Subdomain `{slug}.atskolla.com` per Sekolah
+Saya akan menulis dokumentasi **`VPS_WILDCARD_SETUP.md`** yang berisi panduan lengkap deploy ATSkolla ke VPS dengan dukungan wildcard subdomain (`*.atskolla.com`).
 
-Tujuan: Setiap sekolah baru otomatis punya `slug.atskolla.com` yang melayani **login ber-branding, monitoring publik, parent portal, dan seluruh app** dengan isolasi data berdasarkan subdomain.
+## Arsitektur
 
----
+```text
+User Browser
+   ↓ smkcendikia.atskolla.com
+Cloudflare DNS (orange cloud OFF / DNS only)
+   ↓ A record * → IP VPS
+VPS (Ubuntu 22.04)
+   ├── Nginx (reverse proxy + wildcard SSL)
+   │     ↓ serve dist/index.html + assets
+   └── Build statis Vite (folder /var/www/atskolla/dist)
+        ↓ JS client baca window.location.hostname
+        ↓ TenantProvider resolve slug → schools table
+Lovable Cloud (Supabase) — backend tetap di sini
+```
 
-## Bagian 1 — Yang harus disiapkan user (sekali setup di luar Lovable)
+VPS hanya jadi **origin server statis + reverse proxy**. Backend (DB, Auth, Edge Functions, cron `auto-mark-alfa`) **tetap di Lovable Cloud** — tidak perlu pindah.
 
-Ini **tidak bisa saya kerjakan** karena di luar Lovable, tapi wajib agar wildcard jalan:
+## Isi Dokumentasi yang Akan Dibuat
 
-1. **Beli/punya domain `atskolla.com`** dan arahkan nameserver ke **Cloudflare** (gratis).
-2. Di Cloudflare DNS, tambahkan record:
-   - `CNAME  *  →  absenpintar.lovable.app` (Proxied / orange cloud ON)
-   - `CNAME  @  →  absenpintar.lovable.app` (Proxied)
-3. Di Lovable → Project Settings → Domains:
-   - Connect `atskolla.com` **dengan opsi "Domain uses Cloudflare proxy"** dicentang (CNAME verification).
-   - Catatan: Lovable hanya verifikasi domain root. Wildcard `*` ditangani Cloudflare proxy yang melempar semua subdomain ke origin Lovable yang sama. SSL otomatis dari Cloudflare Universal SSL.
-4. (Opsional tapi direkomendasikan) **Cloudflare Page Rule / Transform Rule** untuk meneruskan `Host` header asli ke origin sehingga app bisa baca subdomain.
+### 1. Prasyarat
+- VPS Ubuntu 22.04+, RAM 1GB minimum, akses root/sudo
+- Domain `atskolla.com` sudah terdaftar (boleh di Cloudflare/Niagahoster/dll)
+- IP publik VPS (misal `123.45.67.89`)
 
-Setelah ini sekali jadi, **semua sekolah baru otomatis** tanpa setup DNS tambahan.
+### 2. DNS Setup (Cloudflare DNS-Only Mode)
+- Hapus CNAME `@` dan `*` yang lama (yang ke `absenpintar.lovable.app`)
+- Tambah **A record**:
+  - `@` → `123.45.67.89` (Proxy: **DNS only / abu-abu**)
+  - `www` → `123.45.67.89` (DNS only)
+  - `*` → `123.45.67.89` (DNS only) ← wildcard
+- Catatan: Proxy harus **OFF** karena SSL akan dihandle Nginx di VPS (Let's Encrypt). Kalau mau pakai Cloudflare proxy, perlu mode "Full (strict)" + Origin Certificate.
 
----
+### 3. Install Dependencies di VPS
+```bash
+apt update && apt install -y nginx certbot python3-certbot-nginx python3-certbot-dns-cloudflare git curl
+curl -fsSL https://bun.sh/install | bash
+```
 
-## Bagian 2 — Yang saya kerjakan di codebase
+### 4. Clone Project & Build
+```bash
+mkdir -p /var/www/atskolla
+cd /var/www/atskolla
+git clone <repo-github-anda> .
+bun install
+bun run build   # hasilkan folder dist/
+```
 
-### 2.1 Schema database
-- Tambah kolom `schools.slug` (text, unique, lowercase, regex `^[a-z0-9-]+$`).
-- Migration backfill slug untuk sekolah existing dari `name` (slugify).
-- Trigger auto-generate slug saat insert sekolah baru jika kosong (handle collision: `smkcendikia`, `smkcendikia-2`, dst).
-- Update edge function `create-user` agar generate & simpan slug saat school baru dibuat.
+`.env` berisi `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` (sama dengan Lovable Cloud sekarang).
 
-### 2.2 Tenant resolver (frontend)
-- Buat `src/lib/tenant.ts`:
-  - Parse `window.location.hostname` → ekstrak subdomain.
-  - Kalau host = `atskolla.com` / `www.atskolla.com` / `*.lovable.app` / `localhost` → mode **landing** (tidak terikat sekolah).
-  - Kalau subdomain ada → fetch `schools` by slug, simpan di React Context `TenantProvider`.
-  - Kalau slug tidak ditemukan → halaman "Sekolah tidak ditemukan".
-- `TenantProvider` membungkus `App.tsx`, expose `useTenant()` ke seluruh app.
+### 5. Nginx Config Wildcard
+File `/etc/nginx/sites-available/atskolla`:
+```nginx
+server {
+  listen 80;
+  listen 443 ssl http2;
+  server_name atskolla.com www.atskolla.com *.atskolla.com;
 
-### 2.3 Login & UI ber-branding per subdomain
-- Halaman `Login.tsx`: jika `useTenant().school` ada, tampilkan logo + nama + warna sekolah, sembunyikan field "Pilih sekolah". Auto-scope login ke `school_id` sekolah tsb.
-- Halaman publik (`PublicMonitoring`, `PublicAttendanceMonitoring`, `ParentLogin`) baca slug dari subdomain, bukan dari path/param.
-- Root subdomain (`smkcendikia.atskolla.com/`) redirect ke `/login` sekolah tsb (bukan landing page ATSkolla).
+  ssl_certificate     /etc/letsencrypt/live/atskolla.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/atskolla.com/privkey.pem;
 
-### 2.4 Landing page
-- `atskolla.com` (tanpa subdomain) tetap menampilkan landing marketing seperti sekarang.
-- Form pendaftaran sekolah baru: setelah daftar, tampilkan "URL sekolah Anda: `smkcendikia.atskolla.com`" + tombol langsung kunjungi.
+  root /var/www/atskolla/dist;
+  index index.html;
 
-### 2.5 Super Admin
-- Tambah kolom "Subdomain" di `SuperAdminSchools` dengan tombol edit slug (validasi unique + warning kalau diubah karena memutus link lama).
+  # SPA fallback — wajib supaya React Router & subdomain routing bekerja
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
 
----
+  # Cache asset hashed
+  location /assets/ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+  }
+}
+```
+Aktifkan: `ln -s /etc/nginx/sites-available/atskolla /etc/nginx/sites-enabled/`
 
-## Bagian 3 — Hal yang perlu diperhatikan / risiko
+### 6. Wildcard SSL via Let's Encrypt (DNS-01 Challenge)
+Wildcard cert **wajib pakai DNS challenge** (HTTP challenge tidak support wildcard).
 
-- **Supabase Auth cookie**: domain cookie harus di-scope ke `.atskolla.com` agar session valid lintas subdomain. Saat ini Supabase pakai localStorage (bukan cookie), jadi **session terisolasi per subdomain** — user yang login di `smkA.atskolla.com` tidak otomatis login di `smkB.atskolla.com`. Ini justru bagus untuk multi-tenant, tapi perlu dikomunikasikan.
-- **Custom Domain Add-on** existing (per sekolah punya domain sendiri spt `absen.smkcendikia.sch.id`) tetap jalan paralel, tidak konflik.
-- **Reserved slug**: `www`, `app`, `api`, `admin`, `super`, `affiliate`, `parent` harus diblokir agar tidak diambil sekolah.
-- **SEO**: tiap subdomain butuh meta tag dinamis (judul = nama sekolah). Akan saya tambahkan via `react-helmet`-style update di tenant provider.
+**Opsi A — Cloudflare API Token (rekomendasi):**
+```bash
+# Buat token di Cloudflare: Zone.DNS Edit untuk atskolla.com
+mkdir -p /root/.secrets && nano /root/.secrets/cloudflare.ini
+# Isi: dns_cloudflare_api_token = <TOKEN>
+chmod 600 /root/.secrets/cloudflare.ini
 
----
+certbot certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
+  -d atskolla.com -d "*.atskolla.com" \
+  --agree-tos -m admin@atskolla.com
+```
 
-## Bagian 4 — Urutan implementasi (jika disetujui)
+**Auto-renew:** Certbot sudah pasang cron sendiri (`/etc/cron.d/certbot`). Test: `certbot renew --dry-run`.
 
-1. Migration: kolom `slug`, trigger, backfill, reserved-slug check.
-2. `TenantProvider` + `useTenant()` + parser hostname.
-3. Refactor `Login`, `PublicMonitoring`, `ParentLogin`, root route untuk pakai tenant.
-4. Update `create-user` edge function & form registrasi landing untuk generate slug & tampilkan URL hasil.
-5. Super Admin: kolom subdomain + edit.
-6. Dokumentasi singkat di `DEPLOY.md` untuk setup Cloudflare wildcard (untuk user).
+### 7. Update Script & Auto-Deploy
+Script `update.sh` (sudah ada di project, tinggal sesuaikan):
+```bash
+#!/bin/bash
+cd /var/www/atskolla
+git pull origin main
+bun install
+bun run build
+systemctl reload nginx
+```
+Cron tiap 10 menit (opsional): `*/10 * * * * /var/www/atskolla/update.sh >> /var/log/atskolla.log 2>&1`
 
----
+### 8. Verifikasi
+- `https://atskolla.com` → landing page
+- `https://smkcendikia.atskolla.com` → login page ber-branding SMK Cendikia
+- `https://random123.atskolla.com` → halaman "Sekolah tidak ditemukan"
 
-## Pertanyaan terakhir sebelum saya mulai
+### 9. Troubleshooting
+- **502/404 di subdomain:** cek `try_files ... /index.html` ada di Nginx
+- **SSL invalid:** pastikan cert berisi `*.atskolla.com` (`certbot certificates`)
+- **Session login hilang antar subdomain:** ini **by design** (localStorage per-origin); tiap sekolah punya sesi terpisah
+- **Backend connection error:** pastikan `.env` Supabase URL benar
 
-1. Apakah subdomain boleh **diubah** sekolah sendiri, atau **fix** (hanya Super Admin yang bisa ubah)?
-2. Untuk sekolah existing yang sudah jalan: backfill slug otomatis dari nama, atau Super Admin set manual satu-satu?
-3. Saat user buka `smkcendikia.atskolla.com` tanpa login → langsung `/login` sekolah tsb, atau ke halaman "monitoring publik" sekolah tsb?
+### 10. Perbandingan dengan Lovable Hosting
+| | Lovable + Cloudflare Proxy | VPS Self-Host |
+|---|---|---|
+| Wildcard SSL | Otomatis (Cloudflare Universal) | Manual Let's Encrypt DNS-01 |
+| Auto-deploy | Push Lovable = live | Perlu `update.sh` + cron |
+| Maintenance | Zero | Update OS, Nginx, cert renewal |
+| Biaya | Lovable plan saja | + VPS (~$5/bulan) |
+| Kontrol | Terbatas | Penuh (custom Nginx, header, dll) |
+
+## File yang akan dibuat/diubah
+
+1. **CREATE** `VPS_WILDCARD_SETUP.md` — dokumentasi lengkap di atas
+2. **UPDATE** `WILDCARD_SUBDOMAIN.md` — tambah bagian "Alternatif: Self-Host VPS" yang menunjuk ke dokumen baru
+
+**Tidak ada perubahan kode aplikasi** — `TenantProvider`, `slug` resolver, dan semua kode yang sudah dibuat sebelumnya **otomatis bekerja** di VPS karena hanya membaca `window.location.hostname` di browser.
+
+## Yang TIDAK Termasuk
+
+- Migrasi backend ke self-hosted Supabase (tetap pakai Lovable Cloud)
+- Setup PM2/Docker (karena Vite output statis, cukup Nginx serve file)
+- Load balancing multi-VPS (belum diperlukan)
+
+Apakah panduan ini sudah sesuai? Klik **Implement plan** untuk saya buatkan file dokumentasinya.

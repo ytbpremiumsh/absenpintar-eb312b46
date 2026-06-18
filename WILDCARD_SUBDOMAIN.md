@@ -25,6 +25,10 @@ Agar wildcard subdomain bekerja, domain `atskolla.com` harus diproxy oleh Cloudf
 Setelah langkah ini selesai sekali, **semua sekolah baru otomatis bisa diakses
 via subdomain** tanpa konfigurasi DNS tambahan.
 
+> **Alternatif: Self-Host di VPS** — Jika ingin hosting sendiri (Nginx + Let's Encrypt
+> wildcard SSL), lihat panduan lengkap di [`VPS_WILDCARD_SETUP.md`](./VPS_WILDCARD_SETUP.md).
+> Kode aplikasi tidak berubah — `TenantProvider` otomatis bekerja di kedua skenario.
+
 ## Cara Sistem Memetakan Subdomain → Sekolah
 
 - File `src/lib/tenant.tsx` membaca `window.location.hostname`, mengekstrak
