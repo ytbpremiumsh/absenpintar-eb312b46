@@ -223,11 +223,11 @@ const Login = () => {
             className="hidden lg:block text-white w-full max-w-lg"
           >
             <div className="flex items-center gap-3 mb-5">
-              <img src={loginLogo} alt="ATSkolla" className="h-11 w-11 rounded-xl shadow-lg" />
-              <span className="font-bold text-2xl tracking-tight">ATSkolla</span>
+              <img src={tenantLogo || loginLogo} alt={tenantName || "ATSkolla"} className="h-11 w-11 rounded-xl shadow-lg object-contain bg-white/10" />
+              <span className="font-bold text-2xl tracking-tight">{tenantName || "ATSkolla"}</span>
             </div>
-            <h2 className="text-3xl xl:text-[2rem] font-bold mb-2 leading-tight">Platform Digital Sekolah Modern</h2>
-            <p className="text-white/70 text-sm mb-5">Solusi lengkap absensi, keuangan, dan komunikasi sekolah dalam satu sistem.</p>
+            <h2 className="text-3xl xl:text-[2rem] font-bold mb-2 leading-tight">{tenantName ? `Selamat Datang di ${tenantName}` : "Platform Digital Sekolah Modern"}</h2>
+            <p className="text-white/70 text-sm mb-5">{tenantName ? "Masuk untuk mengakses dashboard sekolah Anda." : "Solusi lengkap absensi, keuangan, dan komunikasi sekolah dalam satu sistem."}</p>
             <div className="space-y-2.5">
               {features.map((f, i) => (
                 <motion.div
@@ -254,8 +254,8 @@ const Login = () => {
           >
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
               className="flex lg:hidden items-center justify-center gap-3 mb-6">
-              <img src={loginLogo} alt="ATSkolla" className="h-11 w-11 rounded-xl shadow-lg" />
-              <span className="font-bold text-xl text-white tracking-tight">ATSkolla</span>
+              <img src={tenantLogo || loginLogo} alt={tenantName || "ATSkolla"} className="h-11 w-11 rounded-xl shadow-lg object-contain bg-white/10" />
+              <span className="font-bold text-xl text-white tracking-tight">{tenantName || "ATSkolla"}</span>
             </motion.div>
 
             <div className="text-center mb-5">
