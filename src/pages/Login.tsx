@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import BackendStatusBanner, { isBackendNetworkError } from "@/components/BackendStatusBanner";
+import { useTenant } from "@/lib/tenant";
 
 type Mode = "school" | "parent";
 
@@ -20,6 +21,9 @@ const Login = () => {
   const { signIn } = useAuth();
   const [params] = useSearchParams();
   const [mode, setMode] = useState<Mode>(params.get("as") === "parent" ? "parent" : "school");
+  const tenant = useTenant();
+  const tenantLogo = tenant.school?.logo || null;
+  const tenantName = tenant.school?.name || null;
 
   // school
   const [showPassword, setShowPassword] = useState(false);
