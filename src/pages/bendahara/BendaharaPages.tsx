@@ -1409,7 +1409,7 @@ export function BendaharaGenerate() {
       <PageHeader
         icon={FileText}
         title="Buat Tagihan"
-        subtitle="SPP bulanan atau tagihan custom (Ujian, Praktek, Daftar Ulang, dll)"
+        subtitle="SPP bulanan atau tagihan lainnya (Ujian, Praktek, Daftar Ulang, dll)"
         variant="primary"
       />
 
