@@ -2156,10 +2156,15 @@ export function BendaharaTransaksi() {
     return students.map(s => {
       const studentInvs = invoices.filter(inv => {
         if (inv.student_id !== s.id) return false;
-        if (filterBillType !== "all" && (inv.bill_type || "spp") !== filterBillType) return false;
-        const ay = academicYearOf(inv.period_month, inv.period_year);
-        if (ay !== filterAY) return false;
-        if (filterMonth !== "all" && inv.period_month !== parseInt(filterMonth)) return false;
+        const billType = (inv.bill_type || "spp");
+        if (filterBillType !== "all" && billType !== filterBillType) return false;
+        // Filter periode (AY/bulan) hanya berlaku untuk tagihan SPP bulanan.
+        // Tagihan custom (Ujian, Praktek, dll) tidak terikat periode bulan → selalu tampil.
+        if (billType === "spp") {
+          const ay = academicYearOf(inv.period_month, inv.period_year);
+          if (ay !== filterAY) return false;
+          if (filterMonth !== "all" && inv.period_month !== parseInt(filterMonth)) return false;
+        }
         return true;
       });
       const lunas = studentInvs.filter(i => i.status === "paid").length;
