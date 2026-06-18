@@ -1408,10 +1408,23 @@ export function BendaharaGenerate() {
     <div className="space-y-4">
       <PageHeader
         icon={FileText}
-        title="Generate Tagihan SPP"
-        subtitle="Buat tagihan SPP per kelas, per bulan, atau satu tahun ajaran sekaligus"
+        title="Buat Tagihan"
+        subtitle="SPP bulanan atau tagihan custom (Ujian, Praktek, Daftar Ulang, dll)"
         variant="primary"
       />
+
+      <Tabs defaultValue="spp" className="w-full">
+        <TabsList className="grid grid-cols-2 w-full md:w-fit gap-1 bg-indigo-50 dark:bg-indigo-950/40 p-1 rounded-xl border border-indigo-200/60 dark:border-indigo-800/60">
+          <TabsTrigger value="spp" className="gap-2 text-xs data-[state=active]:bg-[#5B6CF9] data-[state=active]:text-white">
+            <Receipt className="h-3.5 w-3.5" /> SPP Bulanan
+          </TabsTrigger>
+          <TabsTrigger value="custom" className="gap-2 text-xs data-[state=active]:bg-[#5B6CF9] data-[state=active]:text-white">
+            <FileText className="h-3.5 w-3.5" /> Custom (Ujian / Praktek / dll)
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="spp" className="space-y-4 mt-4">
+
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
