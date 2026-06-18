@@ -1849,6 +1849,8 @@ export type Database = {
       spp_invoices: {
         Row: {
           amount: number
+          bill_category: string | null
+          bill_type: string
           class_name: string
           created_at: string
           denda: number
@@ -1881,6 +1883,8 @@ export type Database = {
         }
         Insert: {
           amount?: number
+          bill_category?: string | null
+          bill_type?: string
           class_name: string
           created_at?: string
           denda?: number
@@ -1913,6 +1917,8 @@ export type Database = {
         }
         Update: {
           amount?: number
+          bill_category?: string | null
+          bill_type?: string
           class_name?: string
           created_at?: string
           denda?: number

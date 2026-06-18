@@ -1,54 +1,88 @@
-## Hasil Tes Langsung ke 089501123808
+# Generate Custom + Rapikan Menu Bendahara
 
-Saya sudah memicu `parent-portal?action=request_otp` untuk nomor tersebut:
+## 1. Database — perluas `spp_invoices` agar mendukung tagihan non-SPP
 
-- OTP berhasil dibuat di DB: kode **656414** pada 04:55 UTC.
-- `send-whatsapp` melog status **`sent`** (message_type `parent_otp`).
-- Gateway MPWA membalas: `{"status":true,"msg":"Pesan berhasil terkirim!"}`
-- Nomor yang sama tetap menerima `teaching_reminder` dengan sukses ~1 jam sebelumnya.
+Tambah 2 kolom (migration):
+- `bill_type text not null default 'spp'` — nilai: `'spp'` atau `'custom'`
+- `bill_category text` — diisi untuk custom (mis. `"Ujian"`, `"Praktek"`, `"Daftar Ulang"`, atau bebas)
 
-**Artinya: kode aplikasi & integrasi MPWA sudah benar.** Jika WA tidak masuk juga, penyebabnya di luar aplikasi (sesi WA sender sekolah pending, antrean MPWA, atau pemblokiran nomor).
+Index ringan: `(school_id, bill_type)` untuk filter cepat.
 
-Yang membuat user kesulitan adalah: **semua flow OTP (parent login, lupa password admin, OTP bendahara) menggantungkan pengiriman OTP pada gateway MPWA milik sekolah**. Kalau sender sekolah down, OTP tidak akan pernah sampai walau platform MPWA punya sender cadangan yang aktif (`628886117537`).
+Tagihan SPP lama tetap aman (default `spp`). Tidak ada perubahan RLS — kebijakan existing sudah scoped via `school_id`.
 
-## Rencana Perbaikan
+## 2. Halaman Buat Tagihan — tambah tab "Custom"
 
-### 1. OTP selalu pakai Platform MPWA sebagai prioritas (semua flow)
-File: `supabase/functions/send-otp/index.ts`, `supabase/functions/send-bendahara-otp/index.ts`, `supabase/functions/parent-portal/index.ts`.
+File: `src/pages/bendahara/BendaharaPages.tsx` → `BendaharaGenerate`
 
-- Untuk semua `message_type` berbau OTP (`otp`, `parent_otp`, `bendahara_otp`), **kirim langsung via Platform MPWA sender** (`mpwa_platform_*` di `platform_settings`) terlebih dahulu.
-- Jika platform sender gagal / tidak terhubung → fallback ke sender milik sekolah → fallback ke OneSender mana pun yang aktif.
-- Alasan: OTP adalah pesan kritis dan tidak boleh tergantung kesehatan WA satu sekolah.
+Bungkus konten yang ada dengan **Tabs** di paling atas:
 
-### 2. Logging lebih jujur (deteksi false-positive)
-File: `supabase/functions/send-whatsapp/index.ts`
+- **Tab "SPP Bulanan"** — persis seperti sekarang (mode Single / Range periode, ambil tarif dari `spp_tariffs`). Tidak diubah logikanya.
+- **Tab "Custom"** — flow baru:
+  1. **Nama Tagihan** (text, wajib) — contoh: "Ujian Tengah Semester Ganjil 2026"
+  2. **Kategori** (select + free text) — Ujian, Praktek, Daftar Ulang, Study Tour, Seragam, Lainnya
+  3. **Nominal** (number, wajib) — sama untuk semua siswa terpilih (versi v1)
+  4. **Tanggal Jatuh Tempo** (date picker)
+  5. **Pilih Kelas** (checkbox grid + "Pilih Semua") — reuse komponen kelas dari tab SPP
+  6. **Preview**: jumlah siswa, total nominal, daftar siswa
+  7. Toggle "Kirim WA otomatis setelah generate" (sama seperti SPP)
+  8. Tombol **Generate Sekarang**
 
-- Saat MPWA membalas `status=true` tapi `msg` mengandung kata `pending`, `queue`, `belum`, atau `not connected`, tandai log sebagai `pending` (bukan `sent`) supaya admin tahu OTP nyangkut.
-- Simpan `msg` dari MPWA ke kolom message log (potong 200 char) agar bisa diaudit.
+Insert ke `spp_invoices` dengan:
+- `bill_type = 'custom'`, `bill_category = <kategori>`
+- `period_month`/`period_year` = bulan/tahun jatuh tempo (untuk kompatibilitas grouping existing)
+- `period_label` = nama tagihan (mis. "Ujian Tengah Semester Ganjil 2026")
+- `description` = `"<nama tagihan> - <kelas> - <nama siswa>"`
+- `invoice_number` = `CUSTOM/<yyyymm>/<student_id>/<slug-nama>` (jamin unik per siswa+nama)
+- `amount` = `total_amount` = nominal input, `denda = 0`
 
-### 3. UI Parent Login lebih informatif
-File: `src/pages/parent/ParentLogin.tsx`
+Dedup: skip siswa yang sudah punya invoice dengan kombinasi (student_id, bill_type='custom', period_label) sama.
 
-- Setelah `request_otp` sukses, tampilkan baris kecil: "Belum dapat? Coba kirim ulang setelah 60 detik." (tombol resend sudah ada via cooldown — pastikan visible).
-- Saat `verify_otp` gagal "Kode kedaluwarsa", langsung reset ke step input nomor + auto-trigger resend agar user tidak bingung.
+Reuse pipeline background yang sudah ada: panggil `spp-mayar create_payment_link` + kirim WA via `send-whatsapp` (template pesan diganti dari "Tagihan SPP Baru" → "Tagihan <nama> Baru").
 
-### 4. Halaman diagnosa OTP untuk Super Admin
-File baru: `src/pages/super-admin/SuperAdminWhatsAppHub.tsx` (tambah tab "OTP Logs")
+Header halaman jadi: **"Buat Tagihan"** dengan deskripsi "SPP bulanan atau tagihan custom (Ujian, Praktek, dll)".
 
-- List 50 OTP terakhir (parent / admin / bendahara) dari `wa_message_logs` dengan filter `message_type IN ('otp','parent_otp','bendahara_otp')` + status + balasan MPWA.
-- Tombol "Tes Kirim OTP" dengan input nomor → memanggil `send-whatsapp` via platform sender → tampilkan respons mentah.
+## 3. Halaman Pembayaran — tampilkan tipe tagihan
 
-### 5. Tidak perlu perubahan
-- Schema DB tetap (`wa_message_logs.message` cukup panjang).
-- Tidak ada perubahan auth, RLS, atau halaman lain.
+File: `BendaharaTransaksi` & `BendaharaSPPDetail`
 
-## Detail Teknis Singkat
+- Tambah **filter tab/segment**: `Semua` · `SPP` · `Custom` (filter berdasarkan `bill_type`)
+- Di tabel daftar invoice per siswa, tambah kolom kecil **"Jenis"** (badge "SPP" / "<kategori>")
+- Statistik (Total Tagihan / Lunas / Sisa) tetap, hanya mengikuti filter aktif
+- Pesan WA tetap reuse template — pakai `period_label` (sudah berisi nama tagihan untuk custom)
 
-- Platform MPWA sender sudah aktif & terhubung (`mpwa_platform_connected=true`, sender `628886117537`, key tersimpan).
-- WA add-on credit sedang **disabled** (`addon_wa_credit_enabled=false`), jadi tidak ada blocker karena saldo.
-- Helper baru `sendOtpViaPlatform(phone, message)` dipakai di 3 fungsi OTP — kode dipusatkan di `_shared/sendOtp.ts` untuk menghindari duplikasi.
+## 4. Rapikan Sidebar & Header
 
-## Aksi yang Anda Perlu Lakukan Sekarang
+File: `src/components/layout/BendaharaSidebar.tsx` + `BendaharaFloatingNav.tsx`
 
-1. **Cek WA 089501123808** — kode `656414` dari sender `6289605757557` seharusnya masuk (atau di antrean MPWA).
-2. Konfirmasi: apakah Anda menerima OTP `teaching_reminder` hari ini di nomor itu? Kalau ya, masalahnya hanya pada delivery MPWA per-pesan, bukan setup. Rencana di atas akan menstabilkannya.
+Struktur baru (lebih ringkas & sesuai alur kerja):
+
+```
+Ringkasan
+  - Dashboard
+
+Master Data
+  - Data Siswa
+  - Tarif SPP
+
+Tagihan
+  - Buat Tagihan          (was: Generate Tagihan — sekarang ada tab SPP & Custom)
+  - Pembayaran            (was: Pembayaran SPP — sekarang juga tampung custom)
+  - Import Tagihan
+
+Keuangan
+  - Keuangan              (saldo, pencairan, laporan — sudah ada tab)
+```
+
+Mobile floating nav (`BendaharaFloatingNav`) ikut disesuaikan: Dashboard · Siswa · Buat · Bayar · Keuangan.
+
+PageHeader masing-masing halaman juga diupdate (title + subtitle) agar konsisten dengan nama menu baru.
+
+## 5. Yang TIDAK diubah
+- Skema `spp_tariffs`, alur Mayar, edge functions, RLS
+- Logika SPP bulanan (single/range) tetap apa adanya
+- Halaman `Keuangan` (tab Saldo / Pencairan / Laporan) tetap
+
+## Catatan teknis
+- Migration kolom baru → setelah disetujui, `types.ts` Supabase regen, baru ubah kode UI.
+- Field `period_month`/`period_year` di-reuse untuk custom (diambil dari jatuh tempo) agar laporan bulanan existing tidak pecah.
+- v1 nominal custom seragam per generate. Nominal berbeda per siswa bisa ditambah nanti (v2).
