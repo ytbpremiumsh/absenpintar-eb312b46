@@ -1972,6 +1972,7 @@ export function BendaharaTransaksi() {
   const [filterAY, setFilterAY] = useState(currentAY);
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterMonth, setFilterMonth] = useState("all");
+  const [filterBillType, setFilterBillType] = useState<"all" | "spp" | "custom">("all");
   const [sortBy, setSortBy] = useState<"name" | "tunggakan" | "lunas">("name");
 
   const load = () => {
