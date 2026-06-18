@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { TenantProvider, useTenant } from "@/lib/tenant";
 
 // Layouts kept eager (small + shared by many routes)
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -120,13 +121,36 @@ function PageFallback() {
   return <div className="min-h-screen w-full bg-background" />;
 }
 
+function TenantNotFound() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-6 text-center">
+      <div className="max-w-md">
+        <h1 className="text-2xl font-bold mb-2">Sekolah tidak ditemukan</h1>
+        <p className="text-muted-foreground mb-4">
+          Subdomain <code className="font-mono">{typeof window !== "undefined" ? window.location.hostname : ""}</code> belum terdaftar di ATSkolla.
+        </p>
+        <a href="https://atskolla.com" className="text-primary underline">Kunjungi atskolla.com</a>
+      </div>
+    </div>
+  );
+}
+
+function RootRoute() {
+  const { slug, school, loading, notFound } = useTenant();
+  if (!slug) return <LandingPage />;
+  if (loading) return <LoadingScreen />;
+  if (notFound) return <TenantNotFound />;
+  if (school) return <Navigate to="/login" replace />;
+  return <LandingPage />;
+}
+
 function AppRoutes() {
   const { loading } = useAuth();
   if (loading) return <LoadingScreen />;
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<RootRoute />} />
         <Route path="/panduan" element={<Panduan />} />
         <Route path="/panduan/:role" element={<PanduanDetail />} />
         <Route path="/login" element={<Login />} />
@@ -255,11 +279,13 @@ const App = () => (
         <Sonner />
         <DynamicFavicon />
         <BrowserRouter>
-          <AuthProvider>
-            <GoogleAnalytics />
-            <MetaPixel />
-            <AppRoutes />
-          </AuthProvider>
+          <TenantProvider>
+            <AuthProvider>
+              <GoogleAnalytics />
+              <MetaPixel />
+              <AppRoutes />
+            </AuthProvider>
+          </TenantProvider>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
