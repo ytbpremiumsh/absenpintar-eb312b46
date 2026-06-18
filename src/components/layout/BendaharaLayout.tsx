@@ -125,7 +125,9 @@ export function BendaharaLayout() {
             </DropdownMenu>
           </header>
           <main className="flex-1 p-4 md:p-6 w-full pb-28 md:pb-6">
-            <Outlet />
+            <Suspense fallback={<div className="h-32" />}>
+              <Outlet />
+            </Suspense>
           </main>
         </div>
 
