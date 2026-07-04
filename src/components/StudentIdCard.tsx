@@ -137,17 +137,19 @@ export function StudentIdCard({ student }: Props) {
           <p className="font-mono text-base font-bold tracking-[0.15em] mt-0.5">{formatCard(cardNumber)}</p>
         </div>
 
-        {/* QR */}
-        <div className="relative flex items-end justify-between px-5 mt-4 text-white">
-          <div>
-            <p className="text-[9px] uppercase tracking-wider text-white/60 font-semibold">Scan untuk verifikasi</p>
-            <p className="text-[10px] text-white/70 mt-1">Powered by ATSkolla</p>
-          </div>
+        {/* QR - centered & larger */}
+        <div className="relative flex flex-col items-center justify-center px-5 mt-5 text-white">
           {qrDataUrl && (
-            <div className="h-24 w-24 rounded-xl bg-white p-1.5 shadow-lg">
+            <div className="h-36 w-36 rounded-2xl bg-white p-2 shadow-lg">
               <img src={qrDataUrl} alt="QR" className="h-full w-full object-contain" />
             </div>
           )}
+        </div>
+
+        {/* Footer */}
+        <div className="absolute bottom-0 inset-x-0 px-5 pb-4 pt-3 text-center text-white">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70 font-semibold">Scan untuk verifikasi</p>
+          <p className="text-[10px] text-white/60 mt-0.5">Powered by ATSkolla</p>
         </div>
       </div>
 
