@@ -62,18 +62,37 @@ serve(async (req) => {
       });
     }
 
-    // Get attendance time settings + school timezone
+    // Get attendance time settings + school timezone + holiday mode
     const [{ data: settings }, { data: schoolTz }] = await Promise.all([
       supabase
         .from('dismissal_settings')
         .select('attendance_start_time, attendance_end_time, departure_start_time, departure_end_time')
         .eq('school_id', school_id)
         .maybeSingle(),
-      supabase.from('schools').select('timezone').eq('id', school_id).maybeSingle(),
+      supabase.from('schools').select('timezone, holiday_mode, holiday_mode_label').eq('id', school_id).maybeSingle(),
     ]);
 
     const tzMap: Record<string, string> = { WIB: 'Asia/Jakarta', WITA: 'Asia/Makassar', WIT: 'Asia/Jayapura' };
     const tz = tzMap[(schoolTz?.timezone || 'WIB').toUpperCase()] || 'Asia/Jakarta';
+
+    // Cek Mode Libur & tanggal merah sekolah
+    if ((schoolTz as any)?.holiday_mode) {
+      return new Response(JSON.stringify({
+        error: `Hari ini libur — ${(schoolTz as any).holiday_mode_label || 'Sekolah sedang libur'}. Absensi ditangguhkan.`,
+      }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const todayLocal = new Date(new Date().toLocaleString('en-US', { timeZone: tz })).toISOString().slice(0, 10);
+    const { data: holToday } = await supabase
+      .from('school_holidays')
+      .select('label')
+      .eq('school_id', school_id)
+      .eq('date', todayLocal)
+      .maybeSingle();
+    if (holToday) {
+      return new Response(JSON.stringify({
+        error: `Hari ini tanggal merah — ${(holToday as any).label || 'Libur sekolah'}. Absensi ditangguhkan.`,
+      }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     const now = new Date();
     const jakartaTime = new Date(now.toLocaleString('en-US', { timeZone: tz }));
