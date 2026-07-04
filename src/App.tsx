@@ -280,6 +280,8 @@ function AppRoutes() {
   );
 }
 
+const tenantBasename = typeof window !== "undefined" ? getTenantBasename() : "";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -287,7 +289,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <DynamicFavicon />
-        <BrowserRouter>
+        <BrowserRouter basename={tenantBasename || undefined}>
           <TenantProvider>
             <AuthProvider>
               <GoogleAnalytics />
