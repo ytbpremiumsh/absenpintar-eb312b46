@@ -835,7 +835,7 @@ export function BendaharaSiswa() {
     });
     return students
       .filter(s => filterClass === "all" || s.class === filterClass)
-      .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.student_id || "").toLowerCase().includes(search.toLowerCase()))
+      .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.student_id || "").toLowerCase().includes(search.toLowerCase()) || (s.card_number || "").toLowerCase().includes(search.toLowerCase().replace(/\s+/g,"")))
       .map(s => ({ ...s, ...(map.get(s.id) || { paid: 0, pending: 0, tunggakan: 0 }) }));
   }, [students, invoices, search, filterClass]);
 
