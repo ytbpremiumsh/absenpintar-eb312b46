@@ -152,6 +152,24 @@ const ScanQR = () => {
   const scanPaused = useRef(false);
 
   const canFace = !features.loading && features.canFaceRecognition;
+  const [holidayBlock, setHolidayBlock] = useState<{ isHoliday: boolean; reason: string | null }>({ isHoliday: false, reason: null });
+
+  // Load holiday status
+  useEffect(() => {
+    if (!profile?.school_id) return;
+    fetchSchoolHolidayStatus(profile.school_id).then(setHolidayBlock);
+  }, [profile?.school_id]);
+
+  const ensureNotHoliday = useCallback(async (): Promise<boolean> => {
+    if (!profile?.school_id) return true;
+    const status = await fetchSchoolHolidayStatus(profile.school_id);
+    setHolidayBlock(status);
+    if (status.isHoliday) {
+      toast.error(`Absensi ditangguhkan: ${status.reason}`);
+      return false;
+    }
+    return true;
+  }, [profile?.school_id]);
 
   // Determine attendance type based on time
   const getAttendanceType = useCallback(async (): Promise<"datang" | "pulang"> => {
