@@ -20,6 +20,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/PageHeader";
 import { getLocalDateString } from "@/lib/dateLocal";
+import { fetchSchoolHolidayStatus, type HolidayStatus } from "@/lib/schoolHoliday";
 
 const STATUS_COLORS: Record<string, string> = {
   hadir: "hsl(152, 69%, 40%)",
@@ -107,6 +108,7 @@ const Dashboard = () => {
   const [periodLogs, setPeriodLogs] = useState<any[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [holidayMode, setHolidayMode] = useState(false);
+  const [holidayStatus, setHolidayStatus] = useState<HolidayStatus>({ isHoliday: false, reason: null, mode: false, modeLabel: null });
   const [holidayToggling, setHolidayToggling] = useState(false);
   const navigate = useNavigate();
 
@@ -140,9 +142,10 @@ const Dashboard = () => {
       setWaliKelasList([]);
     }
 
-    // Fetch holiday_mode
-    supabase.from("schools").select("holiday_mode").eq("id", schoolId).single().then(({ data }) => {
-      if (data) setHolidayMode(!!(data as any).holiday_mode);
+    // Fetch holiday status (mode + weekly + calendar)
+    fetchSchoolHolidayStatus(schoolId).then((status) => {
+      setHolidayStatus(status);
+      setHolidayMode(status.mode);
     });
 
     setLoading(false);
@@ -158,6 +161,7 @@ const Dashboard = () => {
     setHolidayToggling(false);
     if (error) { toast.error("Gagal: " + error.message); return; }
     setHolidayMode(val);
+    if (profile.school_id) fetchSchoolHolidayStatus(profile.school_id).then(setHolidayStatus);
     toast.success(val ? "Mode libur aktif — absensi ditangguhkan" : "Mode libur dinonaktifkan");
   };
 
@@ -374,6 +378,27 @@ const Dashboard = () => {
       {subFeatures.isTrial && subFeatures.trialDaysLeft !== null && (
         <TrialCountdownBanner trialDaysLeft={subFeatures.trialDaysLeft} expiresAt={subFeatures.trialExpiresAt} onUpgrade={() => navigate("/subscription")} />
       )}
+
+      {/* Holiday Banner */}
+      {holidayStatus.isHoliday && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="border border-amber-300/60 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 dark:border-amber-800/40 shadow-sm">
+            <CardContent className="p-3 sm:p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-300/30 flex items-center justify-center shrink-0">
+                <CalendarOff className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-amber-800 dark:text-amber-200">Sedang dalam Mode Libur — Absensi Ditangguhkan</p>
+                <p className="text-[11px] sm:text-xs text-amber-700/90 dark:text-amber-300/80 mt-0.5">{holidayStatus.reason}</p>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => navigate("/holiday-management")} className="hidden sm:inline-flex h-7 text-xs rounded-lg border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300">
+                Kelola
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Header */}
       <PageHeader
         icon={TrendingUp}

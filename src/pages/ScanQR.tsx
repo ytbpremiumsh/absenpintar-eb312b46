@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { fetchSchoolHolidayStatus } from "@/lib/schoolHoliday";
 
 interface FoundStudent {
   id: string;
@@ -85,8 +86,14 @@ const ConfirmationPopup = ({ open, scannedStudent, alreadyRecorded, processing, 
             )}
             <div>
               <h3 className="text-lg sm:text-xl font-bold text-foreground">{scannedStudent.name}</h3>
-              <p className="text-sm text-muted-foreground">Kelas: {scannedStudent.class}</p>
-              <p className="text-sm text-muted-foreground">NIS: {scannedStudent.student_id}</p>
+              {scannedStudent.__isTeacher ? (
+                <p className="text-sm text-muted-foreground">Peran: {scannedStudent.class}</p>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">Kelas: {scannedStudent.class}</p>
+                  <p className="text-sm text-muted-foreground">NIS: {scannedStudent.student_id}</p>
+                </>
+              )}
               {scanMethod === "face" && (
                 <span className="inline-flex items-center gap-1 text-xs text-success font-medium mt-1">
                   <UserCheck className="h-3 w-3" /> Dikenali via Face Recognition
@@ -145,6 +152,24 @@ const ScanQR = () => {
   const scanPaused = useRef(false);
 
   const canFace = !features.loading && features.canFaceRecognition;
+  const [holidayBlock, setHolidayBlock] = useState<{ isHoliday: boolean; reason: string | null }>({ isHoliday: false, reason: null });
+
+  // Load holiday status
+  useEffect(() => {
+    if (!profile?.school_id) return;
+    fetchSchoolHolidayStatus(profile.school_id).then(setHolidayBlock);
+  }, [profile?.school_id]);
+
+  const ensureNotHoliday = useCallback(async (): Promise<boolean> => {
+    if (!profile?.school_id) return true;
+    const status = await fetchSchoolHolidayStatus(profile.school_id);
+    setHolidayBlock(status);
+    if (status.isHoliday) {
+      toast.error(`Absensi ditangguhkan: ${status.reason}`);
+      return false;
+    }
+    return true;
+  }, [profile?.school_id]);
 
   // Determine attendance type based on time
   const getAttendanceType = useCallback(async (): Promise<"datang" | "pulang"> => {
@@ -170,6 +195,7 @@ const ScanQR = () => {
     if (!code.trim() || !profile?.school_id || isLookingUp.current || scanPaused.current) return;
     isLookingUp.current = true;
     try {
+      if (!(await ensureNotHoliday())) { scanPaused.current = true; return; }
       const trimmed = code.trim();
       const { data, error } = await supabase
         .from("students").select("*").eq("school_id", profile.school_id)
@@ -229,7 +255,7 @@ const ScanQR = () => {
 
       toast.error("Tidak ditemukan untuk kode: " + trimmed);
     } finally { isLookingUp.current = false; }
-  }, [profile?.school_id, getAttendanceType]);
+  }, [profile?.school_id, getAttendanceType, ensureNotHoliday]);
 
   // Barcode scanning interval
   const startBarcodeScanning = useCallback(() => {
@@ -253,6 +279,7 @@ const ScanQR = () => {
   // Face recognition capture
   const captureAndRecognize = useCallback(async () => {
     if (!videoRef.current || !profile?.school_id || scanPaused.current) return;
+    if (!(await ensureNotHoliday())) { scanPaused.current = true; return; }
     setFaceScanning(true);
     try {
       const video = videoRef.current;
@@ -315,7 +342,7 @@ const ScanQR = () => {
     } finally {
       setFaceScanning(false);
     }
-  }, [profile?.school_id, getAttendanceType]);
+  }, [profile?.school_id, getAttendanceType, ensureNotHoliday]);
 
   const faceTimeoutRef = useRef<number | null>(null);
 
@@ -586,6 +613,18 @@ const ScanQR = () => {
           </div>
         </div>
       </div>
+
+      {holidayBlock.isHoliday && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-4 flex gap-3">
+          <div className="h-9 w-9 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Absensi Ditangguhkan</p>
+            <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">{holidayBlock.reason}</p>
+          </div>
+        </div>
+      )}
 
       <canvas ref={canvasRef} className="hidden" />
 
