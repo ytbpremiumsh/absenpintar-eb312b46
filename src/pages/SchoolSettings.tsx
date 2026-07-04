@@ -300,7 +300,7 @@ const SchoolSettings = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label>Subdomain Sekolah</Label>
-              <Badge variant="secondary" className="text-[10px]"><Lock className="h-3 w-3 mr-1" /> Hubungi Super Admin</Badge>
+              <Badge variant="secondary" className="text-[10px]"><Lock className="h-3 w-3 mr-1" /> Hubungi Tim Bantuan</Badge>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex-1 flex items-center rounded-lg border border-border bg-muted/40 overflow-hidden">
@@ -341,7 +341,7 @@ const SchoolSettings = () => {
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Subdomain adalah alamat unik login sekolah Anda. Perubahan subdomain hanya dapat dilakukan oleh Super Admin.
+              Perubahan subdomain hanya dapat dilakukan oleh Tim Bantuan
             </p>
           </div>
 
