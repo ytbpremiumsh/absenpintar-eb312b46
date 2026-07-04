@@ -614,6 +614,18 @@ const ScanQR = () => {
         </div>
       </div>
 
+      {holidayBlock.isHoliday && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-4 flex gap-3">
+          <div className="h-9 w-9 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Absensi Ditangguhkan</p>
+            <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">{holidayBlock.reason}</p>
+          </div>
+        </div>
+      )}
+
       <canvas ref={canvasRef} className="hidden" />
 
       {/* Scanner Card - Premium */}
