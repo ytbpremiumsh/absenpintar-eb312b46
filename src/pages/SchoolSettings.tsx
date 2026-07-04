@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { School, Save, Upload, Lock, Loader2, Image, Clock, Plus, Trash2, FileText, GripVertical, Globe, CalendarOff } from "lucide-react";
+import { School, Save, Upload, Lock, Loader2, Image, Clock, Plus, Trash2, FileText, GripVertical, Globe, CalendarOff, CalendarDays, PowerOff } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptionFeatures } from "@/hooks/useSubscriptionFeatures";
@@ -35,16 +37,22 @@ const SchoolSettings = () => {
   const [uploading, setUploading] = useState(false);
   const [qrInstructions, setQrInstructions] = useState<{ id?: string; text: string }[]>([]);
   const [savingInstructions, setSavingInstructions] = useState(false);
+  const [holidayMode, setHolidayMode] = useState(false);
+  const [holidayModeLabel, setHolidayModeLabel] = useState("");
+  const [holidayDates, setHolidayDates] = useState<{ id: string; date: string; label: string | null }[]>([]);
+  const [savingHolidayMode, setSavingHolidayMode] = useState(false);
+  const [newHolidayLabel, setNewHolidayLabel] = useState("");
 
   const maxInstructions = features.planName === "Free" ? 2 : 999;
 
   useEffect(() => {
     if (!profile?.school_id) { setLoading(false); return; }
     Promise.all([
-      supabase.from("schools").select("name, address, logo, npsn, city, province, timezone, holiday_days").eq("id", profile.school_id).single(),
+      supabase.from("schools").select("name, address, logo, npsn, city, province, timezone, holiday_days, holiday_mode, holiday_mode_label").eq("id", profile.school_id).single(),
       supabase.from("dismissal_settings").select("school_start_time, school_end_time, attendance_start_time, attendance_end_time, departure_start_time, departure_end_time").eq("school_id", profile.school_id).maybeSingle(),
       supabase.from("qr_instructions").select("id, instruction_text, sort_order").eq("school_id", profile.school_id).order("sort_order"),
-    ]).then(([schoolRes, settingsRes, instrRes]) => {
+      supabase.from("school_holidays").select("id, date, label").eq("school_id", profile.school_id).order("date"),
+    ]).then(([schoolRes, settingsRes, instrRes, holRes]) => {
       if (schoolRes.data) {
         setName(schoolRes.data.name || "");
         setAddress(schoolRes.data.address || "");
@@ -55,7 +63,10 @@ const SchoolSettings = () => {
         setTimezone((schoolRes.data as any).timezone || "Asia/Jakarta");
         const hd = (schoolRes.data as any).holiday_days;
         setHolidayDays(Array.isArray(hd) ? hd : [0, 6]);
+        setHolidayMode(!!(schoolRes.data as any).holiday_mode);
+        setHolidayModeLabel((schoolRes.data as any).holiday_mode_label || "");
       }
+      if (holRes.data) setHolidayDates(holRes.data as any);
       if (settingsRes.data) {
         setStartTime(settingsRes.data.school_start_time?.slice(0, 5) || "07:00");
         setEndTime(settingsRes.data.school_end_time?.slice(0, 5) || "14:00");
@@ -138,6 +149,49 @@ const SchoolSettings = () => {
 
     setSavingInstructions(false);
     toast.success("Petunjuk QR Code berhasil disimpan!");
+  };
+
+  const handleToggleHolidayMode = async (val: boolean) => {
+    if (!profile?.school_id) return;
+    setSavingHolidayMode(true);
+    const { error } = await supabase.from("schools").update({
+      holiday_mode: val,
+      holiday_mode_label: val ? (holidayModeLabel || "Hari Libur") : null,
+    } as any).eq("id", profile.school_id);
+    setSavingHolidayMode(false);
+    if (error) { toast.error("Gagal: " + error.message); return; }
+    setHolidayMode(val);
+    toast.success(val ? "Mode libur diaktifkan — absensi ditangguhkan" : "Mode libur dinonaktifkan");
+  };
+
+  const handleAddHolidayDate = async (date: Date | undefined) => {
+    if (!date || !profile?.school_id) return;
+    const iso = date.toISOString().slice(0, 10);
+    // Toggle: if exists, delete
+    const existing = holidayDates.find((h) => h.date === iso);
+    if (existing) {
+      const { error } = await supabase.from("school_holidays").delete().eq("id", existing.id);
+      if (error) { toast.error("Gagal menghapus: " + error.message); return; }
+      setHolidayDates(holidayDates.filter((h) => h.id !== existing.id));
+      toast.success("Tanggal libur dihapus");
+      return;
+    }
+    const { data, error } = await supabase.from("school_holidays").insert({
+      school_id: profile.school_id,
+      date: iso,
+      label: newHolidayLabel || null,
+    } as any).select().single();
+    if (error) { toast.error("Gagal menambah: " + error.message); return; }
+    setHolidayDates([...holidayDates, data as any].sort((a, b) => a.date.localeCompare(b.date)));
+    setNewHolidayLabel("");
+    toast.success("Tanggal libur ditambahkan");
+  };
+
+  const handleRemoveHolidayDate = async (id: string) => {
+    const { error } = await supabase.from("school_holidays").delete().eq("id", id);
+    if (error) { toast.error("Gagal: " + error.message); return; }
+    setHolidayDates(holidayDates.filter((h) => h.id !== id));
+    toast.success("Dihapus");
   };
 
   const handleSave = async () => {
@@ -346,6 +400,94 @@ const SchoolSettings = () => {
                 .map(d => ({1:"Senin",2:"Selasa",3:"Rabu",4:"Kamis",5:"Jumat",6:"Sabtu",0:"Minggu"} as any)[d])
                 .join(", ") || "(tidak ada)"
             }</strong>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Mode Libur & Tanggal Merah */}
+      <Card className="border-0 shadow-card">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <PowerOff className="h-4 w-4 text-primary" />
+            Mode Libur & Kalender Tanggal Merah
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {/* Toggle darurat */}
+          <div className={`rounded-xl border p-4 transition-colors ${holidayMode ? "bg-amber-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800" : "bg-secondary/40 border-border"}`}>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <Label className="text-sm font-semibold flex items-center gap-2">
+                  {holidayMode ? "Mode Libur AKTIF" : "Mode Libur Nonaktif"}
+                  {holidayMode && <Badge className="bg-amber-500 text-white border-0">Absensi Ditangguhkan</Badge>}
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Aktifkan bila hari ini libur mendadak. Sistem akan menolak absensi & tidak menghitung Alfa otomatis.
+                </p>
+              </div>
+              <Switch checked={holidayMode} disabled={savingHolidayMode} onCheckedChange={handleToggleHolidayMode} />
+            </div>
+            {holidayMode && (
+              <div className="mt-3">
+                <Label className="text-xs">Alasan / Label</Label>
+                <Input
+                  value={holidayModeLabel}
+                  onChange={(e) => setHolidayModeLabel(e.target.value)}
+                  onBlur={() => holidayMode && supabase.from("schools").update({ holiday_mode_label: holidayModeLabel } as any).eq("id", profile?.school_id || "").then(() => {})}
+                  placeholder="Contoh: Cuaca ekstrem, Ujian nasional, dll"
+                  className="mt-1 h-9 text-sm"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Kalender tanggal merah */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4 text-primary" />
+              <Label className="text-sm font-semibold">Kalender Tanggal Merah Sekolah</Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Klik tanggal untuk menandai libur. Klik lagi untuk membatalkan. Tanggal merah otomatis melewati Auto-Alfa & absensi ditolak.
+            </p>
+            <div className="space-y-2">
+              <Input
+                value={newHolidayLabel}
+                onChange={(e) => setNewHolidayLabel(e.target.value)}
+                placeholder="Label opsional (mis: Libur Semester)"
+                className="text-sm h-9"
+              />
+              <div className="rounded-xl border border-border p-2 flex justify-center">
+                <Calendar
+                  mode="single"
+                  onSelect={handleAddHolidayDate}
+                  modifiers={{ holiday: holidayDates.map((h) => new Date(h.date + "T00:00:00")) }}
+                  modifiersClassNames={{ holiday: "bg-red-500 text-white hover:bg-red-600 rounded-full" }}
+                  className="p-0"
+                />
+              </div>
+            </div>
+
+            {holidayDates.length > 0 && (
+              <div>
+                <p className="text-[11px] text-muted-foreground mb-2">Total: {holidayDates.length} tanggal libur</p>
+                <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
+                  {holidayDates.map((h) => (
+                    <div key={h.id} className="flex items-center justify-between gap-2 rounded-lg bg-secondary/40 px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold">
+                          {new Date(h.date + "T00:00:00").toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                        </p>
+                        {h.label && <p className="text-[11px] text-muted-foreground truncate">{h.label}</p>}
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => handleRemoveHolidayDate(h.id)}>
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

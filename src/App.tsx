@@ -85,6 +85,7 @@ const BendaharaKeuangan = lazy(() => import("./pages/bendahara/BendaharaKeuangan
 const LaporanAbsensi = lazy(() => import("./pages/LaporanAbsensi"));
 const JadwalCombined = lazy(() => import("./pages/JadwalCombined"));
 const LanggananCombined = lazy(() => import("./pages/LanggananCombined"));
+const AllFeatures = lazy(() => import("./pages/AllFeatures"));
 const WaliKelasLaporan = lazy(() => import("./pages/WaliKelasLaporan"));
 const MapelLaporan = lazy(() => import("./pages/MapelLaporan"));
 const TeacherWaliDashboard = lazy(() => import("./pages/TeacherWaliDashboard"));
@@ -247,6 +248,7 @@ function AppRoutes() {
           <Route path="/langganan" element={<LanggananCombined />} />
           <Route path="/subscription" element={<Navigate to="/langganan?tab=paket" replace />} />
           <Route path="/addons" element={<Navigate to="/langganan?tab=addon" replace />} />
+          <Route path="/all-features" element={<AllFeatures />} />
           <Route path="/school-settings" element={<SchoolSettings />} />
           <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/support" element={<SupportTickets />} />

@@ -180,9 +180,20 @@ async function findStudentsByPhone(phone: string) {
   const variants = phoneVariants(phone);
   const { data } = await supabase
     .from("students")
-    .select("id, name, student_id, class, photo_url, gender, school_id, parent_name, schools(id, name, logo)")
+    .select("id, name, student_id, class, photo_url, gender, school_id, parent_name, parent_phone, card_number, schools(id, name, logo)")
     .in("parent_phone", variants);
   return data || [];
+}
+
+async function findPhoneByCardNumber(card: string): Promise<string | null> {
+  const digits = (card || "").replace(/\D/g, "");
+  if (digits.length !== 16) return null;
+  const { data } = await supabase
+    .from("students")
+    .select("parent_phone")
+    .eq("card_number", digits)
+    .maybeSingle();
+  return data?.parent_phone || null;
 }
 
 async function getSession(req: Request) {
@@ -207,7 +218,13 @@ Deno.serve(async (req) => {
 
     // ---- Public actions ----
     if (action === "request_otp") {
-      const phone = normalizePhone(body.phone || "");
+      let phone = normalizePhone(body.phone || "");
+      // NEW: allow login by card_number — resolves to registered parent phone, still sends OTP to WA.
+      if (!phone && body.card_number) {
+        const found = await findPhoneByCardNumber(String(body.card_number));
+        if (!found) return json({ error: "Kode Kartu tidak ditemukan. Hubungi admin sekolah." });
+        phone = normalizePhone(found);
+      }
       if (!phone || phone.length < 10) return json({ error: "Nomor tidak valid" });
       const students = await findStudentsByPhone(phone);
       if (students.length === 0) {

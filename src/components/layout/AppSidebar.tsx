@@ -67,8 +67,11 @@ const whatsappNav = [
   { title: "WhatsApp", url: "/whatsapp", icon: MessageCircle, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
 ];
 
-const settingsNav = [
+const settingsNavSubscription = [
   { title: "Langganan & Add-on", url: "/langganan", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
+];
+const settingsNavAllFeatures = [
+  { title: "Semua Fitur", url: "/all-features", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
 ];
 
 export function AppSidebar() {
@@ -277,7 +280,7 @@ export function AppSidebar() {
             <SidebarGroup>
               {renderGroupLabel("Pengaturan")}
               <SidebarGroupContent>
-                <SidebarMenu className="space-y-1">{renderNavItems(settingsNav)}</SidebarMenu>
+                <SidebarMenu className="space-y-1">{renderNavItems(features.subscriptionEnabled ? settingsNavSubscription : settingsNavAllFeatures)}</SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
           </>

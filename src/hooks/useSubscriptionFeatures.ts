@@ -18,10 +18,11 @@ export interface PlanFeatures {
   maxClasses: number;
   maxStudentsPerClass: number;
   maxStudentsTotal: number | null;
+  subscriptionEnabled: boolean;
   loading: boolean;
 }
 
-const PLAN_FEATURES: Record<string, Omit<PlanFeatures, "planName" | "loading" | "isTrial" | "trialDaysLeft" | "trialExpiresAt">> = {
+const PLAN_FEATURES: Record<string, Omit<PlanFeatures, "planName" | "loading" | "isTrial" | "trialDaysLeft" | "trialExpiresAt" | "subscriptionEnabled">> = {
   Free: {
     canImportExport: false,
     canUploadPhoto: false,
@@ -76,21 +77,55 @@ const PLAN_FEATURES: Record<string, Omit<PlanFeatures, "planName" | "loading" | 
   },
 };
 
+// Simple module-level cache for the global subscription toggle (survives per-page mounts)
+let subscriptionEnabledCache: boolean | null = null;
+let subscriptionEnabledPromise: Promise<boolean> | null = null;
+
+async function getSubscriptionEnabled(): Promise<boolean> {
+  if (subscriptionEnabledCache !== null) return subscriptionEnabledCache;
+  if (subscriptionEnabledPromise) return subscriptionEnabledPromise;
+  subscriptionEnabledPromise = (async () => {
+    try {
+      const { data } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "subscription_enabled")
+        .maybeSingle();
+      // Default: true (system enabled). Only "false" disables it.
+      const enabled = data?.value !== "false";
+      subscriptionEnabledCache = enabled;
+      return enabled;
+    } catch {
+      subscriptionEnabledCache = true;
+      return true;
+    }
+  })();
+  return subscriptionEnabledPromise;
+}
+
+export function invalidateSubscriptionEnabledCache() {
+  subscriptionEnabledCache = null;
+  subscriptionEnabledPromise = null;
+}
+
 export function useSubscriptionFeatures(): PlanFeatures {
   const { profile } = useAuth();
   const [planName, setPlanName] = useState("Free");
   const [isTrial, setIsTrial] = useState(false);
   const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
   const [trialExpiresAt, setTrialExpiresAt] = useState<string | null>(null);
+  const [subscriptionEnabled, setSubscriptionEnabled] = useState<boolean>(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetch = async () => {
+      const enabled = await getSubscriptionEnabled();
+      setSubscriptionEnabled(enabled);
+
       if (!profile?.school_id) {
         setLoading(false);
         return;
       }
-      // Fetch active or trial subscription
       const { data } = await supabase
         .from("school_subscriptions")
         .select("*, subscription_plans(name)")
@@ -130,9 +165,21 @@ export function useSubscriptionFeatures(): PlanFeatures {
     fetch();
   }, [profile?.school_id]);
 
+  // Ketika sistem langganan dinonaktifkan Super Admin: semua sekolah otomatis Premium unlimited.
+  if (!subscriptionEnabled) {
+    return {
+      planName: "Premium",
+      isTrial: false,
+      trialDaysLeft: null,
+      trialExpiresAt: null,
+      subscriptionEnabled: false,
+      loading,
+      ...PLAN_FEATURES.Premium,
+    };
+  }
+
   const baseFeatures = PLAN_FEATURES[planName] || PLAN_FEATURES.Free;
-  // Active trial unlocks Face Recognition regardless of plan name
   const features = isTrial ? { ...baseFeatures, canFaceRecognition: true } : baseFeatures;
 
-  return { planName, isTrial, trialDaysLeft, trialExpiresAt, loading, ...features };
+  return { planName, isTrial, trialDaysLeft, trialExpiresAt, subscriptionEnabled, loading, ...features };
 }

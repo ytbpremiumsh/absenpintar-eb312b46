@@ -37,7 +37,9 @@ const Login = () => {
 
   // parent
   const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [parentMethod, setParentMethod] = useState<"phone" | "card">("phone");
   const [phone, setPhone] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [cooldown, setCooldown] = useState(0);
 
@@ -141,11 +143,21 @@ const Login = () => {
   };
 
   const requestOtp = async () => {
-    if (!phone || phone.length < 9) return toast.error("Nomor WA tidak valid");
     setLoading(true);
     try {
-      const { data } = await supabase.functions.invoke("parent-portal", { body: { action: "request_otp", phone } });
+      let bodyPayload: any = {};
+      if (parentMethod === "card") {
+        const digits = cardNumber.replace(/\D/g, "");
+        if (digits.length !== 16) { toast.error("Nomor Kartu harus 16 digit"); return; }
+        bodyPayload = { action: "request_otp", card_number: digits };
+      } else {
+        if (!phone || phone.length < 9) { toast.error("Nomor WA tidak valid"); return; }
+        bodyPayload = { action: "request_otp", phone };
+      }
+      const { data } = await supabase.functions.invoke("parent-portal", { body: bodyPayload });
       if (data?.error) return toast.error(data.error);
+      // API returns resolved phone (from card lookup or normalized); use it for verify step.
+      if (data?.phone) setPhone(data.phone);
       toast.success("Kode OTP dikirim via WhatsApp");
       setStep("otp");
       setCooldown(60);
@@ -371,18 +383,52 @@ const Login = () => {
                         {step === "phone" ? (
                           <motion.div key="phone" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
                             transition={{ duration: 0.25 }} className="space-y-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nomor WhatsApp</Label>
-                              <div className="relative group">
-                                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary" />
-                                <Input id="phone" type="tel" inputMode="numeric" placeholder="08xxxxxxxxxx" value={phone}
-                                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                                  className="h-12 pl-10 bg-secondary/50 border-border focus:bg-background focus:border-primary focus:ring-primary/20 rounded-xl" />
-                              </div>
-                              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                                <Sparkles className="h-3 w-3" /> Gunakan nomor yang terdaftar di sekolah ananda.
-                              </p>
+                            {/* Method toggle */}
+                            <div className="flex p-1 bg-secondary/60 rounded-xl">
+                              <button
+                                type="button"
+                                onClick={() => setParentMethod("phone")}
+                                className={`flex-1 h-8 text-[11px] font-semibold rounded-lg transition-all ${parentMethod === "phone" ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground"}`}
+                              >
+                                No. WhatsApp
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setParentMethod("card")}
+                                className={`flex-1 h-8 text-[11px] font-semibold rounded-lg transition-all ${parentMethod === "card" ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground"}`}
+                              >
+                                Kode Kartu
+                              </button>
                             </div>
+
+                            {parentMethod === "phone" ? (
+                              <div className="space-y-2">
+                                <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nomor WhatsApp</Label>
+                                <div className="relative group">
+                                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary" />
+                                  <Input id="phone" type="tel" inputMode="numeric" placeholder="08xxxxxxxxxx" value={phone}
+                                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                                    className="h-12 pl-10 bg-secondary/50 border-border focus:bg-background focus:border-primary focus:ring-primary/20 rounded-xl" />
+                                </div>
+                                <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                                  <Sparkles className="h-3 w-3" /> Gunakan nomor yang terdaftar di sekolah ananda.
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <Label htmlFor="card" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nomor Kartu Siswa (16 digit)</Label>
+                                <div className="relative group">
+                                  <QrCode className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary" />
+                                  <Input id="card" type="tel" inputMode="numeric" maxLength={19} placeholder="1234 5678 9012 3456"
+                                    value={cardNumber.replace(/(\d{4})(?=\d)/g, "$1 ")}
+                                    onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, "").slice(0, 16))}
+                                    className="h-12 pl-10 font-mono tracking-wider bg-secondary/50 border-border focus:bg-background focus:border-primary focus:ring-primary/20 rounded-xl" />
+                                </div>
+                                <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                                  <Sparkles className="h-3 w-3" /> OTP tetap dikirim ke WhatsApp orang tua yang terdaftar.
+                                </p>
+                              </div>
+                            )}
                             <Button onClick={requestOtp} disabled={loading}
                               className="w-full h-12 bg-[#5B6CF9] hover:bg-[#4c5ded] text-white font-semibold text-sm uppercase tracking-wide shadow-lg shadow-indigo-500/20 rounded-xl">
                               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><MessageSquare className="h-4 w-4 mr-2" /> Kirim Kode OTP <ArrowRight className="h-4 w-4 ml-2" /></>}

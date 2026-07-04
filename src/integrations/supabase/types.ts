@@ -1597,6 +1597,38 @@ export type Database = {
         }
         Relationships: []
       }
+      school_holidays: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          label: string | null
+          school_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          label?: string | null
+          school_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          label?: string | null
+          school_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_holidays_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_integrations: {
         Row: {
           api_key: string | null
@@ -1726,6 +1758,8 @@ export type Database = {
           created_at: string
           group_id: string | null
           holiday_days: number[]
+          holiday_mode: boolean
+          holiday_mode_label: string | null
           id: string
           logo: string | null
           name: string
@@ -1740,6 +1774,8 @@ export type Database = {
           created_at?: string
           group_id?: string | null
           holiday_days?: number[]
+          holiday_mode?: boolean
+          holiday_mode_label?: string | null
           id?: string
           logo?: string | null
           name: string
@@ -1754,6 +1790,8 @@ export type Database = {
           created_at?: string
           group_id?: string | null
           holiday_days?: number[]
+          holiday_mode?: boolean
+          holiday_mode_label?: string | null
           id?: string
           logo?: string | null
           name?: string
@@ -2148,6 +2186,7 @@ export type Database = {
       }
       students: {
         Row: {
+          card_number: string | null
           class: string
           created_at: string
           gender: string
@@ -2161,6 +2200,7 @@ export type Database = {
           student_id: string
         }
         Insert: {
+          card_number?: string | null
           class: string
           created_at?: string
           gender?: string
@@ -2174,6 +2214,7 @@ export type Database = {
           student_id: string
         }
         Update: {
+          card_number?: string | null
           class?: string
           created_at?: string
           gender?: string
@@ -2640,6 +2681,7 @@ export type Database = {
     }
     Functions: {
       _fmt_idr: { Args: { amt: number }; Returns: string }
+      generate_student_card_number: { Args: never; Returns: string }
       get_user_school_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {

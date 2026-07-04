@@ -65,7 +65,7 @@ serve(async (req) => {
     // Ambil semua sekolah aktif beserta timezone
     const { data: schools, error: schErr } = await supabase
       .from('schools')
-      .select('id, name, timezone, holiday_days');
+      .select('id, name, timezone, holiday_days, holiday_mode');
 
     if (schErr) throw schErr;
     if (!schools || schools.length === 0) {
@@ -101,6 +101,22 @@ serve(async (req) => {
         // Skip libur nasional
         if (HOLIDAYS.has(today)) {
           summary.push({ school: school.name, skipped: 'holiday', date: today });
+          continue;
+        }
+        // Skip Mode Libur darurat sekolah
+        if ((school as any).holiday_mode) {
+          summary.push({ school: school.name, skipped: 'holiday_mode', date: today });
+          continue;
+        }
+        // Skip tanggal merah spesifik sekolah
+        const { data: schoolHol } = await supabase
+          .from('school_holidays')
+          .select('id')
+          .eq('school_id', school.id)
+          .eq('date', today)
+          .maybeSingle();
+        if (schoolHol) {
+          summary.push({ school: school.name, skipped: 'school_holiday_date', date: today });
           continue;
         }
 

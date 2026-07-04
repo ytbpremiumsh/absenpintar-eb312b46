@@ -25,6 +25,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import atskollaLogo from "@/assets/Logo_atskolla.png";
 import { formatPaymentMethodLabel } from "@/lib/paymentMethod";
 import { isWorkingDay } from "@/lib/holidays";
+import { StudentIdCard } from "@/components/StudentIdCard";
 
 const STATUS_COLORS: Record<string, string> = {
   hadir: "#10b981",
@@ -471,6 +472,18 @@ export default function ParentDashboard() {
                 );
               })()}
             </div>
+
+            {/* Kartu Pelajar Digital */}
+            {current && (
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-2 px-1">
+                  <h3 className="text-xs font-bold text-foreground">Kartu Pelajar Digital</h3>
+                  <span className="text-[10px] text-muted-foreground">Simpan / cetak untuk identitas resmi</span>
+                </div>
+                <StudentIdCard student={current as any} />
+              </div>
+            )}
+
 
             {/* Tunggakan SPP — semua tagihan lewat jatuh tempo & belum lunas */}
             {(sppData.tunggakan || []).length > 0 && (

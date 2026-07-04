@@ -763,6 +763,7 @@ const Students = () => {
                                 <TableHead className="w-10">#</TableHead>
                                 <TableHead>Nama Siswa</TableHead>
                                 <TableHead className="hidden sm:table-cell w-[140px] whitespace-nowrap">NIS</TableHead>
+                                <TableHead className="hidden xl:table-cell w-[180px] whitespace-nowrap">Kode Kartu</TableHead>
                                 <TableHead className="hidden md:table-cell">Wali</TableHead>
                                 <TableHead className="hidden lg:table-cell">No. HP</TableHead>
                                 <TableHead className="text-right w-[140px]">Aksi</TableHead>
@@ -783,6 +784,11 @@ const Students = () => {
                                   </TableCell>
                                   <TableCell className="hidden sm:table-cell whitespace-nowrap">
                                     <span className="font-mono text-xs bg-secondary px-2 py-0.5 rounded">{student.student_id}</span>
+                                  </TableCell>
+                                  <TableCell className="hidden xl:table-cell whitespace-nowrap">
+                                    <span className="font-mono text-[11px] text-muted-foreground" title={student.card_number || ""}>
+                                      {student.card_number ? student.card_number.replace(/(\d{4})(?=\d)/g, "$1 ") : "-"}
+                                    </span>
                                   </TableCell>
                                   <TableCell className="hidden md:table-cell"><p className="text-sm">{student.parent_name}</p></TableCell>
                                   <TableCell className="hidden lg:table-cell">
