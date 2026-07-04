@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 
-// Parent login is now merged into the main /login page as a tab.
+// Parent login lives at /login (school/guru moved to /admin).
 export default function ParentLogin() {
-  return <Navigate to="/login?as=parent" replace />;
+  return <Navigate to="/login" replace />;
 }
