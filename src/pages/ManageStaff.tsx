@@ -185,7 +185,7 @@ const ManageStaff = () => {
 
       toast.success(`Akun ${formName} berhasil ditambahkan`);
       setShowDialog(false);
-      setFormName(""); setFormEmail(""); setFormPassword(""); setFormPhone(""); setFormNip("");
+      setFormName(""); setFormEmail(""); setFormPassword(""); setFormPhone(""); setFormNip(""); setFormPosition("Guru");
       setFormRoles({ staff: true, teacher: false, bendahara: false });
       fetchStaff();
     } catch (err: any) {
