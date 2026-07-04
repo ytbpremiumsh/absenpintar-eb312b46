@@ -1187,6 +1187,7 @@ export default function ParentDashboard() {
                 <SheetMenuItem icon={Phone} label="Wali Kelas" color="#0EA5E9" bg="#E1F4FE" onClick={() => { setTab("contact"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
                 <SheetMenuItem icon={CalendarDays} label="Jadwal" color="#10B981" bg="#E6FAF3" onClick={() => { setTab("schedule"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
                 <SheetMenuItem icon={Wallet} label="SPP" color="#F59E0B" bg="#FEF5E1" onClick={() => { setTab("spp"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
+                <SheetMenuItem icon={CreditCard} label="Kartu Pelajar" color="#5B6CF9" bg="#EEF0FE" onClick={() => { setTab("card"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
                 <SheetMenuItem icon={LogOut} label="Keluar" color="#EF4444" bg="#FEE7E7" onClick={logout} />
               </div>
             </SheetContent>
