@@ -217,6 +217,22 @@ Deno.serve(async (req) => {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
 
     // ---- Public actions ----
+    // Direct login via Nomor Kartu Identitas — no OTP required.
+    if (action === "login_card") {
+      const digits = String(body.card_number || "").replace(/\D/g, "");
+      if (digits.length !== 16) return json({ error: "Nomor Kartu Identitas harus 16 digit" });
+      const phone = await findPhoneByCardNumber(digits);
+      if (!phone) return json({ error: "Nomor Kartu Identitas tidak ditemukan. Hubungi admin sekolah." });
+      const normPhone = normalizePhone(phone);
+      const students = await findStudentsByPhone(normPhone);
+      if (students.length === 0) {
+        return json({ error: "Data siswa tidak ditemukan untuk kartu ini." });
+      }
+      const token = genToken();
+      await supabase.from("parent_sessions").insert({ token, phone: normPhone });
+      return json({ ok: true, token, phone: normPhone });
+    }
+
     if (action === "request_otp") {
       let phone = normalizePhone(body.phone || "");
       // NEW: allow login by card_number — resolves to registered parent phone, still sends OTP to WA.
