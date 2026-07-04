@@ -3971,8 +3971,26 @@ export function BendaharaPencairan() {
     if (list.length && !selectedAccountId) {
       const def = list.find((x: any) => x.is_default) || list[0];
       setSelectedAccountId(def.id);
-      setBank({ bank_name: def.bank_name, account_number: def.account_number, account_holder: def.account_holder, notes: def.notes || "" });
+      setBank({ bank_name: def.bank_name, account_number: def.account_number, account_holder: def.account_holder, notes: def.notes || "", account_type: def.account_type || "bank", responsible_user_id: def.responsible_user_id || "" });
     }
+  };
+
+  const loadStaff = async () => {
+    if (!profile?.school_id) return;
+    const { data: roleRows } = await supabase.from("user_roles")
+      .select("user_id, role").in("role", ["guru", "operator", "admin", "bendahara"] as any);
+    const ids = Array.from(new Set((roleRows || []).map((r: any) => r.user_id)));
+    if (ids.length === 0) { setStaffList([]); return; }
+    const { data: profs } = await supabase.from("profiles")
+      .select("user_id, full_name, phone, school_id")
+      .in("user_id", ids).eq("school_id", profile.school_id);
+    const roleMap = new Map<string, string[]>();
+    (roleRows || []).forEach((r: any) => {
+      const arr = roleMap.get(r.user_id) || [];
+      arr.push(r.role);
+      roleMap.set(r.user_id, arr);
+    });
+    setStaffList((profs || []).map((p: any) => ({ ...p, roles: roleMap.get(p.user_id) || [] })));
   };
 
   useEffect(() => {
