@@ -828,6 +828,10 @@ const ManageStaff = () => {
         userId={attendanceTarget?.user_id || null}
         fullName={attendanceTarget?.full_name || ""}
         schoolId={schoolId}
+        photoUrl={attendanceTarget?.photo_url || null}
+        roles={attendanceTarget?.roles || []}
+        nip={attendanceTarget?.nip || null}
+        phone={attendanceTarget?.phone || null}
       />
     </div>
     </PremiumGate>
