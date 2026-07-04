@@ -17,14 +17,25 @@ import { Search, School as SchoolIcon } from "lucide-react";
 
 type Mode = "school" | "parent";
 
-const Login = () => {
+interface LoginProps {
+  /** When provided, hides the tab switcher and locks the login form to one audience. */
+  forcedMode?: Mode;
+}
+
+const Login = ({ forcedMode }: LoginProps) => {
   const navigate = useNavigate();
   const { signIn } = useAuth();
   const [params] = useSearchParams();
-  const [mode, setMode] = useState<Mode>(params.get("as") === "parent" ? "parent" : "school");
+  const [mode, setMode] = useState<Mode>(
+    forcedMode ?? (params.get("as") === "parent" ? "parent" : "school")
+  );
+  useEffect(() => { if (forcedMode) setMode(forcedMode); }, [forcedMode]);
   const tenant = useTenant();
   const tenantLogo = tenant.school?.logo || null;
   const tenantName = tenant.school?.name || null;
+  const tenantSlug = tenant.slug;
+  const tenantSchoolId = tenant.school?.id ?? null;
+
 
   // school
   const [showPassword, setShowPassword] = useState(false);
