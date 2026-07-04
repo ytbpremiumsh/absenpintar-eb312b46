@@ -362,27 +362,41 @@ const Login = ({ forcedMode }: LoginProps) => {
               transition={{ delay: 0.25, duration: 0.6 }} className="relative">
               <div className="absolute -inset-1 bg-white/10 rounded-[2rem] blur-xl" />
               <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-7 shadow-2xl shadow-black/20">
-                {/* Tabs */}
-                <div className="flex p-1 bg-secondary/60 rounded-xl mb-5">
-                  <button
-                    type="button"
-                    onClick={() => setMode("school")}
-                    className={`flex-1 h-9 text-xs font-semibold rounded-lg transition-all ${
-                      mode === "school" ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground"
-                    }`}
-                  >
-                    Sekolah / Guru
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMode("parent")}
-                    className={`flex-1 h-9 text-xs font-semibold rounded-lg transition-all ${
-                      mode === "parent" ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground"
-                    }`}
-                  >
-                    Wali Murid
-                  </button>
-                </div>
+                {/* Tabs (hidden when a forced mode is provided via /admin or /login routes) */}
+                {!forcedMode && (
+                  <div className="flex p-1 bg-secondary/60 rounded-xl mb-5">
+                    <button
+                      type="button"
+                      onClick={() => setMode("school")}
+                      className={`flex-1 h-9 text-xs font-semibold rounded-lg transition-all ${
+                        mode === "school" ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground"
+                      }`}
+                    >
+                      Sekolah / Guru
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMode("parent")}
+                      className={`flex-1 h-9 text-xs font-semibold rounded-lg transition-all ${
+                        mode === "parent" ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground"
+                      }`}
+                    >
+                      Wali Murid
+                    </button>
+                  </div>
+                )}
+
+                {/* Cross-link to the other portal when a forced mode is active */}
+                {forcedMode && (
+                  <div className="mb-5 text-center text-xs text-muted-foreground">
+                    {forcedMode === "school" ? (
+                      <>Orang tua / wali murid? <Link to={tenantSlug ? "/login" : "/login"} className="text-primary font-semibold hover:underline">Masuk di sini</Link></>
+                    ) : (
+                      <>Admin sekolah / Guru? <Link to="/admin" className="text-primary font-semibold hover:underline">Masuk di sini</Link></>
+                    )}
+                  </div>
+                )}
+
 
                 <div className="flex items-center gap-2 mb-5">
                   <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
