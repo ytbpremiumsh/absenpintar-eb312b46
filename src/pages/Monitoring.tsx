@@ -16,6 +16,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { getLocalDateString, getLocalTimeString } from "@/lib/dateLocal";
+import { fetchSchoolHolidayStatus } from "@/lib/schoolHoliday";
 
 const STATUS_COLORS: Record<string, string> = {
   hadir: "text-success",
@@ -168,6 +169,16 @@ const Monitoring = () => {
 
   const handleUpdateStatus = async () => {
     if (!editStudent || !editStatus || !profile?.school_id) return;
+
+    // Block manual attendance during holiday
+    const holidayStatus = await fetchSchoolHolidayStatus(profile.school_id);
+    if (holidayStatus.isHoliday) {
+      toast.error(`Absensi ditangguhkan: ${holidayStatus.reason}`);
+      setEditStudent(null);
+      setEditStatus("");
+      return;
+    }
+
     
     if (editStatus === "belum") {
       // Cancel attendance — delete the log

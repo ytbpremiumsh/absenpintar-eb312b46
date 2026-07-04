@@ -8,6 +8,7 @@ import { Search, CalendarDays, Save, Loader2, ClipboardList } from "lucide-react
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { fetchSchoolHolidayStatus } from "@/lib/schoolHoliday";
 import { motion } from "framer-motion";
 
 const STATUS_OPTIONS = [
@@ -187,8 +188,17 @@ const WaliKelasAttendance = () => {
 
   const handleSave = async () => {
     if (changes.size === 0) { toast.info("Tidak ada perubahan"); return; }
-    setSaving(true);
     const schoolId = assignments[0].school_id;
+    // Block manual attendance during holiday (only when marking for today)
+    const today = new Date().toISOString().slice(0, 10);
+    if (selectedDate === today) {
+      const holidayStatus = await fetchSchoolHolidayStatus(schoolId);
+      if (holidayStatus.isHoliday) {
+        toast.error(`Absensi ditangguhkan: ${holidayStatus.reason}`);
+        return;
+      }
+    }
+    setSaving(true);
     const now = new Date().toTimeString().slice(0, 8);
 
     try {
