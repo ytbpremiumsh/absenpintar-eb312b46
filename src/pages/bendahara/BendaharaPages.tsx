@@ -2753,7 +2753,11 @@ export function BendaharaSPPDetail() {
     }
   };
 
-  const openOfflineDialog = (inv: any) => {
+  const openOfflineDialog = async (inv: any) => {
+    if (profile?.school_id) {
+      const flags = await fetchBendaharaFlags(profile.school_id);
+      if (!flags.offline) { toast.error("Pembayaran offline dinonaktifkan Super Admin untuk sekolah ini"); return; }
+    }
     setOfflineDialog({ inv, method: "offline_cash", paidDate: new Date().toISOString().slice(0, 10), note: "" });
   };
 
