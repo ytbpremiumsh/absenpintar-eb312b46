@@ -1930,21 +1930,13 @@ function BendaharaGenerateCustom() {
       {/* Options */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-4 space-y-2">
-          {flags.wa ? (
+          {flags.wa && (
             <div className="flex items-center justify-between rounded-lg border p-3 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-900">
               <div>
                 <p className="text-sm font-medium flex items-center gap-1.5 text-emerald-800 dark:text-emerald-200"><Send className="h-3.5 w-3.5" /> Otomatis buat link & kirim WA</p>
                 <p className="text-xs text-emerald-700/80 dark:text-emerald-300/80">Setelah generate, sistem otomatis membuat link pembayaran & mengirim ke WA wali murid</p>
               </div>
               <Switch checked={autoSendWa} onCheckedChange={setAutoSendWa} />
-            </div>
-          ) : (
-            <div className="flex items-center justify-between rounded-lg border p-3 bg-slate-50 border-slate-200 dark:bg-slate-900/40 dark:border-slate-800">
-              <div>
-                <p className="text-sm font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200"><Send className="h-3.5 w-3.5" /> Kirim WA otomatis nonaktif</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Fitur pengiriman WA dinonaktifkan Super Admin untuk sekolah ini.</p>
-              </div>
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300 bg-white/70 dark:bg-slate-800/70 px-2 py-1 rounded-md">Nonaktif</span>
             </div>
           )}
           {preview.skipped > 0 && (
