@@ -30,7 +30,7 @@ const navItems = [
 
   // PROGRAM PARTNER
   { title: "Referral & Poin", url: "/super-admin/referral", icon: Gift, group: "partner" },
-  { title: "Affiliate", url: "/super-admin/affiliate", icon: Handshake, group: "partner" },
+  
 
   // KOMUNIKASI
   { title: "Pengumuman", url: "/super-admin/announcements", icon: Megaphone, group: "comms" },
