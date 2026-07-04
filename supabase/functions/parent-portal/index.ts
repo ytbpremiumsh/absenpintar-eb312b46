@@ -180,7 +180,7 @@ async function findStudentsByPhone(phone: string) {
   const variants = phoneVariants(phone);
   const { data } = await supabase
     .from("students")
-    .select("id, name, student_id, class, photo_url, gender, school_id, parent_name, parent_phone, card_number, schools(id, name, logo)")
+    .select("id, name, student_id, qr_code, class, photo_url, gender, school_id, parent_name, parent_phone, card_number, schools(id, name, logo)")
     .in("parent_phone", variants);
   return data || [];
 }
