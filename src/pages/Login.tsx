@@ -145,23 +145,32 @@ const Login = () => {
   const requestOtp = async () => {
     setLoading(true);
     try {
-      let bodyPayload: any = {};
       if (parentMethod === "card") {
         const digits = cardNumber.replace(/\D/g, "");
         if (digits.length !== 16) { toast.error("Nomor Kartu harus 16 digit"); return; }
-        bodyPayload = { action: "request_otp", card_number: digits };
-      } else {
-        if (!phone || phone.length < 9) { toast.error("Nomor WA tidak valid"); return; }
-        bodyPayload = { action: "request_otp", phone };
+        // Direct login (no OTP) when using Nomor Kartu Identitas
+        const { data } = await supabase.functions.invoke("parent-portal", {
+          body: { action: "login_card", card_number: digits },
+        });
+        if (data?.error) return toast.error(data.error);
+        if (!data?.token) return toast.error("Login gagal");
+        localStorage.setItem("parent_token", data.token);
+        localStorage.setItem("parent_phone", data.phone);
+        toast.success("Login berhasil");
+        navigate("/parent");
+        return;
       }
-      const { data } = await supabase.functions.invoke("parent-portal", { body: bodyPayload });
+      // WhatsApp method → still requires OTP
+      if (!phone || phone.length < 9) { toast.error("Nomor WA tidak valid"); return; }
+      const { data } = await supabase.functions.invoke("parent-portal", {
+        body: { action: "request_otp", phone },
+      });
       if (data?.error) return toast.error(data.error);
-      // API returns resolved phone (from card lookup or normalized); use it for verify step.
       if (data?.phone) setPhone(data.phone);
       toast.success("Kode OTP dikirim via WhatsApp");
       setStep("otp");
       setCooldown(60);
-    } catch { toast.error("Gagal mengirim OTP"); } finally { setLoading(false); }
+    } catch { toast.error("Gagal memproses login"); } finally { setLoading(false); }
   };
 
   const verifyOtp = async () => {
