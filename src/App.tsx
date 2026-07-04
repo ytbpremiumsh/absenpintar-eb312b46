@@ -39,6 +39,7 @@ const PublicMonitoring = lazy(() => import("./pages/PublicMonitoring"));
 const PublicClassMonitoring = lazy(() => import("./pages/PublicClassMonitoring"));
 const PublicAttendanceMonitoring = lazy(() => import("./pages/PublicAttendanceMonitoring"));
 const SchoolSettings = lazy(() => import("./pages/SchoolSettings"));
+const HolidayManagement = lazy(() => import("./pages/HolidayManagement"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
 const SuperAdminDashboard = lazy(() => import("./pages/super-admin/SuperAdminDashboard"));
 const SuperAdminPayments = lazy(() => import("./pages/super-admin/SuperAdminPayments"));
@@ -250,6 +251,7 @@ function AppRoutes() {
           <Route path="/addons" element={<Navigate to="/langganan?tab=addon" replace />} />
           <Route path="/all-features" element={<AllFeatures />} />
           <Route path="/school-settings" element={<SchoolSettings />} />
+          <Route path="/holidays" element={<HolidayManagement />} />
           <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/support" element={<SupportTickets />} />
           <Route path="/referral" element={<ReferralDashboard />} />

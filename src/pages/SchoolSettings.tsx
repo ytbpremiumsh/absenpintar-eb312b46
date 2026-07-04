@@ -404,91 +404,21 @@ const SchoolSettings = () => {
         </CardContent>
       </Card>
 
-      {/* Mode Libur & Tanggal Merah */}
+      {/* Shortcut ke halaman Mode Libur */}
       <Card className="border-0 shadow-card">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <PowerOff className="h-4 w-4 text-primary" />
-            Mode Libur & Kalender Tanggal Merah
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          {/* Toggle darurat */}
-          <div className={`rounded-xl border p-4 transition-colors ${holidayMode ? "bg-amber-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800" : "bg-secondary/40 border-border"}`}>
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  {holidayMode ? "Mode Libur AKTIF" : "Mode Libur Nonaktif"}
-                  {holidayMode && <Badge className="bg-amber-500 text-white border-0">Absensi Ditangguhkan</Badge>}
-                </Label>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Aktifkan bila hari ini libur mendadak. Sistem akan menolak absensi & tidak menghitung Alfa otomatis.
-                </p>
-              </div>
-              <Switch checked={holidayMode} disabled={savingHolidayMode} onCheckedChange={handleToggleHolidayMode} />
+        <CardContent className="p-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+              <CalendarOff className="h-5 w-5 text-amber-600" />
             </div>
-            {holidayMode && (
-              <div className="mt-3">
-                <Label className="text-xs">Alasan / Label</Label>
-                <Input
-                  value={holidayModeLabel}
-                  onChange={(e) => setHolidayModeLabel(e.target.value)}
-                  onBlur={() => holidayMode && supabase.from("schools").update({ holiday_mode_label: holidayModeLabel } as any).eq("id", profile?.school_id || "").then(() => {})}
-                  placeholder="Contoh: Cuaca ekstrem, Ujian nasional, dll"
-                  className="mt-1 h-9 text-sm"
-                />
-              </div>
-            )}
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">Mode Libur & Tanggal Merah</p>
+              <p className="text-xs text-muted-foreground">Kelola libur mendadak dan kalender tanggal merah sekolah.</p>
+            </div>
           </div>
-
-          {/* Kalender tanggal merah */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-primary" />
-              <Label className="text-sm font-semibold">Kalender Tanggal Merah Sekolah</Label>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Klik tanggal untuk menandai libur. Klik lagi untuk membatalkan. Tanggal merah otomatis melewati Auto-Alfa & absensi ditolak.
-            </p>
-            <div className="space-y-2">
-              <Input
-                value={newHolidayLabel}
-                onChange={(e) => setNewHolidayLabel(e.target.value)}
-                placeholder="Label opsional (mis: Libur Semester)"
-                className="text-sm h-9"
-              />
-              <div className="rounded-xl border border-border p-2 flex justify-center">
-                <Calendar
-                  mode="single"
-                  onSelect={handleAddHolidayDate}
-                  modifiers={{ holiday: holidayDates.map((h) => new Date(h.date + "T00:00:00")) }}
-                  modifiersClassNames={{ holiday: "bg-red-500 text-white hover:bg-red-600 rounded-full" }}
-                  className="p-0"
-                />
-              </div>
-            </div>
-
-            {holidayDates.length > 0 && (
-              <div>
-                <p className="text-[11px] text-muted-foreground mb-2">Total: {holidayDates.length} tanggal libur</p>
-                <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
-                  {holidayDates.map((h) => (
-                    <div key={h.id} className="flex items-center justify-between gap-2 rounded-lg bg-secondary/40 px-3 py-2">
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold">
-                          {new Date(h.date + "T00:00:00").toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-                        </p>
-                        {h.label && <p className="text-[11px] text-muted-foreground truncate">{h.label}</p>}
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => handleRemoveHolidayDate(h.id)}>
-                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          <Button variant="outline" size="sm" onClick={() => (window.location.href = "/holidays")}>
+            Buka Halaman
+          </Button>
         </CardContent>
       </Card>
 

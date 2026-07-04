@@ -22,6 +22,7 @@ import {
   BookOpen,
   Megaphone,
   FileText,
+  CalendarOff,
 } from "lucide-react";
 import atskollaLogo from "@/assets/Logo_atskolla.png";
 import { useSubscriptionFeatures } from "@/hooks/useSubscriptionFeatures";
@@ -68,9 +69,11 @@ const whatsappNav = [
 ];
 
 const settingsNavSubscription = [
+  { title: "Mode Libur", url: "/holidays", icon: CalendarOff, accent: "from-amber-500/85 to-amber-600" },
   { title: "Langganan & Add-on", url: "/langganan", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
 ];
 const settingsNavAllFeatures = [
+  { title: "Mode Libur", url: "/holidays", icon: CalendarOff, accent: "from-amber-500/85 to-amber-600" },
   { title: "Semua Fitur", url: "/all-features", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
 ];
 
