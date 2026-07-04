@@ -15,7 +15,7 @@ import {
   Sparkles, TrendingUp, Pin, Paperclip, MessageCircle, User, MapPin, Bell,
   Wallet, AlertCircle, Download, ExternalLink, RefreshCw, Receipt, MoreHorizontal,
   Send, ScanLine, History as HistoryIcon, Home, Briefcase, LayoutGrid, UserCircle2,
-  ArrowUpRight, Grid3x3,
+  ArrowUpRight, Grid3x3, CreditCard, ChevronRight,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -359,6 +359,7 @@ export default function ParentDashboard() {
             { id: "info", label: "Pengumuman", icon: Megaphone },
             { id: "leave", label: "Pengajuan Izin", icon: FileText },
             { id: "contact", label: "Wali Kelas", icon: Phone },
+            { id: "card", label: "Kartu Pelajar", icon: CreditCard },
           ].map((t) => {
             const Active = tab === t.id;
             return (
@@ -473,16 +474,24 @@ export default function ParentDashboard() {
               })()}
             </div>
 
-            {/* Kartu Pelajar Digital */}
+            {/* Shortcut: Kartu Pelajar Digital */}
             {current && (
-              <div className="mt-4">
-                <div className="flex items-center justify-between mb-2 px-1">
-                  <h3 className="text-xs font-bold text-foreground">Kartu Pelajar Digital</h3>
-                  <span className="text-[10px] text-muted-foreground">Simpan / cetak untuk identitas resmi</span>
+              <button
+                onClick={() => setTab("card")}
+                className="mt-4 w-full flex items-center gap-3 rounded-2xl p-3.5 bg-gradient-to-r from-[#5B6CF9]/10 via-[#4c5ded]/10 to-transparent border border-[#5B6CF9]/20 hover:border-[#5B6CF9]/40 transition-all active:scale-[0.98]"
+              >
+                <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-[#5B6CF9] to-[#4338CA] flex items-center justify-center shrink-0 shadow-lg shadow-[#5B6CF9]/30">
+                  <CreditCard className="h-5 w-5 text-white" />
                 </div>
-                <StudentIdCard student={current as any} />
-              </div>
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-sm font-bold text-foreground">Kartu Pelajar Digital</p>
+                  <p className="text-[11px] text-muted-foreground truncate">Lihat & unduh kartu identitas siswa</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-[#5B6CF9] shrink-0" />
+              </button>
             )}
+
+
 
 
             {/* Tunggakan SPP — semua tagihan lewat jatuh tempo & belum lunas */}
@@ -1122,6 +1131,29 @@ export default function ParentDashboard() {
           </>
         )}
 
+        {tab === "card" && (
+          <>
+            <SectionTitle icon={CreditCard} title="Kartu Pelajar Digital" />
+            {current ? (
+              <div className="space-y-4">
+                <StudentIdCard student={current as any} />
+                {(current as any).card_number && (
+                  <Card className="p-4 border-0 shadow-card rounded-2xl">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">Nomor Kartu Identitas</p>
+                    <p className="font-mono text-sm font-bold tracking-[0.15em] text-foreground break-all">
+                      {String((current as any).card_number).replace(/(\d{4})(?=\d)/g, "$1 ")}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-2">Gunakan nomor ini untuk login ulang portal wali murid tanpa OTP.</p>
+                  </Card>
+                )}
+              </div>
+            ) : (
+              <EmptyMini text="Memuat data siswa..." />
+            )}
+          </>
+        )}
+
+
       </div>
       {/* end MAIN COLUMN */}
       </div>
@@ -1156,6 +1188,7 @@ export default function ParentDashboard() {
                 <SheetMenuItem icon={Phone} label="Wali Kelas" color="#0EA5E9" bg="#E1F4FE" onClick={() => { setTab("contact"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
                 <SheetMenuItem icon={CalendarDays} label="Jadwal" color="#10B981" bg="#E6FAF3" onClick={() => { setTab("schedule"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
                 <SheetMenuItem icon={Wallet} label="SPP" color="#F59E0B" bg="#FEF5E1" onClick={() => { setTab("spp"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
+                <SheetMenuItem icon={CreditCard} label="Kartu Pelajar" color="#5B6CF9" bg="#EEF0FE" onClick={() => { setTab("card"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
                 <SheetMenuItem icon={LogOut} label="Keluar" color="#EF4444" bg="#FEE7E7" onClick={logout} />
               </div>
             </SheetContent>
