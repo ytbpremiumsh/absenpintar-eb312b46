@@ -78,6 +78,7 @@ const ManageStaff = () => {
   const [editEmail, setEditEmail] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editNip, setEditNip] = useState("");
+  const [editPosition, setEditPosition] = useState("");
   const [editPassword, setEditPassword] = useState("");
   const [editRoles, setEditRoles] = useState<{ staff: boolean; teacher: boolean; bendahara: boolean }>({ staff: false, teacher: false, bendahara: false });
   const [savingEdit, setSavingEdit] = useState(false);
