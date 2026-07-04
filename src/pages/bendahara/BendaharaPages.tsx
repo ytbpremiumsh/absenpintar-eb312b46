@@ -4104,7 +4104,7 @@ export function BendaharaPencairan() {
     setSubmitting(true);
     // 1) Verifikasi OTP
     const { data: vData, error: vErr } = await supabase.functions.invoke("verify-bendahara-otp", {
-      body: { user_id: user.id, otp_code: otpCode },
+      body: { user_id: user.id, otp_code: otpCode, responsible_user_id: bank.responsible_user_id },
     });
     if (vErr || vData?.error) {
       toast.error(vData?.error || vErr?.message || "OTP tidak valid");
