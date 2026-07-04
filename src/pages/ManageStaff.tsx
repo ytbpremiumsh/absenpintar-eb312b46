@@ -361,6 +361,7 @@ const ManageStaff = () => {
           ...(editEmail.trim() ? { email: editEmail.trim() } : {}),
           phone: editPhone.trim(),
           nip: editNip.trim(),
+          position: editPosition.trim(),
           ...(editPassword.trim() ? { password: editPassword.trim() } : {}),
         },
       });
