@@ -28,7 +28,7 @@ const fmtIDR = (n: number) =>
 const fmtDate = (s?: string | null) =>
   s ? new Date(s).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "—";
 
-type SchoolRow = { id: string; name: string; npsn: string | null };
+type SchoolRow = { id: string; name: string; npsn: string | null; bendahara_wa_enabled?: boolean; bendahara_offline_enabled?: boolean };
 type Invoice = {
   id: string; school_id: string; invoice_number: string; student_name: string;
   class_name: string; period_label: string; total_amount: number; net_amount: number;
