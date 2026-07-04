@@ -140,8 +140,26 @@ const Dashboard = () => {
       setWaliKelasList([]);
     }
 
+    // Fetch holiday_mode
+    supabase.from("schools").select("holiday_mode").eq("id", schoolId).single().then(({ data }) => {
+      if (data) setHolidayMode(!!(data as any).holiday_mode);
+    });
+
     setLoading(false);
   }, [profile?.school_id]);
+
+  const toggleHolidayMode = async (val: boolean) => {
+    if (!profile?.school_id) return;
+    setHolidayToggling(true);
+    const { error } = await supabase.from("schools").update({
+      holiday_mode: val,
+      holiday_mode_label: val ? "Hari Libur" : null,
+    } as any).eq("id", profile.school_id);
+    setHolidayToggling(false);
+    if (error) { toast.error("Gagal: " + error.message); return; }
+    setHolidayMode(val);
+    toast.success(val ? "Mode libur aktif — absensi ditangguhkan" : "Mode libur dinonaktifkan");
+  };
 
   const fetchPeriodLogs = useCallback(async () => {
     if (!profile?.school_id) return;
