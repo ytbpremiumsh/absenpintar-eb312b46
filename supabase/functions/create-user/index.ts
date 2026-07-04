@@ -17,7 +17,31 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { email, password, full_name, role, school_id, npsn, school_name, school_address, school_principal_name, school_email, school_whatsapp, phone, referral_code, nip, position } = await req.json();
+    const { email, password, full_name, role, school_id, npsn, school_name, school_address, school_principal_name, school_email, school_whatsapp, phone, referral_code, nip, position, desired_slug } = await req.json();
+
+    // Validate desired_slug early (only if creating a new school context)
+    let cleanSlug: string | null = null;
+    if (desired_slug && typeof desired_slug === 'string') {
+      const s = desired_slug.trim().toLowerCase();
+      if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(s)) {
+        throw new Error('Subdomain tidak valid. Gunakan 3-64 karakter huruf kecil, angka, atau tanda hubung.');
+      }
+      // Check reserved
+      const { data: reserved } = await supabaseAdmin.rpc('is_reserved_slug', { _slug: s });
+      if (reserved === true) {
+        throw new Error(`Subdomain "${s}" sudah dipesan sistem. Silakan pilih yang lain.`);
+      }
+      // Check uniqueness
+      const { data: existingSlug } = await supabaseAdmin
+        .from('schools')
+        .select('id')
+        .eq('slug', s)
+        .maybeSingle();
+      if (existingSlug) {
+        throw new Error(`Subdomain "${s}" sudah dipakai sekolah lain. Silakan pilih yang lain.`);
+      }
+      cleanSlug = s;
+    }
 
     // Basic validation with clear, actionable messages (Indonesian)
     if (!email || !password) {
