@@ -131,6 +131,12 @@ const ManageStaff = () => {
 
   useEffect(() => { fetchStaff(); }, [schoolId]);
 
+  useEffect(() => {
+    if (!schoolId) return;
+    supabase.from("schools").select("name, logo").eq("id", schoolId).maybeSingle()
+      .then(({ data }) => { if (data) setSchool(data); });
+  }, [schoolId]);
+
   const handleCreate = async () => {
     if (!formName || !formEmail || !formPassword) { toast.error("Nama, email, dan password harus diisi"); return; }
     if (!schoolId) { toast.error("Data sekolah belum dimuat, silakan tunggu sebentar"); return; }
