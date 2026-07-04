@@ -244,7 +244,8 @@ export default function SuperAdminBendahara() {
   const toggleSchoolFlag = async (schoolId: string, field: "bendahara_wa_enabled" | "bendahara_offline_enabled", next: boolean) => {
     // Optimistic UI
     setSchools((prev) => prev.map((s) => (s.id === schoolId ? { ...s, [field]: next } : s)));
-    const { error } = await supabase.from("schools").update({ [field]: next }).eq("id", schoolId);
+    const patch: any = { [field]: next };
+    const { error } = await supabase.from("schools").update(patch).eq("id", schoolId);
     if (error) {
       toast.error("Gagal menyimpan: " + error.message);
       // Rollback
