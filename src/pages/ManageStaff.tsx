@@ -42,6 +42,7 @@ interface StaffMember {
   qr_code: string | null;
   phone: string | null;
   nip: string | null;
+  position: string | null;
   roles: string[];
   presentToday?: boolean;
   arrivalTime?: string | null;
