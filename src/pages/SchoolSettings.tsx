@@ -370,7 +370,7 @@ const SchoolSettings = () => {
                     type="button"
                     variant="outline"
                     size="icon"
-                    onClick={() => { navigator.clipboard.writeText(buildTenantUrl(initialSlug, "/")); toast.success("URL disalin"); }}
+                    onClick={() => { navigator.clipboard.writeText(buildTenantUrl(initialSlug, "/admin")); toast.success("URL disalin"); }}
                     title="Salin URL"
                   >
                     <Copy className="h-4 w-4" />
