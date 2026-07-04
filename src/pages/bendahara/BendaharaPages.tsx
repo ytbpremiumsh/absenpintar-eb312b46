@@ -25,7 +25,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import { downloadSppInvoicePDF, generateSppInvoicePDF } from "@/lib/sppInvoicePDF";
 import { PaymentIframeDialog } from "@/components/PaymentIframeDialog";
 import { brandPaymentUrl } from "@/lib/utils";
