@@ -17,24 +17,39 @@ const HolidayManagement = () => {
   const [holidayMode, setHolidayMode] = useState(false);
   const [holidayModeLabel, setHolidayModeLabel] = useState("");
   const [holidayDates, setHolidayDates] = useState<{ id: string; date: string; label: string | null }[]>([]);
+  const [holidayDays, setHolidayDays] = useState<number[]>([0, 6]);
   const [saving, setSaving] = useState(false);
+  const [savingDays, setSavingDays] = useState(false);
   const [newHolidayLabel, setNewHolidayLabel] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!profile?.school_id) { setLoading(false); return; }
     Promise.all([
-      supabase.from("schools").select("holiday_mode, holiday_mode_label").eq("id", profile.school_id).single(),
+      supabase.from("schools").select("holiday_mode, holiday_mode_label, holiday_days").eq("id", profile.school_id).single(),
       supabase.from("school_holidays").select("id, date, label").eq("school_id", profile.school_id).order("date"),
     ]).then(([sRes, hRes]) => {
       if (sRes.data) {
         setHolidayMode(!!(sRes.data as any).holiday_mode);
         setHolidayModeLabel((sRes.data as any).holiday_mode_label || "");
+        const hd = (sRes.data as any).holiday_days;
+        setHolidayDays(Array.isArray(hd) ? hd : [0, 6]);
       }
       setHolidayDates((hRes.data || []) as any);
       setLoading(false);
     });
   }, [profile?.school_id]);
+
+  const toggleHolidayDay = async (day: number) => {
+    if (!profile?.school_id) return;
+    const next = holidayDays.includes(day) ? holidayDays.filter((x) => x !== day) : [...holidayDays, day];
+    setHolidayDays(next);
+    setSavingDays(true);
+    const { error } = await supabase.from("schools").update({ holiday_days: next } as any).eq("id", profile.school_id);
+    setSavingDays(false);
+    if (error) { toast.error("Gagal: " + error.message); return; }
+    toast.success("Hari libur mingguan diperbarui");
+  };
 
   const handleToggle = async (val: boolean) => {
     if (!profile?.school_id) return;
