@@ -1758,6 +1758,7 @@ export type Database = {
           bendahara_wa_enabled: boolean
           city: string | null
           created_at: string
+          email: string | null
           group_id: string | null
           holiday_days: number[]
           holiday_mode: boolean
@@ -1766,9 +1767,11 @@ export type Database = {
           logo: string | null
           name: string
           npsn: string | null
+          principal_name: string | null
           province: string | null
           slug: string
           timezone: string | null
+          whatsapp: string | null
         }
         Insert: {
           address?: string | null
@@ -1776,6 +1779,7 @@ export type Database = {
           bendahara_wa_enabled?: boolean
           city?: string | null
           created_at?: string
+          email?: string | null
           group_id?: string | null
           holiday_days?: number[]
           holiday_mode?: boolean
@@ -1784,9 +1788,11 @@ export type Database = {
           logo?: string | null
           name: string
           npsn?: string | null
+          principal_name?: string | null
           province?: string | null
           slug: string
           timezone?: string | null
+          whatsapp?: string | null
         }
         Update: {
           address?: string | null
@@ -1794,6 +1800,7 @@ export type Database = {
           bendahara_wa_enabled?: boolean
           city?: string | null
           created_at?: string
+          email?: string | null
           group_id?: string | null
           holiday_days?: number[]
           holiday_mode?: boolean
@@ -1802,9 +1809,11 @@ export type Database = {
           logo?: string | null
           name?: string
           npsn?: string | null
+          principal_name?: string | null
           province?: string | null
           slug?: string
           timezone?: string | null
+          whatsapp?: string | null
         }
         Relationships: [
           {
