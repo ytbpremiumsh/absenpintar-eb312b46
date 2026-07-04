@@ -30,11 +30,36 @@ const RESERVED = new Set([
   "id-preview--be8d9619-1add-4ede-b66b-9c44088286b4", // lovable preview prefix
 ]);
 
+/**
+ * Detect tenant slug from URL path prefix: /t/{slug}/...
+ * Returns null if not a tenant path.
+ */
+export function parseTenantPath(pathname: string = window.location.pathname): string | null {
+  const m = pathname.match(/^\/t\/([a-z0-9][a-z0-9-]{1,62}[a-z0-9])(?:\/|$)/i);
+  if (!m) return null;
+  const sub = m[1].toLowerCase();
+  if (RESERVED.has(sub)) return null;
+  return sub;
+}
+
+/** Basename for BrowserRouter when accessed via path-based tenant. */
+export function getTenantBasename(pathname: string = typeof window !== "undefined" ? window.location.pathname : "/"): string {
+  const slug = parseTenantPath(pathname);
+  return slug ? `/t/${slug}` : "";
+}
+
 export function parseSubdomain(hostname: string = window.location.hostname): string | null {
   const host = hostname.toLowerCase();
 
   // Strip port if any
   const clean = host.split(":")[0];
+
+  // Path-based tenant takes precedence when present (secure fallback for
+  // schools whose subdomain does not yet have a wildcard SSL certificate).
+  if (typeof window !== "undefined") {
+    const pathSlug = parseTenantPath(window.location.pathname);
+    if (pathSlug) return pathSlug;
+  }
 
   // Exact root match
   if (ROOT_HOSTS.has(clean)) return null;
@@ -63,6 +88,7 @@ export function parseSubdomain(hostname: string = window.location.hostname): str
   if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(sub)) return null;
   return sub;
 }
+
 
 export type TenantSchool = {
   id: string;
