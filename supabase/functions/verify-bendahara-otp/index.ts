@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    const { user_id, otp_code } = await req.json();
+    const { user_id, otp_code, responsible_user_id } = await req.json();
     if (!user_id || !otp_code) {
       return json({ error: 'user_id & otp_code wajib' });
     }
@@ -20,9 +20,10 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { data: u } = await admin.auth.admin.getUserById(user_id);
+    const targetUserId = responsible_user_id || user_id;
+    const { data: u } = await admin.auth.admin.getUserById(targetUserId);
     const email = u?.user?.email;
-    if (!email) return json({ error: 'Email pengguna tidak ditemukan' });
+    if (!email) return json({ error: 'Email penanggung jawab tidak ditemukan' });
 
     const tag = `bendahara:${email.toLowerCase()}`;
 
