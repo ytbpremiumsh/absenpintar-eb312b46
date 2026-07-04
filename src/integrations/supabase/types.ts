@@ -1754,6 +1754,8 @@ export type Database = {
       schools: {
         Row: {
           address: string | null
+          bendahara_offline_enabled: boolean
+          bendahara_wa_enabled: boolean
           city: string | null
           created_at: string
           group_id: string | null
@@ -1770,6 +1772,8 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          bendahara_offline_enabled?: boolean
+          bendahara_wa_enabled?: boolean
           city?: string | null
           created_at?: string
           group_id?: string | null
@@ -1786,6 +1790,8 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          bendahara_offline_enabled?: boolean
+          bendahara_wa_enabled?: boolean
           city?: string | null
           created_at?: string
           group_id?: string | null
