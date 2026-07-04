@@ -385,21 +385,6 @@ const Dashboard = () => {
               <p className="text-2xl font-bold">{attendancePercent}%</p>
               <p className="text-[11px] text-white/70">Kehadiran</p>
             </div>
-            {/* Holiday Mode Toggle */}
-            <div
-              className={`flex items-center gap-2 rounded-xl px-3 py-2 border shadow-sm cursor-pointer transition-colors ${holidayMode ? "bg-amber-500/90 border-amber-300/60" : "bg-white/15 hover:bg-white/25 border-white/20"}`}
-              onClick={() => navigate("/holidays")}
-              title="Kelola Mode Libur & Tanggal Merah"
-            >
-              <CalendarOff className="h-4 w-4 text-white" />
-              <div className="hidden sm:block leading-tight">
-                <p className="text-[10px] text-white/75 font-medium">Mode Libur</p>
-                <p className="text-[11px] text-white font-bold">{holidayMode ? "AKTIF" : "Nonaktif"}</p>
-              </div>
-              <div onClick={(e) => e.stopPropagation()}>
-                <Switch checked={holidayMode} disabled={holidayToggling} onCheckedChange={toggleHolidayMode} />
-              </div>
-            </div>
             {/* Tombol Scan disembunyikan di mobile karena sudah ada di footer */}
             <Button onClick={() => navigate("/scan")} className="hidden sm:inline-flex bg-white/20 hover:bg-white/30 text-white rounded-xl shadow-sm border border-white/20">
               <QrCode className="h-4 w-4 mr-2" />
