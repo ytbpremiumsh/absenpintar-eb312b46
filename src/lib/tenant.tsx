@@ -175,11 +175,30 @@ export function isRootHost(): boolean {
   return parseSubdomain() === null;
 }
 
+/**
+ * Build a tenant URL. Uses the path-based form (/t/{slug}) on the current
+ * root domain so it always resolves with a valid SSL certificate — subdomains
+ * like {slug}.atskolla.com require wildcard SSL which is not provisioned
+ * automatically on Lovable hosting.
+ */
 export function buildTenantUrl(slug: string, path: string = "/"): string {
   if (typeof window === "undefined") return path;
   const root = getRootDomain();
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   if (root && root !== "localhost") {
-    return `${window.location.protocol}//${slug}.${root}${path}`;
+    return `${window.location.protocol}//${root}/t/${slug}${normalizedPath}`;
   }
-  return path;
+  return `/t/${slug}${normalizedPath}`;
 }
+
+/** Subdomain-form URL (informational only; requires wildcard SSL to work). */
+export function buildTenantSubdomainUrl(slug: string, path: string = "/"): string {
+  if (typeof window === "undefined") return path;
+  const root = getRootDomain();
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  if (root && root !== "localhost") {
+    return `${window.location.protocol}//${slug}.${root}${normalizedPath}`;
+  }
+  return normalizedPath;
+}
+
