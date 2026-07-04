@@ -101,35 +101,6 @@ const Login = ({ forcedMode }: LoginProps) => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setNetworkIssue(false);
-    try {
-      const { error } = await signIn(email, password);
-      if (error) {
-        if (isBackendNetworkError(error)) {
-          setNetworkIssue(true);
-          setRecheckKey((k) => k + 1);
-          toast.error("Server backend sedang gangguan/timeout. Silakan coba lagi sebentar.");
-        } else if (error.includes("Invalid login credentials")) {
-          toast.error("Email atau password salah. Pastikan email sudah terverifikasi.");
-        } else if (error.includes("Email not confirmed")) {
-          toast.error("Email belum diverifikasi. Silakan cek inbox email Anda.");
-        } else {
-          toast.error("Login gagal: " + error);
-        }
-        return;
-      }
-      // Persist remember-me preference
-      if (rememberMe) {
-        localStorage.setItem("remembered_email", email);
-        localStorage.removeItem("was_ephemeral");
-      } else {
-        localStorage.removeItem("remembered_email");
-        localStorage.setItem("was_ephemeral", "1");
-        sessionStorage.setItem("tab_alive", "1");
-      }
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
     // Guard: school login is only allowed on a tenant subdomain / path
     if (isRootDomain) {
       toast.error("Silakan buka halaman login sekolah Anda terlebih dahulu.");
