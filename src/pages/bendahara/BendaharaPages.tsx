@@ -2499,7 +2499,7 @@ function ClassGroupedList({ students, filterAY, filterMonth, navigate, invoices,
                   >
                     {isOpen ? <ChevronDown className="h-4 w-4 text-white" /> : <ChevronRight className="h-4 w-4 text-white" />}
                   </button>
-                  {nunggak > 0 && (
+                  {flags.wa && nunggak > 0 && (
                     <Button
                       size="sm"
                       onClick={(e) => { e.stopPropagation(); sendBulkForStudents(className, list); }}
