@@ -12,7 +12,8 @@ import {
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import BackendStatusBanner, { isBackendNetworkError } from "@/components/BackendStatusBanner";
-import { useTenant } from "@/lib/tenant";
+import { useTenant, buildTenantUrl, getRootDomain } from "@/lib/tenant";
+import { Search, School as SchoolIcon } from "lucide-react";
 
 type Mode = "school" | "parent";
 
