@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/PageHeader";
 import { getLocalDateString } from "@/lib/dateLocal";
 import { fetchSchoolHolidayStatus, type HolidayStatus } from "@/lib/schoolHoliday";
+import { buildTenantUrl, useTenant } from "@/lib/tenant";
 
 const STATUS_COLORS: Record<string, string> = {
   hadir: "hsl(152, 69%, 40%)",
