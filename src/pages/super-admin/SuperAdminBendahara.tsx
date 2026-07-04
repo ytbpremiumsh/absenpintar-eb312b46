@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -28,7 +29,7 @@ const fmtIDR = (n: number) =>
 const fmtDate = (s?: string | null) =>
   s ? new Date(s).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "—";
 
-type SchoolRow = { id: string; name: string; npsn: string | null };
+type SchoolRow = { id: string; name: string; npsn: string | null; bendahara_wa_enabled?: boolean; bendahara_offline_enabled?: boolean };
 type Invoice = {
   id: string; school_id: string; invoice_number: string; student_name: string;
   class_name: string; period_label: string; total_amount: number; net_amount: number;
@@ -90,7 +91,7 @@ export default function SuperAdminBendahara() {
     setLoading(true);
     try {
       const [sR, iR, stR, bR, psR] = await Promise.all([
-        supabase.from("schools").select("id,name,npsn").order("name"),
+        supabase.from("schools").select("id,name,npsn,bendahara_wa_enabled,bendahara_offline_enabled").order("name"),
         supabase.from("spp_invoices")
           .select("id,school_id,invoice_number,student_name,class_name,period_label,total_amount,net_amount,gateway_fee,status,payment_method,paid_at,settlement_id,created_at")
           .order("created_at", { ascending: false })
@@ -239,6 +240,22 @@ export default function SuperAdminBendahara() {
       setSavingFee(false);
     }
   };
+
+  const toggleSchoolFlag = async (schoolId: string, field: "bendahara_wa_enabled" | "bendahara_offline_enabled", next: boolean) => {
+    // Optimistic UI
+    setSchools((prev) => prev.map((s) => (s.id === schoolId ? { ...s, [field]: next } : s)));
+    const patch: any = { [field]: next };
+    const { error } = await supabase.from("schools").update(patch).eq("id", schoolId);
+    if (error) {
+      toast.error("Gagal menyimpan: " + error.message);
+      // Rollback
+      setSchools((prev) => prev.map((s) => (s.id === schoolId ? { ...s, [field]: !next } : s)));
+      return;
+    }
+    toast.success(next ? "Fitur diaktifkan" : "Fitur dinonaktifkan");
+  };
+
+
 
   const updateSettlement = async (newStatus: "approved" | "paid" | "rejected") => {
     if (!reviewing) return;
@@ -547,6 +564,66 @@ export default function SuperAdminBendahara() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Toggle Fitur Bendahara per Sekolah */}
+          <Card className="border-0 shadow-card overflow-hidden">
+            <CardContent className="p-5 space-y-1">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <h3 className="font-bold text-base flex items-center gap-2">
+                    <Settings2 className="h-4 w-4 text-primary" />
+                    Fitur Bendahara per Sekolah
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Aktifkan/nonaktifkan pengiriman WA & pencatatan pembayaran offline (tunai / transfer manual) untuk tiap sekolah.
+                  </p>
+                </div>
+                <Badge className="bg-indigo-500 text-white border-0 text-[10px]">Kontrol Super Admin</Badge>
+              </div>
+            </CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/40">
+                    <TableHead className="font-bold">Sekolah</TableHead>
+                    <TableHead className="text-center font-bold">Kirim WA (Tagihan &amp; Konfirmasi)</TableHead>
+                    <TableHead className="text-center font-bold">Pembayaran Offline</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow><TableCell colSpan={3} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin inline" /></TableCell></TableRow>
+                  ) : filteredSettings.length === 0 ? (
+                    <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground text-sm">Tidak ada data</TableCell></TableRow>
+                  ) : filteredSettings.map(({ school }) => {
+                    const waOn = school.bendahara_wa_enabled !== false;
+                    const offOn = school.bendahara_offline_enabled !== false;
+                    return (
+                      <TableRow key={school.id} className="hover:bg-muted/30">
+                        <TableCell>
+                          <p className="font-semibold text-sm">{school.name}</p>
+                          <p className="text-[11px] text-muted-foreground">NPSN: {school.npsn || "—"}</p>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="inline-flex items-center gap-2">
+                            <Switch checked={waOn} onCheckedChange={(v) => toggleSchoolFlag(school.id, "bendahara_wa_enabled", v)} />
+                            <Badge className={`${waOn ? "bg-emerald-500" : "bg-slate-400"} text-white border-0 text-[10px]`}>{waOn ? "AKTIF" : "NONAKTIF"}</Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="inline-flex items-center gap-2">
+                            <Switch checked={offOn} onCheckedChange={(v) => toggleSchoolFlag(school.id, "bendahara_offline_enabled", v)} />
+                            <Badge className={`${offOn ? "bg-emerald-500" : "bg-slate-400"} text-white border-0 text-[10px]`}>{offOn ? "AKTIF" : "NONAKTIF"}</Badge>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+
 
           <Card className="border-0 shadow-card overflow-hidden">
             <div className="overflow-x-auto">

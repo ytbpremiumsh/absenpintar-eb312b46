@@ -90,6 +90,35 @@ function StatCard({ label, value, icon: Icon, gradient = "from-emerald-500 to-te
   );
 }
 
+// ============ Feature Flags (per-sekolah, dikontrol Super Admin) ============
+const bendaharaFlagsCache: Record<string, { wa: boolean; offline: boolean }> = {};
+async function fetchBendaharaFlags(schoolId: string): Promise<{ wa: boolean; offline: boolean }> {
+  if (bendaharaFlagsCache[schoolId]) return bendaharaFlagsCache[schoolId];
+  const { data } = await supabase
+    .from("schools")
+    .select("bendahara_wa_enabled, bendahara_offline_enabled")
+    .eq("id", schoolId)
+    .maybeSingle();
+  const flags = {
+    wa: (data as any)?.bendahara_wa_enabled !== false,
+    offline: (data as any)?.bendahara_offline_enabled !== false,
+  };
+  bendaharaFlagsCache[schoolId] = flags;
+  return flags;
+}
+function useBendaharaFlags(schoolId?: string | null) {
+  const [flags, setFlags] = useState<{ wa: boolean; offline: boolean }>({ wa: true, offline: true });
+  useEffect(() => {
+    if (!schoolId) return;
+    let alive = true;
+    // Invalidate cache on mount so toggles by super admin ter-refresh saat halaman dibuka ulang
+    delete bendaharaFlagsCache[schoolId];
+    fetchBendaharaFlags(schoolId).then(f => { if (alive) setFlags(f); });
+    return () => { alive = false; };
+  }, [schoolId]);
+  return flags;
+}
+
 // ============ DASHBOARD ============
 export function BendaharaDashboard() {
   const { profile } = useAuth();
@@ -113,6 +142,8 @@ export function BendaharaDashboard() {
   // Kirim WA konfirmasi (teks SAMA untuk semua metode, hanya field "Metode" yang berbeda)
   const sendPaidConfirmationWa = async (inv: any) => {
     if (!inv?.parent_phone) { toast.error("Wali murid tidak punya nomor WA"); return; }
+    const flags = await fetchBendaharaFlags(profile!.school_id);
+    if (!flags.wa) { toast.error("Pengiriman WA dinonaktifkan Super Admin untuk sekolah ini"); return; }
     const { data: schoolRow } = await supabase.from("schools").select("name").eq("id", profile!.school_id).maybeSingle();
     const schoolName = schoolRow?.name || "Sekolah";
     const tgl = inv.paid_at ? new Date(inv.paid_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "-";
@@ -804,7 +835,7 @@ export function BendaharaSiswa() {
     });
     return students
       .filter(s => filterClass === "all" || s.class === filterClass)
-      .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.student_id || "").toLowerCase().includes(search.toLowerCase()))
+      .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.student_id || "").toLowerCase().includes(search.toLowerCase()) || (s.card_number || "").toLowerCase().includes(search.toLowerCase().replace(/\s+/g,"")))
       .map(s => ({ ...s, ...(map.get(s.id) || { paid: 0, pending: 0, tunggakan: 0 }) }));
   }, [students, invoices, search, filterClass]);
 
@@ -863,7 +894,7 @@ export function BendaharaSiswa() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div className="sm:col-span-2 relative">
               <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Cari nama / NIS" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 text-sm" />
+              <Input placeholder="Cari nama / NIS / Kode Kartu" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 text-sm" />
             </div>
             <Select value={filterClass} onValueChange={setFilterClass}>
               <SelectTrigger className="text-sm"><SelectValue placeholder="Filter Kelas" /></SelectTrigger>
@@ -2138,7 +2169,7 @@ export function BendaharaTransaksi() {
   const load = () => {
     if (!profile?.school_id) { setLoading(false); return; }
     Promise.all([
-      supabase.from("students").select("id, name, student_id, class, parent_name, parent_phone, gender").eq("school_id", profile.school_id),
+      supabase.from("students").select("id, name, student_id, card_number, class, parent_name, parent_phone, gender").eq("school_id", profile.school_id),
       supabase.from("spp_invoices").select("*").eq("school_id", profile.school_id),
       supabase.from("classes").select("name").eq("school_id", profile.school_id),
     ]).then(([s, i, c]) => {
@@ -2182,7 +2213,7 @@ export function BendaharaTransaksi() {
     })
     .filter(s => filterClass === "all" || s.class === filterClass)
     .filter(s => filterStatus === "all" || s.aggStatus === filterStatus)
-    .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.student_id || "").toLowerCase().includes(search.toLowerCase()))
+    .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.student_id || "").toLowerCase().includes(search.toLowerCase()) || (s.card_number || "").toLowerCase().includes(search.toLowerCase().replace(/\s+/g,"")))
     .sort((a, b) => {
       if (sortBy === "tunggakan") return b.sisa - a.sisa;
       if (sortBy === "lunas") return b.lunas - a.lunas;
@@ -2248,7 +2279,7 @@ export function BendaharaTransaksi() {
           <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
             <div className="md:col-span-2 relative">
               <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Cari nama / NIS" value={search} onChange={e => setSearch(e.target.value)} className="pl-9 text-sm" />
+              <Input placeholder="Cari nama / NIS / Kode Kartu" value={search} onChange={e => setSearch(e.target.value)} className="pl-9 text-sm" />
             </div>
             <Select value={filterClass} onValueChange={setFilterClass}>
               <SelectTrigger className="text-sm"><SelectValue placeholder="Kelas" /></SelectTrigger>
@@ -2678,6 +2709,8 @@ export function BendaharaSPPDetail() {
     const parentName = student?.parent_name || inv.parent_name;
     if (!phone) { toast.error("Wali murid tidak punya nomor WA"); return; }
     if (!inv.payment_url) { toast.error("Buat link pembayaran dulu"); return; }
+    const flags = await fetchBendaharaFlags(profile!.school_id);
+    if (!flags.wa) { toast.error("Pengiriman WA dinonaktifkan Super Admin untuk sekolah ini"); return; }
     const { data: schoolRow } = await supabase.from("schools").select("name").eq("id", profile!.school_id).maybeSingle();
     const schoolName = schoolRow?.name || "Sekolah";
     const msg = `*${schoolName} — Tagihan SPP Baru*\n\nYth. Bapak/Ibu *${parentName || "Wali"}*,\n\nTagihan SPP ananda:\n• Nama    : ${inv.student_name}\n• Kelas   : ${inv.class_name}\n• Periode : ${inv.period_label}\n• Nominal : ${fmtIDR(inv.total_amount)}\n• Jatuh tempo: ${inv.due_date ? new Date(inv.due_date).toLocaleDateString("id-ID") : "-"}\n\nSilakan lakukan pembayaran via *QRIS / Transfer Bank* pada link berikut:\n${brandPaymentUrl(inv.payment_url)}\n\nTerima kasih.`;
@@ -2720,7 +2753,11 @@ export function BendaharaSPPDetail() {
     }
   };
 
-  const openOfflineDialog = (inv: any) => {
+  const openOfflineDialog = async (inv: any) => {
+    if (profile?.school_id) {
+      const flags = await fetchBendaharaFlags(profile.school_id);
+      if (!flags.offline) { toast.error("Pembayaran offline dinonaktifkan Super Admin untuk sekolah ini"); return; }
+    }
     setOfflineDialog({ inv, method: "offline_cash", paidDate: new Date().toISOString().slice(0, 10), note: "" });
   };
 
@@ -2766,6 +2803,8 @@ export function BendaharaSPPDetail() {
     const phone = student?.parent_phone || inv.parent_phone;
     const parentName = student?.parent_name || inv.parent_name;
     if (!phone) { toast.error("Wali murid tidak punya nomor WA"); return; }
+    const flags = await fetchBendaharaFlags(profile!.school_id);
+    if (!flags.wa) { toast.error("Pengiriman WA dinonaktifkan Super Admin untuk sekolah ini"); return; }
     const { data: schoolRow } = await supabase.from("schools").select("name").eq("id", profile!.school_id).maybeSingle();
     const schoolName = schoolRow?.name || "Sekolah";
     const tgl = inv.paid_at ? new Date(inv.paid_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "-";
