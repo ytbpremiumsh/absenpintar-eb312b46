@@ -1252,6 +1252,7 @@ export type Database = {
           nip: string | null
           phone: string | null
           photo_url: string | null
+          position: string | null
           qr_code: string | null
           referral_code: string | null
           referred_by: string | null
@@ -1269,6 +1270,7 @@ export type Database = {
           nip?: string | null
           phone?: string | null
           photo_url?: string | null
+          position?: string | null
           qr_code?: string | null
           referral_code?: string | null
           referred_by?: string | null
@@ -1286,6 +1288,7 @@ export type Database = {
           nip?: string | null
           phone?: string | null
           photo_url?: string | null
+          position?: string | null
           qr_code?: string | null
           referral_code?: string | null
           referred_by?: string | null
