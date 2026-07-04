@@ -80,18 +80,18 @@ export function TeacherIdCard({ teacher, school }: Props) {
         <div className="absolute -bottom-14 -left-10 h-48 w-48 rounded-full bg-white/5 blur-2xl pointer-events-none" />
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 20% 10%, white 1.2px, transparent 1.2px), radial-gradient(circle at 80% 90%, white 1.2px, transparent 1.2px)", backgroundSize: "28px 28px" }} />
 
-        <div className="relative flex items-center gap-2.5 p-5 text-white">
-          <img src={schoolLogo || atskollaLogo} alt="" crossOrigin="anonymous" className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur p-1 object-contain" />
+        <div className="relative flex items-start gap-2.5 p-5 text-white">
+          <img src={schoolLogo || atskollaLogo} alt="" crossOrigin="anonymous" className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur p-1 object-contain shrink-0" />
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-wider text-white/70 font-semibold">Kartu {roleLabel}</p>
-            <p className="text-sm font-bold leading-tight truncate">{schoolName}</p>
+            <p className="text-[13px] font-bold leading-tight break-words" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{schoolName}</p>
           </div>
         </div>
 
         <div className="relative px-5 flex items-center gap-4 text-white">
-          <div className="h-24 w-20 rounded-2xl bg-white/15 backdrop-blur ring-2 ring-white/40 overflow-hidden shrink-0 flex items-center justify-center text-3xl font-bold">
+          <div style={{ width: 80, height: 100 }} className="rounded-2xl bg-white/15 backdrop-blur ring-2 ring-white/40 overflow-hidden shrink-0 flex items-center justify-center text-3xl font-bold">
             {teacher.photo_url ? (
-              <img src={teacher.photo_url} alt={teacher.full_name} crossOrigin="anonymous" className="h-full w-full object-cover" />
+              <img src={teacher.photo_url} alt={teacher.full_name} crossOrigin="anonymous" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
             ) : (
               <span>{teacher.full_name?.[0]}</span>
             )}
