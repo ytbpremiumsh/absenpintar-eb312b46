@@ -4391,41 +4391,108 @@ export function BendaharaPencairan() {
       <Dialog open={bankManageOpen} onOpenChange={setBankManageOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Kelola Rekening Pencairan</DialogTitle>
-            <DialogDescription>Simpan rekening sekolah agar tidak perlu input ulang setiap pencairan.</DialogDescription>
+            <DialogTitle>Kelola Rekening / E-Wallet Pencairan</DialogTitle>
+            <DialogDescription>Simpan rekening bank atau e-wallet sekolah beserta penanggung jawab OTP.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Rekening Tersimpan</Label>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Tersimpan</Label>
               {savedAccounts.length === 0 ? (
-                <p className="text-sm text-muted-foreground italic">Belum ada rekening</p>
+                <p className="text-sm text-muted-foreground italic">Belum ada rekening / e-wallet</p>
               ) : (
                 <div className="space-y-2 max-h-48 overflow-auto">
-                  {savedAccounts.map((a: any) => (
-                    <div key={a.id} className="flex items-center justify-between p-2 rounded-lg border bg-card">
-                      <div>
-                        <p className="text-sm font-semibold">{a.bank_name} {a.is_default && <Badge className="ml-1 bg-emerald-600 text-[10px]">Utama</Badge>}</p>
-                        <p className="text-xs font-mono text-muted-foreground">{a.account_number} · {a.account_holder}</p>
+                  {savedAccounts.map((a: any) => {
+                    const pj = staffList.find((s) => s.user_id === a.responsible_user_id);
+                    const isEw = a.account_type === "ewallet";
+                    return (
+                      <div key={a.id} className="flex items-center justify-between p-2 rounded-lg border bg-card">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold flex items-center gap-1 flex-wrap">
+                            <Badge variant="outline" className="text-[10px]">{isEw ? "E-Wallet" : "Bank"}</Badge>
+                            {a.bank_name}
+                            {a.is_default && <Badge className="ml-1 bg-emerald-600 text-[10px]">Utama</Badge>}
+                          </p>
+                          <p className="text-xs font-mono text-muted-foreground">{a.account_number} · {a.account_holder}</p>
+                          <p className="text-[11px] text-muted-foreground">PJ: {pj?.full_name || <span className="text-amber-600">belum diatur</span>}</p>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          {!a.is_default && <Button size="sm" variant="ghost" onClick={() => setDefault(a.id)} className="h-7 text-xs">Utama</Button>}
+                          <Button size="sm" variant="ghost" onClick={() => deleteAccount(a.id)} className="h-7 text-destructive">Hapus</Button>
+                        </div>
                       </div>
-                      <div className="flex gap-1">
-                        {!a.is_default && <Button size="sm" variant="ghost" onClick={() => setDefault(a.id)} className="h-7 text-xs">Jadikan Utama</Button>}
-                        <Button size="sm" variant="ghost" onClick={() => deleteAccount(a.id)} className="h-7 text-destructive">Hapus</Button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
             <div className="border-t pt-4 space-y-3">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Tambah Rekening Baru</Label>
-              <div><Label>Nama Bank</Label><Input value={newAccount.bank_name} onChange={e => setNewAccount({ ...newAccount, bank_name: e.target.value })} placeholder="BCA / BRI / Mandiri" /></div>
-              <div><Label>Nomor Rekening</Label><Input value={newAccount.account_number} onChange={e => setNewAccount({ ...newAccount, account_number: e.target.value })} /></div>
-              <div><Label>Atas Nama</Label><Input value={newAccount.account_holder} onChange={e => setNewAccount({ ...newAccount, account_holder: e.target.value })} /></div>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Tambah Baru</Label>
+              <div>
+                <Label>Jenis Akun</Label>
+                <Select value={newAccount.account_type} onValueChange={(v) => setNewAccount({ ...newAccount, account_type: v as "bank" | "ewallet", bank_name: "" })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bank">Rekening Bank</SelectItem>
+                    <SelectItem value="ewallet">E-Wallet</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {newAccount.account_type === "ewallet" ? (
+                <>
+                  <div>
+                    <Label>Jenis E-Wallet</Label>
+                    <Select value={newAccount.bank_name} onValueChange={(v) => setNewAccount({ ...newAccount, bank_name: v })}>
+                      <SelectTrigger><SelectValue placeholder="Pilih e-wallet" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="DANA">DANA</SelectItem>
+                        <SelectItem value="OVO">OVO</SelectItem>
+                        <SelectItem value="GoPay">GoPay</SelectItem>
+                        <SelectItem value="ShopeePay">ShopeePay</SelectItem>
+                        <SelectItem value="LinkAja">LinkAja</SelectItem>
+                        <SelectItem value="QRIS">QRIS</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label>Nomor E-Wallet</Label><Input inputMode="numeric" value={newAccount.account_number} onChange={e => setNewAccount({ ...newAccount, account_number: e.target.value })} placeholder="Nomor HP terdaftar" /></div>
+                  <div><Label>Atas Nama</Label><Input value={newAccount.account_holder} onChange={e => setNewAccount({ ...newAccount, account_holder: e.target.value })} /></div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label>Nama Bank</Label>
+                    <Select value={newAccount.bank_name} onValueChange={(v) => setNewAccount({ ...newAccount, bank_name: v })}>
+                      <SelectTrigger><SelectValue placeholder="Pilih bank" /></SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {["BCA","BRI","BNI","Mandiri","BSI","CIMB Niaga","Danamon","Permata","BTN","Panin","Mega","OCBC NISP","Maybank","BJB","Bank Jateng","Bank DKI","Bank Sumut","Bank Sulselbar","Bank Nagari","Muamalat","BTPN","Jenius","SeaBank","Bank Neo Commerce","Jago","Allo Bank","Blu by BCA","Line Bank"].map(b => (
+                          <SelectItem key={b} value={b}>{b}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label>Nomor Rekening</Label><Input inputMode="numeric" value={newAccount.account_number} onChange={e => setNewAccount({ ...newAccount, account_number: e.target.value })} /></div>
+                  <div><Label>Atas Nama (sesuai buku tabungan)</Label><Input value={newAccount.account_holder} onChange={e => setNewAccount({ ...newAccount, account_holder: e.target.value })} /></div>
+                </>
+              )}
+              <div>
+                <Label>Penanggung Jawab (OTP dikirim ke WA-nya)</Label>
+                <Select value={newAccount.responsible_user_id} onValueChange={(v) => setNewAccount({ ...newAccount, responsible_user_id: v })}>
+                  <SelectTrigger><SelectValue placeholder="Pilih Guru / Operator" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {staffList.length === 0 && <div className="p-2 text-xs text-muted-foreground">Belum ada staf terdaftar</div>}
+                    {staffList.map((s) => (
+                      <SelectItem key={s.user_id} value={s.user_id}>
+                        {s.full_name || "(tanpa nama)"} — {(s.roles || []).join(", ")}{s.phone ? "" : " (no WA)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground mt-1">Setiap transaksi pencairan wajib diotorisasi via OTP WhatsApp ke penanggung jawab.</p>
+              </div>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={newAccount.is_default} onChange={e => setNewAccount({ ...newAccount, is_default: e.target.checked })} />
-                Jadikan rekening utama
+                Jadikan utama
               </label>
-              <Button onClick={saveAccount} className="w-full bg-emerald-600 hover:bg-emerald-700">Simpan Rekening</Button>
+              <Button onClick={saveAccount} className="w-full bg-emerald-600 hover:bg-emerald-700">Simpan</Button>
             </div>
           </div>
         </DialogContent>
