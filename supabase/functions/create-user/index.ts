@@ -120,6 +120,7 @@ serve(async (req) => {
     if (resolvedSchoolId) profileUpdate.school_id = resolvedSchoolId;
     if (phone) profileUpdate.phone = phone;
     if (nip) profileUpdate.nip = nip;
+    if (position) profileUpdate.position = position;
 
     await supabaseAdmin
       .from('profiles')
