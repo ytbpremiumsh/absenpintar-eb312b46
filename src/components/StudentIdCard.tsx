@@ -94,16 +94,25 @@ export function StudentIdCard({ student }: Props) {
             <img src={schoolLogo || atskollaLogo} alt="" crossOrigin="anonymous" className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur p-1 object-contain shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="text-[10px] uppercase tracking-wider text-white/70 font-semibold">Kartu Pelajar</p>
-              <p className="text-[13px] font-bold leading-tight break-words" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{schoolName}</p>
+              <p className="text-[12px] font-bold leading-snug break-words">{schoolName}</p>
             </div>
           </div>
 
           <div className="relative px-5 flex items-center gap-4 text-white">
-            <div style={{ width: 80, height: 100 }} className="rounded-2xl bg-white/15 backdrop-blur ring-2 ring-white/40 overflow-hidden shrink-0 flex items-center justify-center text-3xl font-bold">
-              {student.photo_url ? (
-                <img src={student.photo_url} alt={student.name} crossOrigin="anonymous" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-              ) : (
-                <span>{student.name?.[0]}</span>
+            <div
+              style={{
+                width: 80,
+                height: 100,
+                backgroundImage: student.photo_url ? `url("${student.photo_url}")` : undefined,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}
+              className="rounded-2xl bg-white/15 backdrop-blur ring-2 ring-white/40 overflow-hidden shrink-0 flex items-center justify-center text-3xl font-bold"
+            >
+              {!student.photo_url && <span>{student.name?.[0]}</span>}
+              {student.photo_url && (
+                <img src={student.photo_url} alt="" crossOrigin="anonymous" style={{ display: "none" }} />
               )}
             </div>
             <div className="min-w-0 flex-1">
