@@ -122,6 +122,7 @@ function useBendaharaFlags(schoolId?: string | null) {
 // ============ DASHBOARD ============
 export function BendaharaDashboard() {
   const { profile } = useAuth();
+  const flags = useBendaharaFlags(profile?.school_id);
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [settlements, setSettlements] = useState<any[]>([]);
