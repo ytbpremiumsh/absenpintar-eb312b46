@@ -763,7 +763,7 @@ const Students = () => {
                                 <TableHead className="w-10">#</TableHead>
                                 <TableHead>Nama Siswa</TableHead>
                                 <TableHead className="hidden sm:table-cell w-[140px] whitespace-nowrap">NIS</TableHead>
-                                <TableHead className="hidden xl:table-cell w-[180px] whitespace-nowrap">Kode Kartu</TableHead>
+                                <TableHead className="hidden xl:table-cell w-[180px] whitespace-nowrap">Nomor Kartu Identitas</TableHead>
                                 <TableHead className="hidden md:table-cell">Wali</TableHead>
                                 <TableHead className="hidden lg:table-cell">No. HP</TableHead>
                                 <TableHead className="text-right w-[140px]">Aksi</TableHead>
