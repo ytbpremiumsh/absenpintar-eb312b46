@@ -1130,6 +1130,27 @@ export default function ParentDashboard() {
           </>
         )}
 
+        {tab === "card" && (
+          <>
+            <SectionTitle icon={CreditCard} title="Kartu Pelajar Digital" />
+            {current ? (
+              <div className="space-y-4">
+                <StudentIdCard student={current as any} />
+                {(current as any).card_number && (
+                  <Card className="p-4 border-0 shadow-card rounded-2xl">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">Nomor Kartu Identitas</p>
+                    <p className="font-mono text-sm font-bold tracking-[0.15em] text-foreground break-all">
+                      {String((current as any).card_number).replace(/(\d{4})(?=\d)/g, "$1 ")}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-2">Gunakan nomor ini untuk login ulang portal wali murid tanpa OTP.</p>
+                  </Card>
+                )}
+              </div>
+            ) : (
+              <EmptyMini text="Memuat data siswa..." />
+            )}
+          </>
+
       </div>
       {/* end MAIN COLUMN */}
       </div>
