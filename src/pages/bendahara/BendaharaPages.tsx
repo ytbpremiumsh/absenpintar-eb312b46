@@ -4084,9 +4084,10 @@ export function BendaharaPencairan() {
 
   const sendOtp = async () => {
     if (!user?.id || !profile?.school_id) return;
+    if (!bank.responsible_user_id) { toast.error("Penanggung jawab belum diatur pada rekening/e-wallet ini"); return; }
     setOtpSending(true);
     const { data, error } = await supabase.functions.invoke("send-bendahara-otp", {
-      body: { user_id: user.id, school_id: profile.school_id },
+      body: { user_id: user.id, school_id: profile.school_id, responsible_user_id: bank.responsible_user_id },
     });
     setOtpSending(false);
     if (error || data?.error) { toast.error(data?.error || error?.message || "Gagal mengirim OTP"); return; }
