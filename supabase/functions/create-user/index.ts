@@ -104,6 +104,7 @@ serve(async (req) => {
           whatsapp: school_whatsapp?.trim() || null,
         };
         if (npsn) insertData.npsn = npsn;
+        if (cleanSlug) insertData.slug = cleanSlug;
 
         const { data: newSchool, error: schoolError } = await supabaseAdmin
           .from('schools')
