@@ -632,41 +632,6 @@ const SuperAdminRegistrationWA = () => {
             />
           </div>
 
-          {/* Template Pencairan Dana */}
-          <div className="space-y-2 p-3 rounded-lg border border-border bg-muted/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Wallet className="h-3.5 w-3.5 text-emerald-600" />
-                <Label className="text-xs font-semibold">Template Pencairan Dana — Affiliate Guru</Label>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-[11px]"
-                disabled={adminTesting !== null}
-                onClick={() => handleTestAdminNotify("withdrawal")}
-              >
-                {adminTesting === "withdrawal" ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Send className="h-3 w-3 mr-1" />}
-                Tes Kirim
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {["{affiliate}", "{email}", "{amount}", "{bank}", "{account_number}", "{account_holder}", "{time}"].map((v) => (
-                <Badge key={v} variant="secondary" className="text-[10px]">{v}</Badge>
-              ))}
-            </div>
-            <Textarea
-              value={settings.admin_notify_withdrawal_template}
-              onChange={(e) => setSettings({ ...settings, admin_notify_withdrawal_template: e.target.value })}
-              rows={6}
-              className="resize-none font-mono text-xs"
-              placeholder="Pengajuan Pencairan Dana..."
-            />
-            <p className="text-[10px] text-muted-foreground">
-              <Info className="h-3 w-3 inline mr-1" />
-              {"{amount}"} otomatis diformat menjadi nilai Rupiah (mis. Rp 750.000)
-            </p>
-          </div>
 
           {/* Template Pencairan Bendahara Sekolah */}
           <div className="space-y-2 p-3 rounded-lg border border-border bg-muted/30">
