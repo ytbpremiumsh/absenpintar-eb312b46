@@ -102,8 +102,13 @@ export function StudentIdCard({ student }: Props) {
         <div className="absolute -bottom-14 -left-10 h-48 w-48 rounded-full bg-white/5 blur-2xl pointer-events-none" />
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 20% 10%, white 1.2px, transparent 1.2px), radial-gradient(circle at 80% 90%, white 1.2px, transparent 1.2px)", backgroundSize: "28px 28px" }} />
 
+        {/* Lanyard hole space */}
+        <div className="relative h-10 flex items-center justify-center pt-3">
+          <div className="h-1.5 w-14 rounded-full bg-white/25" />
+        </div>
+
         {/* Header */}
-        <div className="relative flex items-center gap-2.5 p-5 text-white">
+        <div className="relative flex items-center gap-2.5 px-5 pt-2 pb-3 text-white">
           <img src={schoolLogo || atskollaLogo} alt="" crossOrigin="anonymous" className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur p-1 object-contain" />
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-wider text-white/70 font-semibold">Kartu Pelajar</p>
