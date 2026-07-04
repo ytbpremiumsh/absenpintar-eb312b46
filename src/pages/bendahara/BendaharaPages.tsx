@@ -1249,6 +1249,7 @@ export function BendaharaTarif() {
 // ============ GENERATE TAGIHAN ============
 export function BendaharaGenerate() {
   const { profile } = useAuth();
+  const flags = useBendaharaFlags(profile?.school_id);
   const [classes, setClasses] = useState<string[]>([]);
   const [tariffs, setTariffs] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
