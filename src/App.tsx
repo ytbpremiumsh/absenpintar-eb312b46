@@ -258,6 +258,7 @@ function AppRoutes() {
           <Route path="/all-features" element={<AllFeatures />} />
           <Route path="/school-settings" element={<SchoolSettings />} />
           <Route path="/holidays" element={<HolidayManagement />} />
+          <Route path="/attendance-time" element={<AttendanceTime />} />
           <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/support" element={<SupportTickets />} />
           <Route path="/referral" element={<ReferralDashboard />} />
