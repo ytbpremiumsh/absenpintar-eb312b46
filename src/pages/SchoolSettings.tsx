@@ -389,7 +389,7 @@ const SchoolSettings = () => {
             </div>
             <p className="text-xs text-muted-foreground">
               {canEditSlug
-                ? "Gunakan huruf kecil, angka, dan tanda '-'. Setelah diubah, subdomain baru bisa diubah lagi setelah 14 hari."
+                ? "Gunakan huruf kecil, Setelah diubah, subdomain baru bisa diubah lagi setelah 14 hari."
                 : `Subdomain baru dapat diubah lagi dalam ${slugDaysRemaining} hari.`}
             </p>
           </div>
