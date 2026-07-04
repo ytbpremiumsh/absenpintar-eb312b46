@@ -8,7 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { TenantProvider, useTenant, getRootDomain } from "@/lib/tenant";
+import { TenantProvider, useTenant, getRootDomain, getTenantBasename } from "@/lib/tenant";
 
 // Layouts kept eager (small + shared by many routes)
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -280,6 +280,8 @@ function AppRoutes() {
   );
 }
 
+const tenantBasename = typeof window !== "undefined" ? getTenantBasename() : "";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -287,7 +289,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <DynamicFavicon />
-        <BrowserRouter>
+        <BrowserRouter basename={tenantBasename || undefined}>
           <TenantProvider>
             <AuthProvider>
               <GoogleAnalytics />

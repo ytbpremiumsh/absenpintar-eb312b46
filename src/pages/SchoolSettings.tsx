@@ -389,9 +389,22 @@ const SchoolSettings = () => {
             </div>
             <p className="text-xs text-muted-foreground">
               {canEditSlug
-                ? "Gunakan huruf kecil, Setelah diubah, subdomain baru bisa diubah lagi setelah 14 hari."
+                ? "Gunakan huruf kecil, angka, dan tanda '-'. Setelah diubah, baru bisa diubah lagi setelah 14 hari."
                 : `Subdomain baru dapat diubah lagi dalam ${slugDaysRemaining} hari.`}
             </p>
+            {initialSlug && (
+              <div className="mt-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground space-y-1">
+                <div className="flex items-center gap-1.5 font-medium text-foreground">
+                  <Link2 className="h-3 w-3" /> URL login sekolah Anda:
+                </div>
+                <div className="font-mono break-all text-foreground">
+                  {buildTenantUrl(initialSlug, "/login")}
+                </div>
+                <div className="text-[11px] text-muted-foreground/80">
+                  Bagikan URL di atas kepada guru & operator agar login aman (HTTPS).
+                </div>
+              </div>
+            )}
           </div>
 
 
