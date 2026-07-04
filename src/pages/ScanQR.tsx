@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { fetchSchoolHolidayStatus } from "@/lib/schoolHoliday";
 
 interface FoundStudent {
   id: string;
