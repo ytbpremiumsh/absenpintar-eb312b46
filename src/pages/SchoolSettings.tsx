@@ -393,15 +393,33 @@ const SchoolSettings = () => {
                 : `Subdomain baru dapat diubah lagi dalam ${slugDaysRemaining} hari.`}
             </p>
             {initialSlug && (
-              <div className="mt-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground space-y-1">
-                <div className="flex items-center gap-1.5 font-medium text-foreground">
-                  <Link2 className="h-3 w-3" /> URL login sekolah Anda:
+              <div className="mt-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground space-y-2">
+                <div>
+                  <div className="flex items-center gap-1.5 font-medium text-foreground mb-0.5">
+                    <Link2 className="h-3 w-3" /> URL Login Admin & Guru
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <code className="font-mono break-all text-foreground flex-1">{buildTenantUrl(initialSlug, "/admin")}</code>
+                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6"
+                      onClick={() => { navigator.clipboard.writeText(buildTenantUrl(initialSlug, "/admin")); toast.success("URL admin disalin"); }}>
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="font-mono break-all text-foreground">
-                  {buildTenantUrl(initialSlug, "/login")}
+                <div>
+                  <div className="flex items-center gap-1.5 font-medium text-foreground mb-0.5">
+                    <Link2 className="h-3 w-3" /> URL Login Wali Murid
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <code className="font-mono break-all text-foreground flex-1">{buildTenantUrl(initialSlug, "/login")}</code>
+                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6"
+                      onClick={() => { navigator.clipboard.writeText(buildTenantUrl(initialSlug, "/login")); toast.success("URL wali murid disalin"); }}>
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="text-[11px] text-muted-foreground/80">
-                  Bagikan URL di atas kepada guru & operator agar login aman (HTTPS).
+                <div className="text-[11px] text-muted-foreground/80 pt-1 border-t border-border/40">
+                  Bagikan URL sesuai peran — admin & guru pakai <b>/admin</b>, orang tua pakai <b>/login</b>.
                 </div>
               </div>
             )}
