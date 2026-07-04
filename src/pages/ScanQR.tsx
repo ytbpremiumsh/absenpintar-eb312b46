@@ -255,7 +255,7 @@ const ScanQR = () => {
 
       toast.error("Tidak ditemukan untuk kode: " + trimmed);
     } finally { isLookingUp.current = false; }
-  }, [profile?.school_id, getAttendanceType]);
+  }, [profile?.school_id, getAttendanceType, ensureNotHoliday]);
 
   // Barcode scanning interval
   const startBarcodeScanning = useCallback(() => {
