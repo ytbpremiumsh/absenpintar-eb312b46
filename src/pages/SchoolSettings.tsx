@@ -28,6 +28,8 @@ const SchoolSettings = () => {
   const [holidayDays, setHolidayDays] = useState<number[]>([0, 6]);
   const [logo, setLogo] = useState("");
   const [slug, setSlug] = useState("");
+  const [initialSlug, setInitialSlug] = useState("");
+  const [slugUpdatedAt, setSlugUpdatedAt] = useState<string | null>(null);
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
   const [principalName, setPrincipalName] = useState("");
@@ -53,7 +55,7 @@ const SchoolSettings = () => {
   useEffect(() => {
     if (!profile?.school_id) { setLoading(false); return; }
     Promise.all([
-      supabase.from("schools").select("name, address, logo, npsn, city, province, timezone, holiday_days, holiday_mode, holiday_mode_label, slug, whatsapp, email, principal_name").eq("id", profile.school_id).single(),
+      supabase.from("schools").select("name, address, logo, npsn, city, province, timezone, holiday_days, holiday_mode, holiday_mode_label, slug, slug_updated_at, whatsapp, email, principal_name").eq("id", profile.school_id).single(),
       supabase.from("dismissal_settings").select("school_start_time, school_end_time, attendance_start_time, attendance_end_time, departure_start_time, departure_end_time").eq("school_id", profile.school_id).maybeSingle(),
       supabase.from("qr_instructions").select("id, instruction_text, sort_order").eq("school_id", profile.school_id).order("sort_order"),
       supabase.from("school_holidays").select("id, date, label").eq("school_id", profile.school_id).order("date"),
@@ -71,6 +73,8 @@ const SchoolSettings = () => {
         setHolidayMode(!!(schoolRes.data as any).holiday_mode);
         setHolidayModeLabel((schoolRes.data as any).holiday_mode_label || "");
         setSlug((schoolRes.data as any).slug || "");
+        setInitialSlug((schoolRes.data as any).slug || "");
+        setSlugUpdatedAt((schoolRes.data as any).slug_updated_at || null);
         setWhatsapp((schoolRes.data as any).whatsapp || "");
         setEmail((schoolRes.data as any).email || "");
         setPrincipalName((schoolRes.data as any).principal_name || "");
