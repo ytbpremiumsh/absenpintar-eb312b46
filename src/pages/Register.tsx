@@ -13,8 +13,15 @@ const _stripMotionProps = ({
   initial, animate, exit, transition, variants, whileHover, whileTap, whileInView,
   whileFocus, whileDrag, layout, layoutId, drag, dragConstraints, viewport, custom, ...rest
 }: any) => rest;
-const _make = (Tag: any) => (props: any) => <Tag {..._stripMotionProps(props)} />;
-const motion: any = new Proxy({}, { get: (_t, tag: string) => _make(tag) });
+const _make = (Tag: any) => {
+  const C = (props: any) => <Tag {..._stripMotionProps(props)} />;
+  C.displayName = `motion.${typeof Tag === "string" ? Tag : "component"}`;
+  return C;
+};
+const _motionCache: Record<string, any> = {};
+const motion: any = new Proxy({}, {
+  get: (_t, tag: string) => (_motionCache[tag] ||= _make(tag)),
+});
 const AnimatePresence = ({ children }: { children: ReactNode; mode?: string; initial?: boolean }) => <Fragment>{children}</Fragment>;
 import { supabase } from "@/integrations/supabase/client";
 import { getRootDomain } from "@/lib/tenant";
