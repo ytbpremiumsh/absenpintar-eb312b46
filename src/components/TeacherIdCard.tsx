@@ -112,9 +112,9 @@ export function TeacherIdCard({ teacher, school }: Props) {
             </div>
           </div>
 
-          <div className="relative mx-5 mt-4 rounded-2xl bg-black/25 backdrop-blur border border-white/15 px-4 py-3 text-white">
+          <div className="relative mx-5 mt-4 rounded-2xl bg-black/25 backdrop-blur border border-white/15 px-4 py-3 text-white text-center">
             <p className="text-[9px] uppercase tracking-wider text-white/60 font-semibold">NIP / Nomor Induk</p>
-            <p className="font-mono text-base font-bold tracking-[0.15em] mt-0.5">{formatNip(teacher.nip)}</p>
+            <p className="font-mono text-base font-bold tracking-[0.15em] mt-0.5 break-all">{formatNip(teacher.nip)}</p>
           </div>
 
           <div className="relative flex-1 flex items-center justify-center px-5 text-white">
