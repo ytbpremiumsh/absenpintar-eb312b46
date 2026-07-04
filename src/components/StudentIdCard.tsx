@@ -89,54 +89,56 @@ export function StudentIdCard({ student }: Props) {
         <div className="absolute -bottom-14 -left-10 h-48 w-48 rounded-full bg-white/5 blur-2xl pointer-events-none" />
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 20% 10%, white 1.2px, transparent 1.2px), radial-gradient(circle at 80% 90%, white 1.2px, transparent 1.2px)", backgroundSize: "28px 28px" }} />
 
-        <div className="relative flex items-start gap-2.5 p-5 text-white">
-          <img src={schoolLogo || atskollaLogo} alt="" crossOrigin="anonymous" className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur p-1 object-contain shrink-0" />
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] uppercase tracking-wider text-white/70 font-semibold">Kartu Pelajar</p>
-            <p className="text-[13px] font-bold leading-tight break-words" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{schoolName}</p>
+        <div className="absolute inset-0 flex flex-col">
+          <div className="relative flex items-start gap-2.5 p-5 text-white">
+            <img src={schoolLogo || atskollaLogo} alt="" crossOrigin="anonymous" className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur p-1 object-contain shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] uppercase tracking-wider text-white/70 font-semibold">Kartu Pelajar</p>
+              <p className="text-[13px] font-bold leading-tight break-words" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{schoolName}</p>
+            </div>
           </div>
-        </div>
 
-        <div className="relative px-5 flex items-center gap-4 text-white">
-          <div style={{ width: 80, height: 100 }} className="rounded-2xl bg-white/15 backdrop-blur ring-2 ring-white/40 overflow-hidden shrink-0 flex items-center justify-center text-3xl font-bold">
-            {student.photo_url ? (
-              <img src={student.photo_url} alt={student.name} crossOrigin="anonymous" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-            ) : (
-              <span>{student.name?.[0]}</span>
+          <div className="relative px-5 flex items-center gap-4 text-white">
+            <div style={{ width: 80, height: 100 }} className="rounded-2xl bg-white/15 backdrop-blur ring-2 ring-white/40 overflow-hidden shrink-0 flex items-center justify-center text-3xl font-bold">
+              {student.photo_url ? (
+                <img src={student.photo_url} alt={student.name} crossOrigin="anonymous" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              ) : (
+                <span>{student.name?.[0]}</span>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] uppercase tracking-wider text-white/70 font-semibold">Nama Siswa</p>
+              <p className="text-lg font-bold leading-tight break-words">{student.name}</p>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-white/60 font-semibold">Kelas</p>
+                  <p className="text-xs font-semibold">{student.class || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-white/60 font-semibold">NIS</p>
+                  <p className="text-xs font-semibold">{student.student_id || "-"}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative mx-5 mt-4 rounded-2xl bg-black/25 backdrop-blur border border-white/15 px-4 py-3 text-white">
+            <p className="text-[9px] uppercase tracking-wider text-white/60 font-semibold">Nomor Kartu Identitas</p>
+            <p className="font-mono text-base font-bold tracking-[0.15em] mt-0.5">{formatCard(cardNumber)}</p>
+          </div>
+
+          <div className="relative flex-1 flex items-center justify-center px-5 text-white">
+            {qrDataUrl && (
+              <div style={{ width: 210, height: 210 }} className="rounded-2xl bg-white p-3 shadow-lg">
+                <img src={qrDataUrl} alt="QR" className="h-full w-full object-contain" />
+              </div>
             )}
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] uppercase tracking-wider text-white/70 font-semibold">Nama Siswa</p>
-            <p className="text-lg font-bold leading-tight break-words">{student.name}</p>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-white/60 font-semibold">Kelas</p>
-                <p className="text-xs font-semibold">{student.class || "-"}</p>
-              </div>
-              <div>
-                <p className="text-[9px] uppercase tracking-wider text-white/60 font-semibold">NIS</p>
-                <p className="text-xs font-semibold">{student.student_id || "-"}</p>
-              </div>
-            </div>
+
+          <div className="relative px-5 pb-4 pt-2 text-center text-white">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/70 font-semibold">Scan untuk verifikasi</p>
+            <p className="text-[10px] text-white/60 mt-0.5">Powered by ATSkolla</p>
           </div>
-        </div>
-
-        <div className="relative mx-5 mt-4 rounded-2xl bg-black/25 backdrop-blur border border-white/15 px-4 py-3 text-white">
-          <p className="text-[9px] uppercase tracking-wider text-white/60 font-semibold">Nomor Kartu Identitas</p>
-          <p className="font-mono text-base font-bold tracking-[0.15em] mt-0.5">{formatCard(cardNumber)}</p>
-        </div>
-
-        <div className="relative flex items-center justify-center px-5 mt-5 text-white">
-          {qrDataUrl && (
-            <div className="h-44 w-44 rounded-2xl bg-white p-2.5 shadow-lg mx-auto">
-              <img src={qrDataUrl} alt="QR" className="h-full w-full object-contain" />
-            </div>
-          )}
-        </div>
-
-        <div className="absolute bottom-0 inset-x-0 px-5 pb-4 pt-3 text-center text-white">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70 font-semibold">Scan untuk verifikasi</p>
-          <p className="text-[10px] text-white/60 mt-0.5">Powered by ATSkolla</p>
         </div>
       </div>
 
