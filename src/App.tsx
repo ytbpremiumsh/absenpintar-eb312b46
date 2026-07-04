@@ -250,6 +250,7 @@ function AppRoutes() {
           <Route path="/addons" element={<Navigate to="/langganan?tab=addon" replace />} />
           <Route path="/all-features" element={<AllFeatures />} />
           <Route path="/school-settings" element={<SchoolSettings />} />
+          <Route path="/holidays" element={<HolidayManagement />} />
           <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/support" element={<SupportTickets />} />
           <Route path="/referral" element={<ReferralDashboard />} />
