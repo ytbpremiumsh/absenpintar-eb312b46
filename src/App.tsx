@@ -255,7 +255,7 @@ function AppRoutes() {
           <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/support" element={<SupportTickets />} />
           <Route path="/referral" element={<ReferralDashboard />} />
-          <Route path="/affiliate-teacher" element={<TeacherAffiliate />} />
+          
           <Route path="/whatsapp" element={<WhatsAppSettings />} />
           <Route path="/custom-domain" element={<CustomDomain />} />
           <Route path="/order-idcard" element={<OrderIdCard />} />
