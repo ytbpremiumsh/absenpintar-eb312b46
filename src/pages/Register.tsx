@@ -6,7 +6,16 @@ import { Label } from "@/components/ui/label";
 import { School, Eye, EyeOff, Loader2, Search, CheckCircle2, MapPin, GraduationCap, PenLine, ArrowLeft, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence, type Easing } from "framer-motion";
+import { Fragment, type ReactNode } from "react";
+// Animations disabled on this page — motion.* & AnimatePresence are inert passthroughs
+type Easing = string;
+const _stripMotionProps = ({
+  initial, animate, exit, transition, variants, whileHover, whileTap, whileInView,
+  whileFocus, whileDrag, layout, layoutId, drag, dragConstraints, viewport, custom, ...rest
+}: any) => rest;
+const _make = (Tag: any) => (props: any) => <Tag {..._stripMotionProps(props)} />;
+const motion: any = new Proxy({}, { get: (_t, tag: string) => _make(tag) });
+const AnimatePresence = ({ children }: { children: ReactNode; mode?: string; initial?: boolean }) => <Fragment>{children}</Fragment>;
 import { supabase } from "@/integrations/supabase/client";
 import { getRootDomain } from "@/lib/tenant";
 
