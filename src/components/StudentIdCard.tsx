@@ -70,10 +70,15 @@ export function StudentIdCard({ student }: Props) {
   const handleDownload = async () => {
     if (!cardRef.current) return;
     try {
-      const { toPng } = await import("html-to-image");
-      const dataUrl = await toPng(cardRef.current, { pixelRatio: 3, cacheBust: true });
+      const { toJpeg } = await import("html-to-image");
+      const dataUrl = await toJpeg(cardRef.current, {
+        pixelRatio: 3,
+        cacheBust: true,
+        quality: 0.95,
+        backgroundColor: "#1E1B4B",
+      });
       const link = document.createElement("a");
-      link.download = `kartu-pelajar-${student.name.replace(/\s+/g, "-")}.png`;
+      link.download = `kartu-pelajar-${student.name.replace(/\s+/g, "-")}.jpg`;
       link.href = dataUrl;
       link.click();
       toast.success("Kartu berhasil diunduh");
