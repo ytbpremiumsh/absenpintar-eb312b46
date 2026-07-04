@@ -142,9 +142,10 @@ const Dashboard = () => {
       setWaliKelasList([]);
     }
 
-    // Fetch holiday_mode
-    supabase.from("schools").select("holiday_mode").eq("id", schoolId).single().then(({ data }) => {
-      if (data) setHolidayMode(!!(data as any).holiday_mode);
+    // Fetch holiday status (mode + weekly + calendar)
+    fetchSchoolHolidayStatus(schoolId).then((status) => {
+      setHolidayStatus(status);
+      setHolidayMode(status.mode);
     });
 
     setLoading(false);
