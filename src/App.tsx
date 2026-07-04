@@ -207,7 +207,7 @@ function AppRoutes() {
           <Route path="/super-admin/testimonials" element={<Navigate to="/super-admin/cms?tab=testimoni" replace />} />
           <Route path="/super-admin/auto-caption" element={<Navigate to="/super-admin/cms?tab=caption" replace />} />
           <Route path="/super-admin/referral" element={<SuperAdminReferral />} />
-          <Route path="/super-admin/affiliate" element={<SuperAdminAffiliate />} />
+          
           <Route path="/super-admin/backup" element={<SuperAdminBackup />} />
           <Route path="/super-admin/server-info" element={<SuperAdminServerInfo />} />
           <Route path="/super-admin/bendahara" element={<SuperAdminBendahara />} />
