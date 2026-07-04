@@ -642,6 +642,24 @@ const ManageStaff = () => {
               <Label>NIP / NIK (opsional)</Label>
               <Input placeholder="Nomor Induk Pegawai" value={formNip} onChange={(e) => setFormNip(e.target.value)} />
             </div>
+            <div className="space-y-2">
+              <Label>Jabatan</Label>
+              <div className="flex gap-2">
+                <select
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm flex-1"
+                  value={POSITION_PRESETS.includes(formPosition) ? formPosition : "__custom__"}
+                  onChange={(e) => setFormPosition(e.target.value === "__custom__" ? "" : e.target.value)}
+                >
+                  {POSITION_PRESETS.map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                  <option value="__custom__">Lainnya (custom)...</option>
+                </select>
+              </div>
+              {!POSITION_PRESETS.includes(formPosition) && (
+                <Input placeholder="Ketik jabatan custom" value={formPosition} onChange={(e) => setFormPosition(e.target.value)} />
+              )}
+            </div>
             <Button onClick={handleCreate} disabled={creating} className="w-full gradient-primary hover:opacity-90">
               {creating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Membuat...</> : <><Plus className="h-4 w-4 mr-2" /> Buat Akun</>}
             </Button>
