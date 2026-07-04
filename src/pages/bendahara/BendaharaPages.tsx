@@ -2837,55 +2837,144 @@ export function BendaharaSPPDetail() {
 
   const downloadAllPaidPdf = async () => {
     if (!profile?.school_id) return;
-    // Hanya invoice yang valid: status paid + ada tanggal pembayaran
     const paidList = enrichedInvoices
       .filter(i => (i._displayStatus || i.status) === "paid" && !!i.paid_at)
       .sort((a, b) => (a.period_year - b.period_year) || (a.period_month - b.period_month));
     if (paidList.length === 0) { toast.error("Belum ada invoice lunas yang valid"); return; }
     setBusy("bulk-all");
-    toast.loading(`Memproses ${paidList.length} invoice lunas...`);
+    toast.loading(`Menyusun rekap ${paidList.length} pembayaran lunas...`);
     try {
-      const { data: school } = await supabase.from("schools").select("name, address, npsn, logo").eq("id", profile.school_id).maybeSingle();
-      const studentMeta = { student_id: student?.student_id, nisn: student?.nisn, parent_name: student?.parent_name };
-      const schoolMeta = school || { name: "Sekolah" };
+      const { data: school } = await supabase.from("schools").select("name, address, npsn, logo, whatsapp, email").eq("id", profile.school_id).maybeSingle();
+      const doc = new jsPDF({ unit: "mm", format: "a4" });
+      const W = 210;
+      const M = 15;
+      let y = 14;
 
-      // Generate halaman pertama
-      const mergedDoc = await generateSppInvoicePDF({
-        invoice: paidList[0],
-        student: studentMeta,
-        school: schoolMeta,
-        bendahara_name: profile.full_name || null,
+      // Logo
+      if (school?.logo) {
+        try {
+          const res = await fetch(school.logo);
+          const blob = await res.blob();
+          const dataUrl: string = await new Promise((resolve, reject) => {
+            const r = new FileReader(); r.onload = () => resolve(r.result as string); r.onerror = reject; r.readAsDataURL(blob);
+          });
+          doc.addImage(dataUrl, "PNG", M, y, 22, 22);
+        } catch {/* skip */}
+      }
+      doc.setFont("times", "bold"); doc.setFontSize(13); doc.setTextColor(20,20,20);
+      doc.text((school?.name || "Sekolah").toUpperCase(), W/2, y+6, { align: "center" });
+      doc.setFont("times", "normal"); doc.setFontSize(9); doc.setTextColor(60,60,60);
+      if (school?.address) doc.text(school.address, W/2, y+11, { align: "center", maxWidth: 150 });
+      const meta: string[] = [];
+      if (school?.npsn) meta.push(`NPSN: ${school.npsn}`);
+      if (school?.whatsapp) meta.push(`WA: ${school.whatsapp}`);
+      if (school?.email) meta.push(`Email: ${school.email}`);
+      if (meta.length) doc.text(meta.join("  •  "), W/2, y+16, { align: "center" });
+
+      y = 38;
+      doc.setDrawColor(0,0,0); doc.setLineWidth(0.7); doc.line(M, y, W-M, y);
+      doc.setLineWidth(0.25); doc.line(M, y+1.2, W-M, y+1.2);
+
+      // Title
+      y += 9;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(20,20,20);
+      doc.text("REKAP PEMBAYARAN SPP LUNAS", W/2, y, { align: "center" });
+
+      // Info siswa
+      y += 8;
+      doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.setTextColor(50,50,50);
+      const infoRows: [string, string][] = [
+        ["Nama Siswa", student?.name || "-"],
+        ["NIS / NISN", `${student?.student_id || "-"}${student?.nisn ? " / " + student.nisn : ""}`],
+        ["Kelas", student?.class || "-"],
+        ["Wali Murid", student?.parent_name || "-"],
+        ["Tahun Ajaran", `TA ${ay}`],
+        ["Tanggal Cetak", new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })],
+      ];
+      const colW = (W - 2*M) / 2;
+      infoRows.forEach((r, i) => {
+        const col = i % 2; const row = Math.floor(i / 2);
+        const x = M + col * colW;
+        const yy = y + row * 5;
+        doc.setFont("helvetica", "normal"); doc.setTextColor(110,110,110);
+        doc.text(r[0], x, yy);
+        doc.setFont("helvetica", "bold"); doc.setTextColor(30,30,30);
+        doc.text(": " + r[1], x + 28, yy);
+      });
+      y += Math.ceil(infoRows.length / 2) * 5 + 3;
+
+      // Tabel rincian
+      const body = paidList.map((inv, idx) => [
+        String(idx + 1),
+        inv.invoice_number || "-",
+        inv.period_label || `${MONTHS[(inv.period_month || 1) - 1]} ${inv.period_year}`,
+        inv.paid_at ? new Date(inv.paid_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-",
+        formatPaymentMethodLabel(inv.payment_method) || "-",
+        fmtIDR(inv.amount || 0),
+        fmtIDR(inv.denda || 0),
+        fmtIDR(inv.total_amount || 0),
+      ]);
+      const totalGross = paidList.reduce((s, i) => s + (i.amount || 0), 0);
+      const totalDenda = paidList.reduce((s, i) => s + (i.denda || 0), 0);
+      const totalNet = paidList.reduce((s, i) => s + (i.total_amount || 0), 0);
+
+      (doc as any).autoTable({
+        startY: y,
+        head: [["No", "No. Invoice", "Periode", "Tgl Bayar", "Metode", "SPP", "Denda", "Total"]],
+        body,
+        foot: [[
+          { content: "TOTAL", colSpan: 5, styles: { halign: "right", fontStyle: "bold" } },
+          { content: fmtIDR(totalGross), styles: { halign: "right", fontStyle: "bold" } },
+          { content: fmtIDR(totalDenda), styles: { halign: "right", fontStyle: "bold" } },
+          { content: fmtIDR(totalNet), styles: { halign: "right", fontStyle: "bold" } },
+        ]],
+        theme: "grid",
+        styles: { fontSize: 8.5, cellPadding: 2, textColor: [40,40,40] },
+        headStyles: { fillColor: [91,108,249], textColor: 255, fontStyle: "bold", halign: "center" },
+        footStyles: { fillColor: [243,245,252], textColor: [30,30,30] },
+        columnStyles: {
+          0: { halign: "center", cellWidth: 10 },
+          1: { cellWidth: 32 },
+          2: { cellWidth: 30 },
+          3: { cellWidth: 24 },
+          4: { cellWidth: 26 },
+          5: { halign: "right", cellWidth: 24 },
+          6: { halign: "right", cellWidth: 20 },
+          7: { halign: "right", cellWidth: 24 },
+        },
+        margin: { left: M, right: M },
       });
 
-      // Generate sisanya, tambahkan sebagai halaman baru ke mergedDoc
-      for (let i = 1; i < paidList.length; i++) {
-        const pageDoc = await generateSppInvoicePDF({
-          invoice: paidList[i],
-          student: studentMeta,
-          school: schoolMeta,
-          bendahara_name: profile.full_name || null,
-        });
-        const pageCount = pageDoc.getNumberOfPages();
-        for (let p = 1; p <= pageCount; p++) {
-          mergedDoc.addPage();
-          // Salin halaman dari pageDoc ke mergedDoc via internal API jsPDF
-          const srcPage = (pageDoc as any).internal.pages[p];
-          const targetIdx = mergedDoc.getNumberOfPages();
-          (mergedDoc as any).internal.pages[targetIdx] = srcPage;
-        }
-      }
+      let endY = (doc as any).lastAutoTable.finalY + 6;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(60,60,60);
+      doc.text(`Jumlah transaksi lunas: ${paidList.length}`, M, endY);
 
-      const filename = `Invoice-Lunas-${(student?.name || "Siswa").replace(/\s+/g, "_")}-${new Date().toISOString().slice(0, 10)}.pdf`;
-      mergedDoc.save(filename);
+      // Tanda tangan
+      endY += 14;
+      if (endY > 250) endY = 250;
+      doc.setFontSize(9); doc.setTextColor(40,40,40);
+      doc.text(`${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`, W - M - 55, endY);
+      doc.text("Bendahara Sekolah,", W - M - 55, endY + 5);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+      doc.text(profile.full_name || "(_______________)", W - M - 55, endY + 25);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(80,80,80);
+      doc.text("NIP/NIK : ........................", W - M - 55, endY + 30);
+
+      doc.setFont("helvetica", "italic"); doc.setFontSize(7); doc.setTextColor(150,150,150);
+      doc.text(`Dokumen dicetak otomatis pada ${new Date().toLocaleString("id-ID")}`, W/2, 290, { align: "center" });
+
+      const filename = `Rekap-Lunas-${(student?.name || "Siswa").replace(/\s+/g, "_")}-TA${ay.replace("/","-")}.pdf`;
+      doc.save(filename);
       toast.dismiss();
-      toast.success(`${paidList.length} invoice digabung ke 1 PDF`);
+      toast.success(`Rekap ${paidList.length} pembayaran berhasil diunduh`);
     } catch (e: any) {
       toast.dismiss();
-      toast.error(e.message || "Gagal mengunduh batch");
+      toast.error(e.message || "Gagal mengunduh rekap");
     } finally {
       setBusy(null);
     }
   };
+
 
   if (loading) return <div className="p-12 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></div>;
   if (!student) return <div className="p-12 text-center text-muted-foreground">Siswa tidak ditemukan</div>;
