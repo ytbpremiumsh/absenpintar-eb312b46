@@ -1150,6 +1150,8 @@ export default function ParentDashboard() {
               <EmptyMini text="Memuat data siswa..." />
             )}
           </>
+        )}
+
 
       </div>
       {/* end MAIN COLUMN */}
