@@ -70,6 +70,10 @@ const SchoolSettings = () => {
         setHolidayDays(Array.isArray(hd) ? hd : [0, 6]);
         setHolidayMode(!!(schoolRes.data as any).holiday_mode);
         setHolidayModeLabel((schoolRes.data as any).holiday_mode_label || "");
+        setSlug((schoolRes.data as any).slug || "");
+        setWhatsapp((schoolRes.data as any).whatsapp || "");
+        setEmail((schoolRes.data as any).email || "");
+        setPrincipalName((schoolRes.data as any).principal_name || "");
       }
       if (holRes.data) setHolidayDates(holRes.data as any);
       if (settingsRes.data) {
