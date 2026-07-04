@@ -2279,7 +2279,7 @@ export function BendaharaTransaksi() {
           <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
             <div className="md:col-span-2 relative">
               <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Cari nama / NIS" value={search} onChange={e => setSearch(e.target.value)} className="pl-9 text-sm" />
+              <Input placeholder="Cari nama / NIS / Kode Kartu" value={search} onChange={e => setSearch(e.target.value)} className="pl-9 text-sm" />
             </div>
             <Select value={filterClass} onValueChange={setFilterClass}>
               <SelectTrigger className="text-sm"><SelectValue placeholder="Kelas" /></SelectTrigger>
