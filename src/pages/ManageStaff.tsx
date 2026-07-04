@@ -755,6 +755,22 @@ const ManageStaff = () => {
                     <Input value={editNip} onChange={(e) => setEditNip(e.target.value)} placeholder="Nomor Induk Pegawai" />
                   </div>
                   <div className="space-y-1">
+                    <Label className="text-xs">Jabatan</Label>
+                    <select
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      value={POSITION_PRESETS.includes(editPosition) ? editPosition : "__custom__"}
+                      onChange={(e) => setEditPosition(e.target.value === "__custom__" ? "" : e.target.value)}
+                    >
+                      {POSITION_PRESETS.map((p) => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                      <option value="__custom__">Lainnya (custom)...</option>
+                    </select>
+                    {!POSITION_PRESETS.includes(editPosition) && (
+                      <Input className="mt-1" placeholder="Ketik jabatan custom" value={editPosition} onChange={(e) => setEditPosition(e.target.value)} />
+                    )}
+                  </div>
+                  <div className="space-y-1">
                     <Label className="text-xs">Password Baru</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
