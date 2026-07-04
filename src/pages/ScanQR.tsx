@@ -342,7 +342,7 @@ const ScanQR = () => {
     } finally {
       setFaceScanning(false);
     }
-  }, [profile?.school_id, getAttendanceType]);
+  }, [profile?.school_id, getAttendanceType, ensureNotHoliday]);
 
   const faceTimeoutRef = useRef<number | null>(null);
 
