@@ -119,15 +119,41 @@ export function useTenant() {
   return useContext(TenantContext);
 }
 
+/**
+ * Return the "root domain" the app should hang subdomains under.
+ * Priority:
+ *   1. Last-2 host parts if they match VITE_ROOT_HOSTS (e.g. absenpintar.online)
+ *   2. Any explicit VITE_ROOT_HOSTS entry (first one that looks like a real domain)
+ *   3. Fallback to the current hostname (dev / self-hosted with no env set)
+ */
+export function getRootDomain(): string {
+  if (typeof window === "undefined") return "";
+  const host = window.location.hostname.toLowerCase().split(":")[0];
+  const parts = host.split(".");
+  if (parts.length >= 2) {
+    const lastTwo = parts.slice(-2).join(".");
+    if (ROOT_HOSTS.has(lastTwo)) return lastTwo;
+  }
+  // Prefer an env-configured root that has a dot (skip "localhost")
+  for (const h of ROOT_HOSTS) {
+    if (h.includes(".") && !h.endsWith("lovable.app") && !h.endsWith("lovableproject.com")) {
+      return h;
+    }
+  }
+  return host;
+}
+
+/** True if the current hostname is a root host (no tenant subdomain). */
+export function isRootHost(): boolean {
+  if (typeof window === "undefined") return true;
+  return parseSubdomain() === null;
+}
+
 export function buildTenantUrl(slug: string, path: string = "/"): string {
   if (typeof window === "undefined") return path;
-  const host = window.location.hostname;
-  // Find a known root host to attach the subdomain to
-  const parts = host.split(".");
-  const lastTwo = parts.slice(-2).join(".");
-  if (ROOT_HOSTS.has(lastTwo)) {
-    return `${window.location.protocol}//${slug}.${lastTwo}${path}`;
+  const root = getRootDomain();
+  if (root && root !== "localhost") {
+    return `${window.location.protocol}//${slug}.${root}${path}`;
   }
-  // Fallback: same origin + path
   return path;
 }
