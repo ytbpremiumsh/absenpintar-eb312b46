@@ -707,7 +707,7 @@ const LandingThemeB = () => {
                   <li><button onClick={() => navigate("/login")} className="hover:text-indigo-600 transition-colors">Login</button></li>
                   <li><button onClick={() => navigate("/register")} className="hover:text-indigo-600 transition-colors">Daftar Gratis</button></li>
                   <li><button onClick={() => navigate("/parent-login")} className="hover:text-indigo-600 transition-colors">Portal Wali Murid</button></li>
-                  <li><button onClick={() => navigate("/affiliate-login")} className="hover:text-indigo-600 transition-colors">Affiliate</button></li>
+                  
                   <li><button onClick={() => navigate("/panduan")} className="hover:text-indigo-600 transition-colors">Panduan</button></li>
                 </ul>
               </div>
