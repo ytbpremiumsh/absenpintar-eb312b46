@@ -43,6 +43,7 @@ const ROLE_META: Record<string, { label: string; icon: any; cls: string }> = {
 const ManageStaff = () => {
   const { profile } = useAuth();
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [school, setSchool] = useState<{ name?: string; logo?: string | null }>({});
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [creating, setCreating] = useState(false);
