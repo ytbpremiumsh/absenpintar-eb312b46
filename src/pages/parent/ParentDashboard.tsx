@@ -473,16 +473,24 @@ export default function ParentDashboard() {
               })()}
             </div>
 
-            {/* Kartu Pelajar Digital */}
+            {/* Shortcut: Kartu Pelajar Digital */}
             {current && (
-              <div className="mt-4">
-                <div className="flex items-center justify-between mb-2 px-1">
-                  <h3 className="text-xs font-bold text-foreground">Kartu Pelajar Digital</h3>
-                  <span className="text-[10px] text-muted-foreground">Simpan / cetak untuk identitas resmi</span>
+              <button
+                onClick={() => setTab("card")}
+                className="mt-4 w-full flex items-center gap-3 rounded-2xl p-3.5 bg-gradient-to-r from-[#5B6CF9]/10 via-[#4c5ded]/10 to-transparent border border-[#5B6CF9]/20 hover:border-[#5B6CF9]/40 transition-all active:scale-[0.98]"
+              >
+                <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-[#5B6CF9] to-[#4338CA] flex items-center justify-center shrink-0 shadow-lg shadow-[#5B6CF9]/30">
+                  <CreditCard className="h-5 w-5 text-white" />
                 </div>
-                <StudentIdCard student={current as any} />
-              </div>
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-sm font-bold text-foreground">Kartu Pelajar Digital</p>
+                  <p className="text-[11px] text-muted-foreground truncate">Lihat & unduh kartu identitas siswa</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-[#5B6CF9] shrink-0" />
+              </button>
             )}
+
+
 
 
             {/* Tunggakan SPP — semua tagihan lewat jatuh tempo & belum lunas */}
