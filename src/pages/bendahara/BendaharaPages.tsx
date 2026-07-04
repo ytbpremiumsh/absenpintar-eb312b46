@@ -4066,7 +4066,7 @@ export function BendaharaPencairan() {
   const handleSelectAccount = (id: string) => {
     setSelectedAccountId(id);
     const acc = savedAccounts.find((x: any) => x.id === id);
-    if (acc) setBank({ bank_name: acc.bank_name, account_number: acc.account_number, account_holder: acc.account_holder, notes: acc.notes || "" });
+    if (acc) setBank({ bank_name: acc.bank_name, account_number: acc.account_number, account_holder: acc.account_holder, notes: acc.notes || "", account_type: acc.account_type || "bank", responsible_user_id: acc.responsible_user_id || "" });
   };
 
   const requestSubmit = () => {
