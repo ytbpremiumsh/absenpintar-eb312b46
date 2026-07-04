@@ -1,147 +1,76 @@
-# Panduan VPS Wildcard Subdomain ATSkolla
+# Setup VPS ATSkolla — Step-by-Step Mulai dari Nol
 
-Saya akan menulis dokumentasi **`VPS_WILDCARD_SETUP.md`** yang berisi panduan lengkap deploy ATSkolla ke VPS dengan dukungan wildcard subdomain (`*.atskolla.com`).
+DNS di Cloudflare sudah **benar dan siap** (A record `@`, `www`, `*`, `bayar` → `45.128.x.x`, semua DNS-only). Sekarang tinggal setup VPS-nya. Saya akan pandu berurutan, per fase, supaya mudah diikuti.
 
-## Arsitektur
+## Yang Sudah OK
+- Wildcard DNS `*.atskolla.com` → VPS ✅
+- Proxy Cloudflare abu-abu (DNS only) → cocok untuk Let's Encrypt di VPS ✅
+- `bayar.atskolla.com` juga ke VPS yang sama → otomatis kena wildcard SSL, bisa dipakai untuk halaman pembayaran khusus ✅
 
-```text
-User Browser
-   ↓ smkcendikia.atskolla.com
-Cloudflare DNS (orange cloud OFF / DNS only)
-   ↓ A record * → IP VPS
-VPS (Ubuntu 22.04)
-   ├── Nginx (reverse proxy + wildcard SSL)
-   │     ↓ serve dist/index.html + assets
-   └── Build statis Vite (folder /var/www/atskolla/dist)
-        ↓ JS client baca window.location.hostname
-        ↓ TenantProvider resolve slug → schools table
-Lovable Cloud (Supabase) — backend tetap di sini
-```
+## Yang Akan Dilakukan
 
-VPS hanya jadi **origin server statis + reverse proxy**. Backend (DB, Auth, Edge Functions, cron `auto-mark-alfa`) **tetap di Lovable Cloud** — tidak perlu pindah.
+Karena VPS **belum disentuh sama sekali**, saya akan buat **1 file panduan baru** yang ringkas, urut, dan bisa dicopy-paste langsung ke terminal VPS. Panduan lama (`VPS_WILDCARD_SETUP.md`) tetap ada sebagai referensi lengkap, panduan baru ini versi **quick-start berurutan**.
 
-## Isi Dokumentasi yang Akan Dibuat
+## File yang Akan Dibuat
 
-### 1. Prasyarat
-- VPS Ubuntu 22.04+, RAM 1GB minimum, akses root/sudo
-- Domain `atskolla.com` sudah terdaftar (boleh di Cloudflare/Niagahoster/dll)
-- IP publik VPS (misal `123.45.67.89`)
+**`VPS_QUICKSTART.md`** — panduan berurutan 7 fase:
 
-### 2. DNS Setup (Cloudflare DNS-Only Mode)
-- Hapus CNAME `@` dan `*` yang lama (yang ke `absenpintar.lovable.app`)
-- Tambah **A record**:
-  - `@` → `123.45.67.89` (Proxy: **DNS only / abu-abu**)
-  - `www` → `123.45.67.89` (DNS only)
-  - `*` → `123.45.67.89` (DNS only) ← wildcard
-- Catatan: Proxy harus **OFF** karena SSL akan dihandle Nginx di VPS (Let's Encrypt). Kalau mau pakai Cloudflare proxy, perlu mode "Full (strict)" + Origin Certificate.
-
-### 3. Install Dependencies di VPS
+### Fase 1 — Login & Update VPS (5 menit)
 ```bash
-apt update && apt install -y nginx certbot python3-certbot-nginx python3-certbot-dns-cloudflare git curl
-curl -fsSL https://bun.sh/install | bash
+ssh root@45.128.x.x
+apt update && apt upgrade -y
+apt install -y nginx certbot python3-certbot-dns-cloudflare git curl unzip ufw
 ```
 
-### 4. Clone Project & Build
+### Fase 2 — Firewall (2 menit)
 ```bash
-mkdir -p /var/www/atskolla
-cd /var/www/atskolla
-git clone <repo-github-anda> .
-bun install
-bun run build   # hasilkan folder dist/
+ufw allow OpenSSH
+ufw allow 'Nginx Full'
+ufw --force enable
 ```
 
-`.env` berisi `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` (sama dengan Lovable Cloud sekarang).
+### Fase 3 — Install Bun + Clone Repo (10 menit)
+- Install Bun runtime
+- Clone repo GitHub ATSkolla ke `/var/www/atskolla`
+- Buat file `.env` dengan `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY`
+- Jalankan `bun install && bun run build`
 
-### 5. Nginx Config Wildcard
-File `/etc/nginx/sites-available/atskolla`:
-```nginx
-server {
-  listen 80;
-  listen 443 ssl http2;
-  server_name atskolla.com www.atskolla.com *.atskolla.com;
+### Fase 4 — Cloudflare API Token untuk SSL (5 menit)
+- Panduan bergambar cara buat token di Cloudflare dashboard (Zone.DNS Edit untuk `atskolla.com`)
+- Simpan ke `/root/.secrets/cloudflare.ini` dengan permission 600
 
-  ssl_certificate     /etc/letsencrypt/live/atskolla.com/fullchain.pem;
-  ssl_certificate_key /etc/letsencrypt/live/atskolla.com/privkey.pem;
-
-  root /var/www/atskolla/dist;
-  index index.html;
-
-  # SPA fallback — wajib supaya React Router & subdomain routing bekerja
-  location / {
-    try_files $uri $uri/ /index.html;
-  }
-
-  # Cache asset hashed
-  location /assets/ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
-  }
-}
-```
-Aktifkan: `ln -s /etc/nginx/sites-available/atskolla /etc/nginx/sites-enabled/`
-
-### 6. Wildcard SSL via Let's Encrypt (DNS-01 Challenge)
-Wildcard cert **wajib pakai DNS challenge** (HTTP challenge tidak support wildcard).
-
-**Opsi A — Cloudflare API Token (rekomendasi):**
+### Fase 5 — Request Wildcard SSL (5 menit)
 ```bash
-# Buat token di Cloudflare: Zone.DNS Edit untuk atskolla.com
-mkdir -p /root/.secrets && nano /root/.secrets/cloudflare.ini
-# Isi: dns_cloudflare_api_token = <TOKEN>
-chmod 600 /root/.secrets/cloudflare.ini
-
-certbot certonly \
-  --dns-cloudflare \
+certbot certonly --dns-cloudflare \
   --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
   -d atskolla.com -d "*.atskolla.com" \
-  --agree-tos -m admin@atskolla.com
+  --agree-tos -m admin@atskolla.com --non-interactive
 ```
+Verifikasi cert include `*.atskolla.com`.
 
-**Auto-renew:** Certbot sudah pasang cron sendiri (`/etc/cron.d/certbot`). Test: `certbot renew --dry-run`.
+### Fase 6 — Nginx Config (5 menit)
+- Buat `/etc/nginx/sites-available/atskolla` (wildcard `server_name`, SSL, SPA fallback, gzip, security headers)
+- Symlink ke `sites-enabled`, hapus default
+- `nginx -t && systemctl reload nginx`
 
-### 7. Update Script & Auto-Deploy
-Script `update.sh` (sudah ada di project, tinggal sesuaikan):
-```bash
-#!/bin/bash
-cd /var/www/atskolla
-git pull origin main
-bun install
-bun run build
-systemctl reload nginx
-```
-Cron tiap 10 menit (opsional): `*/10 * * * * /var/www/atskolla/update.sh >> /var/log/atskolla.log 2>&1`
+### Fase 7 — Verifikasi & Auto-Deploy (5 menit)
+- Test 4 URL:
+  - `https://atskolla.com` → landing
+  - `https://smkcendikia.atskolla.com` → login ber-branding (kalau slug ada)
+  - `https://random.atskolla.com` → "Sekolah tidak ditemukan"
+  - `https://bayar.atskolla.com` → serve app (nanti bisa dibuat route khusus)
+- Pasang `update.sh` + cron `*/10 * * * *` untuk auto-pull dari GitHub
 
-### 8. Verifikasi
-- `https://atskolla.com` → landing page
-- `https://smkcendikia.atskolla.com` → login page ber-branding SMK Cendikia
-- `https://random123.atskolla.com` → halaman "Sekolah tidak ditemukan"
+### Bonus — Checklist Troubleshooting Cepat
+Tabel 5 error paling umum (502, 404 refresh, SSL invalid, subdomain no resolve, Supabase 401) + solusi 1 baris.
 
-### 9. Troubleshooting
-- **502/404 di subdomain:** cek `try_files ... /index.html` ada di Nginx
-- **SSL invalid:** pastikan cert berisi `*.atskolla.com` (`certbot certificates`)
-- **Session login hilang antar subdomain:** ini **by design** (localStorage per-origin); tiap sekolah punya sesi terpisah
-- **Backend connection error:** pastikan `.env` Supabase URL benar
+## Yang TIDAK Diubah
+- Kode aplikasi (tidak perlu — `TenantProvider` sudah universal)
+- Backend Lovable Cloud (tetap di sana)
+- File `VPS_WILDCARD_SETUP.md` (tetap sebagai referensi lengkap)
+- File `WILDCARD_SUBDOMAIN.md` (sudah link ke panduan lama)
 
-### 10. Perbandingan dengan Lovable Hosting
-| | Lovable + Cloudflare Proxy | VPS Self-Host |
-|---|---|---|
-| Wildcard SSL | Otomatis (Cloudflare Universal) | Manual Let's Encrypt DNS-01 |
-| Auto-deploy | Push Lovable = live | Perlu `update.sh` + cron |
-| Maintenance | Zero | Update OS, Nginx, cert renewal |
-| Biaya | Lovable plan saja | + VPS (~$5/bulan) |
-| Kontrol | Terbatas | Penuh (custom Nginx, header, dll) |
+## Estimasi Total Waktu
+~40 menit dari VPS kosong sampai `smkcendikia.atskolla.com` bisa diakses dengan SSL valid.
 
-## File yang akan dibuat/diubah
-
-1. **CREATE** `VPS_WILDCARD_SETUP.md` — dokumentasi lengkap di atas
-2. **UPDATE** `WILDCARD_SUBDOMAIN.md` — tambah bagian "Alternatif: Self-Host VPS" yang menunjuk ke dokumen baru
-
-**Tidak ada perubahan kode aplikasi** — `TenantProvider`, `slug` resolver, dan semua kode yang sudah dibuat sebelumnya **otomatis bekerja** di VPS karena hanya membaca `window.location.hostname` di browser.
-
-## Yang TIDAK Termasuk
-
-- Migrasi backend ke self-hosted Supabase (tetap pakai Lovable Cloud)
-- Setup PM2/Docker (karena Vite output statis, cukup Nginx serve file)
-- Load balancing multi-VPS (belum diperlukan)
-
-Apakah panduan ini sudah sesuai? Klik **Implement plan** untuk saya buatkan file dokumentasinya.
+Klik **Implement plan** untuk saya buatkan file `VPS_QUICKSTART.md`-nya.
