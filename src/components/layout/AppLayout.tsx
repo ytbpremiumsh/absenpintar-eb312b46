@@ -172,13 +172,6 @@ function AppContent() {
                     Referral & Point
                   </DropdownMenuItem>
                 )}
-                {/* Guru / Wali Kelas pakai Affiliate Komisi */}
-                {(roles.includes("teacher") || (!roles.includes("school_admin") && !roles.includes("staff"))) && (
-                  <DropdownMenuItem onClick={() => navigate("/affiliate-teacher")} className="rounded-xl mx-1 px-3 py-2.5 cursor-pointer">
-                    <Gift className="h-4 w-4 mr-2.5 text-muted-foreground" />
-                    Affiliate & Komisi
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="rounded-xl mx-1 px-3 py-2.5 cursor-pointer">
                     <HelpCircle className="h-4 w-4 mr-2.5 text-muted-foreground" />
