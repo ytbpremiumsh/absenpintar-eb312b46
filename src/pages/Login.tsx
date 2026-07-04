@@ -43,6 +43,30 @@ const Login = () => {
   const [otp, setOtp] = useState("");
   const [cooldown, setCooldown] = useState(0);
 
+  // School finder (shown when on root domain — user must land on their subdomain to login)
+  const isRootDomain = !tenant.slug;
+  const [finderQuery, setFinderQuery] = useState("");
+  const [finderResults, setFinderResults] = useState<Array<{ id: string; name: string; slug: string; npsn: string | null; city: string | null }>>([]);
+  const [finderLoading, setFinderLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isRootDomain || mode !== "school") return;
+    const q = finderQuery.trim();
+    if (q.length < 2) { setFinderResults([]); return; }
+    setFinderLoading(true);
+    const t = setTimeout(async () => {
+      const isNumeric = /^\d+$/.test(q);
+      let query = supabase.from("schools").select("id, name, slug, npsn, city").limit(8);
+      query = isNumeric
+        ? query.ilike("npsn", `${q}%`)
+        : query.ilike("name", `%${q}%`);
+      const { data } = await query;
+      setFinderResults((data as any) || []);
+      setFinderLoading(false);
+    }, 350);
+    return () => clearTimeout(t);
+  }, [finderQuery, isRootDomain, mode]);
+
   useEffect(() => {
     supabase
       .from("platform_settings")
