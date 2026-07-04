@@ -42,8 +42,12 @@ import {
   SidebarMenuItem,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const mainNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
@@ -264,9 +268,48 @@ export function AppSidebar() {
               {renderGroupLabel("Laporan")}
               <SidebarGroupContent>
                 <SidebarMenu className="space-y-1">
+                  <Collapsible defaultOpen={isActive("/laporan-absensi")} className="group/collapsible">
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                          isActive={isActive("/laporan-absensi")}
+                          tooltip="Laporan Absensi"
+                          className={`relative rounded-xl px-3 py-2.5 transition-all duration-200 gap-3 ${
+                            isActive("/laporan-absensi")
+                              ? "bg-gradient-to-r from-[#5B6CF9]/85 to-[#4c5ded] text-white font-semibold shadow-lg shadow-[#5B6CF9]/20"
+                              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                          }`}
+                        >
+                          <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${isActive("/laporan-absensi") ? "bg-white/20" : "bg-muted/80"}`}>
+                            <BarChart3 className={`h-[15px] w-[15px] stroke-[2] ${isActive("/laporan-absensi") ? "text-white" : ""}`} />
+                          </div>
+                          <span className={`text-[13px] truncate flex-1 text-left ${isActive("/laporan-absensi") ? "text-white" : ""}`}>Laporan Absensi</span>
+                          <ChevronRight className={`h-3.5 w-3.5 stroke-[2.5] shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 ${isActive("/laporan-absensi") ? "text-white" : "opacity-60"}`} />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub className="mr-0 pr-0 border-l-2 border-[#5B6CF9]/20 ml-4 mt-1 space-y-0.5">
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton asChild isActive={location.pathname === "/laporan-absensi" && (location.search.includes("tab=siswa") || !location.search.includes("tab="))}>
+                              <NavLink to="/laporan-absensi?tab=siswa" onClick={handleNavClick} className="text-[12.5px]">
+                                <GraduationCap className="h-3.5 w-3.5" />
+                                <span>Rekap Absensi Siswa</span>
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton asChild isActive={location.pathname === "/laporan-absensi" && location.search.includes("tab=guru")}>
+                              <NavLink to="/laporan-absensi?tab=guru" onClick={handleNavClick} className="text-[12.5px]">
+                                <UsersRound className="h-3.5 w-3.5" />
+                                <span>Rekap Absensi Guru</span>
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
                   {renderNavItems([
-                    { title: "Laporan Absensi", url: "/laporan-absensi", icon: BarChart3, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
-                    { title: "Rekap Absensi Guru", url: "/teacher-attendance", icon: UsersRound, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
                     { title: "Pengajuan Izin/Sakit", url: "/leave-requests", icon: FileText, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
                   ])}
                 </SidebarMenu>

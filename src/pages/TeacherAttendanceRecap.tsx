@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, UsersRound, Calendar, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, UsersRound, Calendar, Download, TrendingUp, CheckCircle2, XCircle, Clock as ClockIcon, TrendingDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -258,6 +258,121 @@ const TeacherAttendanceRecap = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Analitik Guru */}
+      {!loading && rows.length > 0 && (() => {
+        const totalH = rows.reduce((s, r) => s + r.totals.H, 0);
+        const totalS = rows.reduce((s, r) => s + r.totals.S, 0);
+        const totalI = rows.reduce((s, r) => s + r.totals.I, 0);
+        const totalA = rows.reduce((s, r) => s + r.totals.A, 0);
+        const totalAll = totalH + totalS + totalI + totalA;
+        const avgRate = totalAll ? Math.round((totalH / totalAll) * 100) : 0;
+        // Working days = past weekdays in month up to today
+        const workingDays = dayArray.filter((d) => {
+          const dt = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), d);
+          if (dt > today) return false;
+          const dow = dt.getDay();
+          return dow !== 0 && dow !== 6;
+        }).length;
+        const topAbsent = [...rows].sort((a, b) => (b.totals.A + b.totals.S + b.totals.I) - (a.totals.A + a.totals.S + a.totals.I)).slice(0, 3).filter(r => (r.totals.A + r.totals.S + r.totals.I) > 0);
+        const topPresent = [...rows].sort((a, b) => b.totals.H - a.totals.H).slice(0, 3).filter(r => r.totals.H > 0);
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-[#5B6CF9]" />
+              <h3 className="text-sm font-bold">Analitik Kehadiran Guru & Staff — {monthLabel}</h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5">
+              <Card className="border-0 rounded-xl bg-gradient-to-br from-[#5B6CF9]/10 to-transparent">
+                <CardContent className="p-3">
+                  <p className="text-[10px] text-muted-foreground font-medium">TOTAL PERSONIL</p>
+                  <p className="text-xl font-bold text-[#5B6CF9]">{rows.length}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{workingDays} hari kerja</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-600" /><p className="text-[10px] text-emerald-700 font-medium">HADIR</p></div>
+                  <p className="text-xl font-bold text-emerald-700">{totalH}</p>
+                  <p className="text-[10px] text-emerald-700/70 mt-0.5">Rate {avgRate}%</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 rounded-xl bg-violet-50 dark:bg-violet-500/10">
+                <CardContent className="p-3">
+                  <p className="text-[10px] text-violet-700 font-medium">SAKIT</p>
+                  <p className="text-xl font-bold text-violet-700">{totalS}</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 rounded-xl bg-amber-50 dark:bg-amber-500/10">
+                <CardContent className="p-3">
+                  <p className="text-[10px] text-amber-700 font-medium">IZIN</p>
+                  <p className="text-xl font-bold text-amber-700">{totalI}</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 rounded-xl bg-red-50 dark:bg-red-500/10">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-1.5"><XCircle className="h-3 w-3 text-red-600" /><p className="text-[10px] text-red-700 font-medium">ALFA</p></div>
+                  <p className="text-xl font-bold text-red-700">{totalA}</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              <Card className="border border-border/50 rounded-xl">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-1.5 mb-2.5">
+                    <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
+                    <p className="text-xs font-semibold">Paling Rajin (Terbanyak Hadir)</p>
+                  </div>
+                  {topPresent.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">Belum ada data</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {topPresent.map((r, i) => (
+                        <div key={r.user_id} className="flex items-center gap-2">
+                          <span className={`h-5 w-5 rounded-full text-[10px] font-bold flex items-center justify-center ${i === 0 ? "bg-amber-400 text-white" : i === 1 ? "bg-slate-300 text-slate-700" : "bg-orange-300 text-orange-900"}`}>{i + 1}</span>
+                          <Avatar className="h-6 w-6">
+                            {r.photo_url && <AvatarImage src={r.photo_url} />}
+                            <AvatarFallback className="text-[9px] bg-[#5B6CF9]/10 text-[#5B6CF9]">{r.full_name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <p className="text-xs font-medium truncate flex-1">{r.full_name}</p>
+                          <span className="text-xs font-bold text-emerald-600">{r.totals.H}H</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="border border-border/50 rounded-xl">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-1.5 mb-2.5">
+                    <TrendingDown className="h-3.5 w-3.5 text-red-600" />
+                    <p className="text-xs font-semibold">Perlu Perhatian (Terbanyak Absen)</p>
+                  </div>
+                  {topAbsent.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">Semua personil hadir penuh</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {topAbsent.map((r, i) => (
+                        <div key={r.user_id} className="flex items-center gap-2">
+                          <span className="h-5 w-5 rounded-full text-[10px] font-bold flex items-center justify-center bg-red-100 text-red-700">{i + 1}</span>
+                          <Avatar className="h-6 w-6">
+                            {r.photo_url && <AvatarImage src={r.photo_url} />}
+                            <AvatarFallback className="text-[9px] bg-red-100 text-red-700">{r.full_name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <p className="text-xs font-medium truncate flex-1">{r.full_name}</p>
+                          <span className="text-xs font-bold text-red-600">A:{r.totals.A} S:{r.totals.S} I:{r.totals.I}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        );
+      })()}
 
       <Card className="border border-border/50 shadow-none rounded-2xl overflow-hidden">
         <CardContent className="p-0">
