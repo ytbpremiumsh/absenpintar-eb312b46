@@ -279,6 +279,7 @@ const ScanQR = () => {
   // Face recognition capture
   const captureAndRecognize = useCallback(async () => {
     if (!videoRef.current || !profile?.school_id || scanPaused.current) return;
+    if (!(await ensureNotHoliday())) { scanPaused.current = true; return; }
     setFaceScanning(true);
     try {
       const video = videoRef.current;
