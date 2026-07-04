@@ -15,7 +15,7 @@ const FEATURES: Array<{ icon: any; title: string; desc: string; group: string }>
   { icon: Building2, title: "Multi Cabang", desc: "Kelola beberapa sekolah dalam satu akun", group: "Manajemen" },
   { icon: MessageCircle, title: "Notifikasi WhatsApp Otomatis", desc: "Info kehadiran & tagihan ke wali murid", group: "Komunikasi" },
   { icon: Bell, title: "Pengumuman Sekolah", desc: "Broadcast ke wali murid dalam satu klik", group: "Komunikasi" },
-  { icon: Bot, title: "Portal Wali Murid", desc: "Login via WA atau Kode Kartu, riwayat lengkap", group: "Komunikasi" },
+  { icon: Bot, title: "Portal Wali Murid", desc: "Login via WA atau Nomor Kartu Identitas, riwayat lengkap", group: "Komunikasi" },
   { icon: BarChart3, title: "Analitik & Laporan", desc: "Rekap harian/bulanan, export Excel & PDF", group: "Laporan" },
   { icon: FileSpreadsheet, title: "Import / Export Data", desc: "Backup & migrasi data siswa cepat", group: "Laporan" },
   { icon: Calendar, title: "Jadwal Pelajaran", desc: "Sinkron jadwal mengajar & absensi mapel", group: "Laporan" },

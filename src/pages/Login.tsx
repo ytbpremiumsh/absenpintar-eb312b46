@@ -397,7 +397,7 @@ const Login = () => {
                                 onClick={() => setParentMethod("card")}
                                 className={`flex-1 h-8 text-[11px] font-semibold rounded-lg transition-all ${parentMethod === "card" ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground"}`}
                               >
-                                Kode Kartu
+                                Nomor Kartu Identitas
                               </button>
                             </div>
 
