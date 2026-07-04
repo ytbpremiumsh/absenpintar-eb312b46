@@ -244,11 +244,11 @@ function AppRoutes() {
           <Route path="/laporan-absensi" element={<Navigate to="/laporan-absensi/siswa" replace />} />
           <Route path="/laporan-absensi/siswa" element={<RekapSiswaPage />} />
           <Route path="/laporan-absensi/guru" element={<TeacherAttendanceRecap />} />
-          <Route path="/laporan-absensi/riwayat" element={<EditAttendance />} />
+          <Route path="/laporan-absensi/riwayat" element={<Navigate to="/laporan-absensi/siswa?tab=riwayat" replace />} />
           <Route path="/laporan-absensi/analitik" element={<Navigate to="/laporan-absensi/siswa?tab=analitik" replace />} />
           <Route path="/history" element={<Navigate to="/laporan-absensi/siswa?tab=analitik" replace />} />
           <Route path="/export-history" element={<Navigate to="/laporan-absensi/siswa" replace />} />
-          <Route path="/edit-attendance" element={<Navigate to="/laporan-absensi/riwayat" replace />} />
+          <Route path="/edit-attendance" element={<Navigate to="/laporan-absensi/siswa?tab=riwayat" replace />} />
           <Route path="/mapel/laporan" element={<MapelLaporan />} />
           <Route path="/teacher-attendance" element={<TeacherAttendanceRecap />} />
           <Route path="/langganan" element={<LanggananCombined />} />
