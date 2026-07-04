@@ -195,6 +195,7 @@ const ScanQR = () => {
     if (!code.trim() || !profile?.school_id || isLookingUp.current || scanPaused.current) return;
     isLookingUp.current = true;
     try {
+      if (!(await ensureNotHoliday())) { scanPaused.current = true; return; }
       const trimmed = code.trim();
       const { data, error } = await supabase
         .from("students").select("*").eq("school_id", profile.school_id)
