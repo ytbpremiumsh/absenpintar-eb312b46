@@ -20,6 +20,7 @@ import { PremiumGate } from "@/components/PremiumGate";
 import * as XLSX from "xlsx";
 import QRCodeDisplay from "@/components/QRCodeDisplay";
 import StaffAttendanceDetailDialog from "@/components/staff/StaffAttendanceDetailDialog";
+import { TeacherIdCard } from "@/components/TeacherIdCard";
 
 interface StaffMember {
   user_id: string;
