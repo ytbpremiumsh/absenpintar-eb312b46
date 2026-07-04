@@ -151,6 +151,53 @@ const HolidayManagement = () => {
         </CardContent>
       </Card>
 
+      {/* Hari Libur Mingguan */}
+      <Card className="border-0 shadow-card">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <CalendarOff className="h-4 w-4 text-primary" />
+            Hari Libur Sekolah (Mingguan)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-xs text-muted-foreground">
+            Pilih hari libur tetap sekolah. Pada hari yang dipilih, sistem tidak menghitung absensi (tidak Auto-Alfa) dan dianggap libur.
+          </p>
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+            {[
+              { v: 1, label: "Senin" }, { v: 2, label: "Selasa" }, { v: 3, label: "Rabu" },
+              { v: 4, label: "Kamis" }, { v: 5, label: "Jumat" }, { v: 6, label: "Sabtu" },
+              { v: 0, label: "Minggu" },
+            ].map((d) => {
+              const active = holidayDays.includes(d.v);
+              return (
+                <button
+                  key={d.v}
+                  type="button"
+                  disabled={savingDays || loading}
+                  onClick={() => toggleHolidayDay(d.v)}
+                  className={`px-2 py-2 rounded-lg text-xs font-medium border transition disabled:opacity-60 ${
+                    active
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background text-foreground border-border hover:border-primary/50"
+                  }`}
+                >
+                  {d.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="bg-secondary/50 rounded-lg p-3 text-xs text-muted-foreground">
+            Hari aktif: <strong className="text-foreground">{
+              [1,2,3,4,5,6,0].filter(d => !holidayDays.includes(d))
+                .map(d => ({1:"Senin",2:"Selasa",3:"Rabu",4:"Kamis",5:"Jumat",6:"Sabtu",0:"Minggu"} as any)[d])
+                .join(", ") || "(tidak ada)"
+            }</strong>
+          </div>
+        </CardContent>
+      </Card>
+
+
       {/* Kalender Tanggal Merah */}
       <Card className="border-0 shadow-card">
         <CardHeader>
