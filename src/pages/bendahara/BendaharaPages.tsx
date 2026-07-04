@@ -4239,9 +4239,9 @@ export function BendaharaPencairan() {
                     <div className="flex items-start gap-3">
                       <Landmark className="h-5 w-5 text-emerald-600 mt-0.5" />
                       <div>
-                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Rekening Tujuan</p>
+                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{acc.account_type === "ewallet" ? "E-Wallet Tujuan" : "Rekening Tujuan"}</p>
                         <p className="text-sm font-bold">{acc.bank_name} <span className="font-mono">· {acc.account_number}</span></p>
-                        <p className="text-xs text-muted-foreground">a.n. {acc.account_holder}</p>
+                        <p className="text-xs text-muted-foreground">a.n. {acc.account_holder}{acc.responsible_user_id ? ` · PJ: ${staffList.find((s) => s.user_id === acc.responsible_user_id)?.full_name || "—"}` : ""}</p>
                       </div>
                     </div>
                     <Button variant="ghost" size="sm" onClick={() => setBankManageOpen(true)} className="text-xs">Ubah</Button>
