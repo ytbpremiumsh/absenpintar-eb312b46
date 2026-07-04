@@ -306,14 +306,6 @@ export function AppSidebar() {
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                           <SidebarMenuSubItem>
-                            <SidebarMenuSubButton asChild isActive={location.pathname === "/laporan-absensi/analitik"}>
-                              <NavLink to="/laporan-absensi/analitik" onClick={handleNavClick} className="text-[12.5px]">
-                                <BarChart3 className="h-3.5 w-3.5" />
-                                <span>Analitik</span>
-                              </NavLink>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                          <SidebarMenuSubItem>
                             <SidebarMenuSubButton asChild isActive={location.pathname === "/laporan-absensi/riwayat"}>
                               <NavLink to="/laporan-absensi/riwayat" onClick={handleNavClick} className="text-[12.5px]">
                                 <PenLine className="h-3.5 w-3.5" />
