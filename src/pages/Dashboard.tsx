@@ -111,6 +111,8 @@ const Dashboard = () => {
   const [holidayMode, setHolidayMode] = useState(false);
   const [holidayStatus, setHolidayStatus] = useState<HolidayStatus>({ isHoliday: false, reason: null, mode: false, modeLabel: null });
   const [holidayToggling, setHolidayToggling] = useState(false);
+  const [showLoginInfo, setShowLoginInfo] = useState(() => localStorage.getItem("dismissed_login_info") !== "1");
+  const tenant = useTenant();
   const navigate = useNavigate();
 
 
