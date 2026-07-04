@@ -2867,7 +2867,7 @@ export function BendaharaSPPDetail() {
       if (school?.address) doc.text(school.address, W/2, y+11, { align: "center", maxWidth: 150 });
       const meta: string[] = [];
       if (school?.npsn) meta.push(`NPSN: ${school.npsn}`);
-      if (school?.phone) meta.push(`Telp: ${school.phone}`);
+      if (school?.whatsapp) meta.push(`WA: ${school.whatsapp}`);
       if (school?.email) meta.push(`Email: ${school.email}`);
       if (meta.length) doc.text(meta.join("  •  "), W/2, y+16, { align: "center" });
 
