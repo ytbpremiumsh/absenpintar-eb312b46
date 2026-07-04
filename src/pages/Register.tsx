@@ -50,6 +50,48 @@ const Register = () => {
   const [schoolAddress, setSchoolAddress] = useState("");
   const [schoolWhatsapp, setSchoolWhatsapp] = useState("");
 
+  // Subdomain (school website slug) with live availability check
+  const [slug, setSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken" | "reserved" | "invalid">("idle");
+  const rootDomain = typeof window !== "undefined" ? (getRootDomain() || "absenpintar.online") : "absenpintar.online";
+
+  const slugify = (s: string) =>
+    s.toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40);
+
+  // Auto-suggest slug from school name (only if user hasn't manually edited)
+  useEffect(() => {
+    if (!slugTouched && schoolData?.name) {
+      const s = slugify(schoolData.name);
+      if (s.length >= 3) setSlug(s);
+    }
+  }, [schoolData, slugTouched]);
+
+  // Debounced availability check
+  useEffect(() => {
+    if (!slug) { setSlugStatus("idle"); return; }
+    if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(slug)) {
+      setSlugStatus("invalid"); return;
+    }
+    setSlugStatus("checking");
+    const t = setTimeout(async () => {
+      try {
+        const [{ data: reserved }, { data: existing }] = await Promise.all([
+          supabase.rpc("is_reserved_slug", { _slug: slug }),
+          supabase.from("schools").select("id").eq("slug", slug).maybeSingle(),
+        ]);
+        if (reserved === true) setSlugStatus("reserved");
+        else if (existing) setSlugStatus("taken");
+        else setSlugStatus("available");
+      } catch { setSlugStatus("idle"); }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [slug]);
+
   useEffect(() => {
     supabase
       .from("platform_settings")
