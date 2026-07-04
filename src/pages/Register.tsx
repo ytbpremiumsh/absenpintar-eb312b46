@@ -494,18 +494,8 @@ const Register = () => {
                       </motion.div>
 
                       <motion.div variants={itemVariants} className="space-y-2">
-                        <Label htmlFor="fullName">Nama Lengkap Admin</Label>
+                        <Label htmlFor="fullName">Nama Penanggung Jawab / Operator</Label>
                         <Input id="fullName" placeholder="Nama lengkap" value={fullName} onChange={(e) => setFullName(e.target.value)} className="h-11 rounded-xl" required />
-                      </motion.div>
-
-                      <motion.div variants={itemVariants} className="space-y-2">
-                        <Label htmlFor="regEmail">Email</Label>
-                        <Input id="regEmail" type="email" placeholder="admin@sekolah.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 rounded-xl" required />
-                      </motion.div>
-
-                      <motion.div variants={itemVariants} className="space-y-2">
-                        <Label htmlFor="phone">No. Telepon / WhatsApp</Label>
-                        <Input id="phone" type="tel" placeholder="08xxxxxxxxxx" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))} className="h-11 rounded-xl" />
                       </motion.div>
 
                       {/* School-level required data */}
@@ -524,7 +514,7 @@ const Register = () => {
 
                       <motion.div variants={itemVariants} className="space-y-2">
                         <Label htmlFor="schoolEmail">Email Sekolah</Label>
-                        <Input id="schoolEmail" type="email" placeholder="info@sekolah.sch.id" value={schoolEmail} onChange={(e) => setSchoolEmail(e.target.value)} maxLength={200} className="h-11 rounded-xl" required />
+                        <Input id="schoolEmail" type="email" placeholder="info@sekolah.sch.id" value={schoolEmail} onChange={(e) => { setSchoolEmail(e.target.value); setEmail(e.target.value); }} maxLength={200} className="h-11 rounded-xl" required />
                       </motion.div>
 
                       <motion.div variants={itemVariants} className="space-y-2">
@@ -534,7 +524,7 @@ const Register = () => {
 
                       <motion.div variants={itemVariants} className="space-y-2">
                         <Label htmlFor="schoolWa">No. WhatsApp Sekolah</Label>
-                        <Input id="schoolWa" type="tel" placeholder="08xxxxxxxxxx" value={schoolWhatsapp} onChange={(e) => setSchoolWhatsapp(e.target.value.replace(/\D/g, ''))} maxLength={16} className="h-11 rounded-xl" required />
+                        <Input id="schoolWa" type="tel" placeholder="08xxxxxxxxxx" value={schoolWhatsapp} onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); setSchoolWhatsapp(v); setPhone(v); }} maxLength={16} className="h-11 rounded-xl" required />
                       </motion.div>
 
 
