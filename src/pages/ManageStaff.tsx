@@ -22,6 +22,19 @@ import QRCodeDisplay from "@/components/QRCodeDisplay";
 import StaffAttendanceDetailDialog from "@/components/staff/StaffAttendanceDetailDialog";
 import { TeacherIdCard } from "@/components/TeacherIdCard";
 
+const POSITION_PRESETS = [
+  "Guru",
+  "Wali Kelas",
+  "Kepala Sekolah",
+  "Wakil Kepala Sekolah",
+  "Tata Usaha",
+  "Operator",
+  "Bendahara",
+  "Sekuriti",
+  "Kebersihan",
+  "Pustakawan",
+];
+
 interface StaffMember {
   user_id: string;
   full_name: string;
