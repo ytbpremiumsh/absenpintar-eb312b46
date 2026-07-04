@@ -1576,21 +1576,13 @@ export function BendaharaGenerate() {
             </div>
             <Switch checked={skipExisting} onCheckedChange={setSkipExisting} />
           </div>
-          {flags.wa ? (
+          {flags.wa && (
             <div className="flex items-center justify-between rounded-lg border p-3 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-900">
               <div>
                 <p className="text-sm font-medium flex items-center gap-1.5 text-emerald-800 dark:text-emerald-200"><Send className="h-3.5 w-3.5" /> Otomatis buat link & kirim WA</p>
                 <p className="text-xs text-emerald-700/80 dark:text-emerald-300/80">Setelah generate, sistem langsung membuat link pembayaran (QRIS / Transfer Bank) dan mengirim tagihan ke WA wali murid — tidak perlu langkah tambahan</p>
               </div>
               <span className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300 bg-white/70 dark:bg-emerald-900/40 px-2 py-1 rounded-md">Aktif</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between rounded-lg border p-3 bg-slate-50 border-slate-200 dark:bg-slate-900/40 dark:border-slate-800">
-              <div>
-                <p className="text-sm font-medium flex items-center gap-1.5 text-slate-700 dark:text-slate-200"><Send className="h-3.5 w-3.5" /> Kirim WA otomatis nonaktif</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Fitur pengiriman WA dinonaktifkan Super Admin. Link pembayaran tetap dibuat otomatis.</p>
-              </div>
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300 bg-white/70 dark:bg-slate-800/70 px-2 py-1 rounded-md">Nonaktif</span>
             </div>
           )}
           {(preview.skipped > 0 || preview.noTariff > 0) && (
