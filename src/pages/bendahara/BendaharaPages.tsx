@@ -570,10 +570,12 @@ export function BendaharaDashboard() {
                     {detailBusy === `pdf-${detailInv.id}` ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Download className="h-4 w-4 mr-1.5" />}
                     Invoice PDF
                   </Button>
-                  <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" disabled={!detailInv.parent_phone || detailBusy === `wa-${detailInv.id}`} onClick={() => sendPaidConfirmationWa(detailInv)} title={!detailInv.parent_phone ? "Wali tidak punya nomor WA" : "Kirim konfirmasi via WA"}>
-                    {detailBusy === `wa-${detailInv.id}` ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <MessageCircle className="h-4 w-4 mr-1.5" />}
-                    Notif WA
-                  </Button>
+                  {flags.wa && (
+                    <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" disabled={!detailInv.parent_phone || detailBusy === `wa-${detailInv.id}`} onClick={() => sendPaidConfirmationWa(detailInv)} title={!detailInv.parent_phone ? "Wali tidak punya nomor WA" : "Kirim konfirmasi via WA"}>
+                      {detailBusy === `wa-${detailInv.id}` ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <MessageCircle className="h-4 w-4 mr-1.5" />}
+                      Notif WA
+                    </Button>
+                  )}
                 </div>
               </div>
             );
