@@ -3161,12 +3161,16 @@ export function BendaharaSPPDetail() {
                                 <>
                                   <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => copyLink(brandPaymentUrl(inv.payment_url))} title="Salin"><Copy className="h-3 w-3" /></Button>
                                   <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => setPaymentIframe(brandPaymentUrl(inv.payment_url))} title="Buka di dashboard"><LinkIcon className="h-3 w-3" /></Button>
-                                  <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 h-8 px-2.5" disabled={busy === `wa-${inv.id}`} onClick={() => sendWa(inv)} title="Kirim WA"><MessageCircle className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">WA</span></Button>
+                                  {flags.wa && (
+                                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 h-8 px-2.5" disabled={busy === `wa-${inv.id}`} onClick={() => sendWa(inv)} title="Kirim WA"><MessageCircle className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">WA</span></Button>
+                                  )}
                                 </>
                               )}
-                              <Button size="sm" variant="outline" className="h-8 px-2.5 border-slate-400 text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" onClick={() => openOfflineDialog(inv)} title="Catat pembayaran tunai/transfer manual">
-                                <Banknote className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">Bayar Offline</span>
-                              </Button>
+                              {flags.offline && (
+                                <Button size="sm" variant="outline" className="h-8 px-2.5 border-slate-400 text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" onClick={() => openOfflineDialog(inv)} title="Catat pembayaran tunai/transfer manual">
+                                  <Banknote className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">Bayar Offline</span>
+                                </Button>
+                              )}
                               <Button size="sm" variant="outline" className="h-8 w-8 p-0 border-red-300 text-red-600 hover:bg-red-50" disabled={busy === `del-${inv.id}`} onClick={() => deleteInvoice(inv)} title="Hapus tagihan">
                                 {busy === `del-${inv.id}` ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                               </Button>
