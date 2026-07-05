@@ -483,6 +483,14 @@ const StudentDetail = () => {
                   </div>
                 </div>
               )}
+              {student.rfid_uid && (
+                <div className="border-t pt-4">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5"><CreditCard className="h-3 w-3" /> Kartu RFID Terdaftar</p>
+                  <div className="rounded-lg bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 px-3 py-2.5">
+                    <p className="font-mono text-sm font-bold tracking-[0.15em] text-foreground break-all">{student.rfid_uid}</p>
+                  </div>
+                </div>
+              )}
               <div className="border-t pt-4 space-y-3">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Data Wali / Orang Tua</p>
                 <InfoItem icon={User} label="Nama Wali" value={student.parent_name} />
