@@ -90,6 +90,15 @@ const ManageStaff = () => {
   const [qrDialog, setQrDialog] = useState(false);
   const [qrTarget, setQrTarget] = useState<StaffMember | null>(null);
 
+  // RFID dialogs
+  const [rfidDialogOpen, setRfidDialogOpen] = useState(false);
+  const [rfidTarget, setRfidTarget] = useState<StaffMember | null>(null);
+  const [rfidValue, setRfidValue] = useState("");
+  const [rfidSaving, setRfidSaving] = useState(false);
+  const [testRfidOpen, setTestRfidOpen] = useState(false);
+  const [testRfidValue, setTestRfidValue] = useState("");
+  const [testRfidResult, setTestRfidResult] = useState<{ ok: boolean; msg: string; member?: StaffMember } | null>(null);
+
   // Attendance detail dialog
   const [attendanceDialog, setAttendanceDialog] = useState(false);
   const [attendanceTarget, setAttendanceTarget] = useState<StaffMember | null>(null);
