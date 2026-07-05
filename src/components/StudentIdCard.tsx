@@ -17,6 +17,7 @@ interface Props {
     schools?: { name?: string; logo?: string | null };
     school_id?: string;
   };
+  hideQrDownload?: boolean;
 }
 
 function formatCard(n?: string) {
