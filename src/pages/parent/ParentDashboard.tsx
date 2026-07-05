@@ -26,6 +26,8 @@ import atskollaLogo from "@/assets/Logo_atskolla.png";
 import { formatPaymentMethodLabel } from "@/lib/paymentMethod";
 import { isWorkingDay } from "@/lib/holidays";
 import { StudentIdCard } from "@/components/StudentIdCard";
+import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
+import type { PaymentChannelId } from "@/lib/paymentChannels";
 
 const STATUS_COLORS: Record<string, string> = {
   hadir: "#10b981",
