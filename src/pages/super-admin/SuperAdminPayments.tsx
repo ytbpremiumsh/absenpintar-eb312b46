@@ -114,6 +114,24 @@ const SuperAdminPayments = () => {
   const pendingCount = payments.filter(p => p.status === "pending").length;
   const totalRevenue = payments.filter(p => p.status === "paid").reduce((sum, p) => sum + p.amount, 0);
 
+  const sppPaidCount = sppInvoices.filter(s => s.status === "paid").length;
+  const sppPendingCount = sppInvoices.filter(s => s.status === "pending").length;
+  const sppRevenue = sppInvoices.filter(s => s.status === "paid").reduce((sum, s) => sum + (s.total_amount || s.amount || 0), 0);
+
+  const filteredSpp = sppInvoices.filter(s => {
+    if (sppStatus !== "all" && s.status !== sppStatus) return false;
+    if (!sppSearch) return true;
+    const q = sppSearch.toLowerCase();
+    return (
+      (s.student_name || "").toLowerCase().includes(q) ||
+      (s.parent_name || "").toLowerCase().includes(q) ||
+      (s.class_name || "").toLowerCase().includes(q) ||
+      (s.invoice_number || "").toLowerCase().includes(q) ||
+      (s.schools?.name || "").toLowerCase().includes(q)
+    );
+  });
+
+
   return (
     <div className="space-y-6">
       <div>
