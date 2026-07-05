@@ -670,7 +670,7 @@ const LandingThemeB = () => {
               <div className="col-span-2 space-y-4">
                 <div className="flex items-center gap-3">
                   <img
-                    src={get("footer_logo") || "/images/logo-atskolla.png"}
+                    src="/images/logo-atskolla.png"
                     alt="ATSkolla"
                     className="h-10 w-10 rounded-xl object-contain bg-white"
                   />
