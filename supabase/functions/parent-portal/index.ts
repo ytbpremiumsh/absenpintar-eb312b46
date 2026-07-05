@@ -536,13 +536,16 @@ Deno.serve(async (req) => {
       const { data: inv } = await supabase.from("spp_invoices").select("id, student_id").eq("id", invoiceId).maybeSingle();
       if (!inv || inv.student_id !== studentId) return json({ error: "Invoice tidak valid" });
 
-      // Pilih gateway aktif dari platform_settings (default: mayar)
-      const { data: gwSetting } = await supabase
+      // Pilih gateway per channel (fallback ke active_payment_gateway lalu mayar)
+      const ch = (channel || "va").toString().toLowerCase();
+      const channelKey = ch === "qris" ? "gateway_qris" : ch === "retail" ? "gateway_retail" : "gateway_va";
+      const { data: gwRows } = await supabase
         .from("platform_settings")
-        .select("value")
-        .eq("key", "active_payment_gateway")
-        .maybeSingle();
-      const gateway = (gwSetting?.value || "mayar").toLowerCase() === "doku" ? "doku" : "mayar";
+        .select("key,value")
+        .in("key", [channelKey, "active_payment_gateway"]);
+      const gwMap: Record<string, string> = {};
+      (gwRows || []).forEach((r: any) => { gwMap[r.key] = (r.value || "").toLowerCase(); });
+      const gateway = (gwMap[channelKey] || gwMap.active_payment_gateway || "mayar") === "doku" ? "doku" : "mayar";
       const fnName = gateway === "doku" ? "spp-doku" : "spp-mayar";
 
       const sppRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/${fnName}`, {
