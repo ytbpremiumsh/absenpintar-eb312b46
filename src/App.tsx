@@ -145,7 +145,7 @@ function RootRoute() {
   if (!slug) return <LandingPage />;
   if (loading) return <LoadingScreen />;
   if (notFound) return <TenantNotFound />;
-  if (school) return <Navigate to="/admin" replace />;
+  if (school) return <Navigate to="/login" replace />;
   return <LandingPage />;
 }
 
