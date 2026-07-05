@@ -340,7 +340,7 @@ const Login = ({ forcedMode }: LoginProps) => {
           {/* Right: Login card */}
           <motion.div
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}
-            className="w-full max-w-md"
+            className={`w-full ${mode === "parent" ? "max-w-xl" : "max-w-md"}`}
           >
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
               className="flex lg:hidden items-center justify-center gap-3 mb-6">
@@ -349,8 +349,8 @@ const Login = ({ forcedMode }: LoginProps) => {
             </motion.div>
 
             <div className="text-center mb-5">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white">
-                {mode === "school" ? "Selamat Datang" : "Portal Wali Murid"}
+              <h2 className={`font-bold text-white ${mode === "parent" ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl"}`}>
+                {mode === "school" ? "Selamat Datang" : `Portal Wali Murid${tenantName ? ` — ${tenantName}` : ""}`}
               </h2>
               <p className="text-white/60 text-sm mt-1">
                 {mode === "school" ? "Masuk ke akun Anda untuk melanjutkan" : "Pantau aktivitas ananda dengan mudah"}
@@ -360,7 +360,8 @@ const Login = ({ forcedMode }: LoginProps) => {
             <motion.div initial={{ opacity: 0, y: 20, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 0.25, duration: 0.6 }} className="relative">
               <div className="absolute -inset-1 bg-white/10 rounded-[2rem] blur-xl" />
-              <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-7 shadow-2xl shadow-black/20">
+              <div className={`relative bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl shadow-black/20 ${mode === "parent" ? "p-8 sm:p-10" : "p-6 sm:p-7"}`}>
+
                 {/* Tabs (hidden when a forced mode is provided via /admin or /login routes) */}
                 {!forcedMode && (
                   <div className="flex p-1 bg-secondary/60 rounded-xl mb-5">
