@@ -47,16 +47,27 @@ const WebhookCard = () => {
 
 const SuperAdminPayments = () => {
   const [payments, setPayments] = useState<any[]>([]);
+  const [sppInvoices, setSppInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [approveTarget, setApproveTarget] = useState<any>(null);
   const [approving, setApproving] = useState(false);
+  const [sppSearch, setSppSearch] = useState("");
+  const [sppStatus, setSppStatus] = useState<"all" | "paid" | "pending">("all");
 
   const fetchPayments = async () => {
-    const { data } = await supabase
-      .from("payment_transactions")
-      .select("*, schools(name), subscription_plans(name)")
-      .order("created_at", { ascending: false });
-    setPayments(data || []);
+    const [{ data: pays }, { data: spps }] = await Promise.all([
+      supabase
+        .from("payment_transactions")
+        .select("*, schools(name), subscription_plans(name)")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("spp_invoices")
+        .select("id, school_id, invoice_number, student_name, class_name, parent_name, parent_phone, period_label, amount, total_amount, status, payment_method, payment_channel, paid_at, created_at, schools(name)")
+        .order("created_at", { ascending: false })
+        .limit(500),
+    ]);
+    setPayments(pays || []);
+    setSppInvoices(spps || []);
     setLoading(false);
   };
 
@@ -64,9 +75,8 @@ const SuperAdminPayments = () => {
     fetchPayments();
     const channel = supabase
       .channel("admin-payments")
-      .on("postgres_changes", { event: "*", schema: "public", table: "payment_transactions" }, () => {
-        fetchPayments();
-      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "payment_transactions" }, () => fetchPayments())
+      .on("postgres_changes", { event: "*", schema: "public", table: "spp_invoices" }, () => fetchPayments())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
