@@ -518,7 +518,7 @@ const Login = ({ forcedMode }: LoginProps) => {
                                     className="h-12 pl-10 font-mono tracking-wider bg-secondary/50 border-border focus:bg-background focus:border-primary focus:ring-primary/20 rounded-xl" />
                                 </div>
                                 <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                                  <Sparkles className="h-3 w-3" /> OTP tetap dikirim ke WhatsApp orang tua yang terdaftar.
+                                  <Sparkles className="h-3 w-3" /> Nomor Kartu Identitas yang terdapat pada halaman kartu pelajar
                                 </p>
                               </div>
                             )}
