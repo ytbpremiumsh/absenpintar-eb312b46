@@ -48,11 +48,11 @@ export const PAYMENT_CHANNELS: PaymentChannel[] = [
     description: "Transfer via ATM / Mobile Banking / Internet Banking",
     fee: 5000,
     banks: [
-      { code: "MANDIRI", name: "Mandiri", logo: mandiriAsset.url },
-      { code: "BRI", name: "BRI", logo: briAsset.url },
-      { code: "BNI", name: "BNI", logo: bniAsset.url },
-      { code: "BCA", name: "BCA", logo: bcaAsset.url },
-      { code: "BSI", name: "BSI", logo: bsiAsset.url },
+      { code: "MANDIRI", name: "Mandiri", logo: assetUrl(mandiriAsset.url) },
+      { code: "BRI", name: "BRI", logo: assetUrl(briAsset.url) },
+      { code: "BNI", name: "BNI", logo: assetUrl(bniAsset.url) },
+      { code: "BCA", name: "BCA", logo: assetUrl(bcaAsset.url) },
+      { code: "BSI", name: "BSI", logo: assetUrl(bsiAsset.url) },
     ],
   },
   {
@@ -61,7 +61,7 @@ export const PAYMENT_CHANNELS: PaymentChannel[] = [
     description: "Scan QR dari semua e-wallet & mobile banking (GoPay, OVO, DANA, ShopeePay, dll)",
     fee: 5000,
     banks: [
-      { code: "QRIS", name: "QRIS", logo: qrisAsset.url },
+      { code: "QRIS", name: "QRIS", logo: assetUrl(qrisAsset.url) },
     ],
   },
   {
@@ -70,8 +70,8 @@ export const PAYMENT_CHANNELS: PaymentChannel[] = [
     description: "Bayar tunai di kasir Alfamart atau Indomaret terdekat",
     fee: 8000,
     banks: [
-      { code: "ALFAMART", name: "Alfamart", logo: alfamartAsset.url },
-      { code: "INDOMARET", name: "Indomaret", logo: indomaretAsset.url },
+      { code: "ALFAMART", name: "Alfamart", logo: assetUrl(alfamartAsset.url) },
+      { code: "INDOMARET", name: "Indomaret", logo: assetUrl(indomaretAsset.url) },
     ],
   },
 ];
