@@ -2229,6 +2229,7 @@ export type Database = {
           parent_phone: string
           photo_url: string | null
           qr_code: string
+          rfid_uid: string | null
           school_id: string
           student_id: string
         }
@@ -2243,6 +2244,7 @@ export type Database = {
           parent_phone: string
           photo_url?: string | null
           qr_code: string
+          rfid_uid?: string | null
           school_id: string
           student_id: string
         }
@@ -2257,6 +2259,7 @@ export type Database = {
           parent_phone?: string
           photo_url?: string | null
           qr_code?: string
+          rfid_uid?: string | null
           school_id?: string
           student_id?: string
         }
