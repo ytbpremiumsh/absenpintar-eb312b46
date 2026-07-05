@@ -531,6 +531,7 @@ Deno.serve(async (req) => {
 
     if (action === "spp_pay") {
       const invoiceId = body.invoice_id;
+      const channel = body.channel; // "va" | "qris" | "retail"
       if (!invoiceId) return json({ error: "invoice_id wajib" });
       const { data: inv } = await supabase.from("spp_invoices").select("id, student_id").eq("id", invoiceId).maybeSingle();
       if (!inv || inv.student_id !== studentId) return json({ error: "Invoice tidak valid" });
@@ -542,11 +543,17 @@ Deno.serve(async (req) => {
           "x-parent-token": session.token,
           "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
         },
-        body: JSON.stringify({ action: "parent_create_payment", invoice_id: invoiceId }),
+        body: JSON.stringify({ action: "parent_create_payment", invoice_id: invoiceId, channel }),
       });
       const sppJson = await sppRes.json();
       if (!sppJson?.success) return json({ error: sppJson?.error || "Gagal" });
-      return json({ ok: true, payment_url: brandPaymentUrl(sppJson.payment_url), invoice_id: sppJson.invoice_id });
+      return json({
+        ok: true,
+        payment_url: brandPaymentUrl(sppJson.payment_url),
+        invoice_id: sppJson.invoice_id,
+        service_fee: sppJson.service_fee || 0,
+        total_charged: sppJson.total_charged || 0,
+      });
     }
 
     if (action === "school_info") {
