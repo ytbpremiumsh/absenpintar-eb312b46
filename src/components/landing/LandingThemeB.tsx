@@ -654,7 +654,7 @@ const LandingThemeB = () => {
               <button onClick={() => navigate("/register")} className="inline-flex items-center gap-2 bg-white text-indigo-700 px-8 py-3.5 rounded-xl font-bold text-sm transition-all hover:bg-white/90 shadow-xl hover:scale-[1.02]">
                 <Zap className="h-4 w-4" /> Daftar Gratis Sekarang
               </button>
-              <p className="text-white/50 text-xs mt-4">Coba gratis 14 hari • Tanpa instalasi rumit</p>
+              
             </div>
           </motion.div>
         </div>
