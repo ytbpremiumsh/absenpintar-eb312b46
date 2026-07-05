@@ -161,10 +161,12 @@ export function StudentIdCard({ student, hideQrDownload = false }: Props) {
         </div>
       </div>
 
-      <div className="max-w-sm mx-auto grid grid-cols-2 gap-2">
-        <Button onClick={handleDownloadQr} variant="outline" className="w-full">
-          <Download className="h-4 w-4 mr-2" /> Unduh QR
-        </Button>
+      <div className={`max-w-sm mx-auto grid gap-2 ${hideQrDownload ? "grid-cols-1" : "grid-cols-2"}`}>
+        {!hideQrDownload && (
+          <Button onClick={handleDownloadQr} variant="outline" className="w-full">
+            <Download className="h-4 w-4 mr-2" /> Unduh QR
+          </Button>
+        )}
         <Button onClick={handleDownload} className="w-full bg-[#5B6CF9] hover:bg-[#4c5ded] text-white">
           <Download className="h-4 w-4 mr-2" /> Unduh Kartu
         </Button>
