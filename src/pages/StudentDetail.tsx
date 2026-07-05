@@ -675,6 +675,47 @@ const StudentDetail = () => {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* RFID Scan Dialog */}
+      <Dialog open={rfidScanOpen} onOpenChange={setRfidScanOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><ScanLine className="h-5 w-5 text-primary" /> Scan Kartu RFID</DialogTitle>
+            <DialogDescription>Pastikan RFID reader terhubung (mode keyboard emulation), lalu tempelkan kartu ke reader.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              autoFocus
+              placeholder="Menunggu kartu…"
+              value={rfidCapture}
+              onChange={(e) => setRfidCapture(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && rfidCapture.trim().length >= 4) {
+                  setEditForm({ ...editForm, rfid_uid: rfidCapture.trim() });
+                  setRfidScanOpen(false);
+                  toast.success("Kartu RFID terbaca. Klik Simpan Perubahan untuk menyimpan.");
+                }
+              }}
+              className="font-mono text-lg text-center tracking-widest"
+            />
+            <div className="rounded-lg bg-muted/40 border border-dashed border-border p-3 text-xs text-muted-foreground">
+              Tips: kebanyakan RFID reader (125kHz / 13.56MHz) otomatis mengetik nomor UID lalu menekan Enter. Setelah muncul di kolom di atas, dialog akan tertutup otomatis.
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setRfidScanOpen(false)}>Batal</Button>
+              <Button
+                onClick={() => {
+                  if (rfidCapture.trim().length < 4) { toast.error("UID minimal 4 karakter"); return; }
+                  setEditForm({ ...editForm, rfid_uid: rfidCapture.trim() });
+                  setRfidScanOpen(false);
+                }}
+              >
+                Gunakan UID
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
