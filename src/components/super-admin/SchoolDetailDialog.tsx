@@ -241,6 +241,32 @@ const SchoolDetailDialog = ({ school, onClose, getStatusBadge }: SchoolDetailDia
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <Dialog open={!!cardStudent} onOpenChange={(o) => !o && setCardStudent(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <IdCard className="h-5 w-5 text-primary" /> Kartu Pelajar
+            </DialogTitle>
+          </DialogHeader>
+          {cardStudent && (
+            <StudentIdCard
+              student={{
+                id: cardStudent.id,
+                name: cardStudent.name,
+                class: cardStudent.class,
+                student_id: cardStudent.student_id,
+                photo_url: cardStudent.photo_url,
+                gender: cardStudent.gender,
+                school_id: school.id,
+                schools: { name: school.name, logo: school.logo },
+                ...(cardStudent.card_number ? { card_number: cardStudent.card_number } : {}),
+                ...(cardStudent.qr_code ? { qr_code: cardStudent.qr_code } : {}),
+              } as any}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
