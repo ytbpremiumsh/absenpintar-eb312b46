@@ -43,6 +43,7 @@ interface StaffMember {
   phone: string | null;
   nip: string | null;
   position: string | null;
+  rfid_uid: string | null;
   roles: string[];
   presentToday?: boolean;
   arrivalTime?: string | null;
