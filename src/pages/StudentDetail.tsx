@@ -151,6 +151,7 @@ const StudentDetail = () => {
     const { error } = await supabase.from("students").update({
       name: editForm.name, class: editForm.class, student_id: editForm.student_id,
       parent_name: editForm.parent_name, parent_phone: editForm.parent_phone, gender: editForm.gender,
+      rfid_uid: editForm.rfid_uid ? editForm.rfid_uid.trim() : null,
     }).eq("id", student.id);
     setSaving(false);
     if (error) { toast.error("Gagal menyimpan: " + error.message); return; }
