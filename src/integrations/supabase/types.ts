@@ -1268,6 +1268,7 @@ export type Database = {
           qr_code: string | null
           referral_code: string | null
           referred_by: string | null
+          rfid_uid: string | null
           school_id: string | null
           updated_at: string
           user_id: string
@@ -1286,6 +1287,7 @@ export type Database = {
           qr_code?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          rfid_uid?: string | null
           school_id?: string | null
           updated_at?: string
           user_id: string
@@ -1304,6 +1306,7 @@ export type Database = {
           qr_code?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          rfid_uid?: string | null
           school_id?: string | null
           updated_at?: string
           user_id?: string
