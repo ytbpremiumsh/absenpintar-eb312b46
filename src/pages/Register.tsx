@@ -623,7 +623,7 @@ const Register = () => {
                             <span className="text-[11px] text-red-600 font-medium">✗ Kata ini dipesan sistem, silakan pilih yang lain</span>
                           )}
                           {slugStatus === "invalid" && slug.length > 0 && (
-                            <span className="text-[11px] text-amber-600 font-medium">Min 3 karakter, huruf kecil/angka/tanda hubung</span>
+                            <span className="text-[11px] text-amber-600 font-medium">Min 3 karakter — hanya huruf kecil &amp; angka (tanpa tanda hubung / simbol).</span>
                           )}
                           {slugStatus === "idle" && !slug && (
                             <span className="text-[11px] text-muted-foreground">Contoh: <span className="font-mono">smpn1jakarta</span> → login di <span className="font-mono">smpn1jakarta.{rootDomain}</span></span>
