@@ -39,6 +39,7 @@ const SchoolDetailDialog = ({ school, onClose, getStatusBadge }: SchoolDetailDia
   const [classes, setClasses] = useState<ClassData[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [studentSearch, setStudentSearch] = useState("");
+  const [cardStudent, setCardStudent] = useState<StudentData | null>(null);
 
   useEffect(() => {
     if (school) {
