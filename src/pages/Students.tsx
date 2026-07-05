@@ -703,6 +703,16 @@ const Students = () => {
               </div>
             </DialogContent>
           </Dialog>
+
+          {/* Test RFID - paling pojok setelah Tambah Siswa */}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => { setTestRfidValue(""); setTestRfidResult(null); setTestRfidOpen(true); }}
+            className="bg-emerald-500/90 hover:bg-emerald-500 text-white border-0 shrink-0"
+          >
+            <Nfc className="h-4 w-4 sm:mr-1.5" /> <span className="hidden sm:inline">Test RFID</span>
+          </Button>
         </div>
       } />
 
