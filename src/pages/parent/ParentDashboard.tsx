@@ -15,7 +15,7 @@ import {
   Sparkles, TrendingUp, Pin, Paperclip, MessageCircle, User, MapPin, Bell,
   Wallet, AlertCircle, Download, ExternalLink, RefreshCw, Receipt, MoreHorizontal,
   Send, ScanLine, History as HistoryIcon, Home, Briefcase, LayoutGrid, UserCircle2,
-  ArrowUpRight, Grid3x3, CreditCard, ChevronRight,
+  ArrowUpRight, Grid3x3, CreditCard, ChevronRight, Copy,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
