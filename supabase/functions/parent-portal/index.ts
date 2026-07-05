@@ -535,8 +535,17 @@ Deno.serve(async (req) => {
       if (!invoiceId) return json({ error: "invoice_id wajib" });
       const { data: inv } = await supabase.from("spp_invoices").select("id, student_id").eq("id", invoiceId).maybeSingle();
       if (!inv || inv.student_id !== studentId) return json({ error: "Invoice tidak valid" });
-      // Forward to spp-mayar with parent token
-      const sppRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/spp-mayar`, {
+
+      // Pilih gateway aktif dari platform_settings (default: mayar)
+      const { data: gwSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "active_payment_gateway")
+        .maybeSingle();
+      const gateway = (gwSetting?.value || "mayar").toLowerCase() === "doku" ? "doku" : "mayar";
+      const fnName = gateway === "doku" ? "spp-doku" : "spp-mayar";
+
+      const sppRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/${fnName}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -549,6 +558,7 @@ Deno.serve(async (req) => {
       if (!sppJson?.success) return json({ error: sppJson?.error || "Gagal" });
       return json({
         ok: true,
+        gateway,
         payment_url: brandPaymentUrl(sppJson.payment_url),
         invoice_id: sppJson.invoice_id,
         service_fee: sppJson.service_fee || 0,

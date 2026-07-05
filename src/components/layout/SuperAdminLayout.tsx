@@ -25,6 +25,7 @@ const navItems = [
 
   // KEUANGAN
   { title: "Konfirmasi Bayar", url: "/super-admin/payments", icon: CreditCard, group: "finance" },
+  { title: "Payment Gateway", url: "/super-admin/payment-gateway", icon: Settings, group: "finance" },
   { title: "Manajemen Bendahara", url: "/super-admin/bendahara", icon: Banknote, group: "finance" },
   { title: "Langganan & Add-on", url: "/super-admin/langganan", icon: Wallet, group: "finance" },
 

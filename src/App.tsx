@@ -44,6 +44,7 @@ const AttendanceTime = lazy(() => import("./pages/AttendanceTime"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
 const SuperAdminDashboard = lazy(() => import("./pages/super-admin/SuperAdminDashboard"));
 const SuperAdminPayments = lazy(() => import("./pages/super-admin/SuperAdminPayments"));
+const SuperAdminPaymentGateway = lazy(() => import("./pages/super-admin/SuperAdminPaymentGateway"));
 const ExportHistory = lazy(() => import("./pages/ExportHistory"));
 const EditAttendance = lazy(() => import("./pages/EditAttendance"));
 const SupportTickets = lazy(() => import("./pages/SupportTickets"));
@@ -199,6 +200,7 @@ function AppRoutes() {
           <Route path="/super-admin/subscriptions" element={<Navigate to="/super-admin/langganan?tab=schools" replace />} />
           <Route path="/super-admin/addons" element={<Navigate to="/super-admin/langganan?tab=addons" replace />} />
           <Route path="/super-admin/payments" element={<SuperAdminPayments />} />
+          <Route path="/super-admin/payment-gateway" element={<SuperAdminPaymentGateway />} />
           <Route path="/super-admin/wa" element={<SuperAdminWhatsAppHub />} />
           <Route path="/super-admin/whatsapp" element={<Navigate to="/super-admin/wa?tab=api" replace />} />
           <Route path="/super-admin/registration-wa" element={<Navigate to="/super-admin/wa?tab=aktivasi" replace />} />
