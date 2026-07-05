@@ -75,15 +75,19 @@ const SuperAdminPaymentGateway = () => {
 
   useEffect(() => { fetchAll(); }, []);
 
-  const handleSaveGateway = async (next: GatewayId) => {
-    setGateway(next);
+  const handleSaveChannel = async (channel: "va" | "qris" | "retail", next: GatewayId) => {
+    if (channel === "va") setGatewayVa(next);
+    if (channel === "qris") setGatewayQris(next);
+    if (channel === "retail") setGatewayRetail(next);
     setSaving(true);
     try {
+      const key = channel === "va" ? "gateway_va" : channel === "qris" ? "gateway_qris" : "gateway_retail";
       const { data, error } = await supabase.functions.invoke("manage-payment-gateway", {
-        body: { action: "set", updates: { active_payment_gateway: next } },
+        body: { action: "set", updates: { [key]: next } },
       });
       if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message);
-      toast.success(`Gateway aktif: ${next.toUpperCase()}`);
+      const label = channel === "va" ? "Virtual Account" : channel === "qris" ? "QRIS" : "Retail";
+      toast.success(`${label} → ${next.toUpperCase()}`);
     } catch (e: any) {
       toast.error("Gagal simpan: " + e.message);
     } finally {
