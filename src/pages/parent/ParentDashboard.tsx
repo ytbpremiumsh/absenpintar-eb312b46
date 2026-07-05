@@ -1165,7 +1165,7 @@ export default function ParentDashboard() {
             
             {current ? (
               <div className="space-y-4">
-                <StudentIdCard student={current as any} />
+                <StudentIdCard student={current as any} hideQrDownload />
                 {(current as any).card_number && (
                   <Card className="p-4 border-0 shadow-card rounded-2xl">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">Nomor Kartu Identitas</p>

@@ -17,6 +17,7 @@ interface Props {
     schools?: { name?: string; logo?: string | null };
     school_id?: string;
   };
+  hideQrDownload?: boolean;
 }
 
 function formatCard(n?: string) {
@@ -25,7 +26,7 @@ function formatCard(n?: string) {
   return `${digits.slice(0, 4)} ${digits.slice(4, 8)} ${digits.slice(8, 12)} ${digits.slice(12, 16)}`;
 }
 
-export function StudentIdCard({ student }: Props) {
+export function StudentIdCard({ student, hideQrDownload = false }: Props) {
   const [cardNumber, setCardNumber] = useState<string>("");
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const cardRef = useRef<HTMLDivElement>(null);
@@ -160,10 +161,12 @@ export function StudentIdCard({ student }: Props) {
         </div>
       </div>
 
-      <div className="max-w-sm mx-auto grid grid-cols-2 gap-2">
-        <Button onClick={handleDownloadQr} variant="outline" className="w-full">
-          <Download className="h-4 w-4 mr-2" /> Unduh QR
-        </Button>
+      <div className={`max-w-sm mx-auto grid gap-2 ${hideQrDownload ? "grid-cols-1" : "grid-cols-2"}`}>
+        {!hideQrDownload && (
+          <Button onClick={handleDownloadQr} variant="outline" className="w-full">
+            <Download className="h-4 w-4 mr-2" /> Unduh QR
+          </Button>
+        )}
         <Button onClick={handleDownload} className="w-full bg-[#5B6CF9] hover:bg-[#4c5ded] text-white">
           <Download className="h-4 w-4 mr-2" /> Unduh Kartu
         </Button>
