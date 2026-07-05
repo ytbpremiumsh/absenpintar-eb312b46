@@ -588,14 +588,6 @@ const Students = () => {
               <FileSpreadsheet className="h-4 w-4 mr-1.5" /> Template
             </Button>
 
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => { setTestRfidValue(""); setTestRfidResult(null); setTestRfidOpen(true); }}
-              className="bg-emerald-500/90 hover:bg-emerald-500 text-white border-0"
-            >
-              <Nfc className="h-4 w-4 mr-1.5" /> Test RFID
-            </Button>
 
             <div className="relative">
               {features.canImportExport && (
