@@ -165,14 +165,27 @@ async function syncPaidInvoicesFromMayar(supabaseAdmin: any, schoolId: string) {
   return { checked: (invoices || []).length, paid, wa_sent: waSent };
 }
 
+// Whitelist channel + fee. Fee ditambahkan ke amount yang dikirim ke Mayar
+// (biaya ditanggung wali murid).
+const SERVICE_FEES: Record<string, number> = { va: 5000, qris: 5000, retail: 8000 };
+function normalizeChannel(c: any): string | null {
+  const v = String(c || "").toLowerCase();
+  return v in SERVICE_FEES ? v : null;
+}
+function serviceFeeFor(c: any): number {
+  const v = normalizeChannel(c);
+  return v ? SERVICE_FEES[v] : 0;
+}
+
 async function createMayarLink(apiKey: string, inv: any, attempt = 0): Promise<{ ok: boolean; json: any; expiry: Date; status: number }> {
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + MAYAR_LINK_TTL_DAYS);
   // Short uniq token — keeps Mayar recipient/email unique without exposing long codes.
   // A static email/phone can make Mayar return another student's existing link.
   const uniq = (Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/[^a-z0-9]/g, "").slice(-6);
-  // Mayar requires integer amount (IDR, no decimals).
-  const safeAmount = Math.max(1000, Math.round(Number(inv.total_amount) || 0));
+  // amount_override lets caller include service_fee before creating Mayar link.
+  const baseAmount = Number(inv._amount_override ?? inv.total_amount) || 0;
+  const safeAmount = Math.max(1000, Math.round(baseAmount));
   const buyerEmail = `spp${uniq}@atskolla.com`;
   // Use a short synthetic mobile so Mayar does not dedupe against another student sharing a parent phone.
   const mobileSeed = `${String(inv.id || "")}${Date.now()}${attempt}`;
@@ -271,9 +284,14 @@ serve(async (req) => {
         sesVariants.some((p) => invVariants.includes(p));
       if (!owned) return err("Akses ditolak");
 
-      const result = await ensureFreshLink(supabaseAdmin, inv);
+      const result = await ensureFreshLink(supabaseAdmin, inv, false, normalizeChannel(body.channel));
       if (!result.success) return err(result.error || "Gagal");
-      return ok({ payment_url: brandPaymentUrl(result.payment_url), invoice_id: result.invoice_id });
+      return ok({
+        payment_url: brandPaymentUrl(result.payment_url),
+        invoice_id: result.invoice_id,
+        service_fee: result.service_fee || 0,
+        total_charged: result.total_charged || inv.total_amount,
+      });
     }
 
     // ====== SCHOOL ACTIONS (require school admin/bendahara JWT) ======
@@ -345,16 +363,25 @@ async function ensureFreshLink(
   supabaseAdmin: any,
   inv: any,
   forceRegen = false,
-): Promise<{ success: boolean; payment_url?: string; invoice_id?: string; error?: string }> {
+  channel: string | null = null,
+): Promise<{ success: boolean; payment_url?: string; invoice_id?: string; error?: string; service_fee?: number; total_charged?: number }> {
   const apiKey = await getMayarApiKey(supabaseAdmin);
   if (!apiKey) return { success: false, error: "MAYAR_API_KEY belum dikonfigurasi" };
 
   const now = Date.now();
   const isExpired = inv.expired_at ? new Date(inv.expired_at).getTime() < now : false;
+  const serviceFee = serviceFeeFor(channel);
 
-  // Reuse if fresh & not forced
-  if (!forceRegen && inv.payment_url && !isExpired) {
-    return { success: true, payment_url: inv.payment_url, invoice_id: inv.id };
+  // Reuse if fresh & not forced AND channel matches previously chosen one.
+  const sameChannel = channel ? inv.payment_channel === channel : true;
+  if (!forceRegen && inv.payment_url && !isExpired && sameChannel) {
+    return {
+      success: true,
+      payment_url: inv.payment_url,
+      invoice_id: inv.id,
+      service_fee: inv.service_fee || 0,
+      total_charged: (inv.total_amount || 0) + (inv.service_fee || 0),
+    };
   }
 
   // If the invoice itself is already 'expired', find/use its latest pending sibling instead
@@ -380,8 +407,9 @@ async function ensureFreshLink(
     }
   }
 
-  // Create Mayar link
-  const linkRes = await createMayarLink(apiKey, inv);
+  // Create Mayar link with total = tagihan + service_fee
+  const totalCharged = (Number(inv.total_amount) || 0) + serviceFee;
+  const linkRes = await createMayarLink(apiKey, { ...inv, _amount_override: totalCharged });
   await supabaseAdmin.from("spp_logs").insert({
     school_id: inv.school_id,
     invoice_id: inv.id,
@@ -406,6 +434,8 @@ async function ensureFreshLink(
     payment_url: link.link || null,
     expired_at: linkRes.expiry.toISOString(),
     status: "pending",
+    service_fee: serviceFee,
+    payment_channel: channel,
   }).eq("id", inv.id);
 
   // Bridge to payment_transactions for webhook compatibility
@@ -413,12 +443,21 @@ async function ensureFreshLink(
   await supabaseAdmin.from("payment_transactions").insert({
     school_id: inv.school_id,
     plan_id: anyPlan?.id || inv.school_id,
-    amount: inv.total_amount,
+    amount: totalCharged,
     status: "pending",
     mayar_transaction_id: mayarId || mayarTransactionId,
     mayar_payment_url: link.link || null,
     payment_method: "spp",
+    service_fee: serviceFee,
+    payment_channel: channel,
   });
 
-  return { success: true, payment_url: link.link, invoice_id: parentInvoiceId };
+  return {
+    success: true,
+    payment_url: link.link,
+    invoice_id: parentInvoiceId,
+    service_fee: serviceFee,
+    total_charged: totalCharged,
+  };
 }
+

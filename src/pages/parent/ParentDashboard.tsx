@@ -26,6 +26,8 @@ import atskollaLogo from "@/assets/Logo_atskolla.png";
 import { formatPaymentMethodLabel } from "@/lib/paymentMethod";
 import { isWorkingDay } from "@/lib/holidays";
 import { StudentIdCard } from "@/components/StudentIdCard";
+import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
+import type { PaymentChannelId } from "@/lib/paymentChannels";
 
 const STATUS_COLORS: Record<string, string> = {
   hadir: "#10b981",
@@ -115,6 +117,9 @@ export default function ParentDashboard() {
   const [sppBusy, setSppBusy] = useState<string | null>(null);
   const [paymentIframe, setPaymentIframe] = useState<string | null>(null);
   const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerInvoice, setPickerInvoice] = useState<any>(null);
+  const [pickerLoading, setPickerLoading] = useState(false);
   const [headerLogo, setHeaderLogo] = useState<string | null>(null);
 
   useEffect(() => {
@@ -183,12 +188,32 @@ export default function ParentDashboard() {
     }
   }, [tab, selectedStudent, invoke]);
 
-  const paySpp = async (invoiceId: string) => {
-    setSppBusy(invoiceId);
-    const d = await invoke("spp_pay", { student_id: selectedStudent, invoice_id: invoiceId });
+  // Membuka picker channel pembayaran (sebelum benar-benar membuat link Mayar).
+  const paySpp = (invoiceOrId: any) => {
+    // Cari objek invoice lengkap supaya bisa tampilkan info di picker.
+    const list = [...(sppData.tunggakan || []), ...(sppData.aktif || [])];
+    const inv = typeof invoiceOrId === "string"
+      ? list.find((x: any) => x.id === invoiceOrId)
+      : invoiceOrId;
+    if (!inv) { toast.error("Tagihan tidak ditemukan"); return; }
+    setPickerInvoice(inv);
+    setPickerOpen(true);
+  };
+
+  const confirmPaySpp = async (channel: PaymentChannelId, _fee: number, _total: number) => {
+    if (!pickerInvoice) return;
+    setPickerLoading(true);
+    setSppBusy(pickerInvoice.id);
+    const d = await invoke("spp_pay", { student_id: selectedStudent, invoice_id: pickerInvoice.id, channel });
     setSppBusy(null);
+    setPickerLoading(false);
     if (d?.error) { toast.error(d.error); return; }
-    if (d?.payment_url) { setPayingInvoiceId(invoiceId); setPaymentIframe(d.payment_url); toast.success("Membuka halaman pembayaran..."); }
+    if (d?.payment_url) {
+      setPickerOpen(false);
+      setPayingInvoiceId(pickerInvoice.id);
+      setPaymentIframe(d.payment_url);
+      toast.success("Membuka halaman pembayaran...");
+    }
   };
 
   const downloadSppPdf = async (inv: any) => {
@@ -1220,6 +1245,16 @@ export default function ParentDashboard() {
         }}
         onPaid={() => { /* refresh dilakukan saat onClose */ }}
         onClose={() => { setPaymentIframe(null); setPayingInvoiceId(null); loadTab(); }}
+      />
+
+      <PaymentMethodPicker
+        open={pickerOpen}
+        onOpenChange={(o) => { if (!pickerLoading) { setPickerOpen(o); if (!o) setPickerInvoice(null); } }}
+        billAmount={pickerInvoice?.total_amount || 0}
+        title="Pilih Metode Pembayaran"
+        subtitle={pickerInvoice ? `Tagihan SPP ${pickerInvoice.period_label || ""}` : undefined}
+        loading={pickerLoading}
+        onConfirm={confirmPaySpp}
       />
     </div>
   );

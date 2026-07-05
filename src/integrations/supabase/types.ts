@@ -1139,9 +1139,11 @@ export type Database = {
           mayar_payment_url: string | null
           mayar_transaction_id: string | null
           paid_at: string | null
+          payment_channel: string | null
           payment_method: string | null
           plan_id: string
           school_id: string
+          service_fee: number
           status: string
         }
         Insert: {
@@ -1151,9 +1153,11 @@ export type Database = {
           mayar_payment_url?: string | null
           mayar_transaction_id?: string | null
           paid_at?: string | null
+          payment_channel?: string | null
           payment_method?: string | null
           plan_id: string
           school_id: string
+          service_fee?: number
           status?: string
         }
         Update: {
@@ -1163,9 +1167,11 @@ export type Database = {
           mayar_payment_url?: string | null
           mayar_transaction_id?: string | null
           paid_at?: string | null
+          payment_channel?: string | null
           payment_method?: string | null
           plan_id?: string
           school_id?: string
+          service_fee?: number
           status?: string
         }
         Relationships: [
@@ -1934,6 +1940,7 @@ export type Database = {
           parent_email: string | null
           parent_name: string | null
           parent_phone: string | null
+          payment_channel: string | null
           payment_method: string | null
           payment_url: string | null
           period_label: string
@@ -1942,6 +1949,7 @@ export type Database = {
           qr_code: string | null
           regenerated_from: string | null
           school_id: string
+          service_fee: number
           settlement_id: string | null
           status: string
           student_id: string
@@ -1968,6 +1976,7 @@ export type Database = {
           parent_email?: string | null
           parent_name?: string | null
           parent_phone?: string | null
+          payment_channel?: string | null
           payment_method?: string | null
           payment_url?: string | null
           period_label: string
@@ -1976,6 +1985,7 @@ export type Database = {
           qr_code?: string | null
           regenerated_from?: string | null
           school_id: string
+          service_fee?: number
           settlement_id?: string | null
           status?: string
           student_id: string
@@ -2002,6 +2012,7 @@ export type Database = {
           parent_email?: string | null
           parent_name?: string | null
           parent_phone?: string | null
+          payment_channel?: string | null
           payment_method?: string | null
           payment_url?: string | null
           period_label?: string
@@ -2010,6 +2021,7 @@ export type Database = {
           qr_code?: string | null
           regenerated_from?: string | null
           school_id?: string
+          service_fee?: number
           settlement_id?: string | null
           status?: string
           student_id?: string
