@@ -74,9 +74,7 @@ const Register = () => {
 
   const slugify = (s: string) =>
     s.toLowerCase()
-      .replace(/[^a-z0-9-]+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-+|-+$/g, "")
+      .replace(/[^a-z0-9]+/g, "")
       .slice(0, 40);
 
   // Auto-suggest slug from school name (only if user hasn't manually edited)
@@ -87,10 +85,10 @@ const Register = () => {
     }
   }, [schoolData, slugTouched]);
 
-  // Debounced availability check
+  // Debounced availability check — subdomains must be letters/digits only (no dashes).
   useEffect(() => {
     if (!slug) { setSlugStatus("idle"); return; }
-    if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(slug)) {
+    if (!/^[a-z0-9]{3,40}$/.test(slug)) {
       setSlugStatus("invalid"); return;
     }
     setSlugStatus("checking");
@@ -240,9 +238,9 @@ const Register = () => {
       }
 
       if (data.school_slug) {
-        // Use path-based tenant URL so it works with valid SSL on the root domain.
-        const targetUrl = `${window.location.protocol}//${rootDomain}/t/${data.school_slug}/admin`;
-        toast.success(`Registrasi berhasil! Login di ${rootDomain}/t/${data.school_slug}/admin`, { duration: 10000 });
+        // Use the school's own subdomain URL (wildcard SSL is provisioned on the root domain).
+        const targetUrl = `${window.location.protocol}//${data.school_slug}.${rootDomain}/admin`;
+        toast.success(`Registrasi berhasil! Login di ${data.school_slug}.${rootDomain}/admin`, { duration: 10000 });
         setTimeout(() => { window.location.href = targetUrl; }, 2500);
       } else {
         toast.success("Registrasi berhasil! Silakan login.");
@@ -600,7 +598,7 @@ const Register = () => {
                         <div className="flex items-stretch rounded-xl overflow-hidden border border-input focus-within:ring-2 focus-within:ring-ring">
                           <Input
                             id="schoolSlug"
-                            placeholder="nama-sekolah"
+                            placeholder="namasekolah"
                             value={slug}
                             onChange={(e) => { setSlug(slugify(e.target.value)); setSlugTouched(true); }}
                             maxLength={40}
@@ -625,7 +623,7 @@ const Register = () => {
                             <span className="text-[11px] text-red-600 font-medium">✗ Kata ini dipesan sistem, silakan pilih yang lain</span>
                           )}
                           {slugStatus === "invalid" && slug.length > 0 && (
-                            <span className="text-[11px] text-amber-600 font-medium">Min 3 karakter, huruf kecil/angka/tanda hubung</span>
+                            <span className="text-[11px] text-amber-600 font-medium">Min 3 karakter — hanya huruf kecil &amp; angka (tanpa tanda hubung / simbol).</span>
                           )}
                           {slugStatus === "idle" && !slug && (
                             <span className="text-[11px] text-muted-foreground">Contoh: <span className="font-mono">smpn1jakarta</span> → login di <span className="font-mono">smpn1jakarta.{rootDomain}</span></span>

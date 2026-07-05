@@ -176,12 +176,24 @@ export function isRootHost(): boolean {
 }
 
 /**
- * Build a tenant URL. Uses the path-based form (/t/{slug}) on the current
- * root domain so it always resolves with a valid SSL certificate — subdomains
- * like {slug}.atskolla.com require wildcard SSL which is not provisioned
- * automatically on Lovable hosting.
+ * Build a tenant URL using the school's own subdomain
+ * (e.g. https://smkcendikia.atskolla.com/admin). Requires wildcard SSL /
+ * DNS to be provisioned for the root domain — that is now the default on
+ * Lovable-managed hosting for ATSkolla.
  */
 export function buildTenantUrl(slug: string, path: string = "/"): string {
+  if (typeof window === "undefined") return path;
+  const root = getRootDomain();
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  if (root && root !== "localhost") {
+    return `${window.location.protocol}//${slug}.${root}${normalizedPath}`;
+  }
+  // Local dev fallback keeps the path-based form so React Router basename resolves it.
+  return `/t/${slug}${normalizedPath}`;
+}
+
+/** Path-based tenant URL (legacy fallback for schools without wildcard SSL). */
+export function buildTenantPathUrl(slug: string, path: string = "/"): string {
   if (typeof window === "undefined") return path;
   const root = getRootDomain();
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -191,14 +203,7 @@ export function buildTenantUrl(slug: string, path: string = "/"): string {
   return `/t/${slug}${normalizedPath}`;
 }
 
-/** Subdomain-form URL (informational only; requires wildcard SSL to work). */
-export function buildTenantSubdomainUrl(slug: string, path: string = "/"): string {
-  if (typeof window === "undefined") return path;
-  const root = getRootDomain();
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  if (root && root !== "localhost") {
-    return `${window.location.protocol}//${slug}.${root}${normalizedPath}`;
-  }
-  return normalizedPath;
-}
+/** @deprecated Use buildTenantUrl — it now returns the subdomain form by default. */
+export const buildTenantSubdomainUrl = buildTenantUrl;
+
 

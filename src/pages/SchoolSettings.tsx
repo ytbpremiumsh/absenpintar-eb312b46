@@ -217,7 +217,7 @@ const SchoolSettings = () => {
     setSaving(true);
 
     // Handle subdomain change with 14-day cooldown + uniqueness check
-    const normalizedSlug = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    const normalizedSlug = slug.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
     const slugChanged = normalizedSlug !== initialSlug;
     let slugUpdatePayload: any = {};
     if (slugChanged) {
@@ -228,7 +228,7 @@ const SchoolSettings = () => {
       }
       if (normalizedSlug.length < 3) {
         setSaving(false);
-        toast.error("Subdomain minimal 3 karakter (huruf, angka, tanda -).");
+        toast.error("Subdomain minimal 3 karakter — hanya huruf & angka (tanpa tanda hubung).");
         return;
       }
       const { data: taken } = await supabase.from("schools").select("id").eq("slug", normalizedSlug).neq("id", profile.school_id).maybeSingle();
@@ -356,8 +356,8 @@ const SchoolSettings = () => {
                 <input
                   readOnly={!canEditSlug}
                   value={slug}
-                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
-                  placeholder="nama-sekolah"
+                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""))}
+                  placeholder="namasekolah"
                   className="flex-1 bg-transparent py-2 text-sm font-medium text-foreground outline-none"
                 />
                 <span className="pl-1 pr-3 py-2 text-sm text-muted-foreground">
@@ -389,7 +389,7 @@ const SchoolSettings = () => {
             </div>
             <p className="text-xs text-muted-foreground">
               {canEditSlug
-                ? "Gunakan huruf kecil, angka, dan tanda '-'. Setelah diubah, baru bisa diubah lagi setelah 14 hari."
+                ? "Gunakan huruf kecil dan angka saja (tanpa tanda hubung / simbol). Setelah diubah, baru bisa diubah lagi setelah 14 hari."
                 : `Subdomain baru dapat diubah lagi dalam ${slugDaysRemaining} hari.`}
             </p>
             {initialSlug && (
