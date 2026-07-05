@@ -802,6 +802,15 @@ const Students = () => {
                           <div className="flex items-center justify-center gap-1 pt-1" onClick={(e) => e.stopPropagation()}>
                             <Button variant="outline" size="icon" className="h-7 w-7 border-border/60" onClick={() => navigate(`/students/${student.id}`)}><Eye className="h-3.5 w-3.5 text-[#5B6CF9]" /></Button>
                             <Button variant="outline" size="icon" className="h-7 w-7 border-border/60" onClick={() => { setSelectedStudent(student); setQrDialogOpen(true); }}><QrCode className="h-3.5 w-3.5 text-[#5B6CF9]" /></Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className={`h-7 w-7 border-border/60 ${student.rfid_uid ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300" : ""}`}
+                              title={student.rfid_uid ? `RFID: ${student.rfid_uid}` : "Daftarkan RFID"}
+                              onClick={() => openRfidDialog(student)}
+                            >
+                              <Nfc className={`h-3.5 w-3.5 ${student.rfid_uid ? "text-emerald-600" : "text-muted-foreground"}`} />
+                            </Button>
                             <Button variant="outline" size="icon" className="h-7 w-7 border-border/60" onClick={() => handleDelete(student.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
                           </div>
                         </CardContent>
