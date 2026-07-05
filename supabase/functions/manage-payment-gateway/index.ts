@@ -9,6 +9,9 @@ const corsHeaders = {
 
 const KEYS = [
   "active_payment_gateway",
+  "gateway_va",
+  "gateway_qris",
+  "gateway_retail",
   "doku_client_id",
   "doku_secret_key",
   "doku_env",
