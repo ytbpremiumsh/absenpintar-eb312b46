@@ -114,6 +114,25 @@ const SchoolDetailDialog = ({ school, onClose, getStatusBadge }: SchoolDetailDia
           </div>
         </div>
 
+        {(school.adminName || school.adminEmail || school.adminPhone) && (
+          <div className="rounded-lg border bg-muted/30 p-3 mb-3 space-y-1.5">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Admin Sekolah Terdaftar</p>
+            {school.adminName && <p className="text-sm font-semibold text-foreground">{school.adminName}</p>}
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {school.adminEmail && (
+                <a href={`mailto:${school.adminEmail}`} className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
+                  <Mail className="h-3.5 w-3.5" />{school.adminEmail}
+                </a>
+              )}
+              {school.adminPhone && (
+                <a href={`https://wa.me/${school.adminPhone.replace(/^0/, '62').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
+                  <Phone className="h-3.5 w-3.5" />{school.adminPhone}
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center gap-2 mb-2 flex-wrap">
           {school.subscription ? (
             <>
