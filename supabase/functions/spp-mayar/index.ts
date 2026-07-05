@@ -284,9 +284,14 @@ serve(async (req) => {
         sesVariants.some((p) => invVariants.includes(p));
       if (!owned) return err("Akses ditolak");
 
-      const result = await ensureFreshLink(supabaseAdmin, inv);
+      const result = await ensureFreshLink(supabaseAdmin, inv, false, normalizeChannel(body.channel));
       if (!result.success) return err(result.error || "Gagal");
-      return ok({ payment_url: brandPaymentUrl(result.payment_url), invoice_id: result.invoice_id });
+      return ok({
+        payment_url: brandPaymentUrl(result.payment_url),
+        invoice_id: result.invoice_id,
+        service_fee: result.service_fee || 0,
+        total_charged: result.total_charged || inv.total_amount,
+      });
     }
 
     // ====== SCHOOL ACTIONS (require school admin/bendahara JWT) ======
