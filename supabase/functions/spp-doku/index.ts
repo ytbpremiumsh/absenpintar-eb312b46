@@ -153,9 +153,19 @@ async function createDokuPayment(
   if (methods.length) body.override_configuration = { payment_method_types: methods };
 
   const res = await dokuFetch(cfg, "/checkout/v1/payment", body);
-  const url = res.json?.response?.payment?.url || res.json?.payment?.url || null;
-  const dokuInvoiceId = res.json?.response?.order?.invoice_number || invoiceNumber;
-  const sessionId = res.json?.response?.payment?.session_id || null;
+  const url =
+    res.json?.response?.payment?.url ||
+    res.json?.payment?.url ||
+    res.json?.response?.payment?.payment_url ||
+    null;
+  const dokuInvoiceId =
+    res.json?.response?.order?.invoice_number ||
+    res.json?.order?.invoice_number ||
+    invoiceNumber;
+  const sessionId =
+    res.json?.response?.payment?.session_id ||
+    res.json?.response?.payment?.token_id ||
+    null;
   return {
     ok: res.ok && !!url,
     url,
