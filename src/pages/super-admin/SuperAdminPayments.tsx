@@ -141,69 +141,126 @@ const SuperAdminPayments = () => {
 
       <WebhookCard />
 
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="border-0 shadow-card">
-          <CardContent className="p-4 text-center">
-            <p className="text-xs text-muted-foreground">Total Lunas</p>
-            <p className="text-lg font-extrabold text-success">{paidCount}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-0 shadow-card">
-          <CardContent className="p-4 text-center">
-            <p className="text-xs text-muted-foreground">Pending</p>
-            <p className="text-lg font-extrabold text-warning">{pendingCount}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-0 shadow-card">
-          <CardContent className="p-4 text-center">
-            <p className="text-xs text-muted-foreground">Total Pendapatan</p>
-            <p className="text-lg font-extrabold text-foreground">{formatRupiah(totalRevenue)}</p>
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="subs" className="w-full">
+        <TabsList className="w-full">
+          <TabsTrigger value="subs" className="flex-1 gap-1.5">
+            <SchoolIcon className="h-3.5 w-3.5" /> Langganan Sekolah
+          </TabsTrigger>
+          <TabsTrigger value="spp" className="flex-1 gap-1.5">
+            <Receipt className="h-3.5 w-3.5" /> Pembayaran SPP
+          </TabsTrigger>
+        </TabsList>
 
-      <Card className="border-0 shadow-card">
-        <CardContent className="p-0">
-          {payments.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-12">Belum ada transaksi</p>
-          ) : (
-            <div className="divide-y divide-border">
-              {payments.map((p) => {
-                const st = statusMap[p.status] || statusMap.pending;
-                return (
-                  <div key={p.id} className="flex items-center justify-between p-4 hover:bg-secondary/30 transition-colors">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{p.schools?.name || "—"}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {p.subscription_plans?.name} • {new Date(p.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                      </p>
-                      {p.mayar_transaction_id && <p className="text-[10px] text-muted-foreground font-mono mt-0.5">#{p.mayar_transaction_id}</p>}
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-3">
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-foreground">{formatRupiah(p.amount)}</p>
-                        <Badge className={`text-[10px] ${st.cls}`}>{st.label}</Badge>
-                        {p.paid_at && <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(p.paid_at).toLocaleDateString("id-ID")}</p>}
+        <TabsContent value="subs" className="space-y-4">
+          <div className="grid grid-cols-3 gap-3">
+            <Card className="border-0 shadow-card"><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">Total Lunas</p><p className="text-lg font-extrabold text-success">{paidCount}</p></CardContent></Card>
+            <Card className="border-0 shadow-card"><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">Pending</p><p className="text-lg font-extrabold text-warning">{pendingCount}</p></CardContent></Card>
+            <Card className="border-0 shadow-card"><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">Total Pendapatan</p><p className="text-lg font-extrabold text-foreground">{formatRupiah(totalRevenue)}</p></CardContent></Card>
+          </div>
+
+          <Card className="border-0 shadow-card">
+            <CardContent className="p-0">
+              {payments.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-12">Belum ada transaksi</p>
+              ) : (
+                <div className="divide-y divide-border">
+                  {payments.map((p) => {
+                    const st = statusMap[p.status] || statusMap.pending;
+                    return (
+                      <div key={p.id} className="flex items-center justify-between p-4 hover:bg-secondary/30 transition-colors">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{p.schools?.name || "—"}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {p.subscription_plans?.name} • {new Date(p.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                          </p>
+                          {p.mayar_transaction_id && <p className="text-[10px] text-muted-foreground font-mono mt-0.5">#{p.mayar_transaction_id}</p>}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 ml-3">
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-foreground">{formatRupiah(p.amount)}</p>
+                            <Badge className={`text-[10px] ${st.cls}`}>{st.label}</Badge>
+                            {p.paid_at && <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(p.paid_at).toLocaleDateString("id-ID")}</p>}
+                          </div>
+                          {p.status === "pending" && (
+                            <Button variant="outline" size="sm" className="h-8 text-xs border-success/30 text-success hover:bg-success/10" onClick={() => setApproveTarget(p)}>
+                              <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Approve
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                      {p.status === "pending" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs border-success/30 text-success hover:bg-success/10"
-                          onClick={() => setApproveTarget(p)}
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                          Approve
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="spp" className="space-y-4">
+          <div className="grid grid-cols-3 gap-3">
+            <Card className="border-0 shadow-card"><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">SPP Lunas</p><p className="text-lg font-extrabold text-success">{sppPaidCount}</p></CardContent></Card>
+            <Card className="border-0 shadow-card"><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">SPP Pending</p><p className="text-lg font-extrabold text-warning">{sppPendingCount}</p></CardContent></Card>
+            <Card className="border-0 shadow-card"><CardContent className="p-4 text-center"><p className="text-xs text-muted-foreground">Total Terkumpul</p><p className="text-lg font-extrabold text-foreground">{formatRupiah(sppRevenue)}</p></CardContent></Card>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input className="pl-9" placeholder="Cari nama siswa, orang tua, kelas, invoice, sekolah..." value={sppSearch} onChange={(e) => setSppSearch(e.target.value)} />
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <div className="flex gap-1">
+              {(["all", "paid", "pending"] as const).map((k) => (
+                <Button key={k} size="sm" variant={sppStatus === k ? "default" : "outline"} onClick={() => setSppStatus(k)} className="text-xs">
+                  {k === "all" ? "Semua" : k === "paid" ? "Lunas" : "Pending"}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <Card className="border-0 shadow-card">
+            <CardContent className="p-0">
+              {filteredSpp.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-12">Belum ada tagihan SPP</p>
+              ) : (
+                <div className="divide-y divide-border">
+                  {filteredSpp.slice(0, 200).map((s) => {
+                    const st = statusMap[s.status] || statusMap.pending;
+                    return (
+                      <div key={s.id} className="flex items-center justify-between p-4 hover:bg-secondary/30 transition-colors gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <User className="h-3.5 w-3.5 text-primary shrink-0" />
+                            <p className="text-sm font-semibold text-foreground truncate">{s.student_name || "—"}</p>
+                            {s.class_name && <Badge variant="secondary" className="text-[10px]">{s.class_name}</Badge>}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            {s.schools?.name || "—"} • {s.period_label || "—"}
+                          </p>
+                          {(s.parent_name || s.parent_phone) && (
+                            <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                              Ortu: {s.parent_name || "—"}{s.parent_phone ? ` • ${s.parent_phone}` : ""}
+                            </p>
+                          )}
+                          <p className="text-[10px] text-muted-foreground font-mono mt-0.5">#{s.invoice_number}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-bold text-foreground">{formatRupiah(s.total_amount || s.amount || 0)}</p>
+                          <Badge className={`text-[10px] ${st.cls}`}>{st.label}</Badge>
+                          {s.paid_at && <p className="text-[10px] text-muted-foreground mt-0.5">Dibayar {new Date(s.paid_at).toLocaleDateString("id-ID")}</p>}
+                          {s.payment_channel && <p className="text-[10px] text-muted-foreground">{s.payment_channel}</p>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {filteredSpp.length > 200 && (
+                    <p className="text-[11px] text-center text-muted-foreground py-3">Menampilkan 200 dari {filteredSpp.length} tagihan</p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Approve Dialog */}
       <Dialog open={!!approveTarget} onOpenChange={() => setApproveTarget(null)}>
