@@ -49,7 +49,7 @@ const Login = ({ forcedMode }: LoginProps) => {
 
   // parent
   const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [parentMethod, setParentMethod] = useState<"phone" | "card">("phone");
+  const [parentMethod, setParentMethod] = useState<"phone" | "card">("card");
   const [phone, setPhone] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [otp, setOtp] = useState("");
