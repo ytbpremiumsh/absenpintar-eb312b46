@@ -52,7 +52,7 @@ serve(async (req) => {
       const trimmed = student_code.trim();
       const { data } = await supabase
         .from('students').select('*').eq('school_id', school_id)
-        .or(`student_id.eq.${trimmed},qr_code.eq.${trimmed}`).maybeSingle();
+        .or(`student_id.eq.${trimmed},qr_code.eq.${trimmed},rfid_uid.eq.${trimmed},card_number.eq.${trimmed}`).maybeSingle();
       student = data;
     }
 
