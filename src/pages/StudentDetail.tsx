@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowLeft, User, Phone, GraduationCap, Hash, Clock, UserCheck, Calendar,
   QrCode, Shield, Camera, Loader2, Pencil, Save, X, FileSpreadsheet, FileText,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, CreditCard, ScanLine,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptionFeatures } from "@/hooks/useSubscriptionFeatures";
