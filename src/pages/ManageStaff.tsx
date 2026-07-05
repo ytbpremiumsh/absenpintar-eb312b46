@@ -403,7 +403,67 @@ const ManageStaff = () => {
     fetchStaff();
   };
 
-  const getRoleBadges = (roles: string[]) => (
+  const openRfidDialog = (member: StaffMember) => {
+    setRfidTarget(member);
+    setRfidValue(member.rfid_uid || "");
+    setRfidDialogOpen(true);
+  };
+
+  const handleSaveRfid = async () => {
+    if (!rfidTarget) return;
+    const uid = rfidValue.trim();
+    if (uid.length < 4) { toast.error("UID RFID minimal 4 karakter"); return; }
+    setRfidSaving(true);
+    // Check dup on profiles + students
+    const { data: dupProfile } = await (supabase.from("profiles") as any)
+      .select("user_id, full_name")
+      .eq("school_id", schoolId).eq("rfid_uid", uid).neq("user_id", rfidTarget.user_id).maybeSingle();
+    if (dupProfile) {
+      setRfidSaving(false);
+      toast.error(`UID sudah dipakai oleh ${dupProfile.full_name}`);
+      return;
+    }
+    const { data: dupStudent } = await supabase.from("students")
+      .select("id, name").eq("school_id", schoolId).eq("rfid_uid", uid).maybeSingle();
+    if (dupStudent) {
+      setRfidSaving(false);
+      toast.error(`UID sudah dipakai oleh siswa ${dupStudent.name}`);
+      return;
+    }
+    const { error } = await (supabase.from("profiles") as any).update({ rfid_uid: uid }).eq("user_id", rfidTarget.user_id);
+    setRfidSaving(false);
+    if (error) { toast.error("Gagal simpan RFID: " + error.message); return; }
+    toast.success(`RFID untuk ${rfidTarget.full_name} berhasil didaftarkan`);
+    setRfidDialogOpen(false);
+    setRfidTarget(null);
+    setRfidValue("");
+    fetchStaff();
+  };
+
+  const handleRemoveRfid = async () => {
+    if (!rfidTarget) return;
+    setRfidSaving(true);
+    const { error } = await (supabase.from("profiles") as any).update({ rfid_uid: null }).eq("user_id", rfidTarget.user_id);
+    setRfidSaving(false);
+    if (error) { toast.error("Gagal hapus RFID: " + error.message); return; }
+    toast.success("RFID dihapus");
+    setRfidDialogOpen(false);
+    setRfidTarget(null);
+    setRfidValue("");
+    fetchStaff();
+  };
+
+  const handleTestRfid = () => {
+    const uid = testRfidValue.trim();
+    if (!uid) { setTestRfidResult({ ok: false, msg: "Silakan scan atau ketik UID kartu terlebih dahulu" }); return; }
+    const match = staff.find((s) => (s.rfid_uid || "").toString() === uid);
+    if (match) {
+      setTestRfidResult({ ok: true, msg: "Kartu dikenali", member: match });
+    } else {
+      setTestRfidResult({ ok: false, msg: `UID "${uid}" belum terdaftar untuk guru/staff mana pun.` });
+    }
+  };
+
     <div className="flex flex-wrap gap-1 mt-1">
       {roles.map((r) => {
         const meta = ROLE_META[r];
