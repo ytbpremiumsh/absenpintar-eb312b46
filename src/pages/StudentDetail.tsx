@@ -428,6 +428,26 @@ const StudentDetail = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label className="flex items-center gap-2"><CreditCard className="h-3.5 w-3.5 text-primary" /> Kartu RFID (UID)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Contoh: 0004829173 (kosongkan jika belum punya)"
+                      value={editForm.rfid_uid}
+                      onChange={(e) => setEditForm({ ...editForm, rfid_uid: e.target.value.replace(/[^a-zA-Z0-9]/g, "") })}
+                      className="font-mono"
+                    />
+                    <Button type="button" variant="outline" onClick={() => { setRfidCapture(""); setRfidScanOpen(true); }}>
+                      <ScanLine className="h-4 w-4 mr-1" /> Scan Kartu
+                    </Button>
+                    {editForm.rfid_uid && (
+                      <Button type="button" variant="ghost" size="icon" onClick={() => setEditForm({ ...editForm, rfid_uid: "" })}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">Tempelkan kartu ke reader saat dialog scan aktif, atau ketik UID manual. Kartu ini akan digunakan untuk absensi via RFID.</p>
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button onClick={handleSaveEdit} disabled={saving} className="gradient-primary hover:opacity-90">
