@@ -984,6 +984,99 @@ const ManageStaff = () => {
         nip={attendanceTarget?.nip || null}
         phone={attendanceTarget?.phone || null}
       />
+
+      {/* RFID Register Dialog */}
+      <Dialog open={rfidDialogOpen} onOpenChange={(o) => { setRfidDialogOpen(o); if (!o) { setRfidTarget(null); setRfidValue(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Nfc className="h-5 w-5 text-emerald-600" /> Daftarkan Kartu RFID
+            </DialogTitle>
+            <DialogDescription>
+              {rfidTarget ? (<>Tempelkan kartu RFID pada reader untuk <b>{rfidTarget.full_name}</b>.</>) : null}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>UID Kartu RFID</Label>
+              <Input
+                autoFocus
+                placeholder="Tempel kartu atau ketik UID..."
+                value={rfidValue}
+                onChange={(e) => setRfidValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && rfidValue.trim().length >= 4) handleSaveRfid(); }}
+                className="font-mono text-lg tracking-wider"
+              />
+              <p className="text-xs text-muted-foreground">
+                Sebagian besar RFID reader USB akan otomatis mengetik UID lalu menekan Enter.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {rfidTarget?.rfid_uid && (
+                <Button variant="outline" onClick={handleRemoveRfid} disabled={rfidSaving} className="text-destructive hover:text-destructive">
+                  Hapus RFID
+                </Button>
+              )}
+              <Button onClick={handleSaveRfid} disabled={rfidSaving || rfidValue.trim().length < 4} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white">
+                {rfidSaving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Nfc className="h-4 w-4 mr-1" />}
+                Simpan
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Test RFID Dialog */}
+      <Dialog open={testRfidOpen} onOpenChange={(o) => { setTestRfidOpen(o); if (!o) { setTestRfidValue(""); setTestRfidResult(null); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Nfc className="h-5 w-5 text-emerald-600" /> Test RFID Reader
+            </DialogTitle>
+            <DialogDescription>
+              Tempelkan kartu pada reader untuk memastikan RFID berfungsi & UID terdaftar untuk guru/staff.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>UID Kartu</Label>
+              <Input
+                autoFocus
+                placeholder="Menunggu scan kartu..."
+                value={testRfidValue}
+                onChange={(e) => { setTestRfidValue(e.target.value); setTestRfidResult(null); }}
+                onKeyDown={(e) => { if (e.key === "Enter") handleTestRfid(); }}
+                className="font-mono text-lg tracking-wider"
+              />
+            </div>
+            <Button onClick={handleTestRfid} disabled={!testRfidValue.trim()} className="w-full bg-[#5B6CF9] hover:bg-[#5065E8] text-white">
+              Cek UID
+            </Button>
+            {testRfidResult && (
+              <div className={`rounded-lg border p-3 ${testRfidResult.ok ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-900" : "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-900"}`}>
+                <div className="flex items-start gap-2">
+                  {testRfidResult.ok
+                    ? <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
+                    : <XCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />}
+                  <div className="text-sm">
+                    <p className={`font-semibold ${testRfidResult.ok ? "text-emerald-800 dark:text-emerald-200" : "text-red-800 dark:text-red-200"}`}>
+                      {testRfidResult.msg}
+                    </p>
+                    {testRfidResult.member && (
+                      <div className="mt-2 space-y-0.5 text-muted-foreground">
+                        <p><b className="text-foreground">{testRfidResult.member.full_name}</b></p>
+                        <p>Jabatan: {testRfidResult.member.position || "-"}</p>
+                        {testRfidResult.member.nip && <p>NIP: <span className="font-mono">{testRfidResult.member.nip}</span></p>}
+                        <p>UID: <span className="font-mono">{testRfidResult.member.rfid_uid}</span></p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
     </PremiumGate>
   );
