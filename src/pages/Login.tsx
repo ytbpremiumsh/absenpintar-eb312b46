@@ -101,11 +101,7 @@ const Login = ({ forcedMode }: LoginProps) => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Guard: school login is only allowed on a tenant subdomain / path
-    if (isRootDomain) {
-      toast.error("Silakan buka halaman login sekolah Anda terlebih dahulu.");
-      return;
-    }
+    // Root domain: any school user may login. Tenant subdomain/path: only that school's users.
     setLoading(true);
     setNetworkIssue(false);
     try {
