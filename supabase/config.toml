@@ -104,3 +104,13 @@ verify_jwt = false
 
 [functions.meta-capi]
 verify_jwt = false
+
+[functions.spp-doku]
+verify_jwt = false
+
+[functions.doku-webhook]
+verify_jwt = false
+
+[functions.manage-payment-gateway]
+verify_jwt = false
+
