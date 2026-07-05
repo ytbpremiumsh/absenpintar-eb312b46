@@ -192,6 +192,7 @@ const SchoolDetailDialog = ({ school, onClose, getStatusBadge }: SchoolDetailDia
                       <TableHead>JK</TableHead>
                       <TableHead>Orang Tua</TableHead>
                       <TableHead>No. HP</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -206,6 +207,11 @@ const SchoolDetailDialog = ({ school, onClose, getStatusBadge }: SchoolDetailDia
                         <TableCell className="text-xs">{s.gender === "L" ? "L" : "P"}</TableCell>
                         <TableCell className="text-xs">{s.parent_name}</TableCell>
                         <TableCell className="text-xs">{s.parent_phone}</TableCell>
+                        <TableCell className="text-right">
+                          <Button size="sm" variant="outline" className="h-7 px-2 text-[11px]" onClick={() => setCardStudent(s)}>
+                            <IdCard className="h-3.5 w-3.5 mr-1" /> Kartu
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
