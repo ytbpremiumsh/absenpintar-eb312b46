@@ -152,9 +152,9 @@ const LandingThemeB = () => {
   const { enabled: waCreditEnabled } = useWaCreditEnabled();
   const [content, setContent] = useState<Record<string, string>>({});
   const [plans, setPlans] = useState<PlanRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showPricing, setShowPricing] = useState(true);
+  const [showPricing, setShowPricing] = useState(false);
   const [trustedSchools, setTrustedSchools] = useState<TrustedSchool[]>(DEFAULT_TRUSTED_SCHOOLS);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(DEFAULT_TESTIMONIALS);
   const [headerLogo, setHeaderLogo] = useState("/images/logo-atskolla.png");
@@ -177,7 +177,7 @@ const LandingThemeB = () => {
       const allPlans = (plansRes.data || []) as any[];
       const landingPlans = allPlans.filter((p: any) => p.show_on_landing !== false);
       setPlans(landingPlans as PlanRow[]);
-      setShowPricing(landingPlans.length > 0);
+      setShowPricing(false);
       if (schoolsRes.data && schoolsRes.data.length > 0) setTrustedSchools(schoolsRes.data as TrustedSchool[]);
       if (testimonialsRes.data && testimonialsRes.data.length > 0) setTestimonials(testimonialsRes.data as Testimonial[]);
       setLoading(false);
