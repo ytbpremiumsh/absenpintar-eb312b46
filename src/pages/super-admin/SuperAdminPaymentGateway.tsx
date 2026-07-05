@@ -171,7 +171,7 @@ const SuperAdminPaymentGateway = () => {
         </p>
       </div>
 
-      {/* Toggle Aktif */}
+      {/* Per-Channel Gateway */}
       <Card className="border-0 shadow-card">
         <CardContent className="p-5 space-y-4">
           <div className="flex items-center gap-3">
@@ -179,53 +179,57 @@ const SuperAdminPaymentGateway = () => {
               <Zap className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Gateway Aktif</h3>
-              <p className="text-xs text-muted-foreground">Berlaku untuk semua sekolah</p>
+              <h3 className="font-semibold text-foreground">Gateway per Channel</h3>
+              <p className="text-xs text-muted-foreground">Pilih gateway berbeda untuk setiap metode pembayaran</p>
             </div>
-            <Badge className="ml-auto bg-primary text-primary-foreground">{gateway.toUpperCase()}</Badge>
           </div>
 
-          <RadioGroup
-            value={gateway}
-            onValueChange={(v) => handleSaveGateway(v as GatewayId)}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-          >
-            <label
-              className={`cursor-pointer rounded-xl border-2 p-4 transition ${gateway === "mayar" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}
-            >
-              <div className="flex items-start gap-3">
-                <RadioGroupItem value="mayar" id="gw-mayar" className="mt-1" />
-                <div className="flex-1">
-                  <p className="font-semibold text-sm">Mayar</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">Payment link Mayar.id — QRIS, VA, e-wallet</p>
-                  {mayarHasKey ? (
-                    <Badge className="mt-2 bg-emerald-100 text-emerald-700 text-[10px]">Key terpasang</Badge>
-                  ) : (
-                    <Badge className="mt-2 bg-amber-100 text-amber-800 text-[10px]">Belum ada key</Badge>
-                  )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {([
+              { key: "va" as const, label: "Virtual Account", desc: "BCA, Mandiri, BRI, BNI, BSI, Permata", icon: Banknote, value: gatewayVa },
+              { key: "qris" as const, label: "QRIS", desc: "Semua e-wallet & mobile banking", icon: QrCode, value: gatewayQris },
+              { key: "retail" as const, label: "Retail", desc: "Alfamart, Indomaret", icon: Store, value: gatewayRetail },
+            ]).map(({ key, label, desc, icon: Icon, value }) => (
+              <div key={key} className="rounded-xl border-2 border-border p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Icon className="h-4 w-4 text-primary" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm">{label}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{desc}</p>
+                  </div>
+                  <Badge className={`text-[10px] ${value === "doku" ? "bg-orange-100 text-orange-700" : "bg-blue-100 text-blue-700"}`}>
+                    {value.toUpperCase()}
+                  </Badge>
                 </div>
+                <Select value={value} onValueChange={(v) => handleSaveChannel(key, v as GatewayId)} disabled={saving}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mayar">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">Mayar</span>
+                        {!mayarHasKey && <span className="text-[9px] text-amber-600">(no key)</span>}
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="doku">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">Doku</span>
+                        {!(hasDokuClient && hasDokuSecret) && <span className="text-[9px] text-amber-600">(belum lengkap)</span>}
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </label>
+            ))}
+          </div>
 
-            <label
-              className={`cursor-pointer rounded-xl border-2 p-4 transition ${gateway === "doku" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}
-            >
-              <div className="flex items-start gap-3">
-                <RadioGroupItem value="doku" id="gw-doku" className="mt-1" />
-                <div className="flex-1">
-                  <p className="font-semibold text-sm">Doku</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">Doku Jokul Checkout — VA (BCA, Mandiri, BRI, BNI, BSI, Permata), QRIS, Retail</p>
-                  {hasDokuClient && hasDokuSecret ? (
-                    <Badge className="mt-2 bg-emerald-100 text-emerald-700 text-[10px]">Kredensial lengkap</Badge>
-                  ) : (
-                    <Badge className="mt-2 bg-amber-100 text-amber-800 text-[10px]">Belum lengkap</Badge>
-                  )}
-                </div>
-              </div>
-            </label>
-          </RadioGroup>
+          <p className="text-[11px] text-muted-foreground">
+            Wali murid akan otomatis diarahkan ke gateway yang dipilih sesuai metode pembayaran mereka. Pastikan kredensial gateway terkait sudah terpasang di bawah.
+          </p>
         </CardContent>
       </Card>
+
 
       {/* MAYAR CONFIG */}
       <Card className="border-0 shadow-card">
