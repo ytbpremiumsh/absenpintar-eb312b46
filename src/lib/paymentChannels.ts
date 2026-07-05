@@ -11,6 +11,20 @@ import qrisAsset from "@/assets/payment/qris.png.asset.json";
 import alfamartAsset from "@/assets/payment/alfamart.png.asset.json";
 import indomaretAsset from "@/assets/payment/indomaret.png.asset.json";
 
+// Aset dilayani melalui path internal `/__l5e/assets-v1/...` yang hanya tersedia
+// di hosting Lovable. Saat aplikasi di-deploy di VPS sendiri (nginx), path itu
+// menghasilkan 404 sehingga logo tidak muncul. Prefix ke domain publik Lovable
+// jika origin saat ini bukan *.lovable.app / *.lovable.dev.
+const LOVABLE_ASSET_HOST = "https://absenpintar.lovable.app";
+function assetUrl(u: string): string {
+  if (!u || /^https?:\/\//i.test(u)) return u;
+  if (typeof window === "undefined") return u;
+  const host = window.location.hostname;
+  const isLovableHost = /\.lovable\.(app|dev)$/i.test(host) || host === "localhost";
+  if (isLovableHost) return u;
+  return LOVABLE_ASSET_HOST + u;
+}
+
 export type PaymentChannelId = "va" | "qris" | "retail";
 
 export type BankBadge = {
