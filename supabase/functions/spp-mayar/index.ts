@@ -165,14 +165,27 @@ async function syncPaidInvoicesFromMayar(supabaseAdmin: any, schoolId: string) {
   return { checked: (invoices || []).length, paid, wa_sent: waSent };
 }
 
+// Whitelist channel + fee. Fee ditambahkan ke amount yang dikirim ke Mayar
+// (biaya ditanggung wali murid).
+const SERVICE_FEES: Record<string, number> = { va: 5000, qris: 5000, retail: 8000 };
+function normalizeChannel(c: any): string | null {
+  const v = String(c || "").toLowerCase();
+  return v in SERVICE_FEES ? v : null;
+}
+function serviceFeeFor(c: any): number {
+  const v = normalizeChannel(c);
+  return v ? SERVICE_FEES[v] : 0;
+}
+
 async function createMayarLink(apiKey: string, inv: any, attempt = 0): Promise<{ ok: boolean; json: any; expiry: Date; status: number }> {
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + MAYAR_LINK_TTL_DAYS);
   // Short uniq token — keeps Mayar recipient/email unique without exposing long codes.
   // A static email/phone can make Mayar return another student's existing link.
   const uniq = (Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/[^a-z0-9]/g, "").slice(-6);
-  // Mayar requires integer amount (IDR, no decimals).
-  const safeAmount = Math.max(1000, Math.round(Number(inv.total_amount) || 0));
+  // amount_override lets caller include service_fee before creating Mayar link.
+  const baseAmount = Number(inv._amount_override ?? inv.total_amount) || 0;
+  const safeAmount = Math.max(1000, Math.round(baseAmount));
   const buyerEmail = `spp${uniq}@atskolla.com`;
   // Use a short synthetic mobile so Mayar does not dedupe against another student sharing a parent phone.
   const mobileSeed = `${String(inv.id || "")}${Date.now()}${attempt}`;
