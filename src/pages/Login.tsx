@@ -279,28 +279,6 @@ const Login = ({ forcedMode }: LoginProps) => {
 
       <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
 
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[
-          { top: '10%', left: '5%', delay: 0 }, { top: '20%', left: '90%', delay: 1 },
-          { top: '70%', left: '8%', delay: 0.5 }, { top: '80%', left: '85%', delay: 1.5 },
-          { top: '40%', left: '3%', delay: 2 }, { top: '55%', left: '95%', delay: 0.8 },
-        ].map((dot, i) => (
-          <motion.div key={i} className="absolute w-2 h-2 rounded-full bg-white" style={{ top: dot.top, left: dot.left }}
-            animate={{ opacity: [0.1, 0.4, 0.1], scale: [1, 1.5, 1] }} transition={{ duration: 3, repeat: Infinity, delay: dot.delay }} />
-        ))}
-        <motion.div className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
-          animate={{ top: ['0%', '100%'] }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }} />
-        <motion.div className="hidden lg:block absolute right-[8%] top-[15%] w-28 h-28 border-2 border-white/10 rounded-2xl"
-          animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.03, 1] }} transition={{ duration: 6, repeat: Infinity }}>
-          <div className="absolute top-2 left-2 w-5 h-5 border-l-2 border-t-2 border-white/20 rounded-tl-md" />
-          <div className="absolute top-2 right-2 w-5 h-5 border-r-2 border-t-2 border-white/20 rounded-tr-md" />
-          <div className="absolute bottom-2 left-2 w-5 h-5 border-l-2 border-b-2 border-white/20 rounded-bl-md" />
-          <div className="absolute bottom-2 right-2 w-5 h-5 border-r-2 border-b-2 border-white/20 rounded-br-md" />
-        </motion.div>
-      </div>
-
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-white/[0.03] rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-indigo-300/[0.05] rounded-full blur-3xl pointer-events-none" />
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10">
         <div className={`w-full grid gap-8 items-center justify-items-center ${mode === "school" ? "max-w-6xl lg:grid-cols-2" : "max-w-md justify-center"}`}>
