@@ -80,7 +80,8 @@ const ParentLogin = lazy(() => import("./pages/parent/ParentLogin"));
 const ParentDashboard = lazy(() => import("./pages/parent/ParentDashboard"));
 const ManageBendahara = lazy(() => import("./pages/ManageBendahara"));
 const SelectRole = lazy(() => import("./pages/SelectRole"));
-const BendaharaKeuangan = lazy(() => import("./pages/bendahara/BendaharaKeuangan"));
+const BendaharaWithdraw = lazy(() => import("./pages/bendahara/BendaharaWithdraw"));
+const BendaharaKeuanganSekolah = lazy(() => import("./pages/bendahara/BendaharaKeuanganSekolah"));
 const LaporanAbsensi = lazy(() => import("./pages/LaporanAbsensi"));
 const RekapSiswaPage = lazy(() => import("./pages/RekapSiswaPage"));
 const JadwalCombined = lazy(() => import("./pages/JadwalCombined"));
@@ -186,10 +187,12 @@ function AppRoutes() {
           <Route path="/bendahara/transaksi" element={<BendaharaTransaksi />} />
           <Route path="/bendahara/transaksi/:studentId" element={<BendaharaSPPDetail />} />
           <Route path="/bendahara/import-export" element={<BendaharaImportExport />} />
-          <Route path="/bendahara/keuangan" element={<BendaharaKeuangan />} />
-          <Route path="/bendahara/saldo" element={<Navigate to="/bendahara/keuangan?tab=saldo" replace />} />
-          <Route path="/bendahara/pencairan" element={<Navigate to="/bendahara/keuangan?tab=pencairan" replace />} />
-          <Route path="/bendahara/laporan" element={<Navigate to="/bendahara/keuangan?tab=laporan" replace />} />
+          <Route path="/bendahara/withdraw" element={<BendaharaWithdraw />} />
+          <Route path="/bendahara/keuangan-sekolah" element={<BendaharaKeuanganSekolah />} />
+          <Route path="/bendahara/keuangan" element={<Navigate to="/bendahara/withdraw" replace />} />
+          <Route path="/bendahara/saldo" element={<Navigate to="/bendahara/withdraw?tab=saldo" replace />} />
+          <Route path="/bendahara/pencairan" element={<Navigate to="/bendahara/withdraw?tab=pencairan" replace />} />
+          <Route path="/bendahara/laporan" element={<Navigate to="/bendahara/keuangan-sekolah" replace />} />
           <Route path="/bendahara/settlement" element={<BendaharaSettlement />} />
           <Route path="/bendahara/gateway" element={<Navigate to="/bendahara" replace />} />
         </Route>

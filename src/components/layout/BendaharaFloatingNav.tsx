@@ -41,14 +41,14 @@ export function BendaharaFloatingNav() {
               <SheetItem icon={Receipt} label="Tarif SPP" gradient="from-indigo-500 to-violet-600" onClick={() => navigate("/bendahara/tarif")} />
               <SheetItem icon={FileText} label="Buat Tagihan" gradient="from-amber-500 to-orange-600" onClick={() => navigate("/bendahara/generate")} />
               <SheetItem icon={Upload} label="Import" gradient="from-violet-500 to-purple-600" onClick={() => navigate("/bendahara/import-export")} />
-              <SheetItem icon={Wallet} label="Saldo" gradient="from-sky-500 to-blue-600" onClick={() => navigate("/bendahara/saldo")} />
-              <SheetItem icon={ArrowDownToLine} label="Pencairan" gradient="from-rose-500 to-red-600" onClick={() => navigate("/bendahara/pencairan")} />
+              <SheetItem icon={Wallet} label="Withdraw" gradient="from-sky-500 to-blue-600" onClick={() => navigate("/bendahara/withdraw")} />
+              <SheetItem icon={ArrowDownToLine} label="Pencairan" gradient="from-rose-500 to-red-600" onClick={() => navigate("/bendahara/withdraw?tab=pencairan")} />
             </div>
           </SheetContent>
         </Sheet>
 
-        <NavBtn icon={Wallet} label="Saldo" active={isActive("/bendahara/saldo")} color="#0EA5E9" onClick={() => navigate("/bendahara/saldo")} />
-        <NavBtn icon={BarChart3} label="Laporan" active={isActive("/bendahara/laporan")} color="#5B6CF9" onClick={() => navigate("/bendahara/laporan")} />
+        <NavBtn icon={Wallet} label="Withdraw" active={isActive("/bendahara/withdraw")} color="#0EA5E9" onClick={() => navigate("/bendahara/withdraw")} />
+        <NavBtn icon={BarChart3} label="Sekolah" active={isActive("/bendahara/keuangan-sekolah")} color="#5B6CF9" onClick={() => navigate("/bendahara/keuangan-sekolah")} />
       </div>
     </nav>
   );

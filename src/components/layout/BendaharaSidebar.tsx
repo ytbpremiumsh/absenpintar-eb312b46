@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Receipt, FileText, CreditCard, Wallet, ArrowDownToLine,
-  History, BarChart3, LogOut, ChevronRight, Crown, Upload,
+  History, BarChart3, LogOut, ChevronRight, Crown, Upload, Landmark,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -35,7 +35,8 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
   {
     label: "Keuangan",
     items: [
-      { title: "Keuangan", url: "/bendahara/keuangan", icon: Wallet },
+      { title: "Keuangan Withdraw", url: "/bendahara/withdraw", icon: ArrowDownToLine },
+      { title: "Keuangan Sekolah", url: "/bendahara/keuangan-sekolah", icon: Landmark },
     ],
   },
 ];
