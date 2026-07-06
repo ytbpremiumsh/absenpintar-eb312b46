@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import QRCodeDisplay from "@/components/QRCodeDisplay";
 import { StudentIdCard } from "@/components/StudentIdCard";
+import { NfcScanButton } from "@/components/NfcScanButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import * as XLSX from "xlsx";
@@ -978,6 +979,7 @@ const Students = () => {
                 Sebagian besar RFID reader USB akan otomatis mengetik UID lalu menekan Enter.
               </p>
             </div>
+            <NfcScanButton onUid={(uid) => setRfidValue(uid)} />
             <div className="flex gap-2">
               {rfidStudent?.rfid_uid && (
                 <Button variant="outline" onClick={handleRemoveRfid} disabled={rfidSaving} className="text-destructive hover:text-destructive">

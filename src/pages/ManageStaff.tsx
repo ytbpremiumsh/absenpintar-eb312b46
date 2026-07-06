@@ -21,6 +21,7 @@ import * as XLSX from "xlsx";
 import QRCodeDisplay from "@/components/QRCodeDisplay";
 import StaffAttendanceDetailDialog from "@/components/staff/StaffAttendanceDetailDialog";
 import { TeacherIdCard } from "@/components/TeacherIdCard";
+import { NfcScanButton } from "@/components/NfcScanButton";
 
 const POSITION_PRESETS = [
   "Guru",
@@ -1011,6 +1012,7 @@ const ManageStaff = () => {
                 Sebagian besar RFID reader USB akan otomatis mengetik UID lalu menekan Enter.
               </p>
             </div>
+            <NfcScanButton onUid={(uid) => setRfidValue(uid)} />
             <div className="flex gap-2">
               {rfidTarget?.rfid_uid && (
                 <Button variant="outline" onClick={handleRemoveRfid} disabled={rfidSaving} className="text-destructive hover:text-destructive">
