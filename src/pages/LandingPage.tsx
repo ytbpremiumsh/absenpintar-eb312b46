@@ -45,7 +45,7 @@ const STATS = [
 const PROBLEMS = [
   { title: "Absensi masih manual", desc: "Buku hadir kertas mudah hilang, rekap bulanan memakan hari kerja." },
   { title: "SPP dicatat manual", desc: "Kwitansi tulis tangan, rawan salah hitung dan sulit diaudit." },
-  { title: "Rekap keuangan sulit", desc: "Data tersebar di Excel berbeda-beda antara bendahara dan yayasan." },
+  { title: "Rekap keuangan sulit", desc: "Data tersebar di Excel berbeda-beda antara bendahara dan pimpinan sekolah." },
   { title: "Orang tua sering lupa bayar", desc: "Tidak ada pengingat otomatis, tunggakan menumpuk tiap semester." },
   { title: "Data tersebar di banyak aplikasi", desc: "Absensi, keuangan, komunikasi, semuanya di tools terpisah." },
 ];
@@ -53,7 +53,7 @@ const PROBLEMS = [
 const SOLUTIONS = [
   { icon: ScanLine, title: "Kehadiran otomatis", desc: "RFID, Face Recognition, dan QR Code tersinkron langsung ke dasbor." },
   { icon: Receipt, title: "Tagihan SPP terotomasi", desc: "Invoice tergenerate per periode dengan reminder WhatsApp otomatis." },
-  { icon: LineChart, title: "Satu dasbor keuangan", desc: "Cash flow, tunggakan, dan laporan yayasan real-time." },
+  { icon: LineChart, title: "Satu dasbor keuangan", desc: "Cash flow, tunggakan, dan laporan keuangan real-time." },
   { icon: Bell, title: "Notifikasi ke wali murid", desc: "Reminder tagihan, absensi, dan pengumuman terkirim otomatis." },
   { icon: Landmark, title: "Satu platform terpadu", desc: "Akademik, keuangan, dan operasional dalam satu ekosistem." },
 ];
@@ -64,7 +64,7 @@ const ECOSYSTEM_NODES = [
   { icon: Cpu, label: "Operasional" },
   { icon: HeartHandshake, label: "Orang Tua" },
   { icon: GraduationCap, label: "Guru" },
-  { icon: Landmark, label: "Yayasan" },
+  { icon: Building2, label: "Sekolah" },
 ];
 
 const MODULES = [
@@ -110,7 +110,7 @@ const PAYMENT_ITEMS = [
   { icon: MessageSquare, title: "Reminder WhatsApp", desc: "Pengingat tagihan terjadwal otomatis, siap kirim sebelum jatuh tempo." },
   { icon: CheckCircle2, title: "Rekonsiliasi Otomatis", desc: "Pembayaran masuk langsung tercatat sebagai lunas — tanpa konfirmasi manual." },
   { icon: LineChart, title: "Dashboard Bendahara", desc: "Ringkasan pemasukan, tunggakan, dan proyeksi kas dalam satu layar." },
-  { icon: FileBarChart, title: "Laporan Yayasan", desc: "Export Excel & PDF resmi untuk audit dan rapat komite." },
+  { icon: FileBarChart, title: "Laporan Keuangan", desc: "Export Excel & PDF resmi untuk audit dan rapat komite." },
 ];
 
 const HARDWARE = [
@@ -125,7 +125,7 @@ const ROLES = [
   { key: "bendahara", label: "Bendahara", metric: { top: "SPP Bulan Ini", val: "Rp 312 Jt", sub: "87% terkumpul • 42 tunggakan" }, blocks: ["Tagihan aktif", "Cash flow harian", "Laporan periode"] },
   { key: "guru", label: "Guru", metric: { top: "Kelas hari ini", val: "5 sesi", sub: "3 selesai • 2 mendatang" }, blocks: ["Jadwal mengajar", "Rekap kehadiran kelas", "Nilai siswa"] },
   { key: "ortu", label: "Orang Tua", metric: { top: "Status anak", val: "Hadir 07:12", sub: "Kelas 6B • SDN 1 Cendikia" }, blocks: ["Absensi anak", "Tagihan SPP", "Pengumuman sekolah"] },
-  { key: "yayasan", label: "Yayasan", metric: { top: "Total sekolah aktif", val: "12 unit", sub: "8.420 siswa • 4 wilayah" }, blocks: ["Konsolidasi keuangan", "Perbandingan unit", "Laporan tahunan"] },
+  
 ];
 
 const FAQ = [
@@ -144,10 +144,6 @@ const FAQ = [
   {
     q: "Berapa lama proses implementasi?",
     a: "Umumnya 1–3 hari kerja. Sekolah tinggal mendaftar, upload data siswa & kelas, atur rekening penerimaan, dan platform siap dipakai. Tim kami mendampingi onboarding tanpa biaya tambahan.",
-  },
-  {
-    q: "Apakah mendukung yayasan multi-sekolah?",
-    a: "Ya. Yayasan dapat mengelola banyak unit sekolah dalam satu dasbor konsolidasi — melihat perbandingan kehadiran, keuangan, dan operasional antar unit secara real-time.",
   },
 ];
 
@@ -525,7 +521,7 @@ function Ecosystem() {
       <SectionHeader
         eyebrow="Ekosistem ATSkolla"
         title={<>Satu platform. <span className="text-[#5B6CF9]">Semua peran sekolah</span> terhubung.</>}
-        sub="ATSkolla menjadi pusat data yang menghubungkan akademik, keuangan, operasional, guru, orang tua, dan yayasan."
+        sub="ATSkolla menjadi pusat data yang menghubungkan akademik, keuangan, operasional, guru, dan orang tua."
       />
 
       <div className="relative rounded-3xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-8 lg:p-14 overflow-hidden">
@@ -958,7 +954,7 @@ function Footer() {
           <div className="flex items-center gap-2.5 mb-4">
             <img src={ATSKOLLA_LOGO_URL} alt="ATSkolla" className="h-10 w-auto object-contain" />
           </div>
-          <p className="text-sm leading-relaxed">Platform Digital Sekolah Terintegrasi untuk sekolah & yayasan di seluruh Indonesia.</p>
+          <p className="text-sm leading-relaxed">Platform Digital Sekolah Terintegrasi untuk sekolah di seluruh Indonesia.</p>
         </div>
         <div>
           <div className="font-display font-semibold text-[#0b1020] text-sm mb-4">Platform</div>
