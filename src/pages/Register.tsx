@@ -583,6 +583,7 @@ const Register = () => {
                         <Button type="button" variant="ghost" size="sm" className="ml-auto text-xs shrink-0" onClick={() => setStep(1)}>Ubah</Button>
                       </motion.div>
 
+                      {step === 2 && (<>
                       {/* ===== SECTION A: Data Sekolah ===== */}
                       <motion.div variants={itemVariants} className="pt-1">
                         <div className="flex items-center gap-2 mb-1">
