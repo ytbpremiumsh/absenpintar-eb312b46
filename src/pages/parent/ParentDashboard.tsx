@@ -28,6 +28,8 @@ import { isWorkingDay } from "@/lib/holidays";
 import { StudentIdCard } from "@/components/StudentIdCard";
 import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import type { PaymentChannelId } from "@/lib/paymentChannels";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
 
 const STATUS_COLORS: Record<string, string> = {
   hadir: "#10b981",
