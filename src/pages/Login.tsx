@@ -14,6 +14,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import BackendStatusBanner, { isBackendNetworkError } from "@/components/BackendStatusBanner";
 import { useTenant, buildTenantUrl, getRootDomain } from "@/lib/tenant";
 import { Search, School as SchoolIcon } from "lucide-react";
+import { useLandingTheme, LANDING_THEME_CSS } from "@/hooks/useLandingTheme";
+import ThemeToggle from "@/components/landing/ThemeToggle";
 
 type Mode = "school" | "parent";
 
