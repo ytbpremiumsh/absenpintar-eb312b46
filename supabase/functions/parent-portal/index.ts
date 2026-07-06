@@ -3,6 +3,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { brandPaymentUrl } from "../_shared/brandUrl.ts";
 import { sendOtpMessage } from "../_shared/sendOtp.ts";
+import { createHmac, createHash } from "https://deno.land/std@0.168.0/node/crypto.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -154,6 +155,100 @@ async function syncSppInvoicesFromMayar(invoices: any[]) {
     }
   }
   return synced;
+}
+
+// ---- Doku status sync (mirrors Mayar sync) --------------------------------
+async function getDokuCfg() {
+  const { data } = await supabase
+    .from("platform_settings")
+    .select("key,value")
+    .in("key", ["doku_client_id", "doku_secret_key", "doku_env"]);
+  const map: Record<string, string> = {};
+  (data || []).forEach((r: any) => { map[r.key] = r.value || ""; });
+  const clientId = map.doku_client_id || Deno.env.get("DOKU_CLIENT_ID") || "";
+  const secretKey = map.doku_secret_key || Deno.env.get("DOKU_SECRET_KEY") || "";
+  const env = (map.doku_env || "production").toLowerCase();
+  const baseUrl = env === "sandbox" ? "https://api-sandbox.doku.com" : "https://api.doku.com";
+  return { clientId, secretKey, baseUrl };
+}
+
+function isPaidDokuStatus(status: unknown) {
+  const s = String(status || "").toUpperCase();
+  return ["PAID", "SUCCESS", "SETTLED", "COMPLETED", "SUCCESSFUL"].includes(s);
+}
+
+async function checkDokuOrder(cfg: { clientId: string; secretKey: string; baseUrl: string }, invoiceNumber: string) {
+  const target = `/orders/v1/status/${encodeURIComponent(invoiceNumber)}`;
+  const requestId = crypto.randomUUID();
+  const requestTimestamp = new Date().toISOString().split(".")[0] + "Z";
+  const digest = createHash("sha256").update("", "utf8").digest("base64");
+  const stringToSign =
+    `Client-Id:${cfg.clientId}\n` +
+    `Request-Id:${requestId}\n` +
+    `Request-Timestamp:${requestTimestamp}\n` +
+    `Request-Target:${target}\n` +
+    `Digest:${digest}`;
+  const signature = "HMACSHA256=" + createHmac("sha256", cfg.secretKey).update(stringToSign, "utf8").digest("base64");
+  const res = await fetch(`${cfg.baseUrl}${target}`, {
+    method: "GET",
+    headers: {
+      "Client-Id": cfg.clientId,
+      "Request-Id": requestId,
+      "Request-Timestamp": requestTimestamp,
+      "Signature": signature,
+      "Digest": digest,
+    },
+  });
+  const json = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, json };
+}
+
+// Doku invoice_numbers created by spp-doku start with "SPP-".
+const looksLikeDokuInvoice = (id: string | null | undefined) => !!id && /^SPP-/i.test(id);
+
+async function syncSppInvoicesFromDoku(invoices: any[]) {
+  const pending = invoices.filter((i) => i.status !== "paid" && looksLikeDokuInvoice(i.mayar_invoice_id));
+  if (pending.length === 0) return invoices;
+  const cfg = await getDokuCfg();
+  if (!cfg.clientId || !cfg.secretKey) return invoices;
+  const byId = new Map(invoices.map((i) => [i.id, i]));
+  for (const inv of pending) {
+    try {
+      const stat = await checkDokuOrder(cfg, inv.mayar_invoice_id);
+      const s = stat.json?.response?.order?.status || stat.json?.order?.status;
+      if (!isPaidDokuStatus(s)) continue;
+      const paidAt = new Date().toISOString();
+      await supabase.from("spp_invoices").update({
+        status: "paid",
+        paid_at: paidAt,
+        payment_method: "doku",
+      }).eq("id", inv.id);
+      await supabase.from("payment_transactions").update({
+        status: "paid",
+        paid_at: paidAt,
+      }).eq("school_id", inv.school_id).eq("mayar_transaction_id", inv.mayar_invoice_id).eq("status", "pending");
+      await supabase.from("spp_logs").insert({
+        school_id: inv.school_id,
+        invoice_id: inv.id,
+        event_type: "doku_sync",
+        status: "paid",
+        payload: stat.json,
+        message: "SPP paid (parent portal Doku sync)",
+      });
+      await supabase.from("notifications").insert({
+        school_id: inv.school_id,
+        title: "Pembayaran SPP Diterima",
+        message: `Pembayaran SPP ${inv.student_name} (${inv.class_name}) untuk ${inv.period_label} sebesar Rp ${(inv.total_amount || 0).toLocaleString("id-ID")} telah diterima.`,
+        type: "success",
+      });
+      const waResult = await sendSppPaidWhatsApp(inv, paidAt).catch((waErr) => ({ sent: false, error: String(waErr) }));
+      console.log("SPP WA notif (Doku sync):", JSON.stringify(waResult));
+      byId.set(inv.id, { ...inv, status: "paid", paid_at: paidAt, payment_method: "doku" });
+    } catch (e) {
+      console.error("Doku SPP sync failed", inv.id, e);
+    }
+  }
+  return invoices.map((i) => byId.get(i.id) || i);
 }
 
 function phoneVariants(phone: string): string[] {
@@ -511,7 +606,8 @@ Deno.serve(async (req) => {
         .eq("student_id", studentId)
         .order("period_year", { ascending: false })
         .order("period_month", { ascending: false });
-      const syncedData = await syncSppInvoicesFromMayar(data || []);
+      let syncedData = await syncSppInvoicesFromMayar(data || []);
+      syncedData = await syncSppInvoicesFromDoku(syncedData);
       // Auto-mark as expired if past expiry and not paid
       const now = Date.now();
       const list = syncedData.map((i: any) => {
@@ -533,8 +629,24 @@ Deno.serve(async (req) => {
       const invoiceId = body.invoice_id;
       const channel = body.channel; // "va" | "qris" | "retail"
       if (!invoiceId) return json({ error: "invoice_id wajib" });
-      const { data: inv } = await supabase.from("spp_invoices").select("id, student_id").eq("id", invoiceId).maybeSingle();
-      if (!inv || inv.student_id !== studentId) return json({ error: "Invoice tidak valid" });
+      const { data: inv } = await supabase
+        .from("spp_invoices")
+        .select("id, student_id, students:student_id(parent_phone)")
+        .eq("id", invoiceId)
+        .maybeSingle();
+      if (!inv) return json({ error: "Tagihan tidak ditemukan" });
+      // Ownership: prefer parent-phone match against the invoice's student
+      // (so switching selectedStudent client-side doesn't break payment
+      // for a sibling under the same wali). Fall back to strict student_id
+      // match for legacy invoices missing a linked student.
+      const invoiceStudentPhone = (inv as any).students?.parent_phone || "";
+      const sesVariants = phoneVariants(session.phone);
+      const invVariants = phoneVariants(invoiceStudentPhone);
+      const ownedByParent = invVariants.some((p) => sesVariants.includes(p));
+      const legacyMatch = !invoiceStudentPhone && inv.student_id === studentId;
+      if (!ownedByParent && !legacyMatch) return json({ error: "Invoice tidak valid" });
+
+
 
       // Pilih gateway per channel (fallback ke active_payment_gateway lalu mayar)
       const ch = (channel || "va").toString().toLowerCase();
