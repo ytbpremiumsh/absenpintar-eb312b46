@@ -75,6 +75,7 @@ const SuperAdminPaymentGateway = () => {
       setHasDokuSecret(!!d.has_doku_secret_key);
       setFeeVa(d.fee_va || "5000");
       setFeeQris(d.fee_qris || "5000");
+      setFeeQrisPercent(d.fee_qris_percent || "1");
       setFeeRetail(d.fee_retail || "8000");
       setDokuWebhookVerify(d.doku_webhook_verify || "true");
     } catch (e: any) {
