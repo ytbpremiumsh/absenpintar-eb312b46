@@ -141,6 +141,32 @@ const SuperAdminDashboard = () => {
         })),
       ].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
 
+      // Trial & langganan aktif yang akan berakhir dalam 7 hari (paling urgent)
+      const nowMs = Date.now();
+      const in7Days = nowMs + 7 * 86400_000;
+      const schoolNameById: Record<string, string> = {};
+      schools.forEach((s: any) => { schoolNameById[s.id] = s.name; });
+      const expiringSoon = subs
+        .filter((s: any) => s.expires_at && ["trial", "active"].includes(s.status))
+        .map((s: any) => {
+          const exp = new Date(s.expires_at).getTime();
+          const days_left = Math.ceil((exp - nowMs) / 86400_000);
+          return {
+            school_id: s.school_id,
+            school_name: schoolNameById[s.school_id] || "—",
+            plan_name: (s as any).subscription_plans?.name || "—",
+            status: s.status,
+            expires_at: s.expires_at,
+            days_left,
+          };
+        })
+        .filter((s) => {
+          const exp = new Date(s.expires_at).getTime();
+          return exp >= nowMs - 86400_000 && exp <= in7Days;
+        })
+        .sort((a, b) => a.days_left - b.days_left)
+        .slice(0, 8);
+
       setStats({
         totalSchools: schools.length,
         totalStudents: students.length,
@@ -155,7 +181,7 @@ const SuperAdminDashboard = () => {
         pendingTickets: tickets.length,
         pendingSettlements: settlements.length,
         pendingWithdrawals: withdrawals.length,
-        actionQueue, notifications,
+        actionQueue, notifications, expiringSoon,
       });
       setLoading(false);
     };
