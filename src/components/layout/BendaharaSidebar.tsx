@@ -25,6 +25,12 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
     ],
   },
   {
+    label: "Keuangan Sekolah",
+    items: [
+      { title: "Keuangan Sekolah", url: "/bendahara/keuangan-sekolah", icon: Landmark },
+    ],
+  },
+  {
     label: "Tagihan",
     items: [
       { title: "Buat Tagihan", url: "/bendahara/generate", icon: FileText },
@@ -35,8 +41,7 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
   {
     label: "Keuangan",
     items: [
-      { title: "Keuangan Withdraw", url: "/bendahara/withdraw", icon: ArrowDownToLine },
-      { title: "Keuangan Sekolah", url: "/bendahara/keuangan-sekolah", icon: Landmark },
+      { title: "Saldo & Penarikan", url: "/bendahara/withdraw", icon: ArrowDownToLine },
     ],
   },
 ];
