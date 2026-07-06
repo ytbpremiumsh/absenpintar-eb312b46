@@ -1151,10 +1151,22 @@ export default function ParentDashboard() {
 
         {tab === "contact" && (
           <>
-            <SectionTitle icon={Phone} title="Kontak Wali Kelas" />
             {!homeroom ? <EmptyMini text="Memuat..." /> : (
               <>
-                <Card className="p-4 border-0 shadow-card rounded-2xl">
+                {homeroom.school && (
+                  <Card className="p-4 border-0 shadow-card rounded-2xl space-y-3">
+                    <SectionTitle icon={GraduationCap} title="Informasi Sekolah" />
+                    <div className="space-y-1.5">
+                      <p className="text-sm font-bold">{homeroom.school.name}</p>
+                      {homeroom.school.address && (
+                        <p className="text-xs text-muted-foreground flex items-start gap-1.5"><MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />{homeroom.school.address}</p>
+                      )}
+                    </div>
+                  </Card>
+                )}
+
+                <Card className="p-4 border-0 shadow-card rounded-2xl space-y-3">
+                  <SectionTitle icon={Phone} title="Kontak Wali Kelas" />
                   {homeroom.teacher ? (
                     <div className="flex items-start gap-3">
                       <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#5B6CF9] to-[#4c5ded] flex items-center justify-center text-white font-bold text-lg overflow-hidden shrink-0">
@@ -1183,17 +1195,28 @@ export default function ParentDashboard() {
                   )}
                 </Card>
 
-                {homeroom.school && (
-                  <Card className="p-4 border-0 shadow-card rounded-2xl">
-                    <SectionTitle icon={GraduationCap} title="Informasi Sekolah" />
-                    <div className="mt-2 space-y-1.5">
-                      <p className="text-sm font-bold">{homeroom.school.name}</p>
-                      {homeroom.school.address && (
-                        <p className="text-xs text-muted-foreground flex items-start gap-1.5"><MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />{homeroom.school.address}</p>
+                <Card className="p-4 border-0 shadow-card rounded-2xl space-y-3">
+                  <SectionTitle icon={User} title="Identitas Wali Murid & Murid" />
+                  <div className="space-y-3">
+                    <div className="rounded-xl bg-muted/40 p-3 space-y-1.5">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Wali Murid</p>
+                      <p className="text-sm font-bold text-foreground">{current?.parent_name || "—"}</p>
+                      {current?.parent_phone ? (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Phone className="h-3 w-3" />{current.parent_phone}</p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">No HP belum tersedia</p>
                       )}
                     </div>
-                  </Card>
-                )}
+                    <div className="rounded-xl bg-muted/40 p-3 space-y-1.5">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Murid</p>
+                      <p className="text-sm font-bold text-foreground">{current?.name || "—"}</p>
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                        {current?.class && <span>Kelas {current.class}</span>}
+                        {current?.student_id && <span>NIS {current.student_id}</span>}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
               </>
             )}
           </>
