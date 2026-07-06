@@ -482,6 +482,46 @@ const Register = () => {
                       </motion.div>
                     )}
 
+                    {/* School Data Result */}
+                    {schoolData && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="p-4 rounded-xl bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-200/60 dark:border-emerald-800/30 space-y-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                          <span className="text-sm font-bold text-foreground">
+                            {schoolData.npsn ? "Sekolah Ditemukan!" : "Data Sekolah Siap"}
+                          </span>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex items-start gap-2">
+                            <School className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">{schoolData.name}</p>
+                              {schoolData.npsn && <p className="text-xs text-muted-foreground">NPSN: {schoolData.npsn}</p>}
+                            </div>
+                          </div>
+                          {schoolData.address && (
+                            <div className="flex items-start gap-2">
+                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                              <p className="text-xs text-muted-foreground">{schoolData.address}</p>
+                            </div>
+                          )}
+                          {(schoolData.level || schoolData.status || schoolData.district || schoolData.province) && (
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {schoolData.level && <Badge variant="secondary" className="text-[10px]"><GraduationCap className="h-3 w-3 mr-0.5" />{schoolData.level}</Badge>}
+                              {schoolData.status && <Badge variant="outline" className="text-[10px]">{schoolData.status}</Badge>}
+                              {schoolData.district && <Badge variant="outline" className="text-[10px]">{schoolData.district}</Badge>}
+                              {schoolData.province && <Badge variant="outline" className="text-[10px]">{schoolData.province}</Badge>}
+                            </div>
+                          )}
+                        </div>
+                        <Button type="button" variant="ghost" size="sm" onClick={resetStep1} className="text-xs text-muted-foreground mt-1 px-0">Ubah data sekolah</Button>
+                      </motion.div>
+                    )}
+
                     {/* Subdomain / Alamat Website Sekolah — shown once schoolData is ready */}
                     {schoolData && (
                       <motion.div variants={itemVariants} className="space-y-2">
@@ -531,59 +571,13 @@ const Register = () => {
                       >
                         Lanjutkan
                       </Button>
-                      <p className="text-[11px] text-muted-foreground text-center mt-2">
-                        Data lain seperti kepala sekolah, email &amp; alamat lengkap dapat dilengkapi nanti di <span className="font-medium">Pengaturan → Identitas Sekolah</span>.
-                      </p>
+                      {schoolData && (
+                        <p className="text-[11px] text-muted-foreground text-center mt-2">
+                          Data lain seperti kepala sekolah, email &amp; alamat lengkap dapat dilengkapi nanti di <span className="font-medium">Pengaturan → Identitas Sekolah</span>.
+                        </p>
+                      )}
                     </motion.div>
 
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="p-4 rounded-xl bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-200/60 dark:border-emerald-800/30 space-y-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                          <span className="text-sm font-bold text-foreground">
-                            {schoolData.npsn ? "Sekolah Ditemukan!" : "Data Sekolah Siap"}
-                          </span>
-                        </div>
-                        <div className="space-y-1.5">
-                          <div className="flex items-start gap-2">
-                            <School className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                            <div>
-                              <p className="text-sm font-semibold text-foreground">{schoolData.name}</p>
-                              {schoolData.npsn && <p className="text-xs text-muted-foreground">NPSN: {schoolData.npsn}</p>}
-                            </div>
-                          </div>
-                          {schoolData.address && (
-                            <div className="flex items-start gap-2">
-                              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                              <p className="text-xs text-muted-foreground">{schoolData.address}</p>
-                            </div>
-                          )}
-                          {(schoolData.level || schoolData.status || schoolData.district || schoolData.province) && (
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {schoolData.level && <Badge variant="secondary" className="text-[10px]"><GraduationCap className="h-3 w-3 mr-0.5" />{schoolData.level}</Badge>}
-                              {schoolData.status && <Badge variant="outline" className="text-[10px]">{schoolData.status}</Badge>}
-                              {schoolData.district && <Badge variant="outline" className="text-[10px]">{schoolData.district}</Badge>}
-                              {schoolData.province && <Badge variant="outline" className="text-[10px]">{schoolData.province}</Badge>}
-                            </div>
-                          )}
-                        </div>
-                        <Button type="button" variant="ghost" size="sm" onClick={resetStep1} className="text-xs text-muted-foreground mt-1 px-0">Ubah data sekolah</Button>
-                      </motion.div>
-                    )}
-
-                    <motion.div variants={itemVariants}>
-                      <Button
-                        type="button"
-                        onClick={() => setStep(2)}
-                        disabled={!canProceed}
-                        className="w-full h-11 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-indigo-500/20 transition-all"
-                      >
-                        Lanjutkan
-                      </Button>
-                    </motion.div>
                   </motion.div>
                 ) : (
                   <motion.div
