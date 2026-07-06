@@ -312,10 +312,31 @@ serve(async (req) => {
             formattedPhone = '62' + formattedPhone.substring(1);
           }
 
-          const message = (ps.wa_registration_message || 'Selamat datang, {name}!')
+          // Lookup slug for subdomain link
+          let slug: string | null = null;
+          if (resolvedSchoolId) {
+            const { data: sd } = await supabaseAdmin.from('schools').select('slug').eq('id', resolvedSchoolId).maybeSingle();
+            slug = sd?.slug || null;
+          }
+          const siteUrl = slug ? `https://${slug}.absenpintar.online` : 'https://absenpintar.online';
+          const adminUrl = `${siteUrl}/admin`;
+          const parentUrl = `${siteUrl}/login`;
+
+          const template = ps.wa_registration_message || 'Selamat datang, {name}!';
+          let message = template
             .replace(/{name}/g, full_name || '')
             .replace(/{school}/g, school_name || '')
-            .replace(/{email}/g, email || '');
+            .replace(/{email}/g, email || '')
+            .replace(/{url}/g, siteUrl)
+            .replace(/{site_url}/g, siteUrl)
+            .replace(/{admin_url}/g, adminUrl)
+            .replace(/{parent_url}/g, parentUrl);
+
+          // Append link info if template did not include it
+          if (!/\{url\}|\{site_url\}|\{admin_url\}|\{parent_url\}|absenpintar\.online/i.test(template)) {
+            message += `\n\n🌐 *Website Sekolah Anda:*\n${siteUrl}\n\n🔐 *Login Admin Sekolah:*\n${adminUrl}\n\n👨‍👩‍👧 *Login Wali Murid:*\n${parentUrl}`;
+          }
+
 
           let sent = false;
 
