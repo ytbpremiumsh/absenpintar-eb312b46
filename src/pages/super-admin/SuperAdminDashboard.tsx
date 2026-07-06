@@ -41,6 +41,7 @@ interface DashboardStats {
   pendingWithdrawals: number;
   actionQueue: PendingItem[];
   notifications: any[];
+  expiringSoon: { school_id: string; school_name: string; plan_name: string; status: string; expires_at: string; days_left: number }[];
 }
 
 const fmtIDR = (n: number) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
@@ -59,7 +60,7 @@ const SuperAdminDashboard = () => {
     totalRevenue: 0, monthlyRevenue: 0, paidCount: 0, waActiveCount: 0,
     recentPayments: [], schools: [], planDistribution: [],
     pendingTickets: 0, pendingSettlements: 0, pendingWithdrawals: 0,
-    actionQueue: [], notifications: [],
+    actionQueue: [], notifications: [], expiringSoon: [],
   });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -140,6 +141,32 @@ const SuperAdminDashboard = () => {
         })),
       ].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
 
+      // Trial & langganan aktif yang akan berakhir dalam 7 hari (paling urgent)
+      const nowMs = Date.now();
+      const in7Days = nowMs + 7 * 86400_000;
+      const schoolNameById: Record<string, string> = {};
+      schools.forEach((s: any) => { schoolNameById[s.id] = s.name; });
+      const expiringSoon = subs
+        .filter((s: any) => s.expires_at && ["trial", "active"].includes(s.status))
+        .map((s: any) => {
+          const exp = new Date(s.expires_at).getTime();
+          const days_left = Math.ceil((exp - nowMs) / 86400_000);
+          return {
+            school_id: s.school_id,
+            school_name: schoolNameById[s.school_id] || "—",
+            plan_name: (s as any).subscription_plans?.name || "—",
+            status: s.status,
+            expires_at: s.expires_at,
+            days_left,
+          };
+        })
+        .filter((s) => {
+          const exp = new Date(s.expires_at).getTime();
+          return exp >= nowMs - 86400_000 && exp <= in7Days;
+        })
+        .sort((a, b) => a.days_left - b.days_left)
+        .slice(0, 8);
+
       setStats({
         totalSchools: schools.length,
         totalStudents: students.length,
@@ -154,7 +181,7 @@ const SuperAdminDashboard = () => {
         pendingTickets: tickets.length,
         pendingSettlements: settlements.length,
         pendingWithdrawals: withdrawals.length,
-        actionQueue, notifications,
+        actionQueue, notifications, expiringSoon,
       });
       setLoading(false);
     };
@@ -351,14 +378,11 @@ const SuperAdminDashboard = () => {
         </Card>
 
         <Card className="rounded-2xl border border-border/60 shadow-sm">
-          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+          <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               <Bell className="h-4 w-4 text-violet-600" />
               Notifikasi Platform
             </CardTitle>
-            <Badge variant="outline" className="rounded-full text-xs font-bold px-2.5">
-              {stats.notifications.filter((n) => !n.is_read).length}
-            </Badge>
           </CardHeader>
           <CardContent>
             {stats.notifications.length === 0 ? (
@@ -387,51 +411,73 @@ const SuperAdminDashboard = () => {
         </Card>
       </div>
 
-      {/* Plan Distribution + Quick Actions */}
+      {/* Expiring subscriptions + Quick Actions */}
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="rounded-2xl border border-border/60 shadow-sm">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <PieIcon className="h-4 w-4 text-violet-600" />
-              Distribusi Paket Langganan
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              Langganan Segera Berakhir
+              <span className="text-[10px] font-normal text-muted-foreground ml-1">(≤ 7 hari)</span>
             </CardTitle>
+            {stats.expiringSoon.length > 0 && (
+              <Badge className="rounded-full text-xs font-bold px-2.5 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border-0">
+                {stats.expiringSoon.length}
+              </Badge>
+            )}
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4">
-              <div className="h-40 w-40 sm:h-48 sm:w-48 shrink-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={stats.planDistribution.length > 0 ? stats.planDistribution : [{ name: "Kosong", value: 1, color: "hsl(262, 20%, 90%)" }]}
-                      cx="50%" cy="50%"
-                      innerRadius={40} outerRadius={70}
-                      paddingAngle={2} dataKey="value"
+            {stats.expiringSoon.length === 0 ? (
+              <div className="py-8 text-center">
+                <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-2">
+                  <UserCheck className="h-6 w-6 text-emerald-600" />
+                </div>
+                <p className="text-sm text-muted-foreground">Semua langganan aman — tidak ada yang berakhir dalam 7 hari</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[280px] overflow-auto pr-1">
+                {stats.expiringSoon.map((s) => {
+                  const isExpired = s.days_left < 0;
+                  const isCritical = s.days_left <= 2;
+                  const tone = isExpired
+                    ? "border-rose-200 bg-rose-50/60 dark:border-rose-800/40 dark:bg-rose-950/20"
+                    : isCritical
+                      ? "border-amber-200 bg-amber-50/60 dark:border-amber-800/40 dark:bg-amber-950/20"
+                      : "border-border/40 bg-background";
+                  const dayLabel = isExpired
+                    ? `Berakhir ${Math.abs(s.days_left)} hari lalu`
+                    : s.days_left === 0 ? "Berakhir hari ini"
+                    : `${s.days_left} hari lagi`;
+                  const dayTone = isExpired ? "text-rose-600 dark:text-rose-400"
+                    : isCritical ? "text-amber-700 dark:text-amber-400"
+                    : "text-muted-foreground";
+                  return (
+                    <button
+                      key={s.school_id + s.expires_at}
+                      onClick={() => navigate("/super-admin/sekolah")}
+                      className={`w-full text-left flex items-center gap-3 p-3 rounded-xl border transition hover:border-violet-300 dark:hover:border-violet-700 ${tone}`}
                     >
-                      {(stats.planDistribution.length > 0 ? stats.planDistribution : [{ name: "Kosong", value: 1, color: "hsl(262, 20%, 90%)" }]).map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value: number) => [`${value} sekolah`]} />
-                  </PieChart>
-                </ResponsiveContainer>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-foreground truncate">{s.school_name}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          Paket {s.plan_name} • {s.status === "trial" ? "Trial" : "Aktif"}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className={`text-xs font-bold ${dayTone}`}>{dayLabel}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {new Date(s.expires_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                    </button>
+                  );
+                })}
               </div>
-              <div className="space-y-2 flex-1">
-                {stats.planDistribution.map((plan) => (
-                  <div key={plan.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: plan.color }} />
-                      <span className="text-sm text-foreground">{plan.name}</span>
-                    </div>
-                    <Badge variant="outline" className="rounded-full text-xs font-bold px-2.5">{plan.value} sekolah</Badge>
-                  </div>
-                ))}
-                {stats.planDistribution.length === 0 && (
-                  <p className="text-sm text-muted-foreground">Belum ada data</p>
-                )}
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
+
 
         <Card className="rounded-2xl border border-border/60 shadow-sm">
           <CardHeader className="pb-3">
