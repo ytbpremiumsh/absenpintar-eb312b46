@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { useTenant } from "@/lib/tenant";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,10 @@ const LiveDot = () => (
 );
 
 const PublicClassMonitoring = () => {
-  const { schoolId, className } = useParams<{ schoolId: string; className: string }>();
+  const params = useParams<{ schoolId: string; className: string }>();
+  const { school: tenantSchool } = useTenant();
+  const schoolId = params.schoolId || tenantSchool?.id;
+  const className = params.className;
   const [students, setStudents] = useState<StudentStatus[]>([]);
   const [schoolName, setSchoolName] = useState("");
   const [loading, setLoading] = useState(true);

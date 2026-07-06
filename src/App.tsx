@@ -172,6 +172,9 @@ function AppRoutes() {
         <Route path="/live/:schoolId" element={<PublicMonitoring />} />
         <Route path="/live/:schoolId/:className" element={<PublicClassMonitoring />} />
         <Route path="/attendance/:schoolId" element={<PublicAttendanceMonitoring />} />
+        {/* Tenant subdomain shortcuts (schoolId resolved from tenant) */}
+        <Route path="/monitor" element={<PublicMonitoring />} />
+        <Route path="/monitor/:className" element={<PublicClassMonitoring />} />
         <Route path="/fitur" element={<Presentation />} />
         <Route path="/penawaran" element={<Penawaran />} />
         <Route path="/proposal" element={<Proposal />} />

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
+import { useTenant } from "@/lib/tenant";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -178,7 +179,9 @@ const RotatingClassPanel = ({
 };
 
 const PublicMonitoring = () => {
-  const { schoolId } = useParams<{ schoolId: string }>();
+  const params = useParams<{ schoolId: string }>();
+  const { school: tenantSchool } = useTenant();
+  const schoolId = params.schoolId || tenantSchool?.id;
   const [data, setData] = useState<MonitoringData | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(new Date());
@@ -327,7 +330,7 @@ const PublicMonitoring = () => {
   const safeClassIndex = currentClassIndex % Math.max(classNames.length, 1);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-background">
+    <div ref={containerRef} className={`min-h-screen bg-background ${isFullscreen ? "h-screen overflow-y-auto" : ""}`}>
       {/* Header */}
       <header className="gradient-hero text-primary-foreground sticky top-0 z-50 shadow-elevated">
         <div className="max-w-7xl mx-auto px-4 py-3">
