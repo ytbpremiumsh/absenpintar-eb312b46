@@ -187,7 +187,7 @@ function SectionHeader({ eyebrow, title, sub, dark = false }: { eyebrow: string;
       className="max-w-2xl mb-12 lg:mb-16"
     >
       <Eyebrow>{eyebrow}</Eyebrow>
-      <h2 className={`mt-4 font-display text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1] ${dark ? "text-white" : "text-[#0b1020]"}`}>
+      <h2 className={`mt-4 font-display text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1] ${dark ? "text-[#0b1020]" : "text-[#0b1020]"}`}>
         {title}
       </h2>
       {sub && (
@@ -221,7 +221,7 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
 
         <nav className="hidden lg:flex items-center gap-8">
           {NAV.map((n) => (
-            <a key={n.href} href={n.href} className="text-sm font-medium text-[#0b1020]/65 hover:text-white transition-colors">
+            <a key={n.href} href={n.href} className="text-sm font-medium text-[#0b1020]/65 hover:text-[#5B6CF9] transition-colors">
               {n.label}
             </a>
           ))}
@@ -229,7 +229,7 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
 
         <div className="hidden lg:flex items-center gap-3">
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-          <button onClick={() => nav("/login")} className="text-sm font-semibold text-[#0b1020]/75 hover:text-white px-3 py-2">
+          <button onClick={() => nav("/login")} className="text-sm font-semibold text-[#0b1020]/75 hover:text-[#5B6CF9] px-3 py-2">
             Masuk
           </button>
           <button
@@ -251,7 +251,7 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
       {open && (
         <div className="lg:hidden bg-white border-t border-slate-100 px-6 py-4 space-y-3">
           {NAV.map((n) => (
-            <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="block text-[#0b1020]/75 hover:text-white py-2 text-sm font-medium">
+            <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="block text-[#0b1020]/75 hover:text-[#5B6CF9] py-2 text-sm font-medium">
               {n.label}
             </a>
           ))}
@@ -867,7 +867,7 @@ function WhyFree() {
               ].map((row) => (
                 <div key={row.l} className="flex items-center justify-between border-b border-slate-200 pb-4 last:border-0">
                   <div className={`text-sm ${row.accent ? "text-[#0b1020] font-semibold" : "text-[#0b1020]/65"}`}>{row.l}</div>
-                  <div className={`font-display font-bold ${row.accent ? "text-[#5B6CF9] text-2xl" : "text-white"}`}>{row.v}</div>
+                  <div className={`font-display font-bold ${row.accent ? "text-[#5B6CF9] text-2xl" : "text-[#0b1020]"}`}>{row.v}</div>
                 </div>
               ))}
             </div>
@@ -970,19 +970,19 @@ function Footer() {
         <div>
           <div className="font-display font-semibold text-[#0b1020] text-sm mb-4">Platform</div>
           <ul className="space-y-2 text-sm">
-            <li><a href="#modul" className="hover:text-white">Modul</a></li>
-            <li><a href="#pembayaran" className="hover:text-white">Pembayaran</a></li>
-            <li><a href="#hardware" className="hover:text-white">Hardware</a></li>
-            <li><a href="#dashboard" className="hover:text-white">Dashboard</a></li>
+            <li><a href="#modul" className="hover:text-[#5B6CF9]">Modul</a></li>
+            <li><a href="#pembayaran" className="hover:text-[#5B6CF9]">Pembayaran</a></li>
+            <li><a href="#hardware" className="hover:text-[#5B6CF9]">Hardware</a></li>
+            <li><a href="#dashboard" className="hover:text-[#5B6CF9]">Dashboard</a></li>
           </ul>
         </div>
         <div>
           <div className="font-display font-semibold text-[#0b1020] text-sm mb-4">Perusahaan</div>
           <ul className="space-y-2 text-sm">
-            <li><a href="/panduan" className="hover:text-white">Panduan</a></li>
-            <li><a href="#faq" className="hover:text-white">FAQ</a></li>
-            <li><a href="/login" className="hover:text-white">Masuk</a></li>
-            <li><a href="/register" className="hover:text-white">Daftar Gratis</a></li>
+            <li><a href="/panduan" className="hover:text-[#5B6CF9]">Panduan</a></li>
+            <li><a href="#faq" className="hover:text-[#5B6CF9]">FAQ</a></li>
+            <li><a href="/login" className="hover:text-[#5B6CF9]">Masuk</a></li>
+            <li><a href="/register" className="hover:text-[#5B6CF9]">Daftar Gratis</a></li>
           </ul>
         </div>
         <div>
