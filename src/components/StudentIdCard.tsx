@@ -18,6 +18,13 @@ interface Props {
     school_id?: string;
   };
   hideQrDownload?: boolean;
+  /**
+   * When true (default), a diagonal "SALINAN — ATSkolla" watermark is baked into
+   * the downloaded image to discourage schools from printing the card themselves
+   * (they must order via the platform). Parent portal passes `false` so wali murid
+   * gets a clean card.
+   */
+  watermark?: boolean;
 }
 
 function formatCard(n?: string) {
@@ -26,7 +33,8 @@ function formatCard(n?: string) {
   return `${digits.slice(0, 4)} ${digits.slice(4, 8)} ${digits.slice(8, 12)} ${digits.slice(12, 16)}`;
 }
 
-export function StudentIdCard({ student, hideQrDownload = false }: Props) {
+export function StudentIdCard({ student, hideQrDownload = false, watermark = true }: Props) {
+
   const [cardNumber, setCardNumber] = useState<string>("");
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const cardRef = useRef<HTMLDivElement>(null);
