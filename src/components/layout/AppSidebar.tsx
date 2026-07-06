@@ -76,13 +76,16 @@ const whatsappNav = [
 const settingsNavSubscription = [
   { title: "Mode Libur", url: "/holidays", icon: CalendarOff, accent: "from-amber-500/85 to-amber-600" },
   { title: "Waktu Absensi", url: "/attendance-time", icon: Clock, accent: "from-emerald-500/85 to-emerald-600" },
+  { title: "Perangkat RFID", url: "/rfid-devices", icon: Radio, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
   { title: "Langganan & Add-on", url: "/langganan", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
 ];
 const settingsNavAllFeatures = [
   { title: "Mode Libur", url: "/holidays", icon: CalendarOff, accent: "from-amber-500/85 to-amber-600" },
   { title: "Waktu Absensi", url: "/attendance-time", icon: Clock, accent: "from-emerald-500/85 to-emerald-600" },
+  { title: "Perangkat RFID", url: "/rfid-devices", icon: Radio, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
   { title: "Semua Fitur", url: "/all-features", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
 ];
+
 
 export function AppSidebar() {
   const { isMobile, setOpenMobile } = useSidebar();
