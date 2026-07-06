@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScanLine, CheckCircle2, Camera, Search, ShieldCheck, X, Clock, UserCheck, Loader2, Lock, SwitchCamera, ArrowDownToLine, ArrowUpFromLine, AlertTriangle } from "lucide-react";
+import { ScanLine, CheckCircle2, Camera, Search, ShieldCheck, X, Clock, UserCheck, Loader2, Lock, SwitchCamera, ArrowDownToLine, ArrowUpFromLine, AlertTriangle, Nfc } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptionFeatures } from "@/hooks/useSubscriptionFeatures";
@@ -679,6 +679,7 @@ const ScanQR = () => {
                   <div className="flex items-center gap-1 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg">
                     <ScanLine className="h-3 w-3 text-white/70" />
                     {canFace && <UserCheck className="h-3 w-3 text-white/70 ml-0.5" />}
+                    <Nfc className="h-3 w-3 text-white/70 ml-0.5" />
                   </div>
                 </div>
 
@@ -692,6 +693,7 @@ const ScanQR = () => {
                       ) : (
                         <><span className="text-white/40">•</span><Lock className="h-3 w-3 opacity-50" /><span className="opacity-50">Face</span><span className="text-[9px] text-amber-400 font-bold ml-1">PREMIUM</span></>
                       )}
+                      <span className="text-white/40">•</span><Nfc className="h-3.5 w-3.5" /> RFID
                     </div>
                   </div>
                 </div>
@@ -736,6 +738,9 @@ const ScanQR = () => {
                     <Lock className="h-3 w-3" /> Face <span className="text-[9px] text-amber-600 dark:text-amber-400 font-bold ml-1">PREMIUM</span>
                   </div>
                 )}
+                <div className="flex items-center gap-1 bg-muted/50 px-2.5 py-1 rounded-lg">
+                  <Nfc className="h-3.5 w-3.5 text-[#5B6CF9]" /> RFID
+                </div>
               </div>
               <p className="text-[11px] text-muted-foreground/60">Atau gunakan input NIS manual di bawah</p>
             </div>
