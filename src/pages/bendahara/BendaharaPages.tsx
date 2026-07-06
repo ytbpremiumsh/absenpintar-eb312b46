@@ -4872,6 +4872,11 @@ export function BendaharaLaporan() {
         }
       />
 
+      {/* PRESET LAPORAN — Harian / Bulanan / Tahunan / per Kelas / per Jenis / per Siswa */}
+      <PresetLaporan items={items} students={students} school={school} year={year} />
+
+
+
       {/* KPI Ringkasan tahun */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="border-0 shadow-sm bg-gradient-to-br from-[#5B6CF9]/10 to-transparent">
