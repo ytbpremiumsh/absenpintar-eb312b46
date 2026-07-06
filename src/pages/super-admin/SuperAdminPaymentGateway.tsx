@@ -133,6 +133,7 @@ const SuperAdminPaymentGateway = () => {
         doku_env: dokuEnv,
         fee_va: feeVa.trim() || "0",
         fee_qris: feeQris.trim() || "0",
+        fee_qris_percent: feeQrisPercent.trim() || "1",
         fee_retail: feeRetail.trim() || "0",
         doku_webhook_verify: dokuWebhookVerify,
       };
