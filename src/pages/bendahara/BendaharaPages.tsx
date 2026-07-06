@@ -4240,9 +4240,27 @@ export function BendaharaPencairan() {
     if (error || !settlement) { toast.error(error?.message || "Gagal"); setSubmitting(false); return; }
     await supabase.from("spp_invoices").update({ settlement_id: settlement.id })
       .eq("school_id", profile!.school_id).in("id", invoiceIds).is("settlement_id", null);
-    toast.success("Pencairan berhasil diajukan, sedang diproses");
+
+    // 3) Auto-disburse via DOKU (jika kode bank DOKU tersedia pada rekening).
+    let disburseMsg = "Pencairan diajukan (manual).";
+    try {
+      const { data: dRes } = await supabase.functions.invoke("doku-disbursement", {
+        body: { action: "disburse", settlement_id: settlement.id },
+      });
+      if (dRes?.ok && dRes?.status === "success") {
+        disburseMsg = "Pencairan berhasil diproses via DOKU (SUCCESS).";
+      } else if (dRes?.ok && dRes?.status === "processing") {
+        disburseMsg = "Pencairan sedang diproses DOKU — status auto-update via webhook.";
+      } else if (dRes?.error) {
+        disburseMsg = `DOKU: ${dRes.error} — tetap tercatat, bisa retry.`;
+      }
+    } catch (e: any) {
+      disburseMsg = `Gagal panggil DOKU: ${e?.message || e}. Pencairan tercatat manual.`;
+    }
+    toast.success(disburseMsg);
     setConfirmOpen(false); setSubmitting(false); setRefreshKey(k => k + 1);
     setOtpStep(false); setOtpCode(""); setOtpPhoneMasked("");
+
   };
 
   const saveAccount = async () => {
