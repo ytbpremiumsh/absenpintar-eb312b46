@@ -53,8 +53,11 @@ const Register = () => {
 
   const [manualName, setManualName] = useState("");
   const [manualAddress, setManualAddress] = useState("");
+  const [manualLevel, setManualLevel] = useState<string>("");
+  const [manualStatus, setManualStatus] = useState<string>("");
 
   const [fullName, setFullName] = useState("");
+  const [position, setPosition] = useState<string>("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -62,12 +65,16 @@ const Register = () => {
   const [referralInput, setReferralInput] = useState(refCode);
   const [registering, setRegistering] = useState(false);
   const [logo, setLogo] = useState("/images/logo-atskolla.png");
+  const [agreeTos, setAgreeTos] = useState(false);
 
   // School-level extra info (required)
   const [principalName, setPrincipalName] = useState("");
   const [schoolEmail, setSchoolEmail] = useState("");
   const [schoolAddress, setSchoolAddress] = useState("");
   const [schoolWhatsapp, setSchoolWhatsapp] = useState("");
+  const [schoolCity, setSchoolCity] = useState("");
+  const [schoolProvince, setSchoolProvince] = useState("");
+  const [studentCountRange, setStudentCountRange] = useState<string>("");
 
   // Subdomain (school website slug) with live availability check
   const [slug, setSlug] = useState("");
