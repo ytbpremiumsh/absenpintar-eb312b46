@@ -1297,6 +1297,7 @@ export default function ParentDashboard() {
         title="Pilih Metode Pembayaran"
         subtitle={pickerInvoice ? `Tagihan SPP ${pickerInvoice.period_label || ""}` : undefined}
         loading={pickerLoading}
+        feeOverrides={channelFees}
         onConfirm={confirmPaySpp}
       />
     </div>
