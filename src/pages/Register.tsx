@@ -3,9 +3,12 @@ import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { School, Eye, EyeOff, Loader2, Search, CheckCircle2, MapPin, GraduationCap, PenLine, ArrowLeft, Sparkles, ShieldCheck, Zap } from "lucide-react";
+import { School, Eye, EyeOff, Loader2, Search, CheckCircle2, MapPin, GraduationCap, PenLine, ArrowLeft, Sparkles, ShieldCheck, Zap, User, Mail, Phone, Building2, Globe2, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Fragment, type ReactNode } from "react";
 // Animations disabled on this page — motion.* & AnimatePresence are inert passthroughs
 type Easing = string;
@@ -50,8 +53,11 @@ const Register = () => {
 
   const [manualName, setManualName] = useState("");
   const [manualAddress, setManualAddress] = useState("");
+  const [manualLevel, setManualLevel] = useState<string>("");
+  const [manualStatus, setManualStatus] = useState<string>("");
 
   const [fullName, setFullName] = useState("");
+  const [position, setPosition] = useState<string>("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -59,12 +65,16 @@ const Register = () => {
   const [referralInput, setReferralInput] = useState(refCode);
   const [registering, setRegistering] = useState(false);
   const [logo, setLogo] = useState("/images/logo-atskolla.png");
+  const [agreeTos, setAgreeTos] = useState(false);
 
   // School-level extra info (required)
   const [principalName, setPrincipalName] = useState("");
   const [schoolEmail, setSchoolEmail] = useState("");
   const [schoolAddress, setSchoolAddress] = useState("");
   const [schoolWhatsapp, setSchoolWhatsapp] = useState("");
+  const [schoolCity, setSchoolCity] = useState("");
+  const [schoolProvince, setSchoolProvince] = useState("");
+  const [studentCountRange, setStudentCountRange] = useState<string>("");
 
   // Subdomain (school website slug) with live availability check
   const [slug, setSlug] = useState("");
@@ -147,12 +157,14 @@ const Register = () => {
 
   const handleManualConfirm = () => {
     if (!manualName.trim()) { toast.error("Nama sekolah wajib diisi"); return; }
+    if (!manualLevel) { toast.error("Jenjang sekolah wajib dipilih"); return; }
+    if (!manualStatus) { toast.error("Status sekolah wajib dipilih"); return; }
     setSchoolData({
       npsn: "",
       name: manualName.trim(),
       address: manualAddress.trim(),
-      level: "",
-      status: "",
+      level: manualLevel,
+      status: manualStatus,
       district: "",
       province: "",
     });
@@ -161,10 +173,12 @@ const Register = () => {
 
   const canProceed = !!schoolData;
 
-  // Prefill school address whenever schoolData is (re)set
+  // Prefill school address/city/province whenever schoolData is (re)set
   useEffect(() => {
     if (schoolData) {
       setSchoolAddress((prev) => prev || schoolData.address || "");
+      setSchoolCity((prev) => prev || schoolData.district || "");
+      setSchoolProvince((prev) => prev || schoolData.province || "");
     }
   }, [schoolData]);
 
@@ -174,6 +188,8 @@ const Register = () => {
     setSchoolData(null);
     setManualName("");
     setManualAddress("");
+    setManualLevel("");
+    setManualStatus("");
   };
 
   const passwordHasUpper = /[A-Z]/.test(password);
@@ -185,8 +201,6 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!schoolData) { toast.error("Data sekolah belum diisi"); return; }
-    if (!fullName.trim()) { toast.error("Nama lengkap wajib diisi"); return; }
-    if (!email.trim()) { toast.error("Email admin wajib diisi"); return; }
     if (!principalName.trim()) { toast.error("Nama Kepala Sekolah wajib diisi"); return; }
     if (!schoolEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(schoolEmail.trim())) {
       toast.error("Email sekolah tidak valid"); return;
@@ -194,19 +208,36 @@ const Register = () => {
     if (!schoolAddress.trim() || schoolAddress.trim().length < 8) {
       toast.error("Alamat lengkap sekolah wajib diisi (min 8 karakter)"); return;
     }
+    if (!schoolCity.trim()) { toast.error("Kota/Kabupaten wajib diisi"); return; }
+    if (!schoolProvince.trim()) { toast.error("Provinsi wajib diisi"); return; }
     const waDigits = schoolWhatsapp.replace(/\D/g, '');
     if (waDigits.length < 9 || waDigits.length > 15) {
       toast.error("Nomor WhatsApp sekolah tidak valid"); return;
     }
+    if (!studentCountRange) { toast.error("Perkiraan jumlah siswa wajib dipilih"); return; }
+
+    if (!fullName.trim() || fullName.trim().length < 3) { toast.error("Nama lengkap penanggung jawab wajib diisi"); return; }
+    if (!position) { toast.error("Jabatan penanggung jawab wajib dipilih"); return; }
+    const personalWa = phone.replace(/\D/g, '');
+    if (personalWa.length < 9 || personalWa.length > 15) {
+      toast.error("Nomor WhatsApp pribadi tidak valid"); return;
+    }
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast.error("Email login tidak valid"); return;
+    }
+
     if (!passwordValid) { toast.error("Password harus minimal 8 karakter, mengandung huruf besar, angka, dan simbol"); return; }
     if (password !== confirmPassword) { toast.error("Password tidak cocok"); return; }
     if (!slug || slugStatus !== "available") {
       toast.error("Silakan pilih alamat website sekolah (subdomain) yang tersedia");
       return;
     }
+    if (!agreeTos) { toast.error("Anda harus menyetujui Syarat & Ketentuan"); return; }
 
     setRegistering(true);
     try {
+      // Compose full address including city & province for the schools table
+      const fullAddress = [schoolAddress.trim(), schoolCity.trim(), schoolProvince.trim()].filter(Boolean).join(", ");
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`, {
         method: 'POST',
         headers: {
@@ -214,17 +245,18 @@ const Register = () => {
           'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify({
-          email,
+          email: email.trim(),
           password,
-          full_name: fullName,
+          full_name: fullName.trim(),
           role: 'school_admin',
           npsn: schoolData.npsn || undefined,
           school_name: schoolData.name,
-          school_address: schoolAddress.trim() || schoolData.address,
+          school_address: fullAddress || schoolData.address,
           school_principal_name: principalName.trim(),
           school_email: schoolEmail.trim(),
           school_whatsapp: waDigits,
-          phone,
+          phone: personalWa,
+          position,
           referral_code: referralInput || undefined,
           desired_slug: slug,
         }),
@@ -402,16 +434,39 @@ const Register = () => {
                     {inputMode === "manual" && !schoolData && (
                       <motion.div variants={itemVariants} className="space-y-3">
                         <div className="space-y-2">
-                          <Label htmlFor="schoolName">Nama Sekolah</Label>
+                          <Label htmlFor="schoolName">Nama Sekolah <span className="text-red-500">*</span></Label>
                           <Input id="schoolName" placeholder="Contoh: SDN 1 Surabaya" value={manualName} onChange={(e) => setManualName(e.target.value)} className="h-11 rounded-xl" />
                         </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label>Jenjang <span className="text-red-500">*</span></Label>
+                            <Select value={manualLevel} onValueChange={setManualLevel}>
+                              <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Pilih jenjang" /></SelectTrigger>
+                              <SelectContent>
+                                {["PAUD","TK","SD","MI","SMP","MTs","SMA","MA","SMK","SLB","Pesantren","Lainnya"].map((l) => (
+                                  <SelectItem key={l} value={l}>{l}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Status <span className="text-red-500">*</span></Label>
+                            <Select value={manualStatus} onValueChange={setManualStatus}>
+                              <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Pilih status" /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Negeri">Negeri</SelectItem>
+                                <SelectItem value="Swasta">Swasta</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                         <div className="space-y-2">
-                          <Label htmlFor="schoolAddress">Alamat Sekolah <span className="text-muted-foreground font-normal">(opsional)</span></Label>
-                          <Input id="schoolAddress" placeholder="Jl. Pendidikan No. 1, Kota ..." value={manualAddress} onChange={(e) => setManualAddress(e.target.value)} className="h-11 rounded-xl" />
+                          <Label htmlFor="schoolAddressManual">Alamat Sekolah <span className="text-muted-foreground font-normal">(opsional)</span></Label>
+                          <Input id="schoolAddressManual" placeholder="Jl. Pendidikan No. 1, Kota ..." value={manualAddress} onChange={(e) => setManualAddress(e.target.value)} className="h-11 rounded-xl" />
                         </div>
                         <div className="flex gap-2">
                           <Button type="button" variant="ghost" size="sm" onClick={resetStep1} className="text-xs text-muted-foreground">← Kembali</Button>
-                          <Button type="button" onClick={handleManualConfirm} disabled={!manualName.trim()} className="flex-1 h-10 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl">Konfirmasi</Button>
+                          <Button type="button" onClick={handleManualConfirm} disabled={!manualName.trim() || !manualLevel || !manualStatus} className="flex-1 h-10 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl">Konfirmasi</Button>
                         </div>
                       </motion.div>
                     )}
@@ -492,43 +547,67 @@ const Register = () => {
                         <Button type="button" variant="ghost" size="sm" className="ml-auto text-xs shrink-0" onClick={() => setStep(1)}>Ubah</Button>
                       </motion.div>
 
-                      <motion.div variants={itemVariants} className="space-y-2">
-                        <Label htmlFor="fullName">Nama Penanggung Jawab / Operator</Label>
-                        <Input id="fullName" placeholder="Nama lengkap" value={fullName} onChange={(e) => setFullName(e.target.value)} className="h-11 rounded-xl" required />
-                      </motion.div>
-
-                      {/* School-level required data */}
-                      <motion.div variants={itemVariants} className="pt-2">
+                      {/* ===== SECTION A: Data Sekolah ===== */}
+                      <motion.div variants={itemVariants} className="pt-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <div className="h-px flex-1 bg-border" />
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Data Sekolah Lengkap</span>
-                          <div className="h-px flex-1 bg-border" />
+                          <div className="h-8 w-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
+                            <Building2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-foreground">Profil Sekolah</p>
+                            <p className="text-[11px] text-muted-foreground">Data resmi sekolah untuk keperluan administrasi & invoice</p>
+                          </div>
                         </div>
                       </motion.div>
 
                       <motion.div variants={itemVariants} className="space-y-2">
-                        <Label htmlFor="principalName">Nama Kepala Sekolah</Label>
+                        <Label htmlFor="principalName">Nama Kepala Sekolah <span className="text-red-500">*</span></Label>
                         <Input id="principalName" placeholder="Contoh: Drs. Ahmad Setiawan, M.Pd" value={principalName} onChange={(e) => setPrincipalName(e.target.value)} maxLength={120} className="h-11 rounded-xl" required />
                       </motion.div>
 
                       <motion.div variants={itemVariants} className="space-y-2">
-                        <Label htmlFor="schoolEmail">Email Sekolah</Label>
-                        <Input id="schoolEmail" type="email" placeholder="info@sekolah.sch.id" value={schoolEmail} onChange={(e) => { setSchoolEmail(e.target.value); setEmail(e.target.value); }} maxLength={200} className="h-11 rounded-xl" required />
+                        <Label htmlFor="schoolEmail">Email Resmi Sekolah <span className="text-red-500">*</span></Label>
+                        <Input id="schoolEmail" type="email" placeholder="info@sekolah.sch.id" value={schoolEmail} onChange={(e) => setSchoolEmail(e.target.value)} maxLength={200} className="h-11 rounded-xl" required />
+                        <p className="text-[11px] text-muted-foreground">Digunakan untuk invoice, notifikasi resmi, dan pemulihan akun</p>
                       </motion.div>
 
                       <motion.div variants={itemVariants} className="space-y-2">
-                        <Label htmlFor="schoolAddress">Alamat Lengkap Sekolah</Label>
-                        <Input id="schoolAddress" placeholder="Jl. Pendidikan No. 1, Kel. ..., Kec. ..., Kota ..." value={schoolAddress} onChange={(e) => setSchoolAddress(e.target.value)} maxLength={300} className="h-11 rounded-xl" required />
+                        <Label htmlFor="schoolWa">No. WhatsApp Sekolah <span className="text-red-500">*</span></Label>
+                        <Input id="schoolWa" type="tel" inputMode="numeric" placeholder="08xxxxxxxxxx" value={schoolWhatsapp} onChange={(e) => setSchoolWhatsapp(e.target.value.replace(/\D/g, ''))} maxLength={16} className="h-11 rounded-xl" required />
                       </motion.div>
 
                       <motion.div variants={itemVariants} className="space-y-2">
-                        <Label htmlFor="schoolWa">No. WhatsApp Sekolah</Label>
-                        <Input id="schoolWa" type="tel" placeholder="08xxxxxxxxxx" value={schoolWhatsapp} onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); setSchoolWhatsapp(v); setPhone(v); }} maxLength={16} className="h-11 rounded-xl" required />
+                        <Label htmlFor="schoolAddress">Alamat Lengkap Sekolah <span className="text-red-500">*</span></Label>
+                        <Textarea id="schoolAddress" placeholder="Jl. Pendidikan No. 1, RT/RW, Kelurahan, Kecamatan" value={schoolAddress} onChange={(e) => setSchoolAddress(e.target.value)} maxLength={300} className="rounded-xl min-h-[72px]" required />
+                      </motion.div>
+
+                      <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="schoolCity">Kota/Kabupaten <span className="text-red-500">*</span></Label>
+                          <Input id="schoolCity" placeholder="Contoh: Kota Surabaya" value={schoolCity} onChange={(e) => setSchoolCity(e.target.value)} maxLength={80} className="h-11 rounded-xl" required />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="schoolProvince">Provinsi <span className="text-red-500">*</span></Label>
+                          <Input id="schoolProvince" placeholder="Contoh: Jawa Timur" value={schoolProvince} onChange={(e) => setSchoolProvince(e.target.value)} maxLength={80} className="h-11 rounded-xl" required />
+                        </div>
+                      </motion.div>
+
+                      <motion.div variants={itemVariants} className="space-y-2">
+                        <Label>Perkiraan Jumlah Siswa <span className="text-red-500">*</span></Label>
+                        <Select value={studentCountRange} onValueChange={setStudentCountRange}>
+                          <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Pilih rentang jumlah siswa" /></SelectTrigger>
+                          <SelectContent>
+                            {["< 100 siswa","100 - 300 siswa","300 - 600 siswa","600 - 1.000 siswa","> 1.000 siswa"].map((r) => (
+                              <SelectItem key={r} value={r}>{r}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-[11px] text-muted-foreground">Membantu kami menyiapkan rekomendasi paket berlangganan yang sesuai</p>
                       </motion.div>
 
                       {/* Subdomain / Alamat Website Sekolah */}
                       <motion.div variants={itemVariants} className="space-y-2">
-                        <Label htmlFor="schoolSlug">Alamat Website Sekolah</Label>
+                        <Label htmlFor="schoolSlug">Alamat Website Sekolah <span className="text-red-500">*</span></Label>
                         <div className="flex items-stretch rounded-xl overflow-hidden border border-input focus-within:ring-2 focus-within:ring-ring">
                           <Input
                             id="schoolSlug"
@@ -564,6 +643,62 @@ const Register = () => {
                           )}
                         </div>
                       </motion.div>
+
+                      {/* ===== SECTION B: Penanggung Jawab ===== */}
+                      <motion.div variants={itemVariants} className="pt-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                            <User className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-foreground">Data Penanggung Jawab</p>
+                            <p className="text-[11px] text-muted-foreground">Orang yang akan mengelola akun ATSkolla ini</p>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      <motion.div variants={itemVariants} className="space-y-2">
+                        <Label htmlFor="fullName">Nama Lengkap <span className="text-red-500">*</span></Label>
+                        <Input id="fullName" placeholder="Nama lengkap sesuai identitas" value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={120} className="h-11 rounded-xl" required />
+                      </motion.div>
+
+                      <motion.div variants={itemVariants} className="space-y-2">
+                        <Label>Jabatan <span className="text-red-500">*</span></Label>
+                        <Select value={position} onValueChange={setPosition}>
+                          <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Pilih jabatan" /></SelectTrigger>
+                          <SelectContent>
+                            {["Kepala Sekolah","Wakil Kepala Sekolah","Operator Sekolah","Tata Usaha (TU)","Guru","Admin IT","Lainnya"].map((p) => (
+                              <SelectItem key={p} value={p}>{p}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </motion.div>
+
+                      <motion.div variants={itemVariants} className="space-y-2">
+                        <Label htmlFor="personalWa">No. WhatsApp Pribadi <span className="text-red-500">*</span></Label>
+                        <Input id="personalWa" type="tel" inputMode="numeric" placeholder="08xxxxxxxxxx" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))} maxLength={16} className="h-11 rounded-xl" required />
+                        <p className="text-[11px] text-muted-foreground">Untuk verifikasi akun & pemulihan password via OTP</p>
+                      </motion.div>
+
+                      <motion.div variants={itemVariants} className="space-y-2">
+                        <Label htmlFor="loginEmail">Email Login <span className="text-red-500">*</span></Label>
+                        <Input id="loginEmail" type="email" placeholder="admin@sekolah.sch.id" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={200} className="h-11 rounded-xl" required />
+                        <p className="text-[11px] text-muted-foreground">Email ini digunakan untuk login ke dashboard</p>
+                      </motion.div>
+
+                      {/* ===== SECTION C: Keamanan ===== */}
+                      <motion.div variants={itemVariants} className="pt-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="h-8 w-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                            <ShieldCheck className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-foreground">Keamanan Akun</p>
+                            <p className="text-[11px] text-muted-foreground">Buat password yang kuat untuk melindungi data sekolah</p>
+                          </div>
+                        </div>
+                      </motion.div>
+
 
 
 
@@ -629,12 +764,24 @@ const Register = () => {
                         <p className="text-[11px] text-muted-foreground">Masukkan kode referral jika Anda mendapat undangan dari sekolah lain</p>
                       </motion.div>
 
+                      <motion.div variants={itemVariants} className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800">
+                        <Checkbox id="tos" checked={agreeTos} onCheckedChange={(v) => setAgreeTos(v === true)} className="mt-0.5" />
+                        <label htmlFor="tos" className="text-[12px] leading-relaxed text-muted-foreground cursor-pointer">
+                          Saya menyatakan data yang diisi benar dan menyetujui{" "}
+                          <a href="/terms" target="_blank" rel="noreferrer" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Syarat & Ketentuan</a>{" "}
+                          serta{" "}
+                          <a href="/privacy" target="_blank" rel="noreferrer" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Kebijakan Privasi</a>{" "}
+                          ATSkolla.
+                        </label>
+                      </motion.div>
+
                       <motion.div variants={itemVariants} className="flex gap-2">
                         <Button type="button" variant="outline" onClick={() => setStep(1)} className="h-11 rounded-xl">Kembali</Button>
-                        <Button type="submit" disabled={registering || slugStatus !== "available"} className="flex-1 h-11 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-indigo-500/20 transition-all">
+                        <Button type="submit" disabled={registering || slugStatus !== "available" || !agreeTos} className="flex-1 h-11 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-indigo-500/20 transition-all">
                           {registering ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Mendaftar...</> : "Daftar Sekarang"}
                         </Button>
                       </motion.div>
+
                     </form>
                   </motion.div>
                 )}

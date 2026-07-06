@@ -240,6 +240,7 @@ export type Database = {
           bank_name: string
           created_at: string
           created_by: string | null
+          doku_bank_code: string | null
           id: string
           is_default: boolean
           notes: string | null
@@ -254,6 +255,7 @@ export type Database = {
           bank_name: string
           created_at?: string
           created_by?: string | null
+          doku_bank_code?: string | null
           id?: string
           is_default?: boolean
           notes?: string | null
@@ -268,6 +270,7 @@ export type Database = {
           bank_name?: string
           created_at?: string
           created_by?: string | null
+          doku_bank_code?: string | null
           id?: string
           is_default?: boolean
           notes?: string | null
@@ -2354,6 +2357,13 @@ export type Database = {
           approved_at: string | null
           bank_name: string | null
           created_at: string
+          disbursement_callback_at: string | null
+          disbursement_error: string | null
+          disbursement_method: string
+          disbursement_response: Json | null
+          disbursement_status: string | null
+          doku_partner_reference_no: string | null
+          doku_reference_id: string | null
           final_payout: number
           id: string
           notes: string | null
@@ -2380,6 +2390,13 @@ export type Database = {
           approved_at?: string | null
           bank_name?: string | null
           created_at?: string
+          disbursement_callback_at?: string | null
+          disbursement_error?: string | null
+          disbursement_method?: string
+          disbursement_response?: Json | null
+          disbursement_status?: string | null
+          doku_partner_reference_no?: string | null
+          doku_reference_id?: string | null
           final_payout?: number
           id?: string
           notes?: string | null
@@ -2406,6 +2423,13 @@ export type Database = {
           approved_at?: string | null
           bank_name?: string | null
           created_at?: string
+          disbursement_callback_at?: string | null
+          disbursement_error?: string | null
+          disbursement_method?: string
+          disbursement_response?: Json | null
+          disbursement_status?: string | null
+          doku_partner_reference_no?: string | null
+          doku_reference_id?: string | null
           final_payout?: number
           id?: string
           notes?: string | null
