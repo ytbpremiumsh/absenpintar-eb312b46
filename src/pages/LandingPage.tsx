@@ -952,7 +952,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-14 grid md:grid-cols-4 gap-10">
         <div>
           <div className="flex items-center gap-2.5 mb-4">
-            <img src={ATSKOLLA_LOGO_URL} alt="ATSkolla" className="h-10 w-auto object-contain" />
+            <img src={ATSKOLLA_LOGO_URL} alt="ATSkolla" className="h-12 w-auto object-contain" />
           </div>
           <p className="text-sm leading-relaxed">Platform Digital Sekolah Terintegrasi untuk sekolah di seluruh Indonesia.</p>
         </div>
