@@ -4021,7 +4021,7 @@ export function BendaharaPencairan() {
   const loadStaff = async () => {
     if (!profile?.school_id) return;
     const { data: roleRows } = await supabase.from("user_roles")
-      .select("user_id, role").in("role", ["guru", "operator", "admin", "bendahara"] as any);
+      .select("user_id, role").in("role", ["teacher", "staff", "bendahara"] as any);
     const ids = Array.from(new Set((roleRows || []).map((r: any) => r.user_id)));
     if (ids.length === 0) { setStaffList([]); return; }
     const { data: profs } = await supabase.from("profiles")
@@ -4523,11 +4523,14 @@ export function BendaharaPencairan() {
                   <SelectTrigger><SelectValue placeholder="Pilih Guru / Operator" /></SelectTrigger>
                   <SelectContent className="max-h-72">
                     {staffList.length === 0 && <div className="p-2 text-xs text-muted-foreground">Belum ada staf terdaftar</div>}
-                    {staffList.map((s) => (
-                      <SelectItem key={s.user_id} value={s.user_id}>
-                        {s.full_name || "(tanpa nama)"} — {(s.roles || []).join(", ")}{s.phone ? "" : " (no WA)"}
-                      </SelectItem>
-                    ))}
+                    {staffList.map((s) => {
+                      const roleLabel = (s.roles || []).map((r: string) => ({ teacher: "Guru", staff: "Operator", bendahara: "Bendahara" } as any)[r] || r).join(", ");
+                      return (
+                        <SelectItem key={s.user_id} value={s.user_id}>
+                          {s.full_name || "(tanpa nama)"} — {roleLabel}{s.phone ? "" : " (no WA)"}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
                 <p className="text-[11px] text-muted-foreground mt-1">Setiap transaksi pencairan wajib diotorisasi via OTP WhatsApp ke penanggung jawab.</p>
