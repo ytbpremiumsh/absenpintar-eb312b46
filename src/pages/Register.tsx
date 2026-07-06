@@ -201,8 +201,6 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!schoolData) { toast.error("Data sekolah belum diisi"); return; }
-    if (!fullName.trim()) { toast.error("Nama lengkap wajib diisi"); return; }
-    if (!email.trim()) { toast.error("Email admin wajib diisi"); return; }
     if (!principalName.trim()) { toast.error("Nama Kepala Sekolah wajib diisi"); return; }
     if (!schoolEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(schoolEmail.trim())) {
       toast.error("Email sekolah tidak valid"); return;
@@ -210,19 +208,36 @@ const Register = () => {
     if (!schoolAddress.trim() || schoolAddress.trim().length < 8) {
       toast.error("Alamat lengkap sekolah wajib diisi (min 8 karakter)"); return;
     }
+    if (!schoolCity.trim()) { toast.error("Kota/Kabupaten wajib diisi"); return; }
+    if (!schoolProvince.trim()) { toast.error("Provinsi wajib diisi"); return; }
     const waDigits = schoolWhatsapp.replace(/\D/g, '');
     if (waDigits.length < 9 || waDigits.length > 15) {
       toast.error("Nomor WhatsApp sekolah tidak valid"); return;
     }
+    if (!studentCountRange) { toast.error("Perkiraan jumlah siswa wajib dipilih"); return; }
+
+    if (!fullName.trim() || fullName.trim().length < 3) { toast.error("Nama lengkap penanggung jawab wajib diisi"); return; }
+    if (!position) { toast.error("Jabatan penanggung jawab wajib dipilih"); return; }
+    const personalWa = phone.replace(/\D/g, '');
+    if (personalWa.length < 9 || personalWa.length > 15) {
+      toast.error("Nomor WhatsApp pribadi tidak valid"); return;
+    }
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast.error("Email login tidak valid"); return;
+    }
+
     if (!passwordValid) { toast.error("Password harus minimal 8 karakter, mengandung huruf besar, angka, dan simbol"); return; }
     if (password !== confirmPassword) { toast.error("Password tidak cocok"); return; }
     if (!slug || slugStatus !== "available") {
       toast.error("Silakan pilih alamat website sekolah (subdomain) yang tersedia");
       return;
     }
+    if (!agreeTos) { toast.error("Anda harus menyetujui Syarat & Ketentuan"); return; }
 
     setRegistering(true);
     try {
+      // Compose full address including city & province for the schools table
+      const fullAddress = [schoolAddress.trim(), schoolCity.trim(), schoolProvince.trim()].filter(Boolean).join(", ");
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`, {
         method: 'POST',
         headers: {
@@ -230,17 +245,18 @@ const Register = () => {
           'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify({
-          email,
+          email: email.trim(),
           password,
-          full_name: fullName,
+          full_name: fullName.trim(),
           role: 'school_admin',
           npsn: schoolData.npsn || undefined,
           school_name: schoolData.name,
-          school_address: schoolAddress.trim() || schoolData.address,
+          school_address: fullAddress || schoolData.address,
           school_principal_name: principalName.trim(),
           school_email: schoolEmail.trim(),
           school_whatsapp: waDigits,
-          phone,
+          phone: personalWa,
+          position,
           referral_code: referralInput || undefined,
           desired_slug: slug,
         }),
