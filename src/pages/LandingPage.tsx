@@ -919,7 +919,7 @@ function FinalCTA() {
   const nav = useNavigate();
   return (
     <Section id="kontak" className="py-20 lg:py-28 bg-white relative overflow-hidden">
-      <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "linear-gradient(#1a2340 1px, transparent 1px), linear-gradient(90deg, #1a2340 1px, transparent 1px)", backgroundSize: "44px 44px", maskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)" }} />
+      <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(11,16,32,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(11,16,32,.05) 1px, transparent 1px)", backgroundSize: "56px 56px", maskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)" }} />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#5B6CF9] rounded-full blur-[160px] opacity-15" />
 
       <div className="relative text-center max-w-3xl mx-auto">
