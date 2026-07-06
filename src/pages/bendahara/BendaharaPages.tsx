@@ -128,6 +128,7 @@ export function BendaharaDashboard() {
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [settlements, setSettlements] = useState<any[]>([]);
+  const [cashBook, setCashBook] = useState<any[]>([]);
   const [studentGender, setStudentGender] = useState<Record<string, string>>({});
   const [showRecentPaid, setShowRecentPaid] = useState<boolean>(() => {
     const v = localStorage.getItem("bendahara_show_recent_paid");
