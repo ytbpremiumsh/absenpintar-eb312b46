@@ -1,146 +1,83 @@
+## Ringkasan Fitur yang Sudah Ada vs Yang Ditambahkan
 
-## Manajemen Perangkat RFID ATSkolla
+Setelah menelusuri modul Bendahara yang sudah ada, banyak bagian yang diminta sebetulnya **sudah tersedia**. Berikut pemetaannya, dan hanya bagian yang belum lengkap yang akan saya bangun.
 
-Fitur ini menambahkan manajemen perangkat RFID resmi yang dikendalikan Super Admin, dengan lisensi per sekolah, aktivasi berbasis Device ID + Secret Token, heartbeat, log, dan integrasi ke sistem absensi.
+### Sudah ada (akan disempurnakan seperlunya, tanpa dibongkar)
+- **Dashboard**: sudah menampilkan tagihan bulan berjalan, jumlah lunas/pending, tunggakan, saldo siap cair, grafik bulanan, per kelas, dan riwayat pembayaran.
+- **Tarif SPP** (`/bendahara/tarif`): master tarif SPP per kelas/tahun ajaran.
+- **Pembayaran** (`/bendahara/transaksi`): daftar & detail invoice SPP.
+- **Saldo & Penarikan** (`/bendahara/withdraw`): withdraw ke rekening.
+- **Laporan** (`Keuangan Sekolah` → `BendaharaLaporan`): export Excel/CSV/PDF per kelas/status/tahun ajaran + grafik tahunan.
 
----
+### Yang akan ditambahkan / disempurnakan
+1. **Dashboard — metrik yang belum ada**
+   - Total pemasukan **hari ini**, **bulan ini**, **tahun ini** (kartu ringkas terpisah, di atas panel yang sudah ada).
+   - **Tagihan jatuh tempo hari ini** (kartu + daftar 5 teratas).
+   - **Total saldo kas** (menggabungkan saldo siap cair + saldo kas manual dari Buku Kas).
+   - Jumlah siswa **sudah/belum membayar bulan berjalan** (kartu ringkas — saat ini hanya jumlah invoice, bukan jumlah siswa unik).
 
-### 1. Struktur data (Lovable Cloud / Postgres)
+2. **Manajemen Jenis Pembayaran** (menu baru `/bendahara/jenis-pembayaran`)
+   - Tabel baru `payment_types` (multi-tenant, RLS per `school_id`).
+   - Field: Nama, Kategori (SPP/Daftar Ulang/Seragam/Buku/Ekskul/Lain-lain), Nominal, Berlaku untuk (semua/kelas tertentu/tingkat), Periode (bulanan/semester/tahunan/sekali), Aktif, Keterangan.
+   - CRUD lengkap dengan filter kategori & status.
 
-Tabel baru di skema `public`:
+3. **Buku Kas** (menu baru `/bendahara/buku-kas`)
+   - Tabel baru `cash_book_entries` (kas masuk & keluar manual) — RLS per `school_id`.
+   - **Otomatis menarik** semua invoice SPP `paid` sebagai kas masuk (read-only, ditandai "auto") — digabung dengan entri manual.
+   - Fitur: tambah kas masuk/keluar manual, filter tanggal, filter kategori, saldo berjalan, hapus entri manual, catatan.
 
-- **`rfid_devices`** — inventaris seluruh perangkat resmi
-  - `device_id` (unik, format `ATS-RFID-XXXXXX`)
-  - `serial_number`, `mac_address` (unik)
-  - `activation_code` (kode 8-digit sekali pakai untuk aktivasi awal)
-  - `secret_token_hash` (SHA-256 dari secret token — token asli hanya ditampilkan sekali saat generate)
-  - `school_id` (nullable — null berarti belum di-assign)
-  - `location_label`, `status` (`unassigned` | `assigned` | `active` | `inactive` | `revoked`)
-  - `last_online_at`, `last_heartbeat_at`, `last_ip`
-  - `firmware_version`, `notes`, `activated_at`
+4. **Rekap Tunggakan** (menu baru `/bendahara/tunggakan`)
+   - Total tunggakan, jumlah siswa menunggak.
+   - Rekap per kelas & per jenis pembayaran (sortable).
+   - Filter: kelas, bulan, tahun ajaran.
+   - **Tombol kirim reminder WhatsApp** per siswa & broadcast semua (memakai edge function `send-whatsapp` yang sudah ada + flag `bendahara_wa_enabled`).
 
-- **`rfid_device_licenses`** — kuota lisensi per sekolah
-  - `school_id`, `license_count` (jumlah slot lisensi yang dibeli/dibagi Super Admin)
+5. **Laporan — jenis yang belum ada**
+   - Menu tetap di `/bendahara/keuangan-sekolah`, ditambah **preset laporan**: Pembayaran Harian, Bulanan, Tahunan, Rekap per Kelas, Rekap per **Jenis Pembayaran**, Rekap per Siswa.
+   - Export PDF & Excel untuk setiap preset (menggunakan util `jspdf` + `xlsx` yang sudah dipakai).
 
-- **`rfid_device_logs`** — audit trail perangkat
-  - `device_id_ref` (fk ke `rfid_devices`), `school_id`, `event_type`
-    (`activation` | `heartbeat` | `online` | `offline` | `scan` | `config_change` | `revoke` | `license_change`)
-  - `payload jsonb` (data event: card_number, student_id, mac, dll)
-  - `created_at`
+### Sidebar Bendahara
+Menambahkan 3 menu baru di grup "Tagihan" dan "Keuangan":
+- Jenis Pembayaran (grup Master Data)
+- Buku Kas (grup Keuangan Sekolah)
+- Rekap Tunggakan (grup Tagihan)
 
-- **`rfid_size_tiers`** — aturan minimal perangkat berdasarkan jumlah siswa
-  - `min_students`, `max_students` (nullable = tak terbatas), `min_devices`
-  - Seed default: 0–300 → 1, 301–700 → 2, 701–1200 → 3, 1201+ → 4
+## Teknis Singkat
 
-Semua tabel: `GRANT` sesuai role, RLS ON, kolom `created_at`/`updated_at`.
+**Migrations (2 tabel baru)**
+```sql
+-- payment_types
+CREATE TABLE public.payment_types (
+  id uuid PK, school_id uuid FK schools,
+  name text, category text, amount integer,
+  applies_to text,           -- 'all' | 'class:<name>' | 'grade:<n>'
+  period text,               -- 'monthly'|'semester'|'yearly'|'once'
+  is_active boolean default true,
+  description text,
+  created_at, updated_at
+);
+-- + GRANT authenticated/service_role, RLS by school_id via get_user_school_id()
 
-### 2. Aturan RLS
-
-- **Super Admin** (`has_role(uid,'super_admin')`) — full CRUD di keempat tabel.
-- **School Admin / Bendahara / Teacher** dari sekolah yang sama —
-  hanya `SELECT` pada `rfid_devices`, `rfid_device_licenses`, `rfid_device_logs`
-  (`school_id = get_user_school_id(uid)`), tidak ada INSERT/UPDATE/DELETE.
-- Perangkat sendiri tidak login lewat Supabase auth — komunikasi lewat edge
-  function `rfid-device` menggunakan Device ID + Secret Token (verify_jwt=false).
-
-### 3. Edge Function `rfid-device`
-
-Satu endpoint publik (verify_jwt=false) dengan action:
-
-- `activate` — input: `device_id`, `activation_code`, `mac_address`. Validasi:
-  device ada, code cocok & belum dipakai, sekolah punya slot lisensi kosong.
-  Output: `secret_token` (plaintext, hanya sekali) + `assigned_school_id`.
-  Sets `status='active'`, tulis log `activation`.
-- `heartbeat` — input: `device_id`, `secret_token`, `firmware_version?`.
-  Verifikasi hash token → update `last_heartbeat_at`, `last_online_at`,
-  `status='active'`. Log ringan (rate-limited: 1 baris log per 5 menit).
-- `scan` — input: `device_id`, `secret_token`, `card_number`, `scanned_at`.
-  Wajib `status='active'` DAN heartbeat < 3 menit lalu — kalau tidak,
-  reject dengan `device_offline`. Cari siswa via `students.card_number`,
-  panggil path absensi yang sudah ada (reuse handler `public-scan-attendance`
-  atau tulis langsung ke `attendance_logs` dengan `method='rfid'`).
-  Tulis log `scan`.
-- `deactivate` (Super Admin only via JWT) — revoke token & set `status='revoked'`.
-
-Job pemarkir offline: karena Lovable Cloud tak menjamin cron di dalam edge
-function, kita gunakan **derivasi status di query** — helper SQL / view
-menghitung `computed_status` = `active` jika `last_heartbeat_at > now() - 3 min`,
-selain itu `offline`. Selain itu, pg_cron per menit (sudah tersedia — dipakai
-auto-mark-alfa) memanggil fungsi SQL `mark_offline_rfid_devices()` yang
-meng-update `status='inactive'` untuk perangkat yang lewat 3 menit tanpa
-heartbeat dan menulis log `offline` sekali.
-
-### 4. UI Super Admin (baru)
-
-Route baru: `/super-admin/rfid` — masuk sidebar Super Admin.
-
-Halaman `SuperAdminRFID.tsx` dengan 3 tab:
-
-1. **Perangkat** — tabel semua device: Device ID, Serial, MAC, Sekolah, Lokasi,
-   Status (badge: Aktif/Offline/Belum Aktivasi/Revoked), Last Online, aksi
-   (Assign ke sekolah, Regenerate Secret, Revoke, Hapus). Tombol **Tambah
-   Perangkat** membuka dialog untuk generate device baru (Device ID otomatis
-   `ATS-RFID-XXXXXX`, activation code 8 digit, secret token 32 hex — token
-   ditampilkan sekali dengan tombol copy + warning).
-2. **Lisensi Sekolah** — daftar sekolah + jumlah lisensi + jumlah aktif +
-   status (OK / Kurang / Melebihi). Tombol +/- untuk atur lisensi.
-   Tampilkan juga jumlah siswa & minimal perangkat menurut tier.
-3. **Aturan Ukuran (Tier)** — CRUD `rfid_size_tiers` (min_students,
-   max_students, min_devices).
-
-Tambah tab **Log** di detail perangkat (dialog): 100 event terakhir.
-
-### 5. UI Admin Sekolah (read-only)
-
-Tambahan route `/rfid-devices` di sidebar School Admin — hanya menampilkan
-perangkat milik sekolah, status live, dan log. Tanpa tombol edit/hapus.
-
-### 6. Peringatan pada dashboard
-
-- **Dashboard School Admin (`Dashboard.tsx`)** — banner kuning muncul jika
-  `count(active_devices) < required_min_devices` (dihitung dari tier siswa).
-  Klik → menuju `/rfid-devices`.
-- **Dashboard Super Admin** — kartu ringkas: total perangkat, aktif, offline,
-  sekolah yang under-licensed.
-
-### 7. Integrasi ke absensi yang sudah ada
-
-- Reuse tabel `attendance_logs` dengan `method='rfid'`.
-- Edge function `rfid-device` action `scan` memanggil logika absensi yang
-  sudah ada (import shared helper dari `public-scan-attendance`), sehingga
-  audio announce, WA notifikasi, dan Alfa-check tetap jalan tanpa perubahan.
-- Tidak menambahkan istilah "penjemputan/pickup" — konsisten sekolah.
-
-### 8. Yang TIDAK dilakukan di iterasi ini
-
-- Tidak menyediakan firmware fisik / dokumen hardware.
-- Tidak menghitung biaya lisensi otomatis (Super Admin atur manual).
-- Tidak menyentuh flow QR / Face lain — hanya menambah channel RFID.
-
-### 9. File yang akan ditambah/diubah (technical)
-
-- Migrasi: 4 tabel + tier seed + fungsi `mark_offline_rfid_devices()` + pg_cron.
-- Edge function baru: `supabase/functions/rfid-device/index.ts`.
-- `supabase/functions/_shared/rfidAttendance.ts` (helper reuse).
-- Frontend:
-  - `src/pages/super-admin/SuperAdminRFID.tsx` (baru, 3 tab)
-  - `src/pages/SchoolRFIDDevices.tsx` (baru, read-only)
-  - Sidebar Super Admin & School Admin diupdate.
-  - Route baru di `src/App.tsx`.
-  - Banner peringatan tambahan di `src/pages/Dashboard.tsx`.
-
-### 10. Alur singkat aktivasi perangkat
-
-```text
-Super Admin ── generate device ──> ATS-RFID-000123 + code:12345678 + token(sekali)
-      │
-      └── assign device ke Sekolah A (pakai slot lisensi)
-
-Perangkat fisik ── POST /rfid-device action=activate ──> validasi code + lisensi
-                                                        └── return secret_token
-Perangkat ── POST heartbeat tiap 45s ──> last_heartbeat_at
-Perangkat ── POST scan(card) ──> attendance_logs (method=rfid)
-Cron 1 menit ── mark_offline_rfid_devices() ──> status=inactive + log offline
+-- cash_book_entries
+CREATE TABLE public.cash_book_entries (
+  id uuid PK, school_id uuid FK,
+  entry_date date, direction text CHECK IN ('in','out'),
+  category text, amount integer,
+  description text, reference text,
+  created_by uuid, created_at, updated_at
+);
+-- + GRANT + RLS by school_id
 ```
+Kas masuk otomatis dari `spp_invoices.status='paid'` dibaca on-the-fly (tidak diduplikasi ke tabel).
 
-Setelah kamu setujui plan ini, saya jalankan migrasi dulu, lalu edge function, lalu UI Super Admin, dan terakhir view read-only + banner sekolah.
+**Files yang dibuat/diubah**
+- `supabase/migrations/*` — 2 tabel baru + policies.
+- `src/pages/bendahara/BendaharaJenisPembayaran.tsx` (baru)
+- `src/pages/bendahara/BendaharaBukuKas.tsx` (baru)
+- `src/pages/bendahara/BendaharaTunggakan.tsx` (baru)
+- `src/pages/bendahara/BendaharaPages.tsx` — tambah kartu dashboard baru (hari/bulan/tahun/jatuh tempo/saldo kas), tambah preset laporan.
+- `src/components/layout/BendaharaSidebar.tsx` — 3 menu baru.
+- `src/components/layout/BendaharaFloatingNav.tsx` — sinkron menu mobile.
+- `src/App.tsx` — 3 route baru.
+
+Tidak ada file existing yang dihapus / distruktur ulang. Data lama & tabel `spp_*` tetap sumber kebenaran; fitur baru menempel di sampingnya dan mendukung multi-tenant lewat `school_id` + RLS.

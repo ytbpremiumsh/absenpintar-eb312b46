@@ -128,6 +128,7 @@ export function BendaharaDashboard() {
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [settlements, setSettlements] = useState<any[]>([]);
+  const [cashBook, setCashBook] = useState<any[]>([]);
   const [studentGender, setStudentGender] = useState<Record<string, string>>({});
   const [showRecentPaid, setShowRecentPaid] = useState<boolean>(() => {
     const v = localStorage.getItem("bendahara_show_recent_paid");
@@ -194,13 +195,15 @@ export function BendaharaDashboard() {
 
   const fetchDashboardData = useCallback(async () => {
     if (!profile?.school_id) { setLoading(false); return; }
-    const [i, s, st] = await Promise.all([
+    const [i, s, st, cb] = await Promise.all([
       supabase.from("spp_invoices").select("*").eq("school_id", profile.school_id),
       supabase.from("spp_settlements").select("*").eq("school_id", profile.school_id),
       supabase.from("students").select("id, gender").eq("school_id", profile.school_id),
+      supabase.from("cash_book_entries").select("direction, amount, entry_date").eq("school_id", profile.school_id),
     ]);
     setInvoices(i.data || []);
     setSettlements(s.data || []);
+    setCashBook(cb.data || []);
     const map: Record<string, string> = {};
     (st.data || []).forEach((x: any) => { map[x.id] = (x.gender || "").toString().toUpperCase(); });
     setStudentGender(map);
@@ -296,6 +299,43 @@ export function BendaharaDashboard() {
     return Math.round((invoices.filter(i => i.status === "paid").length / invoices.length) * 100);
   }, [invoices]);
 
+  // ============ Ringkasan Cepat (Hari/Bulan/Tahun/Jatuh Tempo/Saldo Kas) ============
+  const quickMetrics = useMemo(() => {
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const y = now.getFullYear();
+    const m = now.getMonth() + 1;
+    const paid = invoices.filter(i => i.status === "paid" && i.paid_at);
+    const incomeToday = paid.filter(i => (i.paid_at || "").slice(0, 10) === today).reduce((s, i) => s + (i.total_amount || 0), 0);
+    const incomeMonth = paid.filter(i => {
+      const d = new Date(i.paid_at); return d.getFullYear() === y && d.getMonth() + 1 === m;
+    }).reduce((s, i) => s + (i.total_amount || 0), 0);
+    const incomeYear = paid.filter(i => new Date(i.paid_at).getFullYear() === y).reduce((s, i) => s + (i.total_amount || 0), 0);
+    const dueTodayList = invoices.filter(i => i.status !== "paid" && (i.due_date || "").slice(0, 10) === today);
+    const monthInv = invoices.filter(i => i.period_year === y && i.period_month === m);
+    const paidStudentsMonth = new Set(monthInv.filter(i => i.status === "paid").map(i => i.student_id)).size;
+    const unpaidStudentsMonth = new Set(monthInv.filter(i => i.status !== "paid").map(i => i.student_id)).size;
+    const cashIn = cashBook.filter((c: any) => c.direction === "in").reduce((s: number, c: any) => s + (c.amount || 0), 0);
+    const cashOut = cashBook.filter((c: any) => c.direction === "out").reduce((s: number, c: any) => s + (c.amount || 0), 0);
+    // Saldo kas total = kas manual (in - out) + saldo online siap dicairkan
+    const readyOnline = invoices
+      .filter((i: any) => i.status === "paid" && !i.settlement_id)
+      .filter((i: any) => {
+        const v = (i.payment_method || "").toString().toLowerCase();
+        return v !== "offline_cash" && v !== "offline_transfer";
+      })
+      .reduce((s: number, i: any) => s + (i.net_amount || 0), 0);
+    const saldoKas = (cashIn - cashOut) + readyOnline;
+    return {
+      incomeToday, incomeMonth, incomeYear,
+      dueTodayCount: dueTodayList.length,
+      dueTodayTotal: dueTodayList.reduce((s, i) => s + (i.total_amount || 0), 0),
+      dueTodayList: dueTodayList.slice(0, 5),
+      paidStudentsMonth, unpaidStudentsMonth,
+      saldoKas,
+    };
+  }, [invoices, cashBook]);
+
   if (loading) return <div className="p-12 text-center text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></div>;
 
   return (
@@ -317,6 +357,39 @@ export function BendaharaDashboard() {
         subtitle="Ringkasan keuangan sekolah"
         variant="primary"
       />
+
+      {/* Ringkasan Cepat — Pemasukan Hari/Bulan/Tahun, Jatuh Tempo, Saldo Kas */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <StatCard label="Pemasukan Hari Ini" value={fmtIDR(quickMetrics.incomeToday)} icon={TrendingUp} gradient="from-emerald-500 to-teal-600" />
+        <StatCard label="Pemasukan Bulan Ini" value={fmtIDR(quickMetrics.incomeMonth)} icon={BarChart3} gradient="from-[#5B6CF9] to-[#4c5ded]" />
+        <StatCard label="Pemasukan Tahun Ini" value={fmtIDR(quickMetrics.incomeYear)} icon={Banknote} gradient="from-indigo-500 to-violet-600" />
+        <StatCard label="Jatuh Tempo Hari Ini" value={quickMetrics.dueTodayCount} sub={fmtIDR(quickMetrics.dueTodayTotal)} icon={AlertCircle} gradient="from-amber-500 to-orange-600" />
+        <StatCard label="Sudah Bayar (Bulan Ini)" value={quickMetrics.paidStudentsMonth} sub={`${quickMetrics.unpaidStudentsMonth} belum bayar`} icon={CheckCircle2} gradient="from-emerald-500 to-lime-600" />
+        <StatCard label="Total Saldo Kas" value={fmtIDR(quickMetrics.saldoKas)} sub="Kas manual + siap cair" icon={Wallet} gradient="from-sky-500 to-blue-600" />
+      </div>
+
+      {quickMetrics.dueTodayList.length > 0 && (
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2"><AlertCircle className="h-4 w-4 text-amber-600" /> Tagihan Jatuh Tempo Hari Ini</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="divide-y">
+              {quickMetrics.dueTodayList.map((i: any) => (
+                <div key={i.id} className="flex items-center justify-between py-2 text-sm">
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{i.student_name} <span className="text-muted-foreground font-normal">• {i.class_name}</span></p>
+                    <p className="text-[11px] text-muted-foreground">{i.period_label}</p>
+                  </div>
+                  <p className="font-mono font-semibold text-amber-600 shrink-0">{fmtIDR(i.total_amount)}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+
 
       {/* KEUANGAN AKTIF — Siap Dicairkan (dipisah supaya jelas beda dengan rincian pembayaran) */}
       <div className="rounded-2xl overflow-hidden bg-white dark:bg-card shadow-lg shadow-slate-900/5 ring-1 ring-emerald-200/70 dark:ring-emerald-800/40">
@@ -4548,6 +4621,148 @@ export function BendaharaPencairan() {
   );
 }
 
+// ============ Preset Laporan Cepat (PDF & Excel) ============
+function PresetLaporan({ items, students, school, year }: { items: any[]; students: any[]; school: any; year: number }) {
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  const currentMonth = today.getMonth() + 1;
+
+  const paid = items.filter((i: any) => i.status === "paid" && i.paid_at);
+
+  const buildRows = (list: any[]) => list.map((i: any, idx: number) => ({
+    "No": idx + 1,
+    "Invoice": i.invoice_number,
+    "NIS": students.find((s: any) => s.id === i.student_id)?.student_id || "",
+    "Nama Siswa": i.student_name,
+    "Kelas": i.class_name,
+    "Periode": i.period_label,
+    "Nominal": i.total_amount,
+    "Tgl Bayar": i.paid_at ? new Date(i.paid_at).toLocaleDateString("id-ID") : "",
+    "Metode": formatPaymentMethodLabel(i.payment_method),
+    "Status": i.status === "paid" ? "Lunas" : "Belum",
+  }));
+
+  const buildAggRows = (agg: { key: string; label: string; total: number; count: number }[]) =>
+    agg.map((a, idx) => ({
+      "No": idx + 1,
+      [a.label]: a.key,
+      "Jumlah Transaksi": a.count,
+      "Total": a.total,
+    }));
+
+  const exportXlsx = (fname: string, rows: any[]) => {
+    if (rows.length === 0) { toast.error("Tidak ada data untuk periode ini"); return; }
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws["!cols"] = Object.keys(rows[0]).map(k => ({ wch: Math.min(Math.max(k.length + 2, 12), 30) }));
+    XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+    XLSX.writeFile(wb, `${fname}.xlsx`);
+    toast.success("Excel diunduh");
+  };
+
+  const exportPdf = (title: string, subtitle: string, rows: any[]) => {
+    if (rows.length === 0) { toast.error("Tidak ada data untuk periode ini"); return; }
+    const doc = new jsPDF("l", "mm", "a4");
+    doc.setFontSize(14); doc.setFont("helvetica", "bold");
+    doc.text(title, 14, 14);
+    doc.setFontSize(10); doc.setFont("helvetica", "normal");
+    doc.text(school?.name || "-", 14, 21);
+    doc.setFontSize(9);
+    doc.text(subtitle, 14, 27);
+    const total = rows.reduce((s, r) => s + (r["Total"] || r["Nominal"] || 0), 0);
+    doc.text(`Total: ${rows.length} baris • Rp ${total.toLocaleString("id-ID")}`, 14, 33);
+    const head = [Object.keys(rows[0])];
+    const body = rows.map(r => Object.values(r).map(v => typeof v === "number" ? v.toLocaleString("id-ID") : String(v ?? "")));
+    autoTable(doc, {
+      startY: 39, head, body,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [91, 108, 249], textColor: 255 },
+      alternateRowStyles: { fillColor: [248, 249, 252] },
+    });
+    doc.save(`${title.replace(/\s+/g, "_")}.pdf`);
+    toast.success("PDF diunduh");
+  };
+
+  // Presets
+  const dailyRows = () => buildRows(paid.filter((i: any) => (i.paid_at || "").slice(0, 10) === todayStr));
+  const monthlyRows = () => buildRows(paid.filter((i: any) => {
+    const d = new Date(i.paid_at); return d.getFullYear() === year && d.getMonth() + 1 === currentMonth;
+  }));
+  const yearlyRows = () => buildRows(paid.filter((i: any) => new Date(i.paid_at).getFullYear() === year));
+
+  const perClassRows = () => {
+    const map = new Map<string, { total: number; count: number }>();
+    paid.filter((i: any) => new Date(i.paid_at).getFullYear() === year).forEach((i: any) => {
+      const e = map.get(i.class_name) || { total: 0, count: 0 };
+      e.total += i.total_amount || 0; e.count += 1;
+      map.set(i.class_name, e);
+    });
+    return buildAggRows(Array.from(map.entries()).map(([k, v]) => ({ key: k, label: "Kelas", ...v })).sort((a, b) => b.total - a.total));
+  };
+  const perTypeRows = () => {
+    const map = new Map<string, { total: number; count: number }>();
+    paid.filter((i: any) => new Date(i.paid_at).getFullYear() === year).forEach((i: any) => {
+      const k = i.period_label || "Tanpa Kategori";
+      const e = map.get(k) || { total: 0, count: 0 };
+      e.total += i.total_amount || 0; e.count += 1;
+      map.set(k, e);
+    });
+    return buildAggRows(Array.from(map.entries()).map(([k, v]) => ({ key: k, label: "Jenis/Periode", ...v })).sort((a, b) => b.total - a.total));
+  };
+  const perStudentRows = () => {
+    const map = new Map<string, { name: string; class: string; total: number; count: number }>();
+    paid.filter((i: any) => new Date(i.paid_at).getFullYear() === year).forEach((i: any) => {
+      const e = map.get(i.student_id) || { name: i.student_name, class: i.class_name, total: 0, count: 0 };
+      e.total += i.total_amount || 0; e.count += 1;
+      map.set(i.student_id, e);
+    });
+    return Array.from(map.values())
+      .sort((a, b) => b.total - a.total)
+      .map((v, idx) => ({
+        "No": idx + 1,
+        "Nama Siswa": v.name,
+        "Kelas": v.class,
+        "Jumlah Transaksi": v.count,
+        "Total": v.total,
+      }));
+  };
+
+  const presets = [
+    { key: "harian", title: "Pembayaran Harian", subtitle: `Tanggal ${today.toLocaleDateString("id-ID")}`, rows: dailyRows },
+    { key: "bulanan", title: "Pembayaran Bulanan", subtitle: `${MONTHS[currentMonth - 1]} ${year}`, rows: monthlyRows },
+    { key: "tahunan", title: "Pembayaran Tahunan", subtitle: `Tahun ${year}`, rows: yearlyRows },
+    { key: "kelas", title: "Rekap per Kelas", subtitle: `Tahun ${year}`, rows: perClassRows },
+    { key: "jenis", title: "Rekap per Jenis Pembayaran", subtitle: `Tahun ${year}`, rows: perTypeRows },
+    { key: "siswa", title: "Rekap per Siswa", subtitle: `Tahun ${year}`, rows: perStudentRows },
+  ];
+
+  return (
+    <Card className="border-0 shadow-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2"><FileText className="h-4 w-4 text-[#5B6CF9]" /> Laporan Cepat (PDF & Excel)</CardTitle>
+        <p className="text-[11px] text-muted-foreground">Klik untuk mengunduh laporan langsung dari data pembayaran online yang sudah tercatat.</p>
+      </CardHeader>
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {presets.map((p) => (
+          <div key={p.key} className="rounded-xl border border-border/60 p-3 bg-gradient-to-br from-muted/20 to-transparent">
+            <p className="text-sm font-bold">{p.title}</p>
+            <p className="text-[11px] text-muted-foreground mb-2">{p.subtitle}</p>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => exportPdf(p.title, p.subtitle, p.rows())}>
+                <Download className="h-3.5 w-3.5 mr-1" /> PDF
+              </Button>
+              <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => exportXlsx(`${p.title.replace(/\s+/g, "_")}_${todayStr}`, p.rows())}>
+                <Download className="h-3.5 w-3.5 mr-1" /> Excel
+              </Button>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+
 // Backward-compat alias: route /bendahara/settlement now redirects to gabungan
 export function BendaharaSettlement() {
   return <BendaharaPencairan />;
@@ -4798,6 +5013,11 @@ export function BendaharaLaporan() {
           </div>
         }
       />
+
+      {/* PRESET LAPORAN — Harian / Bulanan / Tahunan / per Kelas / per Jenis / per Siswa */}
+      <PresetLaporan items={items} students={students} school={school} year={year} />
+
+
 
       {/* KPI Ringkasan tahun */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

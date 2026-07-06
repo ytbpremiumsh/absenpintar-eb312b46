@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Home, CreditCard, Wallet, BarChart3, LayoutGrid,
-  Users, Receipt, FileText, Upload, ArrowDownToLine,
+  Users, Receipt, FileText, Upload, ArrowDownToLine, Tag, BookOpen, AlertTriangle,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -39,7 +39,10 @@ export function BendaharaFloatingNav() {
             <div className="grid grid-cols-3 gap-3">
               <SheetItem icon={Users} label="Data Siswa" gradient="from-[#5B6CF9] to-[#4c5ded]" onClick={() => navigate("/bendahara/siswa")} />
               <SheetItem icon={Receipt} label="Tarif SPP" gradient="from-indigo-500 to-violet-600" onClick={() => navigate("/bendahara/tarif")} />
+              <SheetItem icon={Tag} label="Jenis Pembayaran" gradient="from-fuchsia-500 to-pink-600" onClick={() => navigate("/bendahara/jenis-pembayaran")} />
               <SheetItem icon={FileText} label="Buat Tagihan" gradient="from-amber-500 to-orange-600" onClick={() => navigate("/bendahara/generate")} />
+              <SheetItem icon={AlertTriangle} label="Tunggakan" gradient="from-rose-500 to-red-600" onClick={() => navigate("/bendahara/tunggakan")} />
+              <SheetItem icon={BookOpen} label="Buku Kas" gradient="from-emerald-500 to-teal-600" onClick={() => navigate("/bendahara/buku-kas")} />
               <SheetItem icon={Upload} label="Import" gradient="from-violet-500 to-purple-600" onClick={() => navigate("/bendahara/import-export")} />
               <SheetItem icon={Wallet} label="Saldo & Penarikan" gradient="from-sky-500 to-blue-600" onClick={() => navigate("/bendahara/withdraw")} />
               <SheetItem icon={ArrowDownToLine} label="Pencairan" gradient="from-rose-500 to-red-600" onClick={() => navigate("/bendahara/withdraw?tab=pencairan")} />
