@@ -631,20 +631,35 @@ Deno.serve(async (req) => {
       if (!invoiceId) return json({ error: "invoice_id wajib" });
       const { data: inv } = await supabase
         .from("spp_invoices")
-        .select("id, student_id, students:student_id(parent_phone)")
+        .select("id, student_id, school_id, parent_phone, status")
         .eq("id", invoiceId)
         .maybeSingle();
       if (!inv) return json({ error: "Tagihan tidak ditemukan" });
-      // Ownership: prefer parent-phone match against the invoice's student
-      // (so switching selectedStudent client-side doesn't break payment
-      // for a sibling under the same wali). Fall back to strict student_id
-      // match for legacy invoices missing a linked student.
-      const invoiceStudentPhone = (inv as any).students?.parent_phone || "";
+      if (inv.status === "paid") return json({ error: "Tagihan sudah lunas" });
+
+      // Ownership: cek nomor WA wali di sesi terhadap:
+      //  1) parent_phone snapshot di invoice, atau
+      //  2) parent_phone dari record students saat ini.
+      // Ini mencegah "Tagihan tidak valid" ketika wali berpindah siswa aktif
+      // di dropdown, atau tagihan milik anak lain di wali yang sama.
+      let ownerPhone = inv.parent_phone || "";
+      if (!ownerPhone && inv.student_id) {
+        const { data: st } = await supabase
+          .from("students")
+          .select("parent_phone")
+          .eq("id", inv.student_id)
+          .maybeSingle();
+        ownerPhone = st?.parent_phone || "";
+      }
       const sesVariants = phoneVariants(session.phone);
-      const invVariants = phoneVariants(invoiceStudentPhone);
-      const ownedByParent = invVariants.some((p) => sesVariants.includes(p));
-      const legacyMatch = !invoiceStudentPhone && inv.student_id === studentId;
-      if (!ownedByParent && !legacyMatch) return json({ error: "Invoice tidak valid" });
+      const ownerVariants = phoneVariants(ownerPhone);
+      const ownedByParent = ownerVariants.some((p) => sesVariants.includes(p));
+      const legacyMatch = !ownerPhone && inv.student_id === studentId;
+      if (!ownedByParent && !legacyMatch) {
+        return json({ error: "Tagihan tidak valid untuk akun ini" });
+      }
+
+
 
 
 
