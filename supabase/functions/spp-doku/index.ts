@@ -13,14 +13,24 @@ const corsHeaders = {
 };
 
 const DOKU_LINK_TTL_MIN = 60 * 24 * 3; // 3 days
-const SERVICE_FEES: Record<string, number> = { va: 5000, qris: 5000, retail: 8000 };
+const DEFAULT_FEES: Record<string, number> = { va: 5000, qris: 5000, retail: 8000 };
 function normalizeChannel(c: any): string | null {
   const v = String(c || "").toLowerCase();
-  return v in SERVICE_FEES ? v : null;
+  return v in DEFAULT_FEES ? v : null;
 }
-function serviceFeeFor(c: any): number {
+async function serviceFeeFor(supabaseAdmin: any, c: any): Promise<number> {
   const v = normalizeChannel(c);
-  return v ? SERVICE_FEES[v] : 0;
+  if (!v) return 0;
+  try {
+    const { data } = await supabaseAdmin
+      .from("platform_settings")
+      .select("value")
+      .eq("key", `fee_${v}`)
+      .maybeSingle();
+    const n = parseInt(data?.value ?? "", 10);
+    if (Number.isFinite(n) && n >= 0) return n;
+  } catch (_) {}
+  return DEFAULT_FEES[v];
 }
 
 async function getDokuConfig(supabaseAdmin: any) {
