@@ -195,13 +195,15 @@ export function BendaharaDashboard() {
 
   const fetchDashboardData = useCallback(async () => {
     if (!profile?.school_id) { setLoading(false); return; }
-    const [i, s, st] = await Promise.all([
+    const [i, s, st, cb] = await Promise.all([
       supabase.from("spp_invoices").select("*").eq("school_id", profile.school_id),
       supabase.from("spp_settlements").select("*").eq("school_id", profile.school_id),
       supabase.from("students").select("id, gender").eq("school_id", profile.school_id),
+      supabase.from("cash_book_entries").select("direction, amount, entry_date").eq("school_id", profile.school_id),
     ]);
     setInvoices(i.data || []);
     setSettlements(s.data || []);
+    setCashBook(cb.data || []);
     const map: Record<string, string> = {};
     (st.data || []).forEach((x: any) => { map[x.id] = (x.gender || "").toString().toUpperCase(); });
     setStudentGender(map);
