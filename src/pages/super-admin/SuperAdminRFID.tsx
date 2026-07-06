@@ -852,6 +852,47 @@ export default function SuperAdminRFID() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ===== Register student RFID dialog ===== */}
+      <Dialog open={!!regTarget} onOpenChange={(o) => { if (!o) { setRegTarget(null); setRegUid(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Nfc className="h-5 w-5 text-emerald-600" /> Daftarkan Kartu RFID
+            </DialogTitle>
+            <DialogDescription>
+              {regTarget && (<>Tempelkan kartu pada USB RFID Reader untuk <b>{regTarget.name}</b> — {regTarget.class}.</>)}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <Label>UID Kartu</Label>
+              <Input
+                autoFocus
+                value={regUid}
+                onChange={(e) => setRegUid(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && regUid.trim().length >= 4) saveStudentRfid(); }}
+                placeholder="Tempel kartu atau ketik UID…"
+                className="font-mono tracking-wider text-lg"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Reader USB umumnya otomatis mengetik UID lalu menekan Enter.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {regTarget?.rfid_uid && (
+                <Button variant="outline" onClick={removeStudentRfid} disabled={regSaving} className="text-destructive hover:text-destructive">
+                  Lepas RFID
+                </Button>
+              )}
+              <Button onClick={saveStudentRfid} disabled={regSaving || regUid.trim().length < 4} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white">
+                {regSaving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Nfc className="h-4 w-4 mr-1" />}
+                Simpan
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
