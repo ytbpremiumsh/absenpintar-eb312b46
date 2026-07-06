@@ -18,6 +18,7 @@ type Props = {
   subtitle?: string;
   loading?: boolean;
   feeOverrides?: Partial<Record<PaymentChannelId, number>>;
+  qrisPercent?: number;
   onConfirm: (channel: PaymentChannelId, fee: number, total: number) => void | Promise<void>;
 };
 
@@ -35,10 +36,11 @@ export function PaymentMethodPicker({
   subtitle,
   loading = false,
   feeOverrides,
+  qrisPercent,
   onConfirm,
 }: Props) {
   const [selected, setSelected] = useState<PaymentChannelId>("qris");
-  const feeFor = (id: PaymentChannelId) => computeChannelFee(id, billAmount, feeOverrides);
+  const feeFor = (id: PaymentChannelId) => computeChannelFee(id, billAmount, feeOverrides, qrisPercent);
   const chan = getChannel(selected)!;
   const fee = feeFor(selected);
   const total = (billAmount || 0) + fee;
