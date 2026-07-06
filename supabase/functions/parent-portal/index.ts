@@ -317,13 +317,15 @@ Deno.serve(async (req) => {
         const { data } = await supabase
           .from("platform_settings")
           .select("key,value")
-          .in("key", ["fee_va", "fee_qris", "fee_retail"]);
+          .in("key", ["fee_va", "fee_qris", "fee_retail", "fee_qris_percent"]);
         const map: Record<string, string> = {};
         (data || []).forEach((r: any) => { map[r.key] = r.value; });
         const num = (v: any, d: number) => {
           const n = parseInt(String(v ?? "").replace(/\D/g, ""), 10);
           return isNaN(n) ? d : n;
         };
+        const pct = parseFloat(String(map.fee_qris_percent ?? "").replace(",", "."));
+        const qrisPercent = Number.isFinite(pct) && pct >= 0 ? pct / 100 : 0.01;
         return json({
           ok: true,
           fees: {
@@ -331,9 +333,10 @@ Deno.serve(async (req) => {
             qris: num(map.fee_qris, 5000),
             retail: num(map.fee_retail, 8000),
           },
+          qris_percent: qrisPercent,
         });
       } catch {
-        return json({ ok: true, fees: { va: 5000, qris: 5000, retail: 8000 } });
+        return json({ ok: true, fees: { va: 5000, qris: 5000, retail: 8000 }, qris_percent: 0.01 });
       }
     }
 
