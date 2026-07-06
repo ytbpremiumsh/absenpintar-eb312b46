@@ -179,7 +179,9 @@ const RotatingClassPanel = ({
 };
 
 const PublicMonitoring = () => {
-  const { schoolId } = useParams<{ schoolId: string }>();
+  const params = useParams<{ schoolId: string }>();
+  const { school: tenantSchool } = useTenant();
+  const schoolId = params.schoolId || tenantSchool?.id;
   const [data, setData] = useState<MonitoringData | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(new Date());
