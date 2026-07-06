@@ -16,6 +16,7 @@ type Props = {
   title?: string;
   subtitle?: string;
   loading?: boolean;
+  feeOverrides?: Partial<Record<PaymentChannelId, number>>;
   onConfirm: (channel: PaymentChannelId, fee: number, total: number) => void | Promise<void>;
 };
 
@@ -32,11 +33,16 @@ export function PaymentMethodPicker({
   title = "Pilih Metode Pembayaran",
   subtitle,
   loading = false,
+  feeOverrides,
   onConfirm,
 }: Props) {
   const [selected, setSelected] = useState<PaymentChannelId>("qris");
+  const feeFor = (id: PaymentChannelId) => {
+    const o = feeOverrides?.[id];
+    return typeof o === "number" && !isNaN(o) ? o : (getChannel(id)?.fee ?? 0);
+  };
   const chan = getChannel(selected)!;
-  const fee = chan.fee;
+  const fee = feeFor(selected);
   const total = (billAmount || 0) + fee;
 
   return (
@@ -88,7 +94,7 @@ export function PaymentMethodPicker({
                           active ? "bg-[#5B6CF9] text-white" : "bg-amber-100 text-amber-800"
                         }`}
                       >
-                        +{formatIDR(c.fee)}
+                        +{formatIDR(feeFor(c.id))}
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-0.5">{c.description}</p>

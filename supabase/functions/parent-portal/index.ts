@@ -312,6 +312,31 @@ Deno.serve(async (req) => {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
 
     // ---- Public actions ----
+    if (action === "payment_config") {
+      try {
+        const { data } = await supabase
+          .from("platform_settings")
+          .select("key,value")
+          .in("key", ["fee_va", "fee_qris", "fee_retail"]);
+        const map: Record<string, string> = {};
+        (data || []).forEach((r: any) => { map[r.key] = r.value; });
+        const num = (v: any, d: number) => {
+          const n = parseInt(String(v ?? "").replace(/\D/g, ""), 10);
+          return isNaN(n) ? d : n;
+        };
+        return json({
+          ok: true,
+          fees: {
+            va: num(map.fee_va, 5000),
+            qris: num(map.fee_qris, 5000),
+            retail: num(map.fee_retail, 8000),
+          },
+        });
+      } catch {
+        return json({ ok: true, fees: { va: 5000, qris: 5000, retail: 8000 } });
+      }
+    }
+
     // Direct login via Nomor Kartu Identitas — no OTP required.
     if (action === "login_card") {
       const digits = String(body.card_number || "").replace(/\D/g, "");

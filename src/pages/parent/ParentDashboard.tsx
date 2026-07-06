@@ -121,11 +121,21 @@ export default function ParentDashboard() {
   const [pickerInvoice, setPickerInvoice] = useState<any>(null);
   const [pickerLoading, setPickerLoading] = useState(false);
   const [headerLogo, setHeaderLogo] = useState<string | null>(null);
+  const [channelFees, setChannelFees] = useState<Partial<Record<PaymentChannelId, number>>>({});
 
   useEffect(() => {
     supabase.from("platform_settings").select("key, value").eq("key", "login_logo_url").maybeSingle().then(({ data }) => {
       if (data?.value) setHeaderLogo(data.value as string);
     });
+    // Load configurable service fees from super admin panel
+    fetch(`https://bohuglednqirnaearrkj.supabase.co/functions/v1/parent-portal`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "payment_config" }),
+    })
+      .then((r) => r.json())
+      .then((d) => { if (d?.ok && d.fees) setChannelFees(d.fees); })
+      .catch(() => {});
   }, []);
 
   const [leaveForm, setLeaveForm] = useState<{ type: string; date: string; reason: string; attachment_url: string | null }>({ type: "izin", date: new Date().toISOString().slice(0, 10), reason: "", attachment_url: null });
@@ -1287,6 +1297,7 @@ export default function ParentDashboard() {
         title="Pilih Metode Pembayaran"
         subtitle={pickerInvoice ? `Tagihan SPP ${pickerInvoice.period_label || ""}` : undefined}
         loading={pickerLoading}
+        feeOverrides={channelFees}
         onConfirm={confirmPaySpp}
       />
     </div>
