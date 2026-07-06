@@ -85,25 +85,27 @@ export function getChannel(id: PaymentChannelId | string | null | undefined): Pa
   return PAYMENT_CHANNELS.find((x) => x.id === id);
 }
 
-// QRIS: 1% dari tagihan dengan minimum Rp 2.500.
-// Sengaja tidak menampilkan "1%" di UI — hanya "Biaya Layanan".
-export const QRIS_MIN_FEE = 2500;
-export const QRIS_PERCENT = 0.01;
-export function computeQrisFee(amount: number): number {
+// QRIS: persen dari tagihan (dapat dikonfigurasi di panel Super Admin) dengan
+// minimum Rp 3.000. Sengaja tidak menampilkan persen di UI — hanya "Biaya Layanan".
+export const QRIS_MIN_FEE = 3000;
+export const QRIS_PERCENT_DEFAULT = 0.01; // 1% default
+export function computeQrisFee(amount: number, percent: number = QRIS_PERCENT_DEFAULT): number {
   const base = Math.max(0, Number(amount) || 0);
-  return Math.max(QRIS_MIN_FEE, Math.round(base * QRIS_PERCENT));
+  const p = Number.isFinite(percent) && percent >= 0 ? percent : QRIS_PERCENT_DEFAULT;
+  return Math.max(QRIS_MIN_FEE, Math.round(base * p));
 }
 
 // Hitung fee untuk channel tertentu berdasarkan amount tagihan.
-// - QRIS = max(Rp2.500, 1% * amount) — dinamis
+// - QRIS = max(Rp3.000, N% * amount) — dinamis (N dari platform_settings)
 // - VA / Retail = fee flat (dari override atau default channel)
 export function computeChannelFee(
   id: PaymentChannelId | string | null | undefined,
   amount: number,
   overrides?: Partial<Record<PaymentChannelId, number>>,
+  qrisPercent: number = QRIS_PERCENT_DEFAULT,
 ): number {
   const key = String(id || "").toLowerCase() as PaymentChannelId;
-  if (key === "qris") return computeQrisFee(amount);
+  if (key === "qris") return computeQrisFee(amount, qrisPercent);
   const ov = overrides?.[key];
   if (typeof ov === "number" && !isNaN(ov)) return ov;
   return getChannel(key)?.fee ?? 0;
