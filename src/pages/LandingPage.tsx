@@ -745,7 +745,7 @@ function Hardware() {
               className="rounded-3xl bg-slate-50 border border-slate-200 p-6 hover:border-[#5B6CF9]/50 hover:-translate-y-1 transition-all"
             >
               <div className="aspect-square rounded-2xl bg-white border border-slate-200 flex items-center justify-center mb-5 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "linear-gradient(#1a2340 1px, transparent 1px), linear-gradient(90deg, #1a2340 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+                <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(11,16,32,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(11,16,32,.05) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
                 <div className="relative h-16 w-16 rounded-2xl bg-[#5B6CF9]/15 border border-[#5B6CF9]/30 flex items-center justify-center">
                   <h.icon className="h-8 w-8 text-[#5B6CF9]" />
                 </div>
