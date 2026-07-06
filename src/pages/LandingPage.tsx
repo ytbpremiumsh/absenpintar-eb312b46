@@ -249,7 +249,7 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
       {open && (
         <div className="lg:hidden bg-white border-t border-slate-100 px-6 py-4 space-y-3">
           {NAV.map((n) => (
-            <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="block text-[#0b1020]/75 hover:text-[#5B6CF9] py-2 text-sm font-medium">
+            <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="block text-[#5B6CF9] hover:text-[#5B6CF9]/80 py-2 text-sm font-semibold">
               {n.label}
             </a>
           ))}
