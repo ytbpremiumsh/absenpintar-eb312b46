@@ -339,12 +339,31 @@ export default function ParentDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-1.5">
-              <button onClick={() => setTab("info")} className="relative h-9 w-9 rounded-full bg-white border border-border/60 hover:border-[#5B6CF9]/40 flex items-center justify-center transition-colors shadow-sm" aria-label="Notifikasi">
-                <Bell className="h-4 w-4 text-foreground" />
-                {announcements.length > 0 && (
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white animate-pulse" />
-                )}
-              </button>
+              {(() => {
+                const now = new Date();
+                const curMonth = now.getMonth() + 1;
+                const curYear = now.getFullYear();
+                const tunggakanCount = (sppData.tunggakan || []).length;
+                const bulanBaruCount = (sppData.aktif || []).filter(
+                  (i: any) => i.status === "pending" && Number(i.period_month) === curMonth && Number(i.period_year) === curYear,
+                ).length;
+                const sppNotifCount = tunggakanCount + bulanBaruCount;
+                const totalNotif = sppNotifCount + (announcements?.length || 0);
+                return (
+                  <button
+                    onClick={() => setTab(sppNotifCount > 0 ? "spp" : "info")}
+                    className="relative h-9 w-9 rounded-full bg-white border border-border/60 hover:border-[#5B6CF9]/40 flex items-center justify-center transition-colors shadow-sm"
+                    aria-label="Notifikasi"
+                  >
+                    <Bell className="h-4 w-4 text-foreground" />
+                    {totalNotif > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                        {totalNotif > 9 ? "9+" : totalNotif}
+                      </span>
+                    )}
+                  </button>
+                );
+              })()}
               <button onClick={logout} className="h-9 w-9 rounded-full bg-white border border-border/60 hover:border-red-300 flex items-center justify-center transition-colors shadow-sm" aria-label="Keluar">
                 <LogOut className="h-4 w-4 text-foreground" />
               </button>
