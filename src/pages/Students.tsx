@@ -1019,7 +1019,8 @@ const Students = () => {
                 className="font-mono text-lg tracking-wider"
               />
             </div>
-            <Button onClick={handleTestRfid} disabled={!testRfidValue.trim()} className="w-full bg-[#5B6CF9] hover:bg-[#5065E8] text-white">
+            <NfcScanButton onUid={(uid) => { setTestRfidValue(uid); handleTestRfid(uid); }} />
+            <Button onClick={() => handleTestRfid()} disabled={!testRfidValue.trim()} className="w-full bg-[#5B6CF9] hover:bg-[#5065E8] text-white">
               Cek UID
             </Button>
             {testRfidResult && (
