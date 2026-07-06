@@ -600,21 +600,29 @@ export default function ParentDashboard() {
                 </button>
               </div>
 
-              {/* Pay SPP banner — hanya tampil jika ada TUNGGAKAN (lewat jatuh tempo).
-                  Tagihan bulan ini ditampilkan terpisah di card "Tagihan SPP Bulan Baru". */}
+              {/* Total Tagihan (tunggakan + tagihan aktif yang belum dibayar).
+                  Perhitungan disatukan agar konsisten dengan yang di tab SPP & notifikasi. */}
               {(() => {
-                const tunggakanTotal = (sppData.tunggakan || []).reduce((s: number, i: any) => s + (i.total_amount || 0), 0);
-                if (tunggakanTotal <= 0) return null;
+                const unpaid = [
+                  ...(sppData.tunggakan || []),
+                  ...(sppData.aktif || []).filter((i: any) => i.status === "pending" || i.status === "expired"),
+                ];
+                // Dedupe by id (tunggakan bisa masuk juga ke aktif kalau server mengubah kategori)
+                const seen = new Set<string>();
+                const uniq = unpaid.filter((i: any) => (seen.has(i.id) ? false : (seen.add(i.id), true)));
+                const total = uniq.reduce((s: number, i: any) => s + (Number(i.total_amount) || 0), 0);
+                if (total <= 0) return null;
                 return (
                   <button
                     onClick={() => setTab("spp")}
                     className="relative mt-5 w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-gradient-to-r from-red-400 to-red-500 text-white font-semibold text-xs shadow-lg hover:opacity-95 transition-all active:scale-[0.98]"
                   >
                     <Wallet className="h-3.5 w-3.5" />
-                    Bayar Tunggakan — Rp {tunggakanTotal.toLocaleString("id-ID")}
+                    Bayar Tagihan — Rp {total.toLocaleString("id-ID")} ({uniq.length} tagihan)
                   </button>
                 );
               })()}
+
             </div>
 
             {/* Shortcut: Kartu Pelajar Digital */}
