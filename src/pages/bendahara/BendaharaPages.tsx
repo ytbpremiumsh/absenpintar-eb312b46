@@ -4632,6 +4632,21 @@ export function BendaharaLaporan() {
     return { cls, months, totalTagihan, totalBayar, totalCount, paidCount };
   }).filter(r => r.totalCount > 0);
 
+  // ===== Preview data untuk export =====
+  const loadPreview = useCallback(async () => {
+    if (!profile?.school_id) return;
+    setPreviewLoading(true);
+    let q = supabase.from("spp_invoices").select("*").eq("school_id", profile.school_id);
+    if (expClass !== "all") q = q.eq("class_name", expClass);
+    if (expStatus !== "all") q = q.eq("status", expStatus);
+    const { data: invs } = await q.order("class_name").order("student_name").order("period_year").order("period_month");
+    const filtered = (invs || []).filter((i: any) => expAY === "all" || academicYearOf(i.period_month, i.period_year) === expAY);
+    setPreviewRows(filtered);
+    setPreviewLoading(false);
+  }, [profile?.school_id, expClass, expStatus, expAY]);
+
+  useEffect(() => { loadPreview(); }, [loadPreview]);
+
   // ===== Export =====
   const exportData = async (format: "xlsx" | "csv" | "pdf") => {
     if (!profile?.school_id) return;
