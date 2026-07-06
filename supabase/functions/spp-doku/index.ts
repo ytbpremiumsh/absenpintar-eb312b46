@@ -319,7 +319,7 @@ async function ensureFreshLink(
   }
   const now = Date.now();
   const isExpired = inv.expired_at ? new Date(inv.expired_at).getTime() < now : false;
-  const serviceFee = serviceFeeFor(channel);
+  const serviceFee = await serviceFeeFor(supabaseAdmin, channel);
   const sameChannel = channel ? inv.payment_channel === channel : true;
   if (!forceRegen && inv.payment_url && !isExpired && sameChannel) {
     return {
