@@ -243,6 +243,37 @@ const SuperAdminPaymentGateway = () => {
           <p className="text-[11px] text-muted-foreground">
             Wali murid akan otomatis diarahkan ke gateway yang dipilih sesuai metode pembayaran mereka. Pastikan kredensial gateway terkait sudah terpasang di bawah.
           </p>
+
+          {/* Custom Admin Fee per channel */}
+          <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-4 space-y-3">
+            <div>
+              <p className="text-xs font-semibold text-foreground">Custom Fee Admin per Channel (Rp)</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Biaya tambahan yang ditagihkan ke wali murid saat membayar SPP & tagihan lainnya. Berlaku untuk Mayar maupun Doku.
+              </p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div className="grid gap-1">
+                <Label className="text-[11px] flex items-center gap-1"><Banknote className="h-3 w-3" /> Virtual Account</Label>
+                <Input type="number" min="0" value={feeVa} onChange={(e) => setFeeVa(e.target.value)} placeholder="5000" className="font-mono text-sm h-9" />
+              </div>
+              <div className="grid gap-1">
+                <Label className="text-[11px] flex items-center gap-1"><QrCode className="h-3 w-3" /> QRIS</Label>
+                <Input type="number" min="0" value={feeQris} onChange={(e) => setFeeQris(e.target.value)} placeholder="5000" className="font-mono text-sm h-9" />
+              </div>
+              <div className="grid gap-1">
+                <Label className="text-[11px] flex items-center gap-1"><Store className="h-3 w-3" /> Retail (Alfa/Indomaret)</Label>
+                <Input type="number" min="0" value={feeRetail} onChange={(e) => setFeeRetail(e.target.value)} placeholder="8000" className="font-mono text-sm h-9" />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button size="sm" onClick={handleSaveDoku} disabled={saving}>
+                {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Save className="h-3.5 w-3.5 mr-1" />}
+                Simpan Fee
+              </Button>
+            </div>
+          </div>
+
         </CardContent>
       </Card>
 
