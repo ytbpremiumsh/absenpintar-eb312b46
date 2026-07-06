@@ -157,12 +157,14 @@ const Register = () => {
 
   const handleManualConfirm = () => {
     if (!manualName.trim()) { toast.error("Nama sekolah wajib diisi"); return; }
+    if (!manualLevel) { toast.error("Jenjang sekolah wajib dipilih"); return; }
+    if (!manualStatus) { toast.error("Status sekolah wajib dipilih"); return; }
     setSchoolData({
       npsn: "",
       name: manualName.trim(),
       address: manualAddress.trim(),
-      level: "",
-      status: "",
+      level: manualLevel,
+      status: manualStatus,
       district: "",
       province: "",
     });
@@ -171,10 +173,12 @@ const Register = () => {
 
   const canProceed = !!schoolData;
 
-  // Prefill school address whenever schoolData is (re)set
+  // Prefill school address/city/province whenever schoolData is (re)set
   useEffect(() => {
     if (schoolData) {
       setSchoolAddress((prev) => prev || schoolData.address || "");
+      setSchoolCity((prev) => prev || schoolData.district || "");
+      setSchoolProvince((prev) => prev || schoolData.province || "");
     }
   }, [schoolData]);
 
@@ -184,6 +188,8 @@ const Register = () => {
     setSchoolData(null);
     setManualName("");
     setManualAddress("");
+    setManualLevel("");
+    setManualStatus("");
   };
 
   const passwordHasUpper = /[A-Z]/.test(password);
