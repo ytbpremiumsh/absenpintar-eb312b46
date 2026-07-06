@@ -149,7 +149,7 @@ export default function BendaharaBukuKas() {
       amount: Number(form.amount) || 0,
       description: form.description?.toString().trim() || null,
       reference: form.reference?.toString().trim() || null,
-      created_by: profile.user_id,
+      created_by: user?.id,
     });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
