@@ -140,7 +140,7 @@ const ScanQR = () => {
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const [alreadyRecorded, setAlreadyRecorded] = useState(false);
-  const [scanMethod, setScanMethod] = useState<"barcode" | "face">("barcode");
+  const [scanMethod, setScanMethod] = useState<"barcode" | "face" | "rfid">("barcode");
   const [faceScanning, setFaceScanning] = useState(false);
   const [currentAttType, setCurrentAttType] = useState<"datang" | "pulang">("datang");
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
@@ -154,6 +154,11 @@ const ScanQR = () => {
 
   const canFace = !features.loading && features.canFaceRecognition;
   const [holidayBlock, setHolidayBlock] = useState<{ isHoliday: boolean; reason: string | null }>({ isHoliday: false, reason: null });
+  const nfc = useNfcScanner((uid) => {
+    if (scanPaused.current) return;
+    setScanMethod("rfid");
+    lookupStudent(uid);
+  });
 
   // Load holiday status
   useEffect(() => {
