@@ -225,7 +225,9 @@ function AppRoutes() {
           <Route path="/super-admin/bendahara" element={<SuperAdminBendahara />} />
           <Route path="/super-admin/shortlinks" element={<SuperAdminShortlinks />} />
           <Route path="/super-admin/meta-pixel" element={<SuperAdminMetaPixel />} />
+          <Route path="/super-admin/rfid" element={<SuperAdminRFID />} />
         </Route>
+
         <Route path="/s/:code" element={<ShortlinkRedirect />} />
         {/* School Admin / Staff */}
         <Route element={<AppLayout />}>
