@@ -464,42 +464,80 @@ const PublicAttendanceMonitoring = () => {
               const sakit = classStudents.filter((s) => s.status === "sakit").length;
               const alfa = classStudents.filter((s) => s.status === "alfa").length;
               const belum = classStudents.filter((s) => s.status === "belum").length;
-              const recorded = classStudents.length - belum;
-              const pct = classStudents.length ? Math.round((recorded / classStudents.length) * 100) : 0;
-              const allDone = belum === 0;
+              const total = classStudents.length;
+              // Persentase murni berdasarkan yang benar-benar HADIR (samakan dengan Dashboard)
+              const pct = total ? Math.round((hadir / total) * 100) : 0;
+              const allPresent = total > 0 && hadir === total;
+              const hasAlfa = alfa > 0;
+              const hasBelum = belum > 0;
+
+              // Tone kartu:
+              // - hijau: semua hadir
+              // - merah: ada Alfa (butuh perhatian)
+              // - amber: masih ada Belum (menunggu)
+              // - default: campuran izin/sakit
+              const cardTone = allPresent
+                ? (darkMode ? "bg-gradient-to-br from-emerald-950/60 to-slate-900 ring-emerald-500/30" : "bg-gradient-to-br from-emerald-50 to-white ring-emerald-200 shadow-emerald-100")
+                : hasAlfa
+                  ? (darkMode ? "bg-gradient-to-br from-red-950/40 to-slate-900 ring-red-500/30" : "bg-gradient-to-br from-red-50 to-white ring-red-200 shadow-sm")
+                  : hasBelum
+                    ? (darkMode ? "bg-gradient-to-br from-amber-950/40 to-slate-900 ring-amber-500/30" : "bg-gradient-to-br from-amber-50 to-white ring-amber-200 shadow-sm")
+                    : (darkMode ? "bg-slate-900/80 ring-slate-700/50" : "bg-white ring-border/50 shadow-sm");
+
+              const iconTone = allPresent
+                ? (darkMode ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30" : "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white")
+                : hasAlfa
+                  ? (darkMode ? "bg-red-500/20 text-red-400 ring-1 ring-red-500/30" : "bg-gradient-to-br from-red-500 to-red-600 text-white")
+                  : hasBelum
+                    ? (darkMode ? "bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/30" : "bg-gradient-to-br from-amber-500 to-amber-600 text-white")
+                    : (darkMode ? "bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-500/30" : "bg-gradient-to-br from-[#5B6CF9] to-[#4c5ded] text-white");
+
+              const pctColor = allPresent
+                ? (darkMode ? "text-emerald-400" : "text-emerald-600")
+                : hasAlfa
+                  ? (darkMode ? "text-red-400" : "text-red-600")
+                  : hasBelum
+                    ? (darkMode ? "text-amber-400" : "text-amber-600")
+                    : "text-[#5B6CF9]";
+
+              const barGradient = allPresent
+                ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
+                : hasAlfa
+                  ? "bg-gradient-to-r from-red-500 to-red-400"
+                  : hasBelum
+                    ? "bg-gradient-to-r from-amber-500 to-amber-400"
+                    : "bg-gradient-to-r from-[#5B6CF9] via-[#7c8afc] to-[#5B6CF9]";
+
+              const statusBadge = allPresent
+                ? { label: "Lengkap", icon: CheckCircle2, cls: darkMode ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-500 text-white" }
+                : hasAlfa
+                  ? { label: `${alfa} Alfa`, icon: AlertTriangle, cls: darkMode ? "bg-red-500/20 text-red-400" : "bg-red-500 text-white" }
+                  : hasBelum
+                    ? { label: `${belum} Belum`, icon: Clock, cls: darkMode ? "bg-amber-500/20 text-amber-400" : "bg-amber-500 text-white" }
+                    : null;
 
               return (
                 <motion.div key={cls} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-                  <div className={`relative overflow-hidden rounded-2xl ring-1 p-5 transition-all hover:shadow-xl hover:scale-[1.02] ${
-                    allDone
-                      ? darkMode ? "bg-gradient-to-br from-emerald-950/60 to-slate-900 ring-emerald-500/30" : "bg-gradient-to-br from-emerald-50 to-white ring-emerald-200 shadow-emerald-100"
-                      : darkMode ? "bg-slate-900/80 ring-slate-700/50" : "bg-white ring-border/50 shadow-sm"
-                  }`}>
-                    {allDone && <div className={`absolute top-0 right-0 h-20 w-20 rounded-bl-[3rem] ${darkMode ? "bg-emerald-500/10" : "bg-emerald-100/60"}`} />}
+                  <div className={`relative overflow-hidden rounded-2xl ring-1 p-5 transition-all hover:shadow-xl hover:scale-[1.02] ${cardTone}`}>
+                    {allPresent && <div className={`absolute top-0 right-0 h-20 w-20 rounded-bl-[3rem] ${darkMode ? "bg-emerald-500/10" : "bg-emerald-100/60"}`} />}
                     <div className="relative z-10">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${
-                          allDone
-                            ? darkMode ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30" : "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white"
-                            : darkMode ? "bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-500/30" : "bg-gradient-to-br from-[#5B6CF9] to-[#4c5ded] text-white"
-                        }`}>
+                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${iconTone}`}>
                           <GraduationCap className="h-6 w-6" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <h3 className={`font-bold text-base ${theme.text}`}>{cls}</h3>
-                            {allDone && (
-                              <Badge className={`border-0 text-[8px] shadow-sm ${darkMode ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-500 text-white"}`}>
-                                <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" /> Lengkap
+                            {statusBadge && (
+                              <Badge className={`border-0 text-[8px] shadow-sm ${statusBadge.cls}`}>
+                                <statusBadge.icon className="h-2.5 w-2.5 mr-0.5" /> {statusBadge.label}
                               </Badge>
                             )}
                           </div>
-                          <p className={`text-[10px] ${theme.textMuted} flex items-center gap-1`}><Users className="h-2.5 w-2.5" />{classStudents.length} siswa</p>
+                          <p className={`text-[10px] ${theme.textMuted} flex items-center gap-1`}><Users className="h-2.5 w-2.5" />{total} siswa • {hadir} hadir</p>
                         </div>
                         <div className="text-right">
-                          <p className={`text-2xl font-extrabold tabular-nums ${
-                            allDone ? (darkMode ? "text-emerald-400" : "text-emerald-600") : "text-[#5B6CF9]"
-                          }`}>{pct}%</p>
+                          <p className={`text-2xl font-extrabold tabular-nums ${pctColor}`}>{pct}%</p>
                         </div>
                       </div>
 
@@ -519,11 +557,7 @@ const PublicAttendanceMonitoring = () => {
                       </div>
 
                       <div className={`h-2.5 rounded-full overflow-hidden ${darkMode ? "bg-slate-800" : "bg-slate-100"}`}>
-                        <motion.div className={`h-full rounded-full ${
-                          allDone
-                            ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                            : "bg-gradient-to-r from-[#5B6CF9] via-[#7c8afc] to-[#5B6CF9]"
-                        }`}
+                        <motion.div className={`h-full rounded-full ${barGradient}`}
                           initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1, delay: i * 0.05 }} />
                       </div>
                     </div>
