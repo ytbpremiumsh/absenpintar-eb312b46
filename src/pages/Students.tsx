@@ -978,6 +978,7 @@ const Students = () => {
                 Sebagian besar RFID reader USB akan otomatis mengetik UID lalu menekan Enter.
               </p>
             </div>
+            <NfcScanButton onUid={(uid) => setRfidValue(uid)} />
             <div className="flex gap-2">
               {rfidStudent?.rfid_uid && (
                 <Button variant="outline" onClick={handleRemoveRfid} disabled={rfidSaving} className="text-destructive hover:text-destructive">
