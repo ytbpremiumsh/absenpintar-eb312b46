@@ -1013,14 +1013,14 @@ const ManageStaff = () => {
                 Sebagian besar RFID reader USB akan otomatis mengetik UID lalu menekan Enter.
               </p>
             </div>
-            <NfcScanButton onUid={(uid) => setRfidValue(uid)} />
+            <NfcScanButton onUid={(uid) => { setRfidValue(uid); handleSaveRfid(uid); }} />
             <div className="flex gap-2">
               {rfidTarget?.rfid_uid && (
                 <Button variant="outline" onClick={handleRemoveRfid} disabled={rfidSaving} className="text-destructive hover:text-destructive">
                   Hapus RFID
                 </Button>
               )}
-              <Button onClick={handleSaveRfid} disabled={rfidSaving || rfidValue.trim().length < 4} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button onClick={() => handleSaveRfid()} disabled={rfidSaving || rfidValue.trim().length < 4} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white">
                 {rfidSaving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Nfc className="h-4 w-4 mr-1" />}
                 Simpan
               </Button>
