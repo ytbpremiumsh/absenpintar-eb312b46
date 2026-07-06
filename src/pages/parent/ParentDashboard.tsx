@@ -1168,7 +1168,7 @@ export default function ParentDashboard() {
                 <StudentIdCard student={current as any} hideQrDownload />
                 {(current as any).card_number && (
                   <Card className="p-4 border-0 shadow-card rounded-2xl">
-                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <div className="flex items-center justify-between gap-2 mb-2">
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Nomor Kartu Identitas</p>
                       <button
                         type="button"
@@ -1179,12 +1179,12 @@ export default function ParentDashboard() {
                             () => toast.error("Gagal menyalin")
                           );
                         }}
-                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
+                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline shrink-0"
                       >
                         <Copy className="h-3 w-3" /> Salin
                       </button>
                     </div>
-                    <p className="font-mono text-sm font-bold tracking-[0.15em] text-foreground break-all">
+                    <p className="font-mono text-base sm:text-lg font-bold tracking-[0.2em] text-foreground text-center tabular-nums whitespace-nowrap">
                       {String((current as any).card_number).replace(/(\d{4})(?=\d)/g, "$1 ")}
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-2">Gunakan nomor ini untuk login ulang portal wali murid tanpa OTP.</p>
