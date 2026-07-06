@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Home, CreditCard, Wallet, BarChart3, LayoutGrid,
-  Users, Receipt, FileText, Upload, ArrowDownToLine,
+  Users, Receipt, FileText, Upload, ArrowDownToLine, Tag, BookOpen, AlertTriangle,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
