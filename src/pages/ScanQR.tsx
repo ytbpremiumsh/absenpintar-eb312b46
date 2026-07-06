@@ -155,6 +155,8 @@ const ScanQR = () => {
   const scanPaused = useRef(false);
 
   const canFace = !features.loading && features.canFaceRecognition;
+  const isMobile = useIsMobile();
+
   const [holidayBlock, setHolidayBlock] = useState<{ isHoliday: boolean; reason: string | null }>({ isHoliday: false, reason: null });
   const nfc = useNfcScanner((uid) => {
     if (scanPaused.current) return;
