@@ -279,6 +279,8 @@ function AppRoutes() {
           <Route path="/holidays" element={<HolidayManagement />} />
           <Route path="/attendance-time" element={<AttendanceTime />} />
           <Route path="/rfid-devices" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/rfid-cards" element={<RFIDCards />} />
+          <Route path="/rfid-test" element={<RFIDTest />} />
 
           <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/support" element={<SupportTickets />} />
