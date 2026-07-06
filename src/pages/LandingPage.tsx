@@ -234,7 +234,7 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
           </button>
           <button
             onClick={() => nav("/register")}
-            className="inline-flex items-center gap-1.5 bg-[#5B6CF9] hover:bg-[#5B6CF9]/90  text-[#0b1020] text-sm font-semibold px-4 py-2 rounded-lg transition-all shadow-lg shadow-[#5B6CF9]/25"
+            className="inline-flex items-center gap-1.5 bg-[#5B6CF9] hover:bg-[#5B6CF9]/90 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all shadow-lg shadow-[#5B6CF9]/25"
           >
             Mulai Gratis <ArrowRight className="h-3.5 w-3.5" />
           </button>
@@ -259,7 +259,7 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
             <button onClick={() => nav("/login")} className="flex-1 text-sm font-semibold text-[#0b1020] border border-slate-200 rounded-lg py-2.5">
               Masuk
             </button>
-            <button onClick={() => nav("/register")} className="flex-1 text-sm font-semibold bg-[#5B6CF9]  text-[#0b1020] rounded-lg py-2.5">
+            <button onClick={() => nav("/register")} className="flex-1 text-sm font-semibold bg-[#5B6CF9] text-white rounded-lg py-2.5">
               Mulai Gratis
             </button>
           </div>
@@ -305,7 +305,7 @@ function Hero() {
           <div className="flex flex-wrap gap-3 pt-2">
             <button
               onClick={() => nav("/register")}
-              className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#5B6CF9] hover:bg-[#5B6CF9]/90  text-[#0b1020] font-semibold rounded-xl transition-all shadow-lg shadow-[#5B6CF9]/25 font-display"
+              className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#5B6CF9] hover:bg-[#5B6CF9]/90 text-white font-semibold rounded-xl transition-all shadow-lg shadow-[#5B6CF9]/25 font-display"
             >
               Mulai Gratis <ArrowRight className="h-4 w-4" />
             </button>
@@ -936,7 +936,7 @@ function FinalCTA() {
         <div className="mt-8 flex flex-wrap gap-3 justify-center">
           <button
             onClick={() => nav("/register")}
-            className="inline-flex items-center gap-2 px-7 py-4 bg-[#5B6CF9] hover:bg-[#5B6CF9]/90  text-[#0b1020] font-semibold rounded-xl shadow-lg shadow-[#5B6CF9]/25 font-display"
+            className="inline-flex items-center gap-2 px-7 py-4 bg-[#5B6CF9] hover:bg-[#5B6CF9]/90 text-white font-semibold rounded-xl shadow-lg shadow-[#5B6CF9]/25 font-display"
           >
             Mulai Gratis <ArrowRight className="h-4 w-4" />
           </button>
