@@ -302,7 +302,7 @@ const Login = ({ forcedMode }: LoginProps) => {
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10">
-        <div className={`w-full grid gap-8 items-center justify-items-center ${mode === "school" ? "max-w-6xl lg:grid-cols-2" : "max-w-md justify-center"}`}>
+        <div className={`w-full grid gap-8 items-stretch justify-items-center ${mode === "school" ? "max-w-6xl lg:grid-cols-2" : "max-w-md"}`}>
           {/* Left: Light feature card (only for school admin login) */}
           {mode === "school" && (
           <div className="hidden lg:block w-full max-w-lg">
