@@ -303,51 +303,51 @@ const Login = ({ forcedMode }: LoginProps) => {
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10">
         <div className={`w-full grid gap-8 items-center justify-items-center ${mode === "school" ? "max-w-6xl lg:grid-cols-2" : "max-w-md justify-center"}`}>
-          {/* Left: Dark hero card (only for school admin login) */}
+          {/* Left: Light feature card (only for school admin login) */}
           {mode === "school" && (
-          <motion.div
-            initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}
-            className="hidden lg:block w-full max-w-lg"
-          >
-            <div className="relative rounded-3xl bg-[#0b1020] border border-[#5B6CF9]/20 p-8 overflow-hidden shadow-2xl">
+          <div className="hidden lg:block w-full max-w-lg">
+            <div className="relative rounded-3xl bg-white border border-slate-200 p-8 overflow-hidden shadow-xl shadow-slate-900/5">
               <div
-                className="absolute inset-0 opacity-30 pointer-events-none"
+                className="absolute inset-0 pointer-events-none"
                 style={{
-                  backgroundImage: 'linear-gradient(#1a2340 1px, transparent 1px), linear-gradient(90deg, #1a2340 1px, transparent 1px)',
-                  backgroundSize: '44px 44px',
+                  backgroundImage: 'linear-gradient(rgba(11,16,32,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(11,16,32,.05) 1px, transparent 1px)',
+                  backgroundSize: '56px 56px',
                   maskImage: 'radial-gradient(ellipse at top, black 40%, transparent 80%)',
                   WebkitMaskImage: 'radial-gradient(ellipse at top, black 40%, transparent 80%)',
                 }}
               />
-              <div className="absolute -top-16 -left-16 w-72 h-72 bg-[#5B6CF9] rounded-full blur-[120px] opacity-20 pointer-events-none" />
+              <div className="absolute -top-16 -left-16 w-72 h-72 bg-[#5B6CF9] rounded-full blur-[120px] opacity-[0.08] pointer-events-none" />
 
-              <div className="relative text-white">
+              <div className="relative text-[#0b1020]">
                 <div className="flex items-center gap-3 mb-5">
-                  <img src={tenantLogo || loginLogo} alt={tenantName || "ATSkolla"} className="h-11 w-11 rounded-xl shadow-lg object-contain bg-white/10 p-1" />
+                  <img src={tenantLogo || loginLogo} alt={tenantName || "ATSkolla"} className="h-11 w-11 rounded-xl object-contain bg-[#5B6CF9]/10 p-1 border border-slate-200" />
                   <span className="font-bold text-2xl tracking-tight">{tenantName || "ATSkolla"}</span>
                 </div>
-                <h2 className="text-3xl xl:text-[2rem] font-bold mb-2 leading-tight">{tenantName ? `Selamat Datang di ${tenantName}` : "Platform Digital Sekolah Modern"}</h2>
-                <p className="text-white/70 text-sm mb-5">{tenantName ? "Masuk untuk mengakses dashboard sekolah Anda." : "Solusi lengkap absensi, keuangan, dan komunikasi sekolah dalam satu sistem."}</p>
+                <h2 className="text-3xl xl:text-[2rem] font-bold mb-2 leading-tight">
+                  {tenantName ? `Selamat Datang di ${tenantName}` : "Platform Digital Sekolah Terintegrasi"}
+                </h2>
+                <p className="text-[#0b1020]/60 text-sm mb-5">
+                  {tenantName ? "Masuk untuk mengakses dashboard sekolah Anda." : "Kelola absensi, keuangan SPP, dan komunikasi wali murid dalam satu platform."}
+                </p>
                 <div className="space-y-2.5">
-                  {features.map((f, i) => (
-                    <motion.div
+                  {features.map((f) => (
+                    <div
                       key={f.title}
-                      initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.08 }}
-                      className="flex items-start gap-3 bg-white/[0.06] border border-white/10 rounded-2xl px-4 py-3 backdrop-blur-sm"
+                      className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3"
                     >
-                      <div className="h-10 w-10 rounded-xl bg-[#5B6CF9]/20 border border-[#5B6CF9]/30 flex items-center justify-center shrink-0">
+                      <div className="h-10 w-10 rounded-xl bg-[#5B6CF9]/10 border border-[#5B6CF9]/20 flex items-center justify-center shrink-0">
                         <f.icon className="h-5 w-5 text-[#5B6CF9]" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm leading-tight">{f.title}</p>
-                        <p className="text-[12px] text-white/65 mt-1 leading-snug">{f.desc}</p>
+                        <p className="font-semibold text-sm leading-tight text-[#0b1020]">{f.title}</p>
+                        <p className="text-[12px] text-[#0b1020]/60 mt-1 leading-snug">{f.desc}</p>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
           )}
 
 
