@@ -299,6 +299,43 @@ export function BendaharaDashboard() {
     return Math.round((invoices.filter(i => i.status === "paid").length / invoices.length) * 100);
   }, [invoices]);
 
+  // ============ Ringkasan Cepat (Hari/Bulan/Tahun/Jatuh Tempo/Saldo Kas) ============
+  const quickMetrics = useMemo(() => {
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const y = now.getFullYear();
+    const m = now.getMonth() + 1;
+    const paid = invoices.filter(i => i.status === "paid" && i.paid_at);
+    const incomeToday = paid.filter(i => (i.paid_at || "").slice(0, 10) === today).reduce((s, i) => s + (i.total_amount || 0), 0);
+    const incomeMonth = paid.filter(i => {
+      const d = new Date(i.paid_at); return d.getFullYear() === y && d.getMonth() + 1 === m;
+    }).reduce((s, i) => s + (i.total_amount || 0), 0);
+    const incomeYear = paid.filter(i => new Date(i.paid_at).getFullYear() === y).reduce((s, i) => s + (i.total_amount || 0), 0);
+    const dueTodayList = invoices.filter(i => i.status !== "paid" && (i.due_date || "").slice(0, 10) === today);
+    const monthInv = invoices.filter(i => i.period_year === y && i.period_month === m);
+    const paidStudentsMonth = new Set(monthInv.filter(i => i.status === "paid").map(i => i.student_id)).size;
+    const unpaidStudentsMonth = new Set(monthInv.filter(i => i.status !== "paid").map(i => i.student_id)).size;
+    const cashIn = cashBook.filter((c: any) => c.direction === "in").reduce((s: number, c: any) => s + (c.amount || 0), 0);
+    const cashOut = cashBook.filter((c: any) => c.direction === "out").reduce((s: number, c: any) => s + (c.amount || 0), 0);
+    // Saldo kas total = kas manual (in - out) + saldo online siap dicairkan
+    const readyOnline = invoices
+      .filter((i: any) => i.status === "paid" && !i.settlement_id)
+      .filter((i: any) => {
+        const v = (i.payment_method || "").toString().toLowerCase();
+        return v !== "offline_cash" && v !== "offline_transfer";
+      })
+      .reduce((s: number, i: any) => s + (i.net_amount || 0), 0);
+    const saldoKas = (cashIn - cashOut) + readyOnline;
+    return {
+      incomeToday, incomeMonth, incomeYear,
+      dueTodayCount: dueTodayList.length,
+      dueTodayTotal: dueTodayList.reduce((s, i) => s + (i.total_amount || 0), 0),
+      dueTodayList: dueTodayList.slice(0, 5),
+      paidStudentsMonth, unpaidStudentsMonth,
+      saldoKas,
+    };
+  }, [invoices, cashBook]);
+
   if (loading) return <div className="p-12 text-center text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></div>;
 
   return (
