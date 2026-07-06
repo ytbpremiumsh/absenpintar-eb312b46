@@ -30,6 +30,10 @@ const SuperAdminBackup = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [googleClientId, setGoogleClientId] = useState<string>("");
   const [showAllTables, setShowAllTables] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importMode, setImportMode] = useState<"upsert" | "replace">("upsert");
+  const [importResult, setImportResult] = useState<any>(null);
 
   const fetchStats = async () => {
     setLoading(true);
