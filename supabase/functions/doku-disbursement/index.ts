@@ -163,21 +163,34 @@ serve(async (req) => {
         return jsonOk({ ok: true, status: "processing", note: "already_in_progress" });
       }
 
-      // Ambil kode bank DOKU dari rekening bendahara.
+      // Ambil kode bank DOKU dari rekening bendahara (fallback: mapping by name).
       const { data: bank } = await admin
         .from("bendahara_bank_accounts")
         .select("doku_bank_code, bank_name, account_number, account_holder")
         .eq("school_id", stl.school_id)
         .eq("account_number", stl.account_number)
         .maybeSingle();
-      const bankCode = bank?.doku_bank_code || "";
+      const BANK_CODE_MAP: Record<string, string> = {
+        "bca": "014", "bri": "002", "bni": "009", "mandiri": "008", "bsi": "451",
+        "cimb niaga": "022", "cimb": "022", "danamon": "011", "permata": "013",
+        "btn": "200", "panin": "019", "mega": "426", "ocbc nisp": "028", "ocbc": "028",
+        "maybank": "016", "bjb": "110", "bank jateng": "113", "bank dki": "111",
+        "bank sumut": "117", "bank sulselbar": "126", "bank nagari": "118",
+        "muamalat": "147", "btpn": "213", "jenius": "213", "seabank": "535",
+        "bank neo commerce": "490", "jago": "542", "allo bank": "567",
+        "blu by bca": "501", "line bank": "484",
+      };
+      const bankCode = bank?.doku_bank_code
+        || BANK_CODE_MAP[(bank?.bank_name || stl.bank_name || "").toLowerCase().trim()]
+        || "";
       if (!bankCode) {
         await admin.from("spp_settlements").update({
           disbursement_status: "failed",
-          disbursement_error: "Kode bank DOKU belum diatur pada rekening tujuan.",
+          disbursement_error: `Kode bank DOKU untuk "${stl.bank_name}" tidak dikenal. Set manual di kolom doku_bank_code.`,
         }).eq("id", settlement_id);
-        return jsonOk({ error: "Kode bank DOKU belum diatur pada rekening tujuan." });
+        return jsonOk({ error: `Kode bank DOKU untuk "${stl.bank_name}" tidak dikenal.` });
       }
+
 
       const partnerRef = stl.doku_partner_reference_no || `ATS-${stl.settlement_code}-${Date.now().toString().slice(-6)}`;
       const requestId = crypto.randomUUID();
