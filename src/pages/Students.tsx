@@ -173,9 +173,9 @@ const Students = () => {
     setRfidDialogOpen(true);
   };
 
-  const handleSaveRfid = async () => {
+  const handleSaveRfid = async (scannedUid?: string) => {
     if (!rfidStudent) return;
-    const uid = rfidValue.trim();
+    const uid = (scannedUid ?? rfidValue).trim();
     if (uid.length < 4) { toast.error("UID RFID minimal 4 karakter"); return; }
     setRfidSaving(true);
     // Cek konflik UID di sekolah yg sama
