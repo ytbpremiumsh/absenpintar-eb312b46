@@ -561,7 +561,7 @@ function Ecosystem() {
               <div className="absolute inset-0 rounded-full bg-[#5B6CF9]/25 blur-2xl" />
               <div className="relative h-28 w-28 lg:h-36 lg:w-36 rounded-3xl bg-white border border-[#5B6CF9]/40 flex flex-col items-center justify-center shadow-2xl">
                 <div className="h-10 w-10 rounded-xl bg-[#5B6CF9] flex items-center justify-center mb-1">
-                  <Sparkles className="h-5 w-5 text-[#0b1020]" />
+                  <Sparkles className="h-5 w-5 text-white" />
                 </div>
                 <div className="font-display font-bold text-[#0b1020] text-sm">ATSkolla</div>
                 <div className="text-[9px] text-[#0b1020]/50 uppercase tracking-widest">Core Platform</div>
@@ -730,7 +730,6 @@ function Hardware() {
       <div className="absolute top-0 left-1/3 w-96 h-96 bg-[#5B6CF9] rounded-full blur-[160px] opacity-10" />
       <div className="relative">
         <SectionHeader
-          dark
           eyebrow="Hardware ATSkolla"
           title={<>Perangkat resmi <span className="text-[#5B6CF9]">terintegrasi</span> dengan sistem.</>}
           sub="Plug-and-play — hubungkan perangkat, data absensi & identitas langsung tersinkron ke dasbor sekolah."
@@ -781,7 +780,7 @@ function DashboardPreview() {
             key={r.key}
             onClick={() => setActive(i)}
             className={`px-4 py-2 rounded-full text-sm font-semibold font-display transition-all ${
-              i === active ? "bg-white text-[#0b1020]" : "bg-slate-100 text-[#0b1020]/70 hover:bg-slate-200"
+              i === active ? "bg-[#5B6CF9] text-white shadow-lg shadow-[#5B6CF9]/25" : "bg-slate-100 text-[#0b1020]/70 hover:bg-slate-200"
             }`}
           >
             {r.label}
