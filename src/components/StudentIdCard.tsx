@@ -80,13 +80,21 @@ export function StudentIdCard({ student, hideQrDownload = false, watermark = tru
   const handleDownload = async () => {
     if (!cardRef.current) return;
     try {
+      if (watermark) {
+        setCapturing(true);
+        // Wait a frame so the watermark overlay renders before html2canvas snapshots.
+        await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 50)));
+      }
       await downloadCardAsJpg(cardRef.current, `kartu-pelajar-${student.name.replace(/\s+/g, "-")}`);
       toast.success("Kartu berhasil diunduh");
     } catch (e) {
       console.error(e);
       toast.error("Gagal mengunduh kartu");
+    } finally {
+      if (watermark) setCapturing(false);
     }
   };
+
 
   const handleDownloadQr = () => {
     if (!qrDataUrl) { toast.error("QR belum siap"); return; }
