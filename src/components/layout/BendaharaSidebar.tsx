@@ -22,12 +22,14 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
     items: [
       { title: "Data Siswa", url: "/bendahara/siswa", icon: Users },
       { title: "Tarif SPP", url: "/bendahara/tarif", icon: Receipt },
+      { title: "Jenis Pembayaran", url: "/bendahara/jenis-pembayaran", icon: Tag },
     ],
   },
   {
     label: "Keuangan Sekolah",
     items: [
-      { title: "Keuangan Sekolah", url: "/bendahara/keuangan-sekolah", icon: Landmark },
+      { title: "Buku Kas", url: "/bendahara/buku-kas", icon: BookOpen },
+      { title: "Laporan Keuangan", url: "/bendahara/keuangan-sekolah", icon: Landmark },
     ],
   },
   {
@@ -35,6 +37,7 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
     items: [
       { title: "Buat Tagihan", url: "/bendahara/generate", icon: FileText },
       { title: "Pembayaran", url: "/bendahara/transaksi", icon: CreditCard },
+      { title: "Rekap Tunggakan", url: "/bendahara/tunggakan", icon: AlertTriangle },
       { title: "Import Tagihan", url: "/bendahara/import-export", icon: Upload },
     ],
   },
