@@ -40,10 +40,10 @@ const SuperAdminPaymentGateway = () => {
   const [hasDokuSecret, setHasDokuSecret] = useState(false);
   const [showDokuSecret, setShowDokuSecret] = useState(false);
 
-  // Doku method overrides (per-channel)
-  const [dokuVaMethods, setDokuVaMethods] = useState("");
-  const [dokuQrisMethods, setDokuQrisMethods] = useState("");
-  const [dokuRetailMethods, setDokuRetailMethods] = useState("");
+  // Custom admin fee per channel (charged to wali murid)
+  const [feeVa, setFeeVa] = useState("5000");
+  const [feeQris, setFeeQris] = useState("5000");
+  const [feeRetail, setFeeRetail] = useState("8000");
   const [dokuWebhookVerify, setDokuWebhookVerify] = useState("true");
 
   const [copied, setCopied] = useState<string | null>(null);
