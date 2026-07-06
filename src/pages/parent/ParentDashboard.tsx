@@ -1200,7 +1200,7 @@ export default function ParentDashboard() {
             
             {current ? (
               <div className="space-y-4">
-                <StudentIdCard student={current as any} hideQrDownload />
+                <StudentIdCard student={current as any} hideQrDownload watermark={false} />
                 {(current as any).card_number && (
                   <Card className="p-4 border-0 shadow-card rounded-2xl">
                     <div className="flex items-center justify-between gap-2 mb-2">
