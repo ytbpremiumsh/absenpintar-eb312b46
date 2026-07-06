@@ -275,11 +275,11 @@ function Hero() {
     <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 bg-white overflow-hidden">
       {/* grid pattern */}
       <div
-        className="absolute inset-0 z-0 opacity-30 pointer-events-none"
+        className="absolute inset-0 z-0 pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(#1a2340 1px, transparent 1px), linear-gradient(90deg, #1a2340 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
+            "linear-gradient(rgba(11,16,32,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(11,16,32,.05) 1px, transparent 1px)",
+          backgroundSize: "56px 56px",
           maskImage: "radial-gradient(ellipse at top, black 40%, transparent 80%)",
           WebkitMaskImage: "radial-gradient(ellipse at top, black 40%, transparent 80%)",
         }}
