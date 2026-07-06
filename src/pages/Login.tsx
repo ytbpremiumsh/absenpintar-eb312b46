@@ -264,11 +264,9 @@ const Login = ({ forcedMode }: LoginProps) => {
   const scanBars = Array.from({ length: 24 }, (_, i) => i);
 
   const features = [
-    { icon: ScanFace, title: "Absensi RFID, Face & QR Code", desc: "Pencatatan kehadiran otomatis via RFID, pengenalan wajah, dan QR/Barcode." },
-    { icon: Calendar, title: "Jadwal Pelajaran Real-time", desc: "Sinkronisasi jadwal guru & kelas yang selalu terkini di semua dashboard." },
-    { icon: Wallet, title: "Pembayaran SPP Otomatis", desc: "Tagihan, VA, QRIS, dan rekap SPP siap audit dalam satu sistem." },
-    { icon: Users, title: "Dashboard Multi Peran", desc: "Kepala sekolah, bendahara, guru, wali kelas, dan wali murid dalam satu platform." },
-    { icon: MessageCircle, title: "Notifikasi WhatsApp Otomatis", desc: "Kehadiran & tagihan langsung terkirim ke wali murid secara real-time." },
+    { icon: ScanFace, title: "Absensi RFID, Face & QR Code", desc: "Pencatatan kehadiran otomatis via RFID, wajah, dan QR." },
+    { icon: Wallet, title: "Pembayaran SPP Otomatis", desc: "Tagihan, VA, QRIS, dan rekap SPP siap audit." },
+    { icon: MessageCircle, title: "Notifikasi WhatsApp Otomatis", desc: "Kehadiran & tagihan terkirim ke wali murid real-time." },
   ];
 
   return (
@@ -302,45 +300,36 @@ const Login = ({ forcedMode }: LoginProps) => {
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10">
-        <div className={`w-full grid gap-8 items-stretch justify-items-center ${mode === "school" ? "max-w-6xl lg:grid-cols-2" : "max-w-md"}`}>
+        <div className={`w-full grid gap-6 items-center justify-items-center ${mode === "school" ? "max-w-5xl lg:grid-cols-2" : "max-w-md"}`}>
           {/* Left: Light feature card (only for school admin login) */}
           {mode === "school" && (
-          <div className="hidden lg:block w-full max-w-lg">
-            <div className="relative rounded-3xl bg-white border border-slate-200 p-8 overflow-hidden shadow-xl shadow-slate-900/5">
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  backgroundImage: 'linear-gradient(rgba(11,16,32,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(11,16,32,.05) 1px, transparent 1px)',
-                  backgroundSize: '56px 56px',
-                  maskImage: 'radial-gradient(ellipse at top, black 40%, transparent 80%)',
-                  WebkitMaskImage: 'radial-gradient(ellipse at top, black 40%, transparent 80%)',
-                }}
-              />
-              <div className="absolute -top-16 -left-16 w-72 h-72 bg-[#5B6CF9] rounded-full blur-[120px] opacity-[0.08] pointer-events-none" />
+          <div className="hidden lg:block w-full max-w-md">
+            <div className="relative rounded-[2rem] bg-white border border-slate-200 p-6 sm:p-7 overflow-hidden shadow-xl shadow-slate-900/5">
+              <div className="absolute -top-16 -left-16 w-60 h-60 bg-[#5B6CF9] rounded-full blur-[120px] opacity-[0.08] pointer-events-none" />
 
               <div className="relative text-[#0b1020]">
-                <div className="flex items-center gap-3 mb-5">
-                  <img src={tenantLogo || loginLogo} alt={tenantName || "ATSkolla"} className="h-11 w-11 rounded-xl object-contain bg-[#5B6CF9]/10 p-1 border border-slate-200" />
-                  <span className="font-bold text-2xl tracking-tight">{tenantName || "ATSkolla"}</span>
+                <div className="flex items-center gap-3 mb-4">
+                  <img src={tenantLogo || loginLogo} alt={tenantName || "ATSkolla"} className="h-10 w-auto object-contain" />
+                  {tenantName && <span className="font-bold text-lg tracking-tight">{tenantName}</span>}
                 </div>
-                <h2 className="text-3xl xl:text-[2rem] font-bold mb-2 leading-tight">
+                <h2 className="text-2xl font-bold mb-2 leading-tight">
                   {tenantName ? `Selamat Datang di ${tenantName}` : "Platform Digital Sekolah Terintegrasi"}
                 </h2>
-                <p className="text-[#0b1020]/60 text-sm mb-5">
+                <p className="text-[#0b1020]/60 text-sm mb-4">
                   {tenantName ? "Masuk untuk mengakses dashboard sekolah Anda." : "Kelola absensi, keuangan SPP, dan komunikasi wali murid dalam satu platform."}
                 </p>
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {features.map((f) => (
                     <div
                       key={f.title}
-                      className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3"
+                      className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5"
                     >
-                      <div className="h-10 w-10 rounded-xl bg-[#5B6CF9]/10 border border-[#5B6CF9]/20 flex items-center justify-center shrink-0">
-                        <f.icon className="h-5 w-5 text-[#5B6CF9]" />
+                      <div className="h-9 w-9 rounded-lg bg-[#5B6CF9]/10 border border-[#5B6CF9]/20 flex items-center justify-center shrink-0">
+                        <f.icon className="h-4 w-4 text-[#5B6CF9]" />
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-sm leading-tight text-[#0b1020]">{f.title}</p>
-                        <p className="text-[12px] text-[#0b1020]/60 mt-1 leading-snug">{f.desc}</p>
+                        <p className="text-[11px] text-[#0b1020]/60 mt-0.5 leading-snug">{f.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -357,8 +346,10 @@ const Login = ({ forcedMode }: LoginProps) => {
             className="w-full max-w-md"
           >
             <div className="flex lg:hidden items-center justify-center gap-3 mb-6">
-              <img src={mode === "parent" ? loginLogo : (tenantLogo || loginLogo)} alt="ATSkolla" className="h-11 w-11 rounded-xl shadow-lg object-contain bg-[#5B6CF9]/10 p-1" />
-              <span className="font-bold text-xl text-[#0b1020] tracking-tight">{mode === "parent" ? "ATSkolla" : (tenantName || "ATSkolla")}</span>
+              <img src={mode === "parent" ? loginLogo : (tenantLogo || loginLogo)} alt="ATSkolla" className="h-10 w-auto object-contain" />
+              {(mode === "parent" || tenantName) && (
+                <span className="font-bold text-xl text-[#0b1020] tracking-tight">{mode === "parent" ? "" : (tenantName || "")}</span>
+              )}
             </div>
 
             <div className="text-center mb-5">

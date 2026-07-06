@@ -41,23 +41,38 @@ Deno.serve(async (req) => {
       studentsQuery = studentsQuery.eq("class", filterClass);
     }
 
-    const [studentsRes, logsRes, schoolRes, settingsRes] = await Promise.all([
+    const [studentsRes, logsRes, attendanceRes, schoolRes, settingsRes] = await Promise.all([
       studentsQuery,
       supabase.from("dismissal_logs").select("student_id, dismissal_time, dismissed_by").eq("school_id", schoolId).gte("dismissal_time", today.toISOString()),
+      supabase.from("attendance_logs").select("student_id, status, check_in_time").eq("school_id", schoolId).gte("check_in_time", today.toISOString()),
       supabase.from("schools").select("name, logo").eq("id", schoolId).single(),
       supabase.from("dismissal_settings").select("is_active, auto_activate_time, auto_deactivate_time").eq("school_id", schoolId).maybeSingle(),
     ]);
 
     const students = studentsRes.data || [];
     const logs = logsRes.data || [];
+    const attendance = attendanceRes.data || [];
     const school = schoolRes.data;
     const settings = settingsRes.data;
 
-    const result = students.map((s) => {
+    // Only students actually present today (hadir / terlambat) belong on the dismissal monitor.
+    // Absent / izin / sakit / alfa or no attendance record → excluded so they don't show as "menunggu".
+    const presentIds = new Set(
+      attendance
+        .filter((a) => ["hadir", "terlambat", "present", "late"].includes(String(a.status).toLowerCase()))
+        .map((a) => a.student_id)
+    );
+
+    const presentStudents = students.filter((s) => presentIds.has(s.id));
+
+    const result = presentStudents.map((s) => {
       const log = logs.find((l) => l.student_id === s.id);
+      const att = attendance.find((a) => a.student_id === s.id);
       return {
         ...s,
         status: log ? "picked_up" : "waiting",
+        attendance_status: att?.status || null,
+        check_in_time: att?.check_in_time || null,
         dismissal_time: log?.dismissal_time || null,
         dismissed_by: log?.dismissed_by || null,
       };
@@ -75,7 +90,7 @@ Deno.serve(async (req) => {
       JSON.stringify({
         school,
         classes: grouped,
-        total: students.length,
+        total: presentStudents.length,
         picked_up: pickedCount,
         settings: settings || { is_active: true, auto_activate_time: "14:00:00", auto_deactivate_time: "17:00:00" },
       }),

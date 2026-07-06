@@ -262,125 +262,59 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex relative overflow-hidden bg-[#5B6CF9]">
+    <div className="min-h-screen flex relative overflow-hidden bg-white text-[#0b1020]">
       {/* Back to home */}
       <button
         onClick={() => navigate("/")}
-        className="absolute top-4 left-4 z-50 flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/15 text-white px-3 py-2 rounded-xl text-sm font-medium transition-all backdrop-blur-sm"
+        className="absolute top-4 left-4 z-50 inline-flex items-center gap-1.5 bg-white border border-slate-200 hover:border-[#5B6CF9]/40 text-[#0b1020] px-3 py-2 rounded-xl text-sm font-medium transition-all"
       >
         <ArrowLeft className="h-4 w-4" />
         Beranda
       </button>
 
-      {/* Grid background */}
+      {/* Subtle grid background — matches Login */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none opacity-40"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)",
+            "linear-gradient(rgba(11,16,32,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(11,16,32,.05) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
+          maskImage: "radial-gradient(ellipse at top, black 40%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(ellipse at top, black 40%, transparent 80%)",
         }}
       />
 
-      {/* Floating decorative blobs */}
-      <motion.div
-        className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-white/5 blur-3xl"
-        animate={{ x: [0, 30, 0], y: [0, 20, 0] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-300/10 blur-3xl"
-        animate={{ x: [0, -30, 0], y: [0, -20, 0] }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      {/* Floating icons */}
-      <motion.div
-        className="hidden lg:flex absolute left-[10%] top-[15%] h-20 w-20 rounded-2xl bg-white/10 border border-white/15 items-center justify-center backdrop-blur-md"
-        animate={{ y: [0, -12, 0], rotate: [0, 6, 0] }}
-        transition={{ duration: 5, repeat: Infinity }}
-      >
-        <School className="h-9 w-9 text-white/70" />
-      </motion.div>
-      <motion.div
-        className="hidden lg:flex absolute left-[5%] bottom-[20%] h-14 w-14 rounded-xl bg-white/10 border border-white/15 items-center justify-center backdrop-blur-md"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 4, repeat: Infinity, delay: 1 }}
-      >
-        <ShieldCheck className="h-6 w-6 text-white/70" />
-      </motion.div>
-      <motion.div
-        className="hidden lg:flex absolute right-[7%] top-[18%] h-16 w-16 rounded-2xl bg-white/10 border border-white/15 items-center justify-center backdrop-blur-md"
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 4.5, repeat: Infinity, delay: 0.5 }}
-      >
-        <Sparkles className="h-7 w-7 text-white/70" />
-      </motion.div>
-      <motion.div
-        className="hidden lg:flex absolute right-[12%] bottom-[15%] h-14 w-14 rounded-xl bg-white/10 border border-white/15 items-center justify-center backdrop-blur-md"
-        animate={{ y: [0, 12, 0] }}
-        transition={{ duration: 5, repeat: Infinity, delay: 1.2 }}
-      >
-        <Zap className="h-6 w-6 text-white/70" />
-      </motion.div>
-
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full max-w-lg"
-        >
+        <div className="w-full max-w-lg">
         {/* Brand */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="flex items-center justify-center gap-3 mb-5"
-        >
-          <img src={logo} alt="ATSkolla" className="h-11 w-11 rounded-xl shadow-lg" />
-          <span className="font-bold text-xl text-white tracking-tight">ATSkolla</span>
-        </motion.div>
+        <div className="flex items-center justify-center gap-3 mb-5">
+          <img src={logo} alt="ATSkolla" className="h-10 w-auto object-contain" />
+        </div>
 
         {/* Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="text-center mb-5"
-        >
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Daftar Sekolah Baru</h1>
-          <p className="text-white/70 text-sm mt-1.5">Mulai digitalisasi sekolah Anda dalam hitungan menit</p>
-        </motion.div>
+        <div className="text-center mb-5">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#0b1020]">Daftar Sekolah Baru</h1>
+          <p className="text-[#0b1020]/60 text-sm mt-1.5">Mulai digitalisasi sekolah Anda dalam hitungan menit</p>
+        </div>
 
         {/* Step Indicator */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
-          className="flex items-center justify-center gap-3 mb-5"
-        >
-          <div className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-500 ${step === 1 ? "bg-white text-indigo-700 shadow-lg shadow-white/20" : "bg-white/15 text-white/70 backdrop-blur-sm"}`}>
+        <div className="flex items-center justify-center gap-3 mb-5">
+          <div className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-500 ${step === 1 ? "bg-[#5B6CF9] text-white shadow-md shadow-[#5B6CF9]/20" : "bg-slate-100 text-slate-500"}`}>
             <span>1</span> Data Sekolah
           </div>
-          <div className="w-8 h-px bg-white/20" />
-          <div className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-500 ${step === 2 ? "bg-white text-indigo-700 shadow-lg shadow-white/20" : "bg-white/15 text-white/70 backdrop-blur-sm"}`}>
+          <div className="w-8 h-px bg-slate-200" />
+          <div className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-500 ${step === 2 ? "bg-[#5B6CF9] text-white shadow-md shadow-[#5B6CF9]/20" : "bg-slate-100 text-slate-500"}`}>
             <span>2</span> Data Admin
           </div>
-        </motion.div>
+        </div>
 
         {/* Main Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: 0.25, duration: 0.6, ease: "easeOut" }}
-          className="relative"
-        >
-          <div className="absolute -inset-1 bg-gradient-to-r from-white/20 via-white/5 to-white/20 rounded-3xl blur-xl opacity-50" />
+        <div className="relative">
+          <div className="absolute -inset-1 bg-[#5B6CF9]/10 rounded-[2rem] blur-xl" />
 
-          <div className="relative bg-white/95 dark:bg-slate-800/95 backdrop-blur-2xl border border-white/30 dark:border-slate-700/50 rounded-2xl shadow-[0_30px_80px_-15px_rgba(0,0,0,0.3)] overflow-hidden">
+          <div className="relative bg-white border border-slate-200 rounded-[2rem] shadow-xl shadow-slate-900/5 overflow-hidden">
             {/* Top accent */}
-            <div className="h-1 bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-500" />
+            <div className="h-1 bg-[#5B6CF9]" />
 
             <div className="p-6 sm:p-8">
               <AnimatePresence mode="wait">
@@ -719,21 +653,13 @@ const Register = () => {
               </motion.div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="text-center text-white/40 text-xs mt-6"
-        >
+        <p className="text-center text-slate-400 text-xs mt-6">
           © 2026 ATSkolla — Platform Digital Sekolah
-        </motion.p>
-      </motion.div>
+        </p>
+        </div>
       </div>
-
-      {/* Bottom rounded accent */}
-      <div className="absolute bottom-0 left-0 right-0 h-8 bg-white dark:bg-slate-950 rounded-t-[2rem] z-[5]" />
     </div>
   );
 };
