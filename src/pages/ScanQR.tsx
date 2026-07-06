@@ -679,6 +679,7 @@ const ScanQR = () => {
                   <div className="flex items-center gap-1 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg">
                     <ScanLine className="h-3 w-3 text-white/70" />
                     {canFace && <UserCheck className="h-3 w-3 text-white/70 ml-0.5" />}
+                    <Nfc className="h-3 w-3 text-white/70 ml-0.5" />
                   </div>
                 </div>
 
