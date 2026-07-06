@@ -6,6 +6,7 @@ import { ScanLine, CheckCircle2, Camera, Search, ShieldCheck, X, Clock, UserChec
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptionFeatures } from "@/hooks/useSubscriptionFeatures";
+import { useNfcScanner } from "@/hooks/useNfcScanner";
 import { toast } from "sonner";
 import jsQR from "jsqr";
 import {
@@ -199,7 +200,7 @@ const ScanQR = () => {
       const trimmed = code.trim();
       const { data, error } = await supabase
         .from("students").select("*").eq("school_id", profile.school_id)
-        .or(`student_id.eq.${trimmed},qr_code.eq.${trimmed}`).maybeSingle();
+        .or(`student_id.eq.${trimmed},qr_code.eq.${trimmed},rfid_uid.eq.${trimmed},card_number.eq.${trimmed}`).maybeSingle();
 
       if (!error && data) {
         const attType = await getAttendanceType();
