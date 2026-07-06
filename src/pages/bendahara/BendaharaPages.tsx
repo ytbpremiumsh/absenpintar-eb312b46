@@ -4566,6 +4566,10 @@ export function BendaharaLaporan() {
   const [expAY, setExpAY] = useState<string>(currentAY);
   const [expStatus, setExpStatus] = useState<string>("all");
 
+  // Export preview
+  const [previewRows, setPreviewRows] = useState<any[]>([]);
+  const [previewLoading, setPreviewLoading] = useState(false);
+
   // Detail kelas (dialog)
   const [openClass, setOpenClass] = useState<string | null>(null);
   const [detailMonth, setDetailMonth] = useState<number>(0); // 0 = semua bulan
