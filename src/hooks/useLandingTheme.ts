@@ -1,27 +1,21 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 
 export type LandingTheme = "light" | "dark";
 
 const KEY = "landing_theme";
 
 export function useLandingTheme() {
-  const [theme, setThemeState] = useState<LandingTheme>(() => {
-    if (typeof window === "undefined") return "light";
-    const stored = localStorage.getItem(KEY);
-    return stored === "dark" ? "dark" : "light";
-  });
-
+  // Landing & Login are locked to light mode — dark background disabled per request.
   useEffect(() => {
-    localStorage.setItem(KEY, theme);
-  }, [theme]);
+    try {
+      localStorage.removeItem(KEY);
+    } catch {
+      /* noop */
+    }
+  }, []);
 
-  const setTheme = useCallback((t: LandingTheme) => setThemeState(t), []);
-  const toggle = useCallback(
-    () => setThemeState((t) => (t === "dark" ? "light" : "dark")),
-    [],
-  );
-
-  return { theme, setTheme, toggle };
+  const noop = useCallback((_t?: LandingTheme) => {}, []);
+  return { theme: "light" as LandingTheme, setTheme: noop, toggle: () => {} };
 }
 
 /**

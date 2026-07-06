@@ -298,7 +298,7 @@ const Login = ({ forcedMode }: LoginProps) => {
         >
           <ArrowLeft className="h-4 w-4" /> Kembali
         </button>
-        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10">
