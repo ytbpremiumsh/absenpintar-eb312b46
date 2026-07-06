@@ -18,6 +18,13 @@ interface Props {
     school_id?: string;
   };
   hideQrDownload?: boolean;
+  /**
+   * When true (default), a diagonal "SALINAN — ATSkolla" watermark is baked into
+   * the downloaded image to discourage schools from printing the card themselves
+   * (they must order via the platform). Parent portal passes `false` so wali murid
+   * gets a clean card.
+   */
+  watermark?: boolean;
 }
 
 function formatCard(n?: string) {
@@ -26,10 +33,15 @@ function formatCard(n?: string) {
   return `${digits.slice(0, 4)} ${digits.slice(4, 8)} ${digits.slice(8, 12)} ${digits.slice(12, 16)}`;
 }
 
-export function StudentIdCard({ student, hideQrDownload = false }: Props) {
+export function StudentIdCard({ student, hideQrDownload = false, watermark = true }: Props) {
+
   const [cardNumber, setCardNumber] = useState<string>("");
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [capturing, setCapturing] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+
+
 
   useEffect(() => {
     let mounted = true;
@@ -68,13 +80,21 @@ export function StudentIdCard({ student, hideQrDownload = false }: Props) {
   const handleDownload = async () => {
     if (!cardRef.current) return;
     try {
+      if (watermark) {
+        setCapturing(true);
+        // Wait a frame so the watermark overlay renders before html2canvas snapshots.
+        await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 50)));
+      }
       await downloadCardAsJpg(cardRef.current, `kartu-pelajar-${student.name.replace(/\s+/g, "-")}`);
       toast.success("Kartu berhasil diunduh");
     } catch (e) {
       console.error(e);
       toast.error("Gagal mengunduh kartu");
+    } finally {
+      if (watermark) setCapturing(false);
     }
   };
+
 
   const handleDownloadQr = () => {
     if (!qrDataUrl) { toast.error("QR belum siap"); return; }
@@ -99,7 +119,41 @@ export function StudentIdCard({ student, hideQrDownload = false }: Props) {
         <div className="absolute -bottom-14 -left-10 h-48 w-48 rounded-full bg-white/5 blur-2xl pointer-events-none" />
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 20% 10%, white 1.2px, transparent 1.2px), radial-gradient(circle at 80% 90%, white 1.2px, transparent 1.2px)", backgroundSize: "28px 28px" }} />
 
+        {/* Watermark hanya di-render saat proses unduh dari sisi sekolah (watermark=true).
+            Tujuan: mencegah sekolah mencetak sendiri kartu pelajar; cetak fisik harus lewat platform. */}
+        {watermark && capturing && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-20" aria-hidden>
+            {/* Diagonal repeating text */}
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ transform: "rotate(-30deg)" }}
+            >
+              <div className="flex flex-col gap-6 select-none">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="whitespace-nowrap font-extrabold tracking-[0.35em] text-white/25"
+                    style={{ fontSize: 26 }}
+                  >
+                    ATSkolla • CONTOH • ATSkolla • CONTOH
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Center stamp */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                className="border-4 border-white/70 rounded-2xl px-5 py-2 text-white/90 font-black tracking-widest"
+                style={{ transform: "rotate(-18deg)", fontSize: 22, backgroundColor: "rgba(0,0,0,0.15)" }}
+              >
+                CETAK RESMI ATSKOLLA
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="absolute inset-0 flex flex-col">
+
           <div className="relative flex items-start gap-2.5 p-5 text-white">
             <img src={schoolLogo || atskollaLogo} alt="" crossOrigin="anonymous" className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur p-1 object-contain shrink-0" />
             <div className="min-w-0 flex-1">
