@@ -209,25 +209,25 @@ function Nav() {
   }, []);
 
   return (
-    <header className={`fixed top-0 inset-x-0 z-50 transition-all ${scrolled ? "backdrop-blur-md bg-[#0b1020]/80 border-b border-white/5" : "bg-transparent"}`}>
+    <header className={`fixed top-0 inset-x-0 z-50 transition-all bg-white ${scrolled ? "shadow-[0_1px_0_0_rgba(15,23,42,0.06),0_8px_24px_-12px_rgba(15,23,42,0.08)]" : "border-b border-slate-100"}`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         <a href="/" className="flex items-center gap-2 group">
-          <div className="h-8 w-8 rounded-lg bg-[#5B6CF9] flex items-center justify-center shadow-lg shadow-[#5B6CF9]/30">
+          <div className="h-8 w-8 rounded-lg bg-[#5B6CF9] flex items-center justify-center shadow-lg shadow-[#5B6CF9]/25">
             <span className="font-display font-bold text-white text-sm">A</span>
           </div>
-          <span className="font-display font-bold text-white text-lg tracking-tight">ATSkolla</span>
+          <span className="font-display font-bold text-[#0b1020] text-lg tracking-tight">ATSkolla</span>
         </a>
 
         <nav className="hidden lg:flex items-center gap-8">
           {NAV.map((n) => (
-            <a key={n.href} href={n.href} className="text-sm font-medium text-white/70 hover:text-white transition-colors">
+            <a key={n.href} href={n.href} className="text-sm font-medium text-[#0b1020]/70 hover:text-[#5B6CF9] transition-colors">
               {n.label}
             </a>
           ))}
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <button onClick={() => nav("/login")} className="text-sm font-semibold text-white/80 hover:text-white px-3 py-2">
+          <button onClick={() => nav("/login")} className="text-sm font-semibold text-[#0b1020]/80 hover:text-[#0b1020] px-3 py-2">
             Masuk
           </button>
           <button
@@ -238,26 +238,27 @@ function Nav() {
           </button>
         </div>
 
-        <button onClick={() => setOpen((v) => !v)} className="lg:hidden text-white p-2" aria-label="Menu">
+        <button onClick={() => setOpen((v) => !v)} className="lg:hidden text-[#0b1020] p-2" aria-label="Menu">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
       {open && (
-        <div className="lg:hidden bg-[#0b1020] border-t border-white/5 px-6 py-4 space-y-3">
+        <div className="lg:hidden bg-white border-t border-slate-100 px-6 py-4 space-y-3">
           {NAV.map((n) => (
-            <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="block text-white/80 py-2 text-sm font-medium">
+            <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="block text-[#0b1020]/80 hover:text-[#5B6CF9] py-2 text-sm font-medium">
               {n.label}
             </a>
           ))}
-          <div className="pt-3 border-t border-white/5 flex gap-2">
-            <button onClick={() => nav("/login")} className="flex-1 text-sm font-semibold text-white/90 border border-white/15 rounded-lg py-2.5">
+          <div className="pt-3 border-t border-slate-100 flex gap-2">
+            <button onClick={() => nav("/login")} className="flex-1 text-sm font-semibold text-[#0b1020] border border-slate-200 rounded-lg py-2.5">
               Masuk
             </button>
             <button onClick={() => nav("/register")} className="flex-1 text-sm font-semibold bg-[#5B6CF9] text-white rounded-lg py-2.5">
               Mulai Gratis
             </button>
           </div>
+
         </div>
       )}
     </header>
