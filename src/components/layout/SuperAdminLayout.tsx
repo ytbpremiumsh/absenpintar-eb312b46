@@ -45,9 +45,11 @@ const navItems = [
   { title: "Meta Pixel & CAPI", url: "/super-admin/meta-pixel", icon: Activity, group: "content" },
 
   // SISTEM
+  { title: "Perangkat RFID", url: "/super-admin/rfid", icon: Radio, group: "system" },
   { title: "Backup & Migrasi", url: "/super-admin/backup", icon: Database, group: "system" },
   { title: "Server Info", url: "/super-admin/server-info", icon: Server, group: "system" },
 ];
+
 
 const groups = [
   { key: "overview", label: "OVERVIEW" },
