@@ -130,7 +130,7 @@ export function PaymentMethodPicker({
             <span className="font-medium">{formatIDR(billAmount)}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Biaya Layanan ({chan.label.split(" ")[0]})</span>
+            <span className="text-muted-foreground">Biaya Layanan</span>
             <span className="font-medium">{formatIDR(fee)}</span>
           </div>
           <div className="border-t border-border/60 pt-1.5 flex justify-between">
