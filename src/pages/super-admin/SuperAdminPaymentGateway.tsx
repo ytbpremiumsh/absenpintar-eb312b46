@@ -356,29 +356,6 @@ const SuperAdminPaymentGateway = () => {
           </div>
 
 
-          {/* Method overrides */}
-          <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-3 space-y-3">
-            <div>
-              <p className="text-xs font-semibold text-amber-900">Filter Metode Pembayaran per Channel</p>
-              <p className="text-[10px] text-amber-800/80 mt-0.5">
-                Ketik <code className="px-1 bg-white rounded">*</code> agar SEMUA metode aktif di Doku Dashboard tampil (rekomendasi kalau Mandiri / bank baru tidak muncul). Atau isi daftar dipisah koma, contoh: <code className="px-1 bg-white rounded">VIRTUAL_ACCOUNT_BCA,VIRTUAL_ACCOUNT_MANDIRI</code>. Kosong = pakai daftar default sistem.
-              </p>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-3">
-              <div className="grid gap-1">
-                <Label className="text-[11px]">VA Methods</Label>
-                <Input value={dokuVaMethods} onChange={(e) => setDokuVaMethods(e.target.value)} placeholder="* atau kosong" className="font-mono text-[11px] h-8" />
-              </div>
-              <div className="grid gap-1">
-                <Label className="text-[11px]">QRIS Methods</Label>
-                <Input value={dokuQrisMethods} onChange={(e) => setDokuQrisMethods(e.target.value)} placeholder="* atau kosong" className="font-mono text-[11px] h-8" />
-              </div>
-              <div className="grid gap-1">
-                <Label className="text-[11px]">Retail Methods</Label>
-                <Input value={dokuRetailMethods} onChange={(e) => setDokuRetailMethods(e.target.value)} placeholder="* atau kosong" className="font-mono text-[11px] h-8" />
-              </div>
-            </div>
-          </div>
 
           <div className="rounded-lg bg-secondary/40 p-3">
             <p className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5"><Webhook className="h-3 w-3" /> Webhook URL Doku (WAJIB didaftarkan)</p>
