@@ -814,13 +814,24 @@ const Register = () => {
                           ATSkolla.
                         </label>
                       </motion.div>
+                      </>)}
 
-                      <motion.div variants={itemVariants} className="flex gap-2">
-                        <Button type="button" variant="outline" onClick={() => setStep(1)} className="h-11 rounded-xl">Kembali</Button>
-                        <Button type="submit" disabled={registering || slugStatus !== "available" || !agreeTos} className="flex-1 h-11 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-indigo-500/20 transition-all">
-                          {registering ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Mendaftar...</> : "Daftar Sekarang"}
+                      {/* Navigation buttons */}
+                      <motion.div variants={itemVariants} className="flex gap-2 pt-1">
+                        <Button type="button" variant="outline" onClick={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))} className="h-11 rounded-xl">
+                          Kembali
                         </Button>
+                        {step < 4 ? (
+                          <Button type="button" onClick={goNext} className="flex-1 h-11 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-indigo-500/20">
+                            Lanjut →
+                          </Button>
+                        ) : (
+                          <Button type="submit" disabled={registering || slugStatus !== "available" || !agreeTos} className="flex-1 h-11 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-indigo-500/20">
+                            {registering ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Mendaftar...</> : "Daftar Sekarang"}
+                          </Button>
+                        )}
                       </motion.div>
+
 
                     </form>
                   </motion.div>
