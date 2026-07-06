@@ -302,7 +302,7 @@ const Login = ({ forcedMode }: LoginProps) => {
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10">
-        <div className={`w-full grid gap-8 items-center justify-items-center ${mode === "school" ? "max-w-6xl lg:grid-cols-2" : "max-w-md justify-center"}`}>
+        <div className={`w-full grid gap-8 items-stretch justify-items-center ${mode === "school" ? "max-w-6xl lg:grid-cols-2" : "max-w-md"}`}>
           {/* Left: Light feature card (only for school admin login) */}
           {mode === "school" && (
           <div className="hidden lg:block w-full max-w-lg">
@@ -353,14 +353,13 @@ const Login = ({ forcedMode }: LoginProps) => {
 
           {/* Right: Login card */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}
-            className={`w-full ${mode === "parent" ? "max-w-xl" : "max-w-md"}`}
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: "easeOut" }}
+            className="w-full max-w-md"
           >
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
-              className="flex lg:hidden items-center justify-center gap-3 mb-6">
+            <div className="flex lg:hidden items-center justify-center gap-3 mb-6">
               <img src={mode === "parent" ? loginLogo : (tenantLogo || loginLogo)} alt="ATSkolla" className="h-11 w-11 rounded-xl shadow-lg object-contain bg-[#5B6CF9]/10 p-1" />
               <span className="font-bold text-xl text-[#0b1020] tracking-tight">{mode === "parent" ? "ATSkolla" : (tenantName || "ATSkolla")}</span>
-            </motion.div>
+            </div>
 
             <div className="text-center mb-5">
               {mode === "parent" && (
@@ -368,11 +367,11 @@ const Login = ({ forcedMode }: LoginProps) => {
                   <img
                     src={tenantLogo || loginLogo}
                     alt={tenantName || "ATSkolla"}
-                    className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl shadow-xl object-contain bg-white border border-slate-200 p-2"
+                    className="h-16 w-16 rounded-2xl shadow-lg object-contain bg-white border border-slate-200 p-2"
                   />
                 </div>
               )}
-              <h2 className={`font-bold text-[#0b1020] ${mode === "parent" ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl"}`}>
+              <h2 className="font-bold text-[#0b1020] text-2xl sm:text-3xl">
                 {mode === "school" ? "Selamat Datang" : "Portal Wali Murid"}
               </h2>
               <p className="text-[#0b1020]/60 text-sm mt-1">
@@ -380,10 +379,9 @@ const Login = ({ forcedMode }: LoginProps) => {
               </p>
             </div>
 
-            <motion.div initial={{ opacity: 0, y: 20, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.25, duration: 0.6 }} className="relative">
+            <div className="relative">
               <div className="absolute -inset-1 bg-[#5B6CF9]/10 rounded-[2rem] blur-xl" />
-              <div className={`relative bg-white border border-slate-200 rounded-[2rem] shadow-xl shadow-slate-900/5 ${mode === "parent" ? "p-8 sm:p-10" : "p-6 sm:p-7"}`}>
+              <div className="relative bg-white border border-slate-200 rounded-[2rem] shadow-xl shadow-slate-900/5 p-6 sm:p-7">
 
 
                 {/* Tabs (hidden when a forced mode is provided via /admin or /login routes) */}
@@ -579,7 +577,7 @@ const Login = ({ forcedMode }: LoginProps) => {
                   )}
                 </AnimatePresence>
               </div>
-            </motion.div>
+            </div>
           </motion.div>
         </div>
         <p className="text-center text-[#0b1020]/40 text-xs mt-8 w-full max-w-6xl">© 2026 ATSkolla — Platform Digital Sekolah</p>
