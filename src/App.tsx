@@ -93,6 +93,8 @@ const SuperAdminSubscriptionsHub = lazy(() => import("./pages/super-admin/SuperA
 const SuperAdminWhatsAppHub = lazy(() => import("./pages/super-admin/SuperAdminWhatsAppHub"));
 const SuperAdminCMS = lazy(() => import("./pages/super-admin/SuperAdminCMS"));
 const SuperAdminSekolahHub = lazy(() => import("./pages/super-admin/SuperAdminSekolahHub"));
+const SuperAdminRFID = lazy(() => import("./pages/super-admin/SuperAdminRFID"));
+const SchoolRFIDDevices = lazy(() => import("./pages/SchoolRFIDDevices"));
 
 // Bendahara grouped
 const BendaharaPagesMod = () => import("./pages/bendahara/BendaharaPages");
