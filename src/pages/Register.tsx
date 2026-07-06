@@ -43,7 +43,7 @@ const Register = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const refCode = searchParams.get('ref') || '';
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [showPassword, setShowPassword] = useState(false);
 
   const [inputMode, setInputMode] = useState<"npsn" | "manual" | null>(null);
@@ -198,6 +198,35 @@ const Register = () => {
   const passwordLongEnough = password.length >= 8;
   const passwordValid = passwordHasUpper && passwordHasNumber && passwordHasSymbol && passwordLongEnough;
 
+  // Per-step validators for Next-button navigation
+  const validateStep2 = (): boolean => {
+    if (!principalName.trim()) { toast.error("Nama Kepala Sekolah wajib diisi"); return false; }
+    if (!schoolEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(schoolEmail.trim())) { toast.error("Email sekolah tidak valid"); return false; }
+    const waDigits = schoolWhatsapp.replace(/\D/g, '');
+    if (waDigits.length < 9 || waDigits.length > 15) { toast.error("Nomor WhatsApp sekolah tidak valid"); return false; }
+    if (!schoolAddress.trim() || schoolAddress.trim().length < 8) { toast.error("Alamat lengkap sekolah wajib diisi (min 8 karakter)"); return false; }
+    if (!schoolCity.trim()) { toast.error("Kota/Kabupaten wajib diisi"); return false; }
+    if (!schoolProvince.trim()) { toast.error("Provinsi wajib diisi"); return false; }
+    if (!studentCountRange) { toast.error("Perkiraan jumlah siswa wajib dipilih"); return false; }
+    if (!slug || slugStatus !== "available") { toast.error("Pilih alamat website (subdomain) yang tersedia"); return false; }
+    return true;
+  };
+  const validateStep3 = (): boolean => {
+    if (!fullName.trim() || fullName.trim().length < 3) { toast.error("Nama lengkap wajib diisi"); return false; }
+    if (!position) { toast.error("Jabatan wajib dipilih"); return false; }
+    const personalWa = phone.replace(/\D/g, '');
+    if (personalWa.length < 9 || personalWa.length > 15) { toast.error("Nomor WhatsApp pribadi tidak valid"); return false; }
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { toast.error("Email login tidak valid"); return false; }
+    return true;
+  };
+  const goNext = () => {
+    if (step === 2 && !validateStep2()) return;
+    if (step === 3 && !validateStep3()) return;
+    setStep((s) => (s < 4 ? ((s + 1) as 2 | 3 | 4) : s));
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!schoolData) { toast.error("Data sekolah belum diisi"); return; }
@@ -330,15 +359,22 @@ const Register = () => {
         </div>
 
         {/* Step Indicator */}
-        <div className="flex items-center justify-center gap-3 mb-5">
-          <div className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-500 ${step === 1 ? "bg-[#5B6CF9] text-white shadow-md shadow-[#5B6CF9]/20" : "bg-slate-100 text-slate-500"}`}>
-            <span>1</span> Data Sekolah
-          </div>
-          <div className="w-8 h-px bg-slate-200" />
-          <div className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-500 ${step === 2 ? "bg-[#5B6CF9] text-white shadow-md shadow-[#5B6CF9]/20" : "bg-slate-100 text-slate-500"}`}>
-            <span>2</span> Data Admin
-          </div>
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-5 flex-wrap">
+          {[
+            { n: 1, label: "Sekolah" },
+            { n: 2, label: "Profil" },
+            { n: 3, label: "PJ" },
+            { n: 4, label: "Keamanan" },
+          ].map((s, i) => (
+            <Fragment key={s.n}>
+              {i > 0 && <div className="w-4 sm:w-6 h-px bg-slate-200" />}
+              <div className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold transition-all duration-300 ${step === s.n ? "bg-[#5B6CF9] text-white shadow-md shadow-[#5B6CF9]/20" : step > s.n ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+                {step > s.n ? <CheckCircle2 className="h-3 w-3" /> : <span>{s.n}</span>} {s.label}
+              </div>
+            </Fragment>
+          ))}
         </div>
+
 
         {/* Main Card */}
         <div className="relative">
@@ -547,6 +583,7 @@ const Register = () => {
                         <Button type="button" variant="ghost" size="sm" className="ml-auto text-xs shrink-0" onClick={() => setStep(1)}>Ubah</Button>
                       </motion.div>
 
+                      {step === 2 && (<>
                       {/* ===== SECTION A: Data Sekolah ===== */}
                       <motion.div variants={itemVariants} className="pt-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -643,7 +680,9 @@ const Register = () => {
                           )}
                         </div>
                       </motion.div>
+                      </>)}
 
+                      {step === 3 && (<>
                       {/* ===== SECTION B: Penanggung Jawab ===== */}
                       <motion.div variants={itemVariants} className="pt-2">
                         <div className="flex items-center gap-2 mb-1">
@@ -685,7 +724,9 @@ const Register = () => {
                         <Input id="loginEmail" type="email" placeholder="admin@sekolah.sch.id" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={200} className="h-11 rounded-xl" required />
                         <p className="text-[11px] text-muted-foreground">Email ini digunakan untuk login ke dashboard</p>
                       </motion.div>
+                      </>)}
 
+                      {step === 4 && (<>
                       {/* ===== SECTION C: Keamanan ===== */}
                       <motion.div variants={itemVariants} className="pt-2">
                         <div className="flex items-center gap-2 mb-1">
@@ -774,13 +815,24 @@ const Register = () => {
                           ATSkolla.
                         </label>
                       </motion.div>
+                      </>)}
 
-                      <motion.div variants={itemVariants} className="flex gap-2">
-                        <Button type="button" variant="outline" onClick={() => setStep(1)} className="h-11 rounded-xl">Kembali</Button>
-                        <Button type="submit" disabled={registering || slugStatus !== "available" || !agreeTos} className="flex-1 h-11 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-indigo-500/20 transition-all">
-                          {registering ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Mendaftar...</> : "Daftar Sekarang"}
+                      {/* Navigation buttons */}
+                      <motion.div variants={itemVariants} className="flex gap-2 pt-1">
+                        <Button type="button" variant="outline" onClick={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))} className="h-11 rounded-xl">
+                          Kembali
                         </Button>
+                        {step < 4 ? (
+                          <Button type="button" onClick={goNext} className="flex-1 h-11 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-indigo-500/20">
+                            Lanjut →
+                          </Button>
+                        ) : (
+                          <Button type="submit" disabled={registering || slugStatus !== "available" || !agreeTos} className="flex-1 h-11 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl shadow-lg shadow-indigo-500/20">
+                            {registering ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Mendaftar...</> : "Daftar Sekarang"}
+                          </Button>
+                        )}
                       </motion.div>
+
 
                     </form>
                   </motion.div>
