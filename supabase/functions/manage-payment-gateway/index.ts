@@ -61,10 +61,10 @@ serve(async (req) => {
         doku_secret_key_masked: mask(map.doku_secret_key || ""),
         has_doku_client_id: !!map.doku_client_id,
         has_doku_secret_key: !!map.doku_secret_key,
-        doku_va_methods: map.doku_va_methods || "",
-        doku_qris_methods: map.doku_qris_methods || "",
-        doku_retail_methods: map.doku_retail_methods || "",
         doku_webhook_verify: map.doku_webhook_verify || "true",
+        fee_va: map.fee_va || "5000",
+        fee_qris: map.fee_qris || "5000",
+        fee_retail: map.fee_retail || "8000",
       });
     }
 
