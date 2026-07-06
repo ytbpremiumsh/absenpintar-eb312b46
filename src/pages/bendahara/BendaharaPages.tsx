@@ -4021,7 +4021,7 @@ export function BendaharaPencairan() {
   const loadStaff = async () => {
     if (!profile?.school_id) return;
     const { data: roleRows } = await supabase.from("user_roles")
-      .select("user_id, role").in("role", ["teacher", "staff", "bendahara"] as any);
+      .select("user_id, role").in("role", ["bendahara"] as any);
     const ids = Array.from(new Set((roleRows || []).map((r: any) => r.user_id)));
     if (ids.length === 0) { setStaffList([]); return; }
     const { data: profs } = await supabase.from("profiles")
