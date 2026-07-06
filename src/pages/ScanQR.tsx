@@ -794,7 +794,8 @@ const ScanQR = () => {
             <p className="text-[11px] text-muted-foreground text-center mt-2">
               Tempelkan kartu RFID ke bagian belakang HP. iPhone belum mendukung Web NFC.
             </p>
-          </div>
+          </div>}
+
         </CardContent>
       </Card>
 
