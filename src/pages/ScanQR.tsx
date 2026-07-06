@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptionFeatures } from "@/hooks/useSubscriptionFeatures";
 import { useNfcScanner } from "@/hooks/useNfcScanner";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 import { toast } from "sonner";
 import jsQR from "jsqr";
 import {
@@ -153,6 +155,8 @@ const ScanQR = () => {
   const scanPaused = useRef(false);
 
   const canFace = !features.loading && features.canFaceRecognition;
+  const isMobile = useIsMobile();
+
   const [holidayBlock, setHolidayBlock] = useState<{ isHoliday: boolean; reason: string | null }>({ isHoliday: false, reason: null });
   const nfc = useNfcScanner((uid) => {
     if (scanPaused.current) return;
@@ -771,7 +775,7 @@ const ScanQR = () => {
               <Search className="h-4 w-4" />
             </Button>
           </div>
-          <div className="pt-2 border-t border-border/40">
+          {isMobile && <div className="pt-2 border-t border-border/40">
             <div className="flex items-center gap-2 mb-2">
               <div className="h-7 w-7 rounded-lg bg-[#5B6CF9]/10 flex items-center justify-center">
                 <Nfc className="h-3.5 w-3.5 text-[#5B6CF9]" />
@@ -790,7 +794,8 @@ const ScanQR = () => {
             <p className="text-[11px] text-muted-foreground text-center mt-2">
               Tempelkan kartu RFID ke bagian belakang HP. iPhone belum mendukung Web NFC.
             </p>
-          </div>
+          </div>}
+
         </CardContent>
       </Card>
 

@@ -2,7 +2,9 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Nfc, Loader2, Smartphone } from "lucide-react";
 import { useNfcScanner } from "@/hooks/useNfcScanner";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
+
 
 interface Props {
   onUid: (uid: string) => void;
@@ -14,12 +16,17 @@ interface Props {
  * Wajib dipanggil dari user gesture (klik) agar browser prompt izin NFC muncul.
  */
 export function NfcScanButton({ onUid, label = "Scan RFID via HP (NFC)" }: Props) {
+  const isMobile = useIsMobile();
   const { supported, scanning, start, stop } = useNfcScanner((uid) => {
+
     onUid(uid);
     toast.success(`Kartu terdeteksi: ${uid}`);
   });
 
   useEffect(() => () => stop(), [stop]);
+
+  if (!isMobile) return null;
+
 
   const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
 

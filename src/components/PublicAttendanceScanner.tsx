@@ -11,6 +11,8 @@ import {
 import { toast } from "sonner";
 import jsQR from "jsqr";
 import { useNfcScanner } from "@/hooks/useNfcScanner";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 import {
   Dialog, DialogContent, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -87,7 +89,9 @@ const PublicAttendanceScanner = ({ schoolId, onAttendanceRecorded, currentMode =
   }, []);
 
   // Web NFC scanner (Android Chrome). Uses lookupRef so tidak butuh dep.
+  const isMobile = useIsMobile();
   const nfc = useNfcScanner((uid) => {
+
     scanPaused.current = false;
     lookupRef.current(uid, "rfid");
   });
@@ -482,7 +486,7 @@ const PublicAttendanceScanner = ({ schoolId, onAttendanceRecorded, currentMode =
               <Search className="h-4 w-4" />
             </Button>
           </div>
-          <div className="pt-2 border-t border-border/40">
+          {isMobile && <div className="pt-2 border-t border-border/40">
             <div className="flex items-center gap-2 mb-2">
               <div className="h-7 w-7 rounded-lg bg-[#5B6CF9]/10 flex items-center justify-center">
                 <Nfc className="h-3.5 w-3.5 text-[#5B6CF9]" />
@@ -501,7 +505,8 @@ const PublicAttendanceScanner = ({ schoolId, onAttendanceRecorded, currentMode =
             <p className="text-[11px] text-muted-foreground text-center mt-1.5">
               Tempelkan kartu ke bagian belakang HP Android. iPhone belum mendukung Web NFC.
             </p>
-          </div>
+          </div>}
+
         </div>
       </Card>
 
