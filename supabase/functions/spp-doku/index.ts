@@ -188,7 +188,10 @@ async function createDokuPayment(
       payment_due_date: DOKU_LINK_TTL_MIN,
     },
     customer: {
-      name: (inv.parent_name || inv.student_name || "Wali Murid").slice(0, 100),
+      // Doku VA menampilkan customer.name sebagai pemilik VA. Pakai nama SISWA
+      // supaya tampilan mutasi bank / halaman pembayaran menampilkan nama anak,
+      // bukan nama wali (yang bisa berbeda per invoice).
+      name: (inv.student_name || inv.parent_name || "Siswa").slice(0, 100),
       email: `spp-${(inv.id || "x").slice(0, 8)}@atskolla.com`,
       phone: String(inv.parent_phone || "081234567890").replace(/\D/g, "").slice(0, 15) || "081234567890",
     },
