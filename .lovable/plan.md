@@ -1,110 +1,146 @@
 
-# Halaman Pilih Metode Pembayaran (Portal Wali Murid)
+## Manajemen Perangkat RFID ATSkolla
 
-Menambahkan satu halaman perantara sebelum membuka link Mayar. Wali murid melihat rincian tagihan + pilih metode pembayaran (VA per bank / QRIS / Retail). Fee channel otomatis ditambah ke total tagihan, lalu link Mayar dibuat dengan nominal final.
+Fitur ini menambahkan manajemen perangkat RFID resmi yang dikendalikan Super Admin, dengan lisensi per sekolah, aktivasi berbasis Device ID + Secret Token, heartbeat, log, dan integrasi ke sistem absensi.
 
-Berlaku untuk **SPP** dan **tagihan lain** yang dibayar wali murid.
+---
 
-## Alur Baru
+### 1. Struktur data (Lovable Cloud / Postgres)
+
+Tabel baru di skema `public`:
+
+- **`rfid_devices`** — inventaris seluruh perangkat resmi
+  - `device_id` (unik, format `ATS-RFID-XXXXXX`)
+  - `serial_number`, `mac_address` (unik)
+  - `activation_code` (kode 8-digit sekali pakai untuk aktivasi awal)
+  - `secret_token_hash` (SHA-256 dari secret token — token asli hanya ditampilkan sekali saat generate)
+  - `school_id` (nullable — null berarti belum di-assign)
+  - `location_label`, `status` (`unassigned` | `assigned` | `active` | `inactive` | `revoked`)
+  - `last_online_at`, `last_heartbeat_at`, `last_ip`
+  - `firmware_version`, `notes`, `activated_at`
+
+- **`rfid_device_licenses`** — kuota lisensi per sekolah
+  - `school_id`, `license_count` (jumlah slot lisensi yang dibeli/dibagi Super Admin)
+
+- **`rfid_device_logs`** — audit trail perangkat
+  - `device_id_ref` (fk ke `rfid_devices`), `school_id`, `event_type`
+    (`activation` | `heartbeat` | `online` | `offline` | `scan` | `config_change` | `revoke` | `license_change`)
+  - `payload jsonb` (data event: card_number, student_id, mac, dll)
+  - `created_at`
+
+- **`rfid_size_tiers`** — aturan minimal perangkat berdasarkan jumlah siswa
+  - `min_students`, `max_students` (nullable = tak terbatas), `min_devices`
+  - Seed default: 0–300 → 1, 301–700 → 2, 701–1200 → 3, 1201+ → 4
+
+Semua tabel: `GRANT` sesuai role, RLS ON, kolom `created_at`/`updated_at`.
+
+### 2. Aturan RLS
+
+- **Super Admin** (`has_role(uid,'super_admin')`) — full CRUD di keempat tabel.
+- **School Admin / Bendahara / Teacher** dari sekolah yang sama —
+  hanya `SELECT` pada `rfid_devices`, `rfid_device_licenses`, `rfid_device_logs`
+  (`school_id = get_user_school_id(uid)`), tidak ada INSERT/UPDATE/DELETE.
+- Perangkat sendiri tidak login lewat Supabase auth — komunikasi lewat edge
+  function `rfid-device` menggunakan Device ID + Secret Token (verify_jwt=false).
+
+### 3. Edge Function `rfid-device`
+
+Satu endpoint publik (verify_jwt=false) dengan action:
+
+- `activate` — input: `device_id`, `activation_code`, `mac_address`. Validasi:
+  device ada, code cocok & belum dipakai, sekolah punya slot lisensi kosong.
+  Output: `secret_token` (plaintext, hanya sekali) + `assigned_school_id`.
+  Sets `status='active'`, tulis log `activation`.
+- `heartbeat` — input: `device_id`, `secret_token`, `firmware_version?`.
+  Verifikasi hash token → update `last_heartbeat_at`, `last_online_at`,
+  `status='active'`. Log ringan (rate-limited: 1 baris log per 5 menit).
+- `scan` — input: `device_id`, `secret_token`, `card_number`, `scanned_at`.
+  Wajib `status='active'` DAN heartbeat < 3 menit lalu — kalau tidak,
+  reject dengan `device_offline`. Cari siswa via `students.card_number`,
+  panggil path absensi yang sudah ada (reuse handler `public-scan-attendance`
+  atau tulis langsung ke `attendance_logs` dengan `method='rfid'`).
+  Tulis log `scan`.
+- `deactivate` (Super Admin only via JWT) — revoke token & set `status='revoked'`.
+
+Job pemarkir offline: karena Lovable Cloud tak menjamin cron di dalam edge
+function, kita gunakan **derivasi status di query** — helper SQL / view
+menghitung `computed_status` = `active` jika `last_heartbeat_at > now() - 3 min`,
+selain itu `offline`. Selain itu, pg_cron per menit (sudah tersedia — dipakai
+auto-mark-alfa) memanggil fungsi SQL `mark_offline_rfid_devices()` yang
+meng-update `status='inactive'` untuk perangkat yang lewat 3 menit tanpa
+heartbeat dan menulis log `offline` sekali.
+
+### 4. UI Super Admin (baru)
+
+Route baru: `/super-admin/rfid` — masuk sidebar Super Admin.
+
+Halaman `SuperAdminRFID.tsx` dengan 3 tab:
+
+1. **Perangkat** — tabel semua device: Device ID, Serial, MAC, Sekolah, Lokasi,
+   Status (badge: Aktif/Offline/Belum Aktivasi/Revoked), Last Online, aksi
+   (Assign ke sekolah, Regenerate Secret, Revoke, Hapus). Tombol **Tambah
+   Perangkat** membuka dialog untuk generate device baru (Device ID otomatis
+   `ATS-RFID-XXXXXX`, activation code 8 digit, secret token 32 hex — token
+   ditampilkan sekali dengan tombol copy + warning).
+2. **Lisensi Sekolah** — daftar sekolah + jumlah lisensi + jumlah aktif +
+   status (OK / Kurang / Melebihi). Tombol +/- untuk atur lisensi.
+   Tampilkan juga jumlah siswa & minimal perangkat menurut tier.
+3. **Aturan Ukuran (Tier)** — CRUD `rfid_size_tiers` (min_students,
+   max_students, min_devices).
+
+Tambah tab **Log** di detail perangkat (dialog): 100 event terakhir.
+
+### 5. UI Admin Sekolah (read-only)
+
+Tambahan route `/rfid-devices` di sidebar School Admin — hanya menampilkan
+perangkat milik sekolah, status live, dan log. Tanpa tombol edit/hapus.
+
+### 6. Peringatan pada dashboard
+
+- **Dashboard School Admin (`Dashboard.tsx`)** — banner kuning muncul jika
+  `count(active_devices) < required_min_devices` (dihitung dari tier siswa).
+  Klik → menuju `/rfid-devices`.
+- **Dashboard Super Admin** — kartu ringkas: total perangkat, aktif, offline,
+  sekolah yang under-licensed.
+
+### 7. Integrasi ke absensi yang sudah ada
+
+- Reuse tabel `attendance_logs` dengan `method='rfid'`.
+- Edge function `rfid-device` action `scan` memanggil logika absensi yang
+  sudah ada (import shared helper dari `public-scan-attendance`), sehingga
+  audio announce, WA notifikasi, dan Alfa-check tetap jalan tanpa perubahan.
+- Tidak menambahkan istilah "penjemputan/pickup" — konsisten sekolah.
+
+### 8. Yang TIDAK dilakukan di iterasi ini
+
+- Tidak menyediakan firmware fisik / dokumen hardware.
+- Tidak menghitung biaya lisensi otomatis (Super Admin atur manual).
+- Tidak menyentuh flow QR / Face lain — hanya menambah channel RFID.
+
+### 9. File yang akan ditambah/diubah (technical)
+
+- Migrasi: 4 tabel + tier seed + fungsi `mark_offline_rfid_devices()` + pg_cron.
+- Edge function baru: `supabase/functions/rfid-device/index.ts`.
+- `supabase/functions/_shared/rfidAttendance.ts` (helper reuse).
+- Frontend:
+  - `src/pages/super-admin/SuperAdminRFID.tsx` (baru, 3 tab)
+  - `src/pages/SchoolRFIDDevices.tsx` (baru, read-only)
+  - Sidebar Super Admin & School Admin diupdate.
+  - Route baru di `src/App.tsx`.
+  - Banner peringatan tambahan di `src/pages/Dashboard.tsx`.
+
+### 10. Alur singkat aktivasi perangkat
 
 ```text
-Wali klik "Bayar"
-        │
-        ▼
-┌─────────────────────────────────────┐
-│  Halaman Pilih Metode Pembayaran   │
-│  ─────────────────────────────────  │
-│  Rincian Tagihan  Rp 500.000        │
-│                                     │
-│  ○ Virtual Account   +Rp 5.000     │
-│      [BRI] [BNI] [Mandiri] [BSI]   │
-│      [Permata] [BCA] [CIMB] [BJB]  │
-│  ○ QRIS              +Rp 5.000     │
-│  ○ Retail            +Rp 8.000     │
-│      [Alfamart] [Indomaret]        │
-│                                     │
-│  Total Bayar     Rp 505.000         │
-│  [ Lanjut Bayar → ]                 │
-└─────────────────────────────────────┘
-        │
-        ▼
-Buat link Mayar dengan amount = tagihan + fee
-        │
-        ▼
-Halaman Mayar (gambar 1) — wali menyelesaikan pembayaran
+Super Admin ── generate device ──> ATS-RFID-000123 + code:12345678 + token(sekali)
+      │
+      └── assign device ke Sekolah A (pakai slot lisensi)
+
+Perangkat fisik ── POST /rfid-device action=activate ──> validasi code + lisensi
+                                                        └── return secret_token
+Perangkat ── POST heartbeat tiap 45s ──> last_heartbeat_at
+Perangkat ── POST scan(card) ──> attendance_logs (method=rfid)
+Cron 1 menit ── mark_offline_rfid_devices() ──> status=inactive + log offline
 ```
 
-## Yang Dibangun
-
-### 1. Halaman/Dialog "Pilih Metode Pembayaran"
-Komponen baru `PaymentMethodPicker` dipakai di:
-- **Portal Wali Murid → Bayar SPP** (`parent-portal` view + `Login.tsx` → Parent Dashboard)
-- **Tagihan lain yang dibayar wali** (kalau ada alur lain di masa depan, komponen ini reusable)
-
-Isi halaman:
-- Kartu ringkas: nama siswa, kelas, periode, nominal tagihan
-- Grup channel dengan logo bank (radio card):
-  - **Virtual Account** — logo BRI, BNI, Mandiri, BSI, Permata, BCA, CIMB, BJB, Danamon
-  - **QRIS** — logo QRIS (semua e-wallet & mobile banking)
-  - **Retail** — logo Alfamart & Indomaret
-- Setiap grup menampilkan fee: **VA +Rp 5.000**, **QRIS +Rp 5.000**, **Retail +Rp 8.000**
-- Baris total: `Tagihan + Biaya Layanan = Total Bayar` (real-time saat pilih)
-- Tombol **Lanjut Bayar** → kirim `channel` + `fee` ke edge function → buka link Mayar
-
-### 2. Perubahan Backend (edge function `spp-mayar`)
-- `parent_create_payment` menerima parameter tambahan `channel` (`va` / `qris` / `retail`).
-- Server menghitung `service_fee` (5.000 atau 8.000) berdasarkan channel.
-- `amount` yang dikirim ke Mayar = `invoice.total_amount + service_fee`.
-- Simpan `service_fee` dan `channel` di kolom baru pada tabel `payment_transactions` supaya bisa dilihat di riwayat & rekap bendahara.
-- Fee ini **berbeda dan terpisah** dari `gateway_fee` internal yang dipakai buat rekap bendahara (yang sudah ada) — service_fee adalah biaya yang dibebankan ke wali, gateway_fee tetap seperti sekarang.
-
-### 3. Perubahan Frontend Lain
-- Kartu invoice di dashboard wali menampilkan estimasi total ("mulai Rp 505.000 termasuk biaya layanan") supaya wali tidak kaget.
-- Notifikasi WhatsApp & email invoice ditambahi keterangan "Biaya layanan menyesuaikan metode pembayaran (Rp 5.000 VA/QRIS, Rp 8.000 Retail)".
-- Bukti pembayaran (invoice PDF) menampilkan breakdown: `Tagihan`, `Biaya Layanan`, `Total Dibayar`.
-
-### 4. Panel Konfigurasi (opsional, disarankan)
-Di **Pengaturan Bendahara** tambahkan input agar sekolah bisa mengatur:
-- `service_fee_va` (default 5.000)
-- `service_fee_qris` (default 5.000)
-- `service_fee_retail` (default 8.000)
-
-Kalau sekolah tidak mengubah, dipakai nilai default di atas.
-
-## Catatan Penting Soal Mayar
-
-- Mayar **tidak bisa mengunci** channel pembayaran dari sisi API — di halaman Mayar wali tetap melihat semua channel. Yang dilakukan sistem:
-  1. Wali memilih channel di ATSkolla → fee dihitung benar sesuai pilihan.
-  2. Link Mayar dibuat dengan amount yang sudah termasuk fee tersebut.
-  3. Sekolah tetap menerima nominal SPP penuh, karena selisihnya dari wali.
-- Halaman pilih channel di ATSkolla berfungsi sebagai **informasi transparan** + kalkulator fee, bukan penguncian teknis. Kalau wali di halaman Mayar iseng pilih channel lain dengan fee real yang berbeda, itu sudah tanggungan wali sendiri (fee di sistem kita tetap sesuai pilihan awal).
-- Kalau ke depan ingin fee benar-benar terkunci per channel (seperti Tripay), perlu pindah/ tambah provider — bisa dibahas terpisah.
-
-## Detail Teknis
-
-**File baru**
-- `src/components/PaymentMethodPicker.tsx` — komponen radio-card channel + kalkulator fee.
-- `src/lib/paymentChannels.ts` — konstanta channel, fee default, path logo bank.
-- `src/assets/banks/` — SVG/PNG logo bank (BRI, BNI, Mandiri, BSI, Permata, BCA, CIMB, BJB, Danamon, QRIS, Alfamart, Indomaret) via `lovable-assets` atau simpanan lokal.
-
-**File diedit**
-- `src/pages/parent/ParentDashboard.tsx` — tombol Bayar membuka `PaymentMethodPicker` sebagai Dialog, bukan langsung memanggil `parent_create_payment`.
-- `supabase/functions/spp-mayar/index.ts` — parameter `channel` di action `parent_create_payment`, hitung `service_fee`, tambahkan ke `amount`, simpan ke `payment_transactions`.
-- `src/lib/sppInvoicePDF.ts` — tambah baris breakdown `Biaya Layanan` dan `Total Dibayar`.
-- (Opsional) `src/pages/bendahara/BendaharaKeuangan.tsx` atau Pengaturan Bendahara — form konfigurasi fee per channel.
-
-**Migrasi database**
-- `ALTER TABLE payment_transactions ADD COLUMN service_fee INT DEFAULT 0, ADD COLUMN payment_channel TEXT`.
-- (Opsional) `INSERT INTO bendahara_settings` key `service_fee_va|qris|retail`.
-
-**Perhitungan (contoh)**
-```text
-SPP           = 500.000
-Pilih channel = QRIS  → service_fee = 5.000
-amount ke Mayar = 505.000
-Wali bayar    = 505.000
-Sekolah terima (setelah gateway_fee Mayar internal) = 500.000 - gateway_fee
-Service fee 5.000 tetap masuk ke sekolah (bukan ke Mayar) sebagai kompensasi biaya layanan.
-```
-
-Setelah plan ini disetujui, saya lanjut implementasi.
+Setelah kamu setujui plan ini, saya jalankan migrasi dulu, lalu edge function, lalu UI Super Admin, dan terakhir view read-only + banner sekolah.
