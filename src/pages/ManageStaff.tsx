@@ -410,9 +410,9 @@ const ManageStaff = () => {
     setRfidDialogOpen(true);
   };
 
-  const handleSaveRfid = async () => {
+  const handleSaveRfid = async (scannedUid?: string) => {
     if (!rfidTarget) return;
-    const uid = rfidValue.trim();
+    const uid = (scannedUid ?? rfidValue).trim();
     if (uid.length < 4) { toast.error("UID RFID minimal 4 karakter"); return; }
     setRfidSaving(true);
     // Check dup on profiles + students
@@ -454,8 +454,9 @@ const ManageStaff = () => {
     fetchStaff();
   };
 
-  const handleTestRfid = () => {
-    const uid = testRfidValue.trim();
+  const handleTestRfid = (scannedUid?: string) => {
+    const uid = (scannedUid ?? testRfidValue).trim();
+    if (uid) setTestRfidValue(uid);
     if (!uid) { setTestRfidResult({ ok: false, msg: "Silakan scan atau ketik UID kartu terlebih dahulu" }); return; }
     const match = staff.find((s) => (s.rfid_uid || "").toString() === uid);
     if (match) {
@@ -1012,14 +1013,14 @@ const ManageStaff = () => {
                 Sebagian besar RFID reader USB akan otomatis mengetik UID lalu menekan Enter.
               </p>
             </div>
-            <NfcScanButton onUid={(uid) => setRfidValue(uid)} />
+            <NfcScanButton onUid={(uid) => { setRfidValue(uid); handleSaveRfid(uid); }} />
             <div className="flex gap-2">
               {rfidTarget?.rfid_uid && (
                 <Button variant="outline" onClick={handleRemoveRfid} disabled={rfidSaving} className="text-destructive hover:text-destructive">
                   Hapus RFID
                 </Button>
               )}
-              <Button onClick={handleSaveRfid} disabled={rfidSaving || rfidValue.trim().length < 4} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button onClick={() => handleSaveRfid()} disabled={rfidSaving || rfidValue.trim().length < 4} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white">
                 {rfidSaving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Nfc className="h-4 w-4 mr-1" />}
                 Simpan
               </Button>
@@ -1051,7 +1052,8 @@ const ManageStaff = () => {
                 className="font-mono text-lg tracking-wider"
               />
             </div>
-            <Button onClick={handleTestRfid} disabled={!testRfidValue.trim()} className="w-full bg-[#5B6CF9] hover:bg-[#5065E8] text-white">
+            <NfcScanButton onUid={(uid) => { setTestRfidValue(uid); handleTestRfid(uid); }} />
+            <Button onClick={() => handleTestRfid()} disabled={!testRfidValue.trim()} className="w-full bg-[#5B6CF9] hover:bg-[#5065E8] text-white">
               Cek UID
             </Button>
             {testRfidResult && (
