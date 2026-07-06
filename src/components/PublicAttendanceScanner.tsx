@@ -399,7 +399,7 @@ const PublicAttendanceScanner = ({ schoolId, onAttendanceRecorded, currentMode =
                   <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-lg">
                     {faceScanning ? (
                       <><Loader2 className="h-3 w-3 animate-spin text-[#5B6CF9]" /><span className="text-[11px] text-white font-medium">Mengenali wajah...</span></>
-                    ) : scanPaused.current ? (
+                    ) : paused ? (
                       <><CheckCircle2 className="h-3 w-3 text-emerald-400" /><span className="text-[11px] text-white font-medium">Terdeteksi!</span></>
                     ) : (
                       <><div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /><span className="text-[11px] text-white/80">Memindai...</span></>
