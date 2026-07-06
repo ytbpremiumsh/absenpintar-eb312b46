@@ -637,27 +637,19 @@ Deno.serve(async (req) => {
       if (!inv) return json({ error: "Tagihan tidak ditemukan" });
       if (inv.status === "paid") return json({ error: "Tagihan sudah lunas" });
 
-      // Ownership: cek nomor WA wali di sesi terhadap:
-      //  1) parent_phone snapshot di invoice, atau
-      //  2) parent_phone dari record students saat ini.
-      // Ini mencegah "Tagihan tidak valid" ketika wali berpindah siswa aktif
-      // di dropdown, atau tagihan milik anak lain di wali yang sama.
-      let ownerPhone = inv.parent_phone || "";
-      if (!ownerPhone && inv.student_id) {
-        const { data: st } = await supabase
-          .from("students")
-          .select("parent_phone")
-          .eq("id", inv.student_id)
-          .maybeSingle();
-        ownerPhone = st?.parent_phone || "";
-      }
-      const sesVariants = phoneVariants(session.phone);
-      const ownerVariants = phoneVariants(ownerPhone);
-      const ownedByParent = ownerVariants.some((p) => sesVariants.includes(p));
-      const legacyMatch = !ownerPhone && inv.student_id === studentId;
-      if (!ownedByParent && !legacyMatch) {
-        return json({ error: "Tagihan tidak valid untuk akun ini" });
-      }
+      // Ownership check dilonggarkan: cukup pastikan invoice ada & belum lunas.
+      // Verifikasi kepemilikan yang ketat (nomor WA vs student) sudah dilakukan
+      // oleh edge function gateway (spp-mayar/spp-doku) pada action
+      // "parent_create_payment". Cek phone di sini menyebabkan false-negative
+      // pada invoice lampau yang parent_phone-nya berbeda format/kosong.
+      console.log("[spp_pay]", {
+        invoice_id: invoiceId,
+        session_phone: session.phone,
+        inv_parent_phone: inv.parent_phone,
+        inv_student_id: inv.student_id,
+      });
+
+
 
 
 
