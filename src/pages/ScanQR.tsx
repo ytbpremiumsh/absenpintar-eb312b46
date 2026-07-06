@@ -429,7 +429,7 @@ const ScanQR = () => {
     setProcessing(true);
 
     const now = new Date();
-    const method = scanMethod === "face" ? "face_recognition" : "barcode";
+    const method = scanMethod === "face" ? "face_recognition" : scanMethod === "rfid" ? "rfid" : "barcode";
 
     if (scannedStudent.__isTeacher && scannedStudent.__teacherUserId) {
       const { error } = await supabase.from("teacher_attendance_logs" as any).insert({
@@ -756,12 +756,12 @@ const ScanQR = () => {
 
       {/* Manual NIS input - Premium */}
       <Card className="border-0 shadow-lg rounded-2xl">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-3">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-[#5B6CF9]/10 flex items-center justify-center">
               <Search className="h-3.5 w-3.5 text-[#5B6CF9]" />
             </div>
-            <p className="text-sm font-semibold text-foreground">Input NIS Manual</p>
+            <p className="text-sm font-semibold text-foreground">Input NIS / Scan RFID</p>
           </div>
           <div className="flex gap-2">
             <Input placeholder="Masukkan NIS (cth: NIS-001)" value={manualCode}
@@ -770,6 +770,26 @@ const ScanQR = () => {
             <Button onClick={handleSearch} className="h-11 px-5 rounded-xl bg-gradient-to-r from-[#5B6CF9] to-[#4c5ded] hover:opacity-90 text-white">
               <Search className="h-4 w-4" />
             </Button>
+          </div>
+          <div className="pt-2 border-t border-border/40">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-7 w-7 rounded-lg bg-[#5B6CF9]/10 flex items-center justify-center">
+                <Nfc className="h-3.5 w-3.5 text-[#5B6CF9]" />
+              </div>
+              <p className="text-sm font-semibold text-foreground flex-1">Scan Kartu RFID via NFC HP</p>
+              {nfc.scanning && <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px]">Aktif</Badge>}
+            </div>
+            <Button
+              onClick={nfc.scanning ? nfc.stop : nfc.start}
+              disabled={!nfc.supported}
+              variant={nfc.scanning ? "destructive" : "outline"}
+              className="w-full h-11 rounded-xl gap-2"
+            >
+              {nfc.scanning ? (<><X className="h-4 w-4" /> Hentikan NFC</>) : (<><Nfc className="h-4 w-4" /> {nfc.supported ? "Aktifkan Scan NFC" : "NFC tidak didukung (pakai Chrome Android)"}</>)}
+            </Button>
+            <p className="text-[11px] text-muted-foreground text-center mt-2">
+              Tempelkan kartu RFID ke bagian belakang HP. iPhone belum mendukung Web NFC.
+            </p>
           </div>
         </CardContent>
       </Card>
