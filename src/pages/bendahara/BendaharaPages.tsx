@@ -4566,6 +4566,10 @@ export function BendaharaLaporan() {
   const [expAY, setExpAY] = useState<string>(currentAY);
   const [expStatus, setExpStatus] = useState<string>("all");
 
+  // Export preview
+  const [previewRows, setPreviewRows] = useState<any[]>([]);
+  const [previewLoading, setPreviewLoading] = useState(false);
+
   // Detail kelas (dialog)
   const [openClass, setOpenClass] = useState<string | null>(null);
   const [detailMonth, setDetailMonth] = useState<number>(0); // 0 = semua bulan
@@ -4627,6 +4631,21 @@ export function BendaharaLaporan() {
     const paidCount = months.reduce((s, m) => s + m.paidCount, 0);
     return { cls, months, totalTagihan, totalBayar, totalCount, paidCount };
   }).filter(r => r.totalCount > 0);
+
+  // ===== Preview data untuk export =====
+  const loadPreview = useCallback(async () => {
+    if (!profile?.school_id) return;
+    setPreviewLoading(true);
+    let q = supabase.from("spp_invoices").select("*").eq("school_id", profile.school_id);
+    if (expClass !== "all") q = q.eq("class_name", expClass);
+    if (expStatus !== "all") q = q.eq("status", expStatus);
+    const { data: invs } = await q.order("class_name").order("student_name").order("period_year").order("period_month");
+    const filtered = (invs || []).filter((i: any) => expAY === "all" || academicYearOf(i.period_month, i.period_year) === expAY);
+    setPreviewRows(filtered);
+    setPreviewLoading(false);
+  }, [profile?.school_id, expClass, expStatus, expAY]);
+
+  useEffect(() => { loadPreview(); }, [loadPreview]);
 
   // ===== Export =====
   const exportData = async (format: "xlsx" | "csv" | "pdf") => {
@@ -4965,9 +4984,78 @@ export function BendaharaLaporan() {
                 Saat memilih "Semua Kelas", Excel dipisah <strong>per-sheet kelas</strong> + sheet Ringkasan.
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button onClick={() => exportData("xlsx")} className="bg-[#5B6CF9] hover:bg-[#4c5ded]"><Download className="h-4 w-4 mr-2" /> Excel (per kelas)</Button>
-                <Button onClick={() => exportData("csv")} variant="outline"><Download className="h-4 w-4 mr-2" /> CSV</Button>
-                <Button onClick={() => exportData("pdf")} variant="outline"><Download className="h-4 w-4 mr-2" /> PDF Laporan</Button>
+                <Button onClick={() => exportData("xlsx")} disabled={previewRows.length === 0} className="bg-[#5B6CF9] hover:bg-[#4c5ded]"><Download className="h-4 w-4 mr-2" /> Excel (per kelas)</Button>
+                <Button onClick={() => exportData("csv")} disabled={previewRows.length === 0} variant="outline"><Download className="h-4 w-4 mr-2" /> CSV</Button>
+                <Button onClick={() => exportData("pdf")} disabled={previewRows.length === 0} variant="outline"><Download className="h-4 w-4 mr-2" /> PDF Laporan</Button>
+                <Button onClick={loadPreview} variant="ghost" size="sm" className="ml-auto"><RefreshCw className={`h-4 w-4 mr-1.5 ${previewLoading ? "animate-spin" : ""}`} /> Muat ulang</Button>
+              </div>
+
+              {/* Preview Table */}
+              <div className="rounded-xl border border-border/60 overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2 bg-muted/40 border-b border-border/60">
+                  <div className="text-xs font-semibold text-foreground">
+                    Preview Data <span className="text-muted-foreground font-normal">— {previewLoading ? "memuat..." : `${previewRows.length} baris`}</span>
+                  </div>
+                  {previewRows.length > 0 && (
+                    <div className="text-[11px] text-muted-foreground">
+                      Total: <span className="font-semibold text-foreground">{fmtIDR(previewRows.reduce((s, r) => s + (r.total_amount || 0), 0))}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="max-h-[420px] overflow-auto">
+                  {previewLoading ? (
+                    <div className="p-6 text-center text-xs text-muted-foreground">Memuat data...</div>
+                  ) : previewRows.length === 0 ? (
+                    <div className="p-6 text-center text-xs text-muted-foreground">Tidak ada data untuk filter ini.</div>
+                  ) : (
+                    <table className="w-full text-xs">
+                      <thead className="bg-muted/30 sticky top-0">
+                        <tr className="text-left text-[10px] uppercase text-muted-foreground">
+                          <th className="px-2 py-2 w-10">No</th>
+                          <th className="px-2 py-2">Invoice</th>
+                          <th className="px-2 py-2">NIS</th>
+                          <th className="px-2 py-2">Nama Siswa</th>
+                          <th className="px-2 py-2">Kelas</th>
+                          <th className="px-2 py-2">TA</th>
+                          <th className="px-2 py-2">Periode</th>
+                          <th className="px-2 py-2 text-right">Total</th>
+                          <th className="px-2 py-2">Status</th>
+                          <th className="px-2 py-2">Tgl Bayar</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {previewRows.slice(0, 200).map((i: any, idx: number) => {
+                          const statusMeta =
+                            i.status === "paid" ? { label: "Lunas", cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40" } :
+                            i.status === "pending" ? { label: "Pending", cls: "bg-amber-100 text-amber-700 dark:bg-amber-950/40" } :
+                            i.status === "expired" ? { label: "Kadaluarsa", cls: "bg-rose-100 text-rose-700 dark:bg-rose-950/40" } :
+                            { label: "Belum Bayar", cls: "bg-slate-100 text-slate-700 dark:bg-slate-800" };
+                          return (
+                            <tr key={i.id} className="border-t border-border/40 hover:bg-muted/30">
+                              <td className="px-2 py-1.5 text-muted-foreground">{idx + 1}</td>
+                              <td className="px-2 py-1.5 font-mono text-[10px]">{i.invoice_number}</td>
+                              <td className="px-2 py-1.5 font-mono text-[10px]">{students.find(s => s.id === i.student_id)?.student_id || "-"}</td>
+                              <td className="px-2 py-1.5 font-medium">{i.student_name}</td>
+                              <td className="px-2 py-1.5">{i.class_name}</td>
+                              <td className="px-2 py-1.5 whitespace-nowrap">{academicYearOf(i.period_month, i.period_year)}</td>
+                              <td className="px-2 py-1.5 whitespace-nowrap">{i.period_label}</td>
+                              <td className="px-2 py-1.5 text-right font-semibold whitespace-nowrap">{fmtIDR(i.total_amount || 0)}</td>
+                              <td className="px-2 py-1.5">
+                                <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${statusMeta.cls}`}>{statusMeta.label}</span>
+                              </td>
+                              <td className="px-2 py-1.5 text-muted-foreground whitespace-nowrap">{i.paid_at ? new Date(i.paid_at).toLocaleDateString("id-ID") : "-"}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+                {previewRows.length > 200 && (
+                  <div className="px-3 py-2 border-t border-border/60 bg-muted/20 text-[11px] text-muted-foreground text-center">
+                    Menampilkan 200 dari {previewRows.length} baris. Semua baris akan ikut ter-export.
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
