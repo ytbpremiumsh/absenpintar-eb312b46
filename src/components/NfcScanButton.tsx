@@ -25,6 +25,9 @@ export function NfcScanButton({ onUid, label = "Scan RFID via HP (NFC)" }: Props
 
   useEffect(() => () => stop(), [stop]);
 
+  if (!isMobile) return null;
+
+
   const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   const handleClick = async () => {
