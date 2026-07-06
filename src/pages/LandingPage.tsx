@@ -228,7 +228,6 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           <button onClick={() => nav("/login")} className="text-sm font-semibold text-[#0b1020]/75 hover:text-[#5B6CF9] px-3 py-2">
             Masuk
           </button>
@@ -241,7 +240,6 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
         </div>
 
         <div className="lg:hidden flex items-center gap-2">
-          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           <button onClick={() => setOpen((v) => !v)} className="text-[#0b1020] p-2" aria-label="Menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
