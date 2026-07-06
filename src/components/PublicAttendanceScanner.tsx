@@ -382,7 +382,7 @@ const PublicAttendanceScanner = ({ schoolId, onAttendanceRecorded, currentMode =
                       <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-[#5B6CF9] rounded-tr-lg" />
                       <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-[#5B6CF9] rounded-bl-lg" />
                       <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-[#5B6CF9] rounded-br-lg" />
-                      {!scanPaused.current && (
+                      {!paused && (
                         <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-[#5B6CF9] to-transparent animate-pulse top-1/2" />
                       )}
                     </div>
