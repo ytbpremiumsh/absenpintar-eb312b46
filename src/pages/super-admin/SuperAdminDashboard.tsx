@@ -41,6 +41,7 @@ interface DashboardStats {
   pendingWithdrawals: number;
   actionQueue: PendingItem[];
   notifications: any[];
+  expiringSoon: { school_id: string; school_name: string; plan_name: string; status: string; expires_at: string; days_left: number }[];
 }
 
 const fmtIDR = (n: number) => `Rp ${Number(n || 0).toLocaleString("id-ID")}`;
