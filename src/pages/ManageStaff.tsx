@@ -454,8 +454,9 @@ const ManageStaff = () => {
     fetchStaff();
   };
 
-  const handleTestRfid = () => {
-    const uid = testRfidValue.trim();
+  const handleTestRfid = (scannedUid?: string) => {
+    const uid = (scannedUid ?? testRfidValue).trim();
+    if (uid) setTestRfidValue(uid);
     if (!uid) { setTestRfidResult({ ok: false, msg: "Silakan scan atau ketik UID kartu terlebih dahulu" }); return; }
     const match = staff.find((s) => (s.rfid_uid || "").toString() === uid);
     if (match) {
