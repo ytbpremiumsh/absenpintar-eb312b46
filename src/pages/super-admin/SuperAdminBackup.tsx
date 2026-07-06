@@ -72,11 +72,13 @@ const SuperAdminBackup = () => {
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || "Export gagal");
 
-      const blob = new Blob([JSON.stringify(data.backup, null, 2)], { type: "application/json" });
+      // Wrap in a portable envelope { meta, backup } so import knows the schema/version
+      const envelope = { meta: data.meta, backup: data.backup };
+      const blob = new Blob([JSON.stringify(envelope, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `backup_${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+      a.download = `atskolla-backup_${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
