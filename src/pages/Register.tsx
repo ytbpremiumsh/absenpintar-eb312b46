@@ -199,19 +199,11 @@ const Register = () => {
   const passwordValid = passwordHasUpper && passwordHasNumber && passwordHasSymbol && passwordLongEnough;
 
   // Per-step validators for Next-button navigation
-  const validateStep2 = (): boolean => {
-    if (!principalName.trim()) { toast.error("Nama Kepala Sekolah wajib diisi"); return false; }
-    if (!schoolEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(schoolEmail.trim())) { toast.error("Email sekolah tidak valid"); return false; }
-    const waDigits = schoolWhatsapp.replace(/\D/g, '');
-    if (waDigits.length < 9 || waDigits.length > 15) { toast.error("Nomor WhatsApp sekolah tidak valid"); return false; }
-    if (!schoolAddress.trim() || schoolAddress.trim().length < 8) { toast.error("Alamat lengkap sekolah wajib diisi (min 8 karakter)"); return false; }
-    if (!schoolCity.trim()) { toast.error("Kota/Kabupaten wajib diisi"); return false; }
-    if (!schoolProvince.trim()) { toast.error("Provinsi wajib diisi"); return false; }
-    if (!studentCountRange) { toast.error("Perkiraan jumlah siswa wajib dipilih"); return false; }
+  const validateStep1Slug = (): boolean => {
     if (!slug || slugStatus !== "available") { toast.error("Pilih alamat website (subdomain) yang tersedia"); return false; }
     return true;
   };
-  const validateStep3 = (): boolean => {
+  const validateStep2 = (): boolean => {
     if (!fullName.trim() || fullName.trim().length < 3) { toast.error("Nama lengkap wajib diisi"); return false; }
     if (!position) { toast.error("Jabatan wajib dipilih"); return false; }
     const personalWa = phone.replace(/\D/g, '');
@@ -220,11 +212,12 @@ const Register = () => {
     return true;
   };
   const goNext = () => {
+    if (step === 1 && !validateStep1Slug()) return;
     if (step === 2 && !validateStep2()) return;
-    if (step === 3 && !validateStep3()) return;
-    setStep((s) => (s < 4 ? ((s + 1) as 2 | 3 | 4) : s));
+    setStep((s) => (s < 3 ? ((s + 1) as 2 | 3) : s));
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
 
 
   const handleRegister = async (e: React.FormEvent) => {
