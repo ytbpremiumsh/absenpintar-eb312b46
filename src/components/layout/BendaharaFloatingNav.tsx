@@ -47,7 +47,7 @@ export function BendaharaFloatingNav() {
           </SheetContent>
         </Sheet>
 
-        <NavBtn icon={Wallet} label="Withdraw" active={isActive("/bendahara/withdraw")} color="#0EA5E9" onClick={() => navigate("/bendahara/withdraw")} />
+        <NavBtn icon={Wallet} label="Saldo" active={isActive("/bendahara/withdraw")} color="#0EA5E9" onClick={() => navigate("/bendahara/withdraw")} />
         <NavBtn icon={BarChart3} label="Sekolah" active={isActive("/bendahara/keuangan-sekolah")} color="#5B6CF9" onClick={() => navigate("/bendahara/keuangan-sekolah")} />
       </div>
     </nav>
