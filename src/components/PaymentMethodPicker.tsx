@@ -94,7 +94,7 @@ export function PaymentMethodPicker({
                           active ? "bg-[#5B6CF9] text-white" : "bg-amber-100 text-amber-800"
                         }`}
                       >
-                        +{formatIDR(c.fee)}
+                        +{formatIDR(feeFor(c.id))}
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-0.5">{c.description}</p>
