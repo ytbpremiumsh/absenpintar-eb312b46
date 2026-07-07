@@ -16,6 +16,7 @@ import { useTenant, buildTenantUrl, getRootDomain } from "@/lib/tenant";
 import { Search, School as SchoolIcon } from "lucide-react";
 import { useLandingTheme, LANDING_THEME_CSS } from "@/hooks/useLandingTheme";
 import ThemeToggle from "@/components/landing/ThemeToggle";
+import loginLogoAsset from "@/assets/logo-atskolla-login.png.asset.json";
 
 type Mode = "school" | "parent";
 
@@ -46,7 +47,7 @@ const Login = ({ forcedMode }: LoginProps) => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem("remembered_email"));
   const [loading, setLoading] = useState(false);
-  const [loginLogo, setLoginLogo] = useState("https://absenpintar.online/images/logo-atskolla.png");
+  const [loginLogo, setLoginLogo] = useState(loginLogoAsset.url);
   const [networkIssue, setNetworkIssue] = useState(false);
   const [recheckKey, setRecheckKey] = useState(0);
 
