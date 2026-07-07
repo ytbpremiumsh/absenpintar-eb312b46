@@ -1,30 +1,12 @@
-import { useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/PageHeader";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   FileSpreadsheet, Users, GraduationCap, Wallet, BookOpen,
-  Receipt, Landmark, ClipboardList, DollarSign, TrendingDown,
+  Receipt, Landmark, ClipboardList, DollarSign, TrendingDown, ArrowRight,
 } from "lucide-react";
-import LaporanAbsensiSiswa from "./reports/LaporanAbsensiSiswa";
-import LaporanAbsensiGuru from "./reports/LaporanAbsensiGuru";
-import LaporanSPP from "./reports/LaporanSPP";
-import LaporanTunggakan from "./reports/LaporanTunggakan";
-import LaporanBukuKas from "./reports/LaporanBukuKas";
-import LaporanSettlement from "./reports/LaporanSettlement";
-import LaporanJurnal from "./reports/LaporanJurnal";
 import { usePrincipalData } from "@/hooks/usePrincipalData";
 import { fmtIDR } from "./_shared";
-
-const tabs = [
-  { key: "absensi-siswa", label: "Absensi Siswa", icon: Users, C: LaporanAbsensiSiswa },
-  { key: "absensi-guru", label: "Absensi Guru", icon: GraduationCap, C: LaporanAbsensiGuru },
-  { key: "spp", label: "SPP", icon: Receipt, C: LaporanSPP },
-  { key: "tunggakan", label: "Tunggakan", icon: Wallet, C: LaporanTunggakan },
-  { key: "buku-kas", label: "Buku Kas", icon: BookOpen, C: LaporanBukuKas },
-  { key: "settlement", label: "Settlement", icon: Landmark, C: LaporanSettlement },
-  { key: "jurnal", label: "Jurnal Mengajar", icon: ClipboardList, C: LaporanJurnal },
-];
 
 function OverviewStat({ icon: Icon, label, value, sub, tone }: {
   icon: any; label: string; value: any; sub?: string;
@@ -55,18 +37,64 @@ function OverviewStat({ icon: Icon, label, value, sub, tone }: {
   );
 }
 
-export default function PrincipalLaporan() {
-  const [params, setParams] = useSearchParams();
-  const active = params.get("tab") || "absensi-siswa";
-  const { finance, settlements } = usePrincipalData();
+type Report = { label: string; desc: string; icon: any; path: string; tone: string };
 
+const akademik: Report[] = [
+  { label: "Absensi Siswa", desc: "Per siswa & per kelas, dengan detail terlambat", icon: Users, path: "/kepsek/laporan/absensi-siswa", tone: "primary" },
+  { label: "Absensi Guru", desc: "Detail hadir/belum hari ini + rekap periode", icon: GraduationCap, path: "/kepsek/laporan/absensi-guru", tone: "violet" },
+  { label: "Jurnal Mengajar", desc: "Sesi mengajar guru & kehadiran per sesi", icon: ClipboardList, path: "/kepsek/laporan/jurnal", tone: "indigo" },
+];
+
+const keuangan: Report[] = [
+  { label: "Pembayaran SPP", desc: "Semua invoice, kanal bayar, biaya gateway", icon: Receipt, path: "/kepsek/laporan/spp", tone: "emerald" },
+  { label: "Tunggakan", desc: "Siswa menunggak + hari menunggak & kontak", icon: Wallet, path: "/kepsek/laporan/tunggakan", tone: "rose" },
+  { label: "Buku Kas", desc: "Saldo awal, mutasi, saldo berjalan, grafik", icon: BookOpen, path: "/kepsek/laporan/buku-kas", tone: "sky" },
+  { label: "Settlement", desc: "Riwayat pencairan dana SPP", icon: Landmark, path: "/kepsek/laporan/settlement", tone: "amber" },
+];
+
+const tones: Record<string, string> = {
+  primary: "from-[#5B6CF9]/15 to-[#5B6CF9]/5 text-[#5B6CF9]",
+  violet: "from-violet-500/15 to-violet-500/5 text-violet-600",
+  emerald: "from-emerald-500/15 to-emerald-500/5 text-emerald-600",
+  sky: "from-sky-500/15 to-sky-500/5 text-sky-600",
+  amber: "from-amber-500/15 to-amber-500/5 text-amber-600",
+  rose: "from-rose-500/15 to-rose-500/5 text-rose-600",
+  indigo: "from-indigo-500/15 to-indigo-500/5 text-indigo-600",
+};
+
+function ReportGrid({ items }: { items: Report[] }) {
+  const navigate = useNavigate();
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {items.map((r) => (
+        <button
+          key={r.path}
+          onClick={() => navigate(r.path)}
+          className={`text-left p-4 rounded-2xl border border-border/50 bg-gradient-to-br ${tones[r.tone]} hover:shadow-md transition-all group`}
+        >
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <div className="h-10 w-10 rounded-xl bg-background/80 backdrop-blur flex items-center justify-center shadow-sm">
+              <r.icon className="h-5 w-5" />
+            </div>
+            <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all mt-3" />
+          </div>
+          <div className="text-sm font-bold text-foreground">{r.label}</div>
+          <div className="text-xs text-muted-foreground mt-1 leading-snug">{r.desc}</div>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export default function PrincipalLaporan() {
+  const { finance, settlements } = usePrincipalData();
   const pendingSettleCount = settlements.filter((s: any) => s.status === "pending").length;
 
   return (
     <div className="space-y-4">
       <PageHeader
         title="Laporan Sekolah"
-        subtitle="Ringkasan keuangan & seluruh laporan sekolah dalam satu tempat"
+        subtitle="Ringkasan keuangan & seluruh laporan sekolah — pilih laporan dari menu samping atau kartu di bawah"
         icon={FileSpreadsheet}
         variant="primary"
       />
@@ -78,26 +106,27 @@ export default function PrincipalLaporan() {
         <OverviewStat icon={Landmark} label="Settlement" value={settlements.length} sub={`${pendingSettleCount} pending`} tone="amber" />
       </div>
 
-      <Tabs value={active} onValueChange={(v) => setParams({ tab: v })}>
-        <TabsList className="w-full flex-wrap h-auto justify-start gap-1 bg-muted/50 p-1 rounded-2xl">
-          {tabs.map((t) => (
-            <TabsTrigger
-              key={t.key}
-              value={t.key}
-              className="gap-1.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs"
-            >
-              <t.icon className="h-3.5 w-3.5" />
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 px-1">
+          <div className="h-7 w-7 rounded-lg bg-[#5B6CF9]/15 text-[#5B6CF9] flex items-center justify-center">
+            <GraduationCap className="h-3.5 w-3.5" />
+          </div>
+          <h2 className="text-sm font-bold">Laporan Akademik</h2>
+          <span className="text-[11px] text-muted-foreground">Kehadiran & aktivitas belajar</span>
+        </div>
+        <ReportGrid items={akademik} />
+      </div>
 
-        {tabs.map((t) => (
-          <TabsContent key={t.key} value={t.key} className="mt-4">
-            {active === t.key && <t.C />}
-          </TabsContent>
-        ))}
-      </Tabs>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 px-1">
+          <div className="h-7 w-7 rounded-lg bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
+            <Wallet className="h-3.5 w-3.5" />
+          </div>
+          <h2 className="text-sm font-bold">Laporan Keuangan</h2>
+          <span className="text-[11px] text-muted-foreground">SPP, kas & pencairan dana</span>
+        </div>
+        <ReportGrid items={keuangan} />
+      </div>
     </div>
   );
 }
