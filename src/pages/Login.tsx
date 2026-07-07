@@ -70,12 +70,11 @@ const Login = ({ forcedMode }: LoginProps) => {
     if (q.length < 2) { setFinderResults([]); return; }
     setFinderLoading(true);
     const t = setTimeout(async () => {
-      const isNumeric = /^\d+$/.test(q);
-      let query = supabase.from("schools").select("id, name, slug, npsn, city").limit(8);
-      query = isNumeric
-        ? query.ilike("npsn", `${q}%`)
-        : query.ilike("name", `%${q}%`);
-      const { data } = await query;
+      const { data } = await supabase
+        .from("schools")
+        .select("id, name, slug, city")
+        .ilike("name", `%${q}%`)
+        .limit(8);
       setFinderResults((data as any) || []);
       setFinderLoading(false);
     }, 350);
