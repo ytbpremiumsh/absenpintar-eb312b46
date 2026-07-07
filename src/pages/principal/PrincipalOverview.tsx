@@ -125,7 +125,7 @@ export default function PrincipalOverview() {
       </div>
 
       <div className="grid md:grid-cols-4 gap-3">
-        <QuickTile icon={ClipboardList} label="Persetujuan" value={totalApprovals} onClick={() => navigate("/kepsek/persetujuan")} tone="indigo" />
+        <QuickTile icon={ClipboardList} label="Persetujuan" value={totalApprovals} onClick={() => navigate("/kepsek/agenda")} tone="indigo" />
         <QuickTile icon={BookOpen} label="Pembelajaran" value={`${liveClasses.length} jadwal`} onClick={() => navigate("/kepsek/pembelajaran")} tone="violet" />
         <QuickTile icon={CalendarDays} label="Agenda & Aktivitas" value={`${timeline.length} aktivitas`} onClick={() => navigate("/kepsek/agenda")} tone="emerald" />
         <QuickTile icon={FileSpreadsheet} label="Laporan Cepat" value="Unduh" onClick={() => navigate("/kepsek/laporan")} tone="amber" />

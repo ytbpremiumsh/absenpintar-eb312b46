@@ -2,13 +2,17 @@ import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarDays, Activity, Search, PartyPopper, Megaphone, Wallet, Receipt, Landmark, UserCheck, BookOpen, Clock } from "lucide-react";
+import { CalendarDays, Activity, Search, PartyPopper, Megaphone, Wallet, Receipt, Landmark, UserCheck, BookOpen, Clock, ClipboardList, CheckCircle2, XCircle } from "lucide-react";
 import { format, isSameDay, isToday, isTomorrow, differenceInCalendarDays } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { usePrincipalData } from "@/hooks/usePrincipalData";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const TYPE_STYLES: Record<string, { icon: any; badge: string; ring: string }> = {
@@ -35,9 +39,18 @@ function relativeDay(d: Date) {
 }
 
 export default function PrincipalAgenda() {
-  const { loading, calendar, timeline } = usePrincipalData();
+  const { user } = useAuth();
+  const { loading, calendar, timeline, leaves, setLeaves } = usePrincipalData();
   const [q, setQ] = useState("");
   const [typeF, setTypeF] = useState("all");
+
+  const approveLeave = async (id: string, status: "approved" | "rejected") => {
+    const { error } = await supabase.from("parent_leave_requests")
+      .update({ status, reviewed_by: user!.id, reviewed_at: new Date().toISOString() }).eq("id", id);
+    if (error) return toast.error("Gagal memperbarui");
+    toast.success(status === "approved" ? "Izin disetujui" : "Izin ditolak");
+    setLeaves(leaves.filter((x: any) => x.id !== id));
+  };
 
   const now = new Date();
 
@@ -99,6 +112,43 @@ export default function PrincipalAgenda() {
         <MiniStat icon={Activity} label="Aktivitas 7 Hari" value={timelineWeek} tone="indigo" />
         <MiniStat icon={UserCheck} label="Aktivitas Hari Ini" value={timelineToday} tone="amber" />
       </div>
+
+      {/* Approval Izin Siswa */}
+      <Card className="rounded-2xl border-0 shadow-sm">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <ClipboardList className="h-4 w-4 text-primary" /> Approval Izin Siswa
+              </CardTitle>
+              <CardDescription>Setujui atau tolak pengajuan izin dari orang tua</CardDescription>
+            </div>
+            <Badge variant="secondary" className="text-[10px]">{leaves.length} menunggu</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-2">
+          {leaves.length === 0 ? (
+            <div className="text-center py-8 text-sm text-muted-foreground">
+              <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-40" />
+              Tidak ada pengajuan izin siswa
+            </div>
+          ) : (
+            leaves.map((l: any) => (
+              <div key={l.id} className="flex items-center justify-between p-3 rounded-xl border border-border/60 gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold truncate">{l.students?.name || "Siswa"} • {l.students?.class || "-"}</div>
+                  <div className="text-xs text-muted-foreground truncate">{l.type} • {l.date} • {l.reason}</div>
+                </div>
+                <div className="flex gap-1.5 shrink-0">
+                  <Button size="sm" variant="outline" onClick={() => approveLeave(l.id, "rejected")}><XCircle className="h-3.5 w-3.5 mr-1" />Tolak</Button>
+                  <Button size="sm" onClick={() => approveLeave(l.id, "approved")}><CheckCircle2 className="h-3.5 w-3.5 mr-1" />Setujui</Button>
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+
 
       {/* Filter bar */}
       <Card className="border-0 shadow-sm">

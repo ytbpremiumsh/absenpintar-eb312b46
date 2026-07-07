@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Activity, Briefcase,
+  LayoutDashboard, Activity,
   CalendarDays, FileSpreadsheet, LogOut, ChevronRight, Crown,
   Users, GraduationCap, ClipboardList, Receipt, Wallet, BookOpen, Landmark,
 } from "lucide-react";
@@ -22,7 +22,6 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
     label: "Operasional",
     items: [
       { title: "Monitoring", url: "/kepsek/monitoring", icon: Activity },
-      { title: "Manajemen", url: "/kepsek/manajemen", icon: Briefcase },
       { title: "Kalender & Aktivitas", url: "/kepsek/agenda", icon: CalendarDays },
     ],
   },
