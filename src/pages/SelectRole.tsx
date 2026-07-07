@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   LogOut,
@@ -11,6 +12,7 @@ import {
   Shield,
   GraduationCap,
   Wallet,
+  School as SchoolIcon,
 } from "lucide-react";
 import { getAvailableDashboards } from "@/lib/dashboards";
 import atskollaLogo from "@/assets/Logo_atskolla.png";
