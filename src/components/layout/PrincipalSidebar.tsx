@@ -22,7 +22,6 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
     label: "Operasional",
     items: [
       { title: "Monitoring", url: "/kepsek/monitoring", icon: Activity },
-      { title: "Manajemen", url: "/kepsek/manajemen", icon: Briefcase },
       { title: "Kalender & Aktivitas", url: "/kepsek/agenda", icon: CalendarDays },
     ],
   },
