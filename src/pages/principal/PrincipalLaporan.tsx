@@ -45,11 +45,14 @@ const akademik: Report[] = [
   { label: "Jurnal Mengajar", desc: "Sesi mengajar guru & kehadiran per sesi", icon: ClipboardList, path: "/kepsek/laporan/jurnal", tone: "indigo" },
 ];
 
-const keuangan: Report[] = [
-  { label: "Pembayaran SPP", desc: "Semua invoice, kanal bayar, biaya gateway", icon: Receipt, path: "/kepsek/laporan/spp", tone: "emerald" },
-  { label: "Tunggakan", desc: "Siswa menunggak + hari menunggak & kontak", icon: Wallet, path: "/kepsek/laporan/tunggakan", tone: "rose" },
-  { label: "Buku Kas", desc: "Saldo awal, mutasi, saldo berjalan, grafik", icon: BookOpen, path: "/kepsek/laporan/buku-kas", tone: "sky" },
-  { label: "Settlement", desc: "Riwayat pencairan dana SPP", icon: Landmark, path: "/kepsek/laporan/settlement", tone: "amber" },
+const keuanganSiswa: Report[] = [
+  { label: "Pembayaran SPP", desc: "Semua invoice SPP siswa, kanal bayar, biaya gateway", icon: Receipt, path: "/kepsek/laporan/spp", tone: "emerald" },
+  { label: "Tunggakan SPP", desc: "Siswa menunggak + hari menunggak & kontak wali", icon: Wallet, path: "/kepsek/laporan/tunggakan", tone: "rose" },
+];
+
+const kasSekolah: Report[] = [
+  { label: "Buku Kas Sekolah", desc: "Kas umum sekolah: saldo awal, mutasi, saldo berjalan", icon: BookOpen, path: "/kepsek/laporan/buku-kas", tone: "sky" },
+  { label: "Settlement Dana", desc: "Riwayat pencairan dana SPP ke rekening sekolah", icon: Landmark, path: "/kepsek/laporan/settlement", tone: "amber" },
 ];
 
 const tones: Record<string, string> = {
@@ -120,12 +123,23 @@ export default function PrincipalLaporan() {
       <div className="space-y-2">
         <div className="flex items-center gap-2 px-1">
           <div className="h-7 w-7 rounded-lg bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
-            <Wallet className="h-3.5 w-3.5" />
+            <Receipt className="h-3.5 w-3.5" />
           </div>
-          <h2 className="text-sm font-bold">Laporan Keuangan</h2>
-          <span className="text-[11px] text-muted-foreground">SPP, kas & pencairan dana</span>
+          <h2 className="text-sm font-bold">Keuangan Siswa (SPP)</h2>
+          <span className="text-[11px] text-muted-foreground">Tagihan & tunggakan SPP siswa</span>
         </div>
-        <ReportGrid items={keuangan} />
+        <ReportGrid items={keuanganSiswa} />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 px-1">
+          <div className="h-7 w-7 rounded-lg bg-sky-500/15 text-sky-600 flex items-center justify-center">
+            <Landmark className="h-3.5 w-3.5" />
+          </div>
+          <h2 className="text-sm font-bold">Kas Sekolah</h2>
+          <span className="text-[11px] text-muted-foreground">Kas umum sekolah & pencairan dana</span>
+        </div>
+        <ReportGrid items={kasSekolah} />
       </div>
     </div>
   );
