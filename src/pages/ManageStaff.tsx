@@ -54,6 +54,7 @@ const ROLE_META: Record<string, { label: string; icon: any; cls: string }> = {
   teacher: { label: "Guru", icon: GraduationCap, cls: "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400" },
   staff: { label: "Operator", icon: Shield, cls: "bg-[#5B6CF9]/10 text-[#5B6CF9]" },
   bendahara: { label: "Bendahara", icon: Wallet, cls: "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400" },
+  principal: { label: "Kepala Sekolah", icon: Shield, cls: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400" },
 };
 
 const ManageStaff = () => {
@@ -70,7 +71,7 @@ const ManageStaff = () => {
   const [formPhone, setFormPhone] = useState("");
   const [formNip, setFormNip] = useState("");
   const [formPosition, setFormPosition] = useState("Guru");
-  const [formRoles, setFormRoles] = useState<{ staff: boolean; teacher: boolean; bendahara: boolean }>({ staff: true, teacher: false, bendahara: false });
+  const [formRoles, setFormRoles] = useState<{ staff: boolean; teacher: boolean; bendahara: boolean; principal: boolean }>({ staff: true, teacher: false, bendahara: false, principal: false });
 
   // Detail/Edit
   const [detailDialog, setDetailDialog] = useState(false);
@@ -82,7 +83,7 @@ const ManageStaff = () => {
   const [editNip, setEditNip] = useState("");
   const [editPosition, setEditPosition] = useState("");
   const [editPassword, setEditPassword] = useState("");
-  const [editRoles, setEditRoles] = useState<{ staff: boolean; teacher: boolean; bendahara: boolean }>({ staff: false, teacher: false, bendahara: false });
+  const [editRoles, setEditRoles] = useState<{ staff: boolean; teacher: boolean; bendahara: boolean; principal: boolean }>({ staff: false, teacher: false, bendahara: false, principal: false });
   const [savingEdit, setSavingEdit] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -118,7 +119,7 @@ const ManageStaff = () => {
     if (!profiles || profiles.length === 0) { setStaff([]); setLoading(false); return; }
 
     const userIds = profiles.map((p: any) => p.user_id);
-    const { data: roles } = await supabase.from("user_roles").select("user_id, role").in("user_id", userIds).in("role", ["staff", "teacher", "bendahara"]);
+    const { data: roles } = await supabase.from("user_roles").select("user_id, role").in("user_id", userIds).in("role", ["staff", "teacher", "bendahara", "principal"]);
 
     const roleMap = new Map<string, string[]>();
     (roles || []).forEach((r) => {
@@ -172,6 +173,7 @@ const ManageStaff = () => {
     if (formRoles.staff) selectedRoles.push("staff");
     if (formRoles.teacher) selectedRoles.push("teacher");
     if (formRoles.bendahara) selectedRoles.push("bendahara");
+    if (formRoles.principal) selectedRoles.push("principal");
     if (selectedRoles.length === 0) { toast.error("Pilih minimal satu role"); return; }
 
     setCreating(true);
@@ -197,7 +199,7 @@ const ManageStaff = () => {
       toast.success(`Akun ${formName} berhasil ditambahkan`);
       setShowDialog(false);
       setFormName(""); setFormEmail(""); setFormPassword(""); setFormPhone(""); setFormNip(""); setFormPosition("Guru");
-      setFormRoles({ staff: true, teacher: false, bendahara: false });
+      setFormRoles({ staff: true, teacher: false, bendahara: false, principal: false });
       fetchStaff();
     } catch (err: any) {
       toast.error(err.message || "Gagal membuat akun");
@@ -314,6 +316,7 @@ const ManageStaff = () => {
       staff: member.roles.includes("staff"),
       teacher: member.roles.includes("teacher"),
       bendahara: member.roles.includes("bendahara"),
+      principal: member.roles.includes("principal"),
     });
     setEditMode(false);
     setDetailDialog(true);
@@ -359,7 +362,7 @@ const ManageStaff = () => {
 
   const handleSaveEdit = async () => {
     if (!selectedStaff || !editName.trim()) return;
-    if (!editRoles.staff && !editRoles.teacher && !editRoles.bendahara) {
+    if (!editRoles.staff && !editRoles.teacher && !editRoles.bendahara && !editRoles.principal) {
       toast.error("Minimal pilih satu role");
       return;
     }
@@ -383,6 +386,7 @@ const ManageStaff = () => {
       if (editRoles.staff) wantedRoles.push("staff");
       if (editRoles.teacher) wantedRoles.push("teacher");
       if (editRoles.bendahara) wantedRoles.push("bendahara");
+      if (editRoles.principal) wantedRoles.push("principal");
 
       for (const role of wantedRoles) {
         if (!currentRoles.includes(role)) {
@@ -696,6 +700,11 @@ const ManageStaff = () => {
                   <Wallet className="h-4 w-4 text-amber-500" />
                   <span className="text-sm">Bendahara (SPP)</span>
                 </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox checked={(formRoles as any).principal || false} onCheckedChange={(v) => setFormRoles({ ...formRoles, principal: !!v } as any)} />
+                  <Shield className="h-4 w-4 text-indigo-500" />
+                  <span className="text-sm">Kepala Sekolah</span>
+                </label>
               </div>
             </div>
             <div className="space-y-2">
@@ -817,6 +826,11 @@ const ManageStaff = () => {
                         <Checkbox checked={editRoles.bendahara} onCheckedChange={(v) => setEditRoles({ ...editRoles, bendahara: !!v })} />
                         <Wallet className="h-4 w-4 text-amber-500" />
                         <span className="text-sm">Bendahara (SPP)</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <Checkbox checked={editRoles.principal} onCheckedChange={(v) => setEditRoles({ ...editRoles, principal: !!v })} />
+                        <Shield className="h-4 w-4 text-indigo-500" />
+                        <span className="text-sm">Kepala Sekolah</span>
                       </label>
                     </div>
                   </div>

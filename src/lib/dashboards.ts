@@ -1,4 +1,4 @@
-import { Wallet, GraduationCap, Shield, LayoutDashboard, Crown } from "lucide-react";
+import { Wallet, GraduationCap, Shield, LayoutDashboard, Crown, School } from "lucide-react";
 
 export interface DashboardOption {
   key: string;
@@ -24,6 +24,16 @@ export function getAvailableDashboards(roles: string[]): DashboardOption[] {
       path: "/super-admin",
       icon: Crown,
       gradient: "from-amber-500 to-orange-600",
+    });
+  }
+  if (roles.includes("principal")) {
+    out.push({
+      key: "principal",
+      label: "Kepala Sekolah",
+      description: "Pusat monitoring seluruh sekolah",
+      path: "/kepsek",
+      icon: School,
+      gradient: "from-indigo-500 to-blue-600",
     });
   }
   if (roles.includes("school_admin")) {

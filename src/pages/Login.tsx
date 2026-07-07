@@ -173,7 +173,8 @@ const Login = ({ forcedMode }: LoginProps) => {
         const isTeacher = rolesList.includes("teacher");
         const isAdmin = rolesList.includes("school_admin");
         const isStaff = rolesList.includes("staff");
-        const dashboardKinds = [isSuperAdmin, isAdmin, isStaff && !isAdmin, isTeacher, isBendahara].filter(Boolean).length;
+        const isPrincipal = rolesList.includes("principal");
+        const dashboardKinds = [isSuperAdmin, isAdmin, isStaff && !isAdmin, isTeacher, isBendahara, isPrincipal].filter(Boolean).length;
 
         (async () => {
           try {
@@ -196,6 +197,7 @@ const Login = ({ forcedMode }: LoginProps) => {
         sessionStorage.removeItem("dashboard_chosen");
         if (dashboardKinds > 1) navigate("/select-role");
         else if (isSuperAdmin) navigate("/super-admin");
+        else if (isPrincipal) navigate("/kepsek");
         else if (isBendahara) navigate("/bendahara");
         else if (isTeacher) navigate("/teacher-dashboard");
         else navigate("/dashboard");

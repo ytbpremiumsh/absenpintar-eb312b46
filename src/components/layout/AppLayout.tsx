@@ -75,6 +75,12 @@ function AppContent() {
 
   const activeDashboard = typeof window !== "undefined" ? sessionStorage.getItem("active_dashboard") : null;
 
+  // Principal (Kepala Sekolah): redirect to /kepsek if principal-only OR user chose principal dashboard.
+  const isPrincipalOnly = roles.includes("principal") && !roles.includes("school_admin") && !roles.includes("staff") && !roles.includes("teacher") && !roles.includes("bendahara");
+  if ((activeDashboard === "principal" || isPrincipalOnly) && !location.pathname.startsWith("/kepsek") && location.pathname !== "/account-settings" && location.pathname !== "/support") {
+    return <Navigate to="/kepsek" replace />;
+  }
+
   // Bendahara: hanya redirect jika user secara aktif memilih dashboard bendahara,
   // atau jika role-nya cuma bendahara (tidak ada role lain).
   const isBendaharaOnly = roles.includes("bendahara") && !roles.includes("school_admin") && !roles.includes("staff") && !roles.includes("teacher");

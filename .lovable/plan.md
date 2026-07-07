@@ -1,83 +1,93 @@
-## Ringkasan Fitur yang Sudah Ada vs Yang Ditambahkan
+## Tujuan
+Menambahkan role **Kepala Sekolah** (`principal`) dan Dashboard khusus sebagai pusat monitoring seluruh aktivitas sekolah (akademik, kehadiran, keuangan, approval). Tidak mengubah fitur yang sudah berjalan.
 
-Setelah menelusuri modul Bendahara yang sudah ada, banyak bagian yang diminta sebetulnya **sudah tersedia**. Berikut pemetaannya, dan hanya bagian yang belum lengkap yang akan saya bangun.
+## Ruang lingkup
 
-### Sudah ada (akan disempurnakan seperlunya, tanpa dibongkar)
-- **Dashboard**: sudah menampilkan tagihan bulan berjalan, jumlah lunas/pending, tunggakan, saldo siap cair, grafik bulanan, per kelas, dan riwayat pembayaran.
-- **Tarif SPP** (`/bendahara/tarif`): master tarif SPP per kelas/tahun ajaran.
-- **Pembayaran** (`/bendahara/transaksi`): daftar & detail invoice SPP.
-- **Saldo & Penarikan** (`/bendahara/withdraw`): withdraw ke rekening.
-- **Laporan** (`Keuangan Sekolah` → `BendaharaLaporan`): export Excel/CSV/PDF per kelas/status/tahun ajaran + grafik tahunan.
+### 1. Backend (Migration)
+- Tambah nilai `principal` ke enum `app_role`.
+- Perluas kebijakan akses (RLS) agar Kepala Sekolah dapat **membaca** seluruh data di sekolahnya (siswa, guru, kelas, absensi, SPP, kas, settlement, pengumuman, izin, jurnal) dan **menyetujui** item approval (izin, pengumuman, pengeluaran kas, pencairan bendahara/settlement).
+- Tidak membuat tabel baru — memanfaatkan tabel yang sudah ada.
 
-### Yang akan ditambahkan / disempurnakan
-1. **Dashboard — metrik yang belum ada**
-   - Total pemasukan **hari ini**, **bulan ini**, **tahun ini** (kartu ringkas terpisah, di atas panel yang sudah ada).
-   - **Tagihan jatuh tempo hari ini** (kartu + daftar 5 teratas).
-   - **Total saldo kas** (menggabungkan saldo siap cair + saldo kas manual dari Buku Kas).
-   - Jumlah siswa **sudah/belum membayar bulan berjalan** (kartu ringkas — saat ini hanya jumlah invoice, bukan jumlah siswa unik).
+### 2. Auth & Routing
+- Register/ManageStaff: opsi role "Kepala Sekolah".
+- SelectRole: kartu Kepala Sekolah.
+- Router: `/kepsek` (atau reuse `/admin` view khusus principal) → `PrincipalDashboard`.
+- Redirect login: user dengan role principal masuk ke dashboard baru.
+- Sidebar principal: menu read-only ke Absensi, SPP, Kas, Pengumuman, Laporan, Approval, Kalender.
 
-2. **Manajemen Jenis Pembayaran** (menu baru `/bendahara/jenis-pembayaran`)
-   - Tabel baru `payment_types` (multi-tenant, RLS per `school_id`).
-   - Field: Nama, Kategori (SPP/Daftar Ulang/Seragam/Buku/Ekskul/Lain-lain), Nominal, Berlaku untuk (semua/kelas tertentu/tingkat), Periode (bulanan/semester/tahunan/sekali), Aktif, Keterangan.
-   - CRUD lengkap dengan filter kategori & status.
+### 3. Dashboard Kepala Sekolah — komponen baru
+Susunan atas → bawah, mobile-first, semantic tokens (tanpa emoji).
 
-3. **Buku Kas** (menu baru `/bendahara/buku-kas`)
-   - Tabel baru `cash_book_entries` (kas masuk & keluar manual) — RLS per `school_id`.
-   - **Otomatis menarik** semua invoice SPP `paid` sebagai kas masuk (read-only, ditandai "auto") — digabung dengan entri manual.
-   - Fitur: tambah kas masuk/keluar manual, filter tanggal, filter kategori, saldo berjalan, hapus entri manual, catatan.
+**A. Header Ringkas**
+- Nama sekolah, tanggal, jam realtime, kondisi cuaca opsional (skip jika kompleks).
 
-4. **Rekap Tunggakan** (menu baru `/bendahara/tunggakan`)
-   - Total tunggakan, jumlah siswa menunggak.
-   - Rekap per kelas & per jenis pembayaran (sortable).
-   - Filter: kelas, bulan, tahun ajaran.
-   - **Tombol kirim reminder WhatsApp** per siswa & broadcast semua (memakai edge function `send-whatsapp` yang sudah ada + flag `bendahara_wa_enabled`).
+**B. Statistik Utama (grid 6 kartu)**
+Total Siswa, Total Guru, Guru Hadir, Siswa Hadir, Kelas Aktif Hari Ini, % Kehadiran Hari Ini.
 
-5. **Laporan — jenis yang belum ada**
-   - Menu tetap di `/bendahara/keuangan-sekolah`, ditambah **preset laporan**: Pembayaran Harian, Bulanan, Tahunan, Rekap per Kelas, Rekap per **Jenis Pembayaran**, Rekap per Siswa.
-   - Export PDF & Excel untuk setiap preset (menggunakan util `jspdf` + `xlsx` yang sudah dipakai).
+**C. Monitoring Realtime Pembelajaran**
+Ambil dari `teaching_schedules` + `subject_attendance`: daftar kelas berlangsung sekarang (mata pelajaran, guru, jumlah siswa hadir/total, progress bar jam pelajaran).
 
-### Sidebar Bendahara
-Menambahkan 3 menu baru di grup "Tagihan" dan "Keuangan":
-- Jenis Pembayaran (grup Master Data)
-- Buku Kas (grup Keuangan Sekolah)
-- Rekap Tunggakan (grup Tagihan)
+**D. Monitoring Kehadiran**
+- Guru: Hadir / Izin / Sakit / Belum Absen / Tidak Hadir (dari `teacher_attendance_logs`).
+- Siswa: ringkasan hari ini + tabel rekap per kelas (dari `attendance_logs` + `classes`).
 
-## Teknis Singkat
+**E. Dashboard Keuangan**
+Total Tagihan, Total Pembayaran, Tunggakan (`spp_invoices`); Saldo Buku Kas (`cash_book_entries`); Dana Menunggu Pencairan + Riwayat Settlement (`spp_settlements`).
 
-**Migrations (2 tabel baru)**
-```sql
--- payment_types
-CREATE TABLE public.payment_types (
-  id uuid PK, school_id uuid FK schools,
-  name text, category text, amount integer,
-  applies_to text,           -- 'all' | 'class:<name>' | 'grade:<n>'
-  period text,               -- 'monthly'|'semester'|'yearly'|'once'
-  is_active boolean default true,
-  description text,
-  created_at, updated_at
-);
--- + GRANT authenticated/service_role, RLS by school_id via get_user_school_id()
+**F. Approval Center**
+Tab: Izin Siswa (`parent_leave_requests`), Pengumuman (`school_announcements` status draft), Pengeluaran Kas (`cash_book_entries` pending jika ada), Surat (skip jika belum ada tabel), Pencairan (`spp_settlements`, `affiliate_withdrawals`). Aksi Setujui / Tolak dengan catatan.
 
--- cash_book_entries
-CREATE TABLE public.cash_book_entries (
-  id uuid PK, school_id uuid FK,
-  entry_date date, direction text CHECK IN ('in','out'),
-  category text, amount integer,
-  description text, reference text,
-  created_by uuid, created_at, updated_at
-);
--- + GRANT + RLS by school_id
-```
-Kas masuk otomatis dari `spp_invoices.status='paid'` dibaca on-the-fly (tidak diduplikasi ke tabel).
+**G. Grafik Bulanan** (Recharts)
+Line/Bar: Absensi Guru, Absensi Siswa, Pembayaran SPP, Pendapatan Kas, Pengeluaran Kas — 6 bulan terakhir.
 
-**Files yang dibuat/diubah**
-- `supabase/migrations/*` — 2 tabel baru + policies.
-- `src/pages/bendahara/BendaharaJenisPembayaran.tsx` (baru)
-- `src/pages/bendahara/BendaharaBukuKas.tsx` (baru)
-- `src/pages/bendahara/BendaharaTunggakan.tsx` (baru)
-- `src/pages/bendahara/BendaharaPages.tsx` — tambah kartu dashboard baru (hari/bulan/tahun/jatuh tempo/saldo kas), tambah preset laporan.
-- `src/components/layout/BendaharaSidebar.tsx` — 3 menu baru.
-- `src/components/layout/BendaharaFloatingNav.tsx` — sinkron menu mobile.
-- `src/App.tsx` — 3 route baru.
+**H. Notifikasi Penting**
+Guru belum isi jurnal hari ini, kelas belum absen, pembayaran masuk hari ini, approval menunggu.
 
-Tidak ada file existing yang dihapus / distruktur ulang. Data lama & tabel `spp_*` tetap sumber kebenaran; fitur baru menempel di sampingnya dan mendukung multi-tenant lewat `school_id` + RLS.
+**I. Ranking Kelas**
+Berdasarkan % kehadiran, kedisiplinan (jumlah terlambat/alfa terendah), % lunas SPP.
+
+**J. Kalender Kegiatan**
+Reuse `school_holidays` + `school_announcements` bertipe agenda + `teaching_schedules` besar → tampilan bulanan sederhana.
+
+**K. Timeline Aktivitas Terbaru**
+Union dari absensi, pembayaran, pengumuman, kas, settlement — 20 item terbaru dengan ikon per jenis.
+
+**L. Menu Laporan Cepat**
+Tombol download: Rekap Absensi Siswa, Rekap Absensi Guru, Rekap SPP, Buku Kas, Settlement, Jurnal Mengajar → memanggil util export yang sudah ada.
+
+### 4. Perlindungan fitur eksisting
+- Tidak menyentuh Dashboard admin/bendahara/wali kelas.
+- Semua akses principal bersifat **read-only** kecuali endpoint approval.
+
+## File yang akan dibuat / diubah
+
+**Baru:**
+- `src/pages/PrincipalDashboard.tsx`
+- `src/components/principal/StatCards.tsx`
+- `src/components/principal/LiveClassMonitor.tsx`
+- `src/components/principal/AttendanceMonitor.tsx`
+- `src/components/principal/FinanceOverview.tsx`
+- `src/components/principal/ApprovalCenter.tsx`
+- `src/components/principal/MonthlyCharts.tsx`
+- `src/components/principal/PrincipalNotifications.tsx`
+- `src/components/principal/ClassRanking.tsx`
+- `src/components/principal/SchoolCalendar.tsx`
+- `src/components/principal/ActivityTimeline.tsx`
+- `src/components/principal/QuickReports.tsx`
+- `src/components/principal/PrincipalSidebar.tsx`
+
+**Diubah minimal:**
+- `App.tsx` (route `/kepsek`)
+- `Login.tsx` / `SelectRole.tsx` (redirect + kartu role)
+- `Register.tsx`, `ManageStaff.tsx` (opsi role)
+- Migration SQL (enum + RLS tambahan)
+
+## Detail teknis
+- Data fetching pakai pola project: `useEffect` + `setLoading(false)` di finally.
+- Chart: `recharts` (sudah dipakai).
+- Realtime: subscribe `attendance_logs`, `teacher_attendance_logs`, `spp_invoices` untuk kartu statistik.
+- Timezone WIB/WITA/WIT dari `schools.timezone`.
+- Semua warna via token; tanpa emoji; ikon Lucide.
+
+## Konfirmasi cepat
+Jalankan plan ini apa adanya, atau ada penyesuaian scope (mis. skip Kalender / Surat)?
