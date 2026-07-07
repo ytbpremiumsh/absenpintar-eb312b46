@@ -277,17 +277,6 @@ export default function BendaharaBukuKas() {
         </Card>
       </div>
 
-      {/* Info: pemisahan Buku Kas vs Settlement */}
-      <div className="rounded-xl border border-[#5B6CF9]/20 bg-[#5B6CF9]/5 px-3 py-2.5 flex items-start gap-2.5">
-        <Landmark className="h-4 w-4 text-[#5B6CF9] mt-0.5 shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-foreground">Pembukuan menggunakan nilai bruto (gross)</p>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Pembayaran SPP online dicatat sesuai nominal tagihan siswa. Biaya gateway/MDR & proses pencairan dana dikelola terpisah pada modul{" "}
-            <Link to="/bendahara/withdraw?tab=pencairan" className="text-[#5B6CF9] font-semibold hover:underline inline-flex items-center gap-0.5">Monitoring Pencairan <ArrowRight className="h-3 w-3" /></Link>.
-          </p>
-        </div>
-      </div>
 
 
 
