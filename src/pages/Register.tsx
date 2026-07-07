@@ -64,7 +64,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [referralInput, setReferralInput] = useState(refCode);
   const [registering, setRegistering] = useState(false);
-  const [logo, setLogo] = useState("/images/logo-atskolla.png");
+  const [logo, setLogo] = useState("https://absenpintar.online/images/logo-atskolla.png");
   const [agreeTos, setAgreeTos] = useState(false);
 
   // School-level extra info (required)

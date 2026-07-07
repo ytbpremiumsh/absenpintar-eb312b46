@@ -24,7 +24,7 @@ const ForgotPassword = () => {
   const [maskedPhone, setMaskedPhone] = useState("");
   const [otpCooldown, setOtpCooldown] = useState(0);
   const [otpError, setOtpError] = useState("");
-  const [logo, setLogo] = useState("/images/logo-atskolla.png");
+  const [logo, setLogo] = useState("https://absenpintar.online/images/logo-atskolla.png");
 
   useEffect(() => {
     supabase

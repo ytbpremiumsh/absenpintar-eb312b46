@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-const ATSKOLLA_LOGO_URL = "/images/logo-atskolla.png";
+const ATSKOLLA_LOGO_URL = "https://absenpintar.online/images/logo-atskolla.png";
 import { useLandingTheme, LANDING_THEME_CSS } from "@/hooks/useLandingTheme";
 import ThemeToggle from "@/components/landing/ThemeToggle";
 import {
