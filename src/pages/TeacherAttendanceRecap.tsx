@@ -297,8 +297,8 @@ const TeacherAttendanceRecap = ({ schoolId: schoolIdProp, hideHeader }: Props = 
       </Card>
 
 
-      {/* Analitik Guru */}
-      {!loading && rows.length > 0 && (() => {
+      {/* Analitik Guru (only for Kehadiran, not Pulang) */}
+      {!loading && rows.length > 0 && !isPulangMode && (() => {
         const totalH = rows.reduce((s, r) => s + r.totals.H, 0);
         const totalS = rows.reduce((s, r) => s + r.totals.S, 0);
         const totalI = rows.reduce((s, r) => s + r.totals.I, 0);
