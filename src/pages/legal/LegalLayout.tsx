@@ -1,10 +1,9 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, Home, ArrowUp } from "lucide-react";
-import logoAsset from "@/assets/logo-atskolla-official.png.asset.json";
 import { cn } from "@/lib/utils";
 
-const ATSKOLLA_LOGO_URL = logoAsset.url;
+const ATSKOLLA_LOGO_URL = "https://absenpintar.online/images/logo-atskolla.png";
 
 interface TocItem {
   id: string;
