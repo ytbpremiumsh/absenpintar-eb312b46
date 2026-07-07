@@ -42,12 +42,12 @@ export const PageHeader = ({ icon: Icon, title, subtitle, actions, variant = "pr
         </>
       )}
       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-lg">
-            <Icon className="h-6 w-6 text-white" />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-12 w-12 shrink-0 aspect-square rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-lg">
+            <Icon className="h-6 w-6 text-white shrink-0" />
           </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold">{title}</h1>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold truncate">{title}</h1>
             <p className="text-white/70 text-xs sm:text-sm">{subtitle}</p>
           </div>
         </div>
