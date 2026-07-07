@@ -150,7 +150,7 @@ const TeacherAttendanceRecap = ({ schoolId: schoolIdProp, hideHeader }: Props = 
       return { user_id: t.user_id, full_name: t.full_name, photo_url: t.photo_url, roles: t.roles, days, totals };
     });
 
-  }, [filteredTeachers, logs, dayArray, currentMonth, daysInMonth]);
+  }, [filteredTeachers, logs, dayArray, currentMonth, daysInMonth, isPulangMode, isCurrentOrPastMonth]);
 
   const exportExcel = () => {
     if (!rows.length) { toast.error("Tidak ada data"); return; }
