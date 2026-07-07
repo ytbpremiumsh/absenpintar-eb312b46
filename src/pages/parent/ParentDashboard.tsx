@@ -831,7 +831,7 @@ export default function ParentDashboard() {
 
         {/* SCHEDULE */}
         {tab === "schedule" && (
-          <>
+          <Card className="p-4 md:p-5 border-0 shadow-card rounded-2xl space-y-3">
             {(() => {
               const DAY_NAMES = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
               const today = new Date();
