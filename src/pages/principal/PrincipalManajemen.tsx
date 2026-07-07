@@ -61,11 +61,11 @@ export default function PrincipalManajemen() {
       </div>
 
       <Tabs value={active} onValueChange={(v) => setParams({ tab: v })}>
-        <TabsList className="bg-muted/50 p-1 rounded-2xl">
-          <TabsTrigger value="keuangan" className="gap-1.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
+        <TabsList className="bg-muted/50 p-1 rounded-2xl h-auto">
+          <TabsTrigger value="keuangan" className="gap-1.5 rounded-xl px-4 py-2 text-foreground/70 hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-[#5B6CF9] data-[state=active]:text-white data-[state=active]:shadow-md">
             <Wallet className="h-4 w-4" /> Keuangan
           </TabsTrigger>
-          <TabsTrigger value="persetujuan" className="gap-1.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          <TabsTrigger value="persetujuan" className="gap-1.5 rounded-xl px-4 py-2 text-foreground/70 hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-[#5B6CF9] data-[state=active]:text-white data-[state=active]:shadow-md">
             <CheckCircle2 className="h-4 w-4" /> Persetujuan
             {totalApprovals > 0 && (
               <span className="ml-1 text-[10px] font-bold bg-amber-500 text-white rounded-full px-1.5 py-0.5 leading-none">{totalApprovals}</span>
