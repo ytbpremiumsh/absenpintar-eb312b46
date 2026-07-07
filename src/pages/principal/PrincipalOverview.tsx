@@ -12,6 +12,8 @@ import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { usePrincipalData } from "@/hooks/usePrincipalData";
 import { StatCard, fmtIDR } from "./_shared";
+import { LiveScheduleWidget } from "@/components/dashboard/LiveScheduleWidget";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function PrincipalOverview() {
   const {
@@ -20,6 +22,7 @@ export default function PrincipalOverview() {
     finance, timeline,
   } = usePrincipalData();
   const navigate = useNavigate();
+  const { profile } = useAuth();
 
   if (loading) {
     return (
@@ -68,6 +71,8 @@ export default function PrincipalOverview() {
           </CardContent>
         </Card>
       )}
+
+      {profile?.school_id && <LiveScheduleWidget schoolId={profile.school_id} />}
 
       <div className="grid lg:grid-cols-3 gap-4">
         <Card className="rounded-2xl lg:col-span-2">
