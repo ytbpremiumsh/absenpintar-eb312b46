@@ -61,7 +61,7 @@ const Login = ({ forcedMode }: LoginProps) => {
   // School finder (shown when on root domain — user must land on their subdomain to login)
   const isRootDomain = !tenant.slug;
   const [finderQuery, setFinderQuery] = useState("");
-  const [finderResults, setFinderResults] = useState<Array<{ id: string; name: string; slug: string; npsn: string | null; city: string | null }>>([]);
+  const [finderResults, setFinderResults] = useState<Array<{ id: string; name: string; slug: string; city: string | null }>>([]);
   const [finderLoading, setFinderLoading] = useState(false);
 
   useEffect(() => {
