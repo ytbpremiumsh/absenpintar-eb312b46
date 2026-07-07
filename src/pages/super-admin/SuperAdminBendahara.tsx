@@ -392,7 +392,6 @@ export default function SuperAdminBendahara() {
                         </TableCell>
                         <TableCell className="text-center font-semibold">{b.total_paid_invoices}</TableCell>
                         <TableCell className="text-right text-sm">{fmtIDR(b.total_gross)}</TableCell>
-                        <TableCell className="text-right text-sm text-rose-600">-{fmtIDR(b.total_gateway_fee)}</TableCell>
                         <TableCell className="text-right text-sm">{fmtIDR(b.total_disbursed)}</TableCell>
                         <TableCell className="text-right">
                           <span className="font-bold text-emerald-600">{fmtIDR(b.saldo_pending)}</span>
