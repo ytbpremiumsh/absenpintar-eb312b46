@@ -52,7 +52,7 @@ export default function LaporanSettlement() {
   const [settlements, setSettlements] = useState<any[]>([]);
   const [paidInvoices, setPaidInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<"settlement" | "riwayat">("settlement");
+  const [tab, setTab] = useState<"settlement" | "riwayat">("riwayat");
 
   useEffect(() => {
     if (!schoolId) return;
