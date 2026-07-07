@@ -17,7 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function PrincipalOverview() {
   const {
-    loading, schoolName, now, stats, liveClasses, notifs,
+    loading, schoolName, now, stats, liveClasses,
     leaves, pendingSettlements, withdrawals, announcements,
     finance, timeline,
   } = usePrincipalData();
