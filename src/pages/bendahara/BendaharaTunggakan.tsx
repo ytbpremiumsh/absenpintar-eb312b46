@@ -338,7 +338,7 @@ export default function BendaharaTunggakan() {
                       onClick={() => sendReminder(s)}
                       className="h-8 text-xs"
                     >
-                      {sending === s.student_id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <MessageCircle className="h-3.5 w-3.5 mr-1 text-emerald-600" />}
+                      {sending === s.student_id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <WhatsAppIcon className="h-3.5 w-3.5 mr-1 text-emerald-600" />}
                       Reminder
                     </Button>
                   </TableCell>
