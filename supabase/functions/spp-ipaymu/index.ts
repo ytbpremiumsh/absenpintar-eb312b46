@@ -112,11 +112,14 @@ async function ipaymuFetch(
 
 // Map ATSkolla channel → iPaymu paymentMethod + optional paymentChannel filter.
 // Leaving paymentChannel empty on VA/Retail lets user pick any bank/store on iPaymu page.
-function channelToIpaymu(ch: string | null): { paymentMethod?: string; paymentChannel?: string } {
+function channelToIpaymu(
+  ch: string | null,
+  sub?: string | null,
+): { paymentMethod?: string; paymentChannel?: string } {
   switch (ch) {
-    case "va":     return { paymentMethod: "va" };
+    case "va":     return { paymentMethod: "va", paymentChannel: (sub || "bca").toLowerCase() };
     case "qris":   return { paymentMethod: "qris", paymentChannel: "qris" };
-    case "retail": return { paymentMethod: "cstore" };
+    case "retail": return { paymentMethod: "cstore", paymentChannel: (sub === "indomaret" ? "indomaret" : "alfamart") };
     default:       return {};
   }
 }
