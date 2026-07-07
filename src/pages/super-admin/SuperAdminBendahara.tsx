@@ -366,16 +366,15 @@ export default function SuperAdminBendahara() {
                     <TableHead className="font-bold">Sekolah</TableHead>
                     <TableHead className="text-center font-bold">Invoice Lunas</TableHead>
                     <TableHead className="text-right font-bold">Total Diterima</TableHead>
-                    <TableHead className="text-right font-bold">Biaya Layanan</TableHead>
                     <TableHead className="text-right font-bold">Sudah Dicairkan</TableHead>
                     <TableHead className="text-right font-bold text-emerald-600">Saldo Aktif</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={6} className="text-center py-12"><Loader2 className="h-5 w-5 animate-spin inline" /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center py-12"><Loader2 className="h-5 w-5 animate-spin inline" /></TableCell></TableRow>
                   ) : filteredBalances.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground text-sm">Tidak ada data</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} className="text-center py-12 text-muted-foreground text-sm">Tidak ada data</TableCell></TableRow>
                   ) : filteredBalances.map((b) => {
                     const s = schoolMap[b.school_id];
                     return (
