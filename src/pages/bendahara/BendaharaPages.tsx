@@ -4968,12 +4968,7 @@ export function BendaharaLaporan() {
         }
       />
 
-      {/* PRESET LAPORAN — Harian / Bulanan / Tahunan / per Kelas / per Jenis / per Siswa */}
-      <PresetLaporan items={items} students={students} school={school} year={year} />
-
-
-
-      {/* KPI Ringkasan tahun */}
+      {/* KPI Ringkasan tahun — prioritas utama di atas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="border-0 shadow-sm bg-gradient-to-br from-[#5B6CF9]/10 to-transparent">
           <CardContent className="p-4">
@@ -5007,6 +5002,7 @@ export function BendaharaLaporan() {
           <TabsTrigger value="kelas" className="gap-2 text-xs"><Users className="h-3.5 w-3.5" /> Per Kelas</TabsTrigger>
           <TabsTrigger value="export" className="gap-2 text-xs"><Download className="h-3.5 w-3.5" /> Export</TabsTrigger>
         </TabsList>
+
 
         {/* TAB 1 — RINGKASAN */}
         <TabsContent value="ringkasan" className="mt-4">
@@ -5109,8 +5105,11 @@ export function BendaharaLaporan() {
           )}
         </TabsContent>
         {/* TAB 5 — EXPORT DATA */}
-        <TabsContent value="export" className="mt-4">
+        <TabsContent value="export" className="mt-4 space-y-3">
+          {/* Laporan Cepat (PDF & Excel) — kompak di atas export lengkap */}
+          <PresetLaporan items={items} students={students} school={school} year={year} />
           <Card className="border-0 shadow-sm">
+
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Download className="h-4 w-4 text-[#5B6CF9]" /> Export Data SPP
