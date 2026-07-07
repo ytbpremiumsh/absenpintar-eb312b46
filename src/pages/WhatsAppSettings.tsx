@@ -35,9 +35,11 @@ const GROUP_PLACEHOLDERS = [
   { key: "{type}", label: "Tipe (Datang/Pulang)" },
 ];
 
-const DEFAULT_ARRIVE = `📋 *Notifikasi Absensi Datang*\n\n{school_name}\n\nAnanda *{student_name}* (Kelas {class}) telah tercatat HADIR pada {day}, pukul {time}.\n\nNIS: {student_id}\nMetode: {method}\n\n_Pesan otomatis dari ATSkolla_`;
-const DEFAULT_DEPART = `📋 *Notifikasi Absensi Pulang*\n\n{school_name}\n\nAnanda *{student_name}* (Kelas {class}) telah tercatat PULANG pada {day}, pukul {time}.\n\nNIS: {student_id}\nMetode: {method}\n\n_Pesan otomatis dari ATSkolla_`;
-const DEFAULT_GROUP = `📋 *Notifikasi Absensi {type}*\n\n{school_name}\n\nSiswa *{student_name}* (Kelas {class}) telah tercatat {type} pada {day}, pukul {time}.\n\nMetode: {method}\n\n_Pesan otomatis dari ATSkolla_`;
+const FOOTER = `─────────────\n_ATSkolla — Platform Digital Sekolah Terintegrasi_`;
+
+const DEFAULT_ARRIVE = `*Notifikasi Kehadiran Siswa*\n\nYth. Bapak/Ibu Wali Murid,\n\nDengan hormat kami sampaikan bahwa ananda *{student_name}* (Kelas {class}) telah tercatat *HADIR* di sekolah pada hari {day}, pukul {time}.\n\nDetail Kehadiran:\n• NIS       : {student_id}\n• Metode : {method}\n• Sekolah : {school_name}\n\nTerima kasih atas perhatian Bapak/Ibu.\n\n${FOOTER}`;
+const DEFAULT_DEPART = `*Notifikasi Kepulangan Siswa*\n\nYth. Bapak/Ibu Wali Murid,\n\nDengan hormat kami sampaikan bahwa ananda *{student_name}* (Kelas {class}) telah tercatat *PULANG* dari sekolah pada hari {day}, pukul {time}.\n\nDetail Kepulangan:\n• NIS       : {student_id}\n• Metode : {method}\n• Sekolah : {school_name}\n\nTerima kasih atas perhatian Bapak/Ibu.\n\n${FOOTER}`;
+const DEFAULT_GROUP = `*Notifikasi Absensi {type}*\n\n{school_name}\n\nSiswa *{student_name}* (Kelas {class}) telah tercatat {type} pada hari {day}, pukul {time}.\n\nMetode: {method}\n\n${FOOTER}`;
 
 const DELIVERY_OPTIONS = [
   { value: "parent_only", label: "Hanya Wali Murid" },
@@ -170,9 +172,44 @@ const WhatsAppSettings = () => {
   const [mpwaSenderNumber, setMpwaSenderNumber] = useState("");
   const [onesenderEnabled, setOnesenderEnabled] = useState(true);
   const [teachingReminderEnabled, setTeachingReminderEnabled] = useState(false);
-  const [teachingReminderTemplate, setTeachingReminderTemplate] = useState('📋 *Pengingat Jadwal Mengajar*\n\nBapak/Ibu *{teacher_name}*,\n\nMata pelajaran *{subject_name}* untuk kelas *{class_name}* akan dimulai dalam 15 menit.\n\nWaktu: {start_time} - {end_time}\nRuangan: {room}\n\n_Pesan otomatis dari ATSkolla_');
+  const [teachingReminderTemplate, setTeachingReminderTemplate] = useState(`*Pengingat Jadwal Mengajar*\n\nYth. Bapak/Ibu *{teacher_name}*,\n\nDengan hormat kami ingatkan bahwa jadwal mengajar Anda akan dimulai dalam 15 menit.\n\nDetail Jadwal:\n• Mata Pelajaran : {subject_name}\n• Kelas                : {class_name}\n• Waktu               : {start_time} - {end_time}\n• Ruangan          : {room}\n\nMohon persiapkan diri dan hadir tepat waktu.\n\n${FOOTER}`);
   const [testReminderPhone, setTestReminderPhone] = useState("089501123808");
   const [testingReminder, setTestingReminder] = useState(false);
+  const [testTemplatePhone, setTestTemplatePhone] = useState("089501123808");
+  const [testingTemplate, setTestingTemplate] = useState<string | null>(null);
+
+  const handleTestTemplate = async (title: string, template: string) => {
+    if (!testTemplatePhone.trim()) { toast.error("Masukkan nomor WhatsApp"); return; }
+    if (!schoolId) { toast.error("School ID tidak ditemukan"); return; }
+    setTestingTemplate(title);
+    try {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const days = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+      const isArrive = /Datang/i.test(title);
+      const message = template
+        .replace(/\{student_name\}/g, "Ahmad Fauzan")
+        .replace(/\{class\}/g, "VII-A")
+        .replace(/\{time\}/g, `${hh}:${mm}`)
+        .replace(/\{day\}/g, days[now.getDay()])
+        .replace(/\{student_id\}/g, "2024001")
+        .replace(/\{method\}/g, "Manual (Test)")
+        .replace(/\{parent_name\}/g, "Wali Murid")
+        .replace(/\{school_name\}/g, "Sekolah Uji Coba")
+        .replace(/\{type\}/g, isArrive ? "Datang" : "Pulang");
+      const { data, error } = await supabase.functions.invoke("send-whatsapp", {
+        body: { school_id: schoolId, phone: testTemplatePhone, message, message_type: "test_template" },
+      });
+      if (error) throw error;
+      if ((data as any)?.success === false) throw new Error((data as any).error || "Gagal kirim");
+      toast.success(`Test "${title}" terkirim ke ${testTemplatePhone}`);
+    } catch (e: any) {
+      toast.error("Gagal: " + (e.message || e));
+    } finally {
+      setTestingTemplate(null);
+    }
+  };
 
   const handleTestReminder = async () => {
     if (!testReminderPhone.trim()) { toast.error("Masukkan nomor WhatsApp"); return; }
@@ -880,8 +917,19 @@ const WhatsAppSettings = () => {
                   <p className="text-[10px] text-muted-foreground">{tmpl.subtitle}</p>
                 </div>
                 <CardContent className="p-4">
-                  <Textarea rows={6} className="font-mono text-xs bg-muted/30 border-border/50 focus:bg-background transition-colors" value={tmpl.value} onChange={(e) => tmpl.setter(e.target.value)} />
+                  <Textarea rows={8} className="font-mono text-xs bg-muted/30 border-border/50 focus:bg-background transition-colors" value={tmpl.value} onChange={(e) => tmpl.setter(e.target.value)} />
                   <PlaceholderButtons placeholders={tmpl.placeholders} onInsert={(key) => tmpl.setter((prev: string) => prev + key)} />
+                  <div className="mt-4 pt-3 border-t border-border/50 space-y-2">
+                    <Label className="text-xs font-semibold">Test Kirim Template</Label>
+                    <div className="flex gap-2">
+                      <Input value={testTemplatePhone} onChange={(e) => setTestTemplatePhone(e.target.value)} placeholder="08xxxxxxxxxx" className="h-9 text-xs" />
+                      <Button onClick={() => handleTestTemplate(tmpl.title, tmpl.value)} disabled={testingTemplate === tmpl.title} size="sm" className="h-9">
+                        {testingTemplate === tmpl.title ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
+                        Test
+                      </Button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">Kirim contoh pesan menggunakan template di atas dengan data dummy.</p>
+                  </div>
                 </CardContent>
               </Card>
             ))}

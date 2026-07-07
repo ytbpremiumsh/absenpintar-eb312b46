@@ -222,7 +222,7 @@ serve(async (req) => {
             : (integration.attendance_depart_template || '');
 
           const message = template ? applyReplacements(template)
-            : `📋 *Notifikasi Absensi ${typeLabel}*\n\n${schoolName}\n\nAnanda *${student.name}* (Kelas ${student.class}) telah tercatat ${typeLabel.toLowerCase()} pada ${dayName}, pukul ${timeStr}.\n\nMetode: ${methodLabel}\n\n_Pesan otomatis dari Smart School Attendance System_`;
+            : `📋 *Notifikasi Absensi ${typeLabel}*\n\n${schoolName}\n\nAnanda *${student.name}* (Kelas ${student.class}) telah tercatat ${typeLabel.toLowerCase()} pada ${dayName}, pukul ${timeStr}.\n\nMetode: ${methodLabel}\n\n─────────────\n_ATSkolla — Platform Digital Sekolah Terintegrasi_`;
 
           sendTasks.push((async () => {
             try {
@@ -244,7 +244,7 @@ serve(async (req) => {
         if ((deliveryTarget === 'group_only' || deliveryTarget === 'both') && groupId) {
           const groupTpl = integration.attendance_group_template || '';
           const groupMessage = groupTpl ? applyReplacements(groupTpl)
-            : `📋 *Notifikasi Absensi ${typeLabel}*\n\n${schoolName}\n\nSiswa *${student.name}* (Kelas ${student.class}) telah tercatat ${typeLabel.toLowerCase()} pada ${dayName}, pukul ${timeStr}.\n\nMetode: ${methodLabel}\n\n_Pesan otomatis dari Smart School Attendance System_`;
+            : `📋 *Notifikasi Absensi ${typeLabel}*\n\n${schoolName}\n\nSiswa *${student.name}* (Kelas ${student.class}) telah tercatat ${typeLabel.toLowerCase()} pada ${dayName}, pukul ${timeStr}.\n\nMetode: ${methodLabel}\n\n─────────────\n_ATSkolla — Platform Digital Sekolah Terintegrasi_`;
 
           sendTasks.push((async () => {
             try {

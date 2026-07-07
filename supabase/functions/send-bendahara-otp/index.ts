@@ -61,7 +61,7 @@ serve(async (req) => {
       email: tag, otp_code: otpCode, phone: profile.phone,
     });
 
-    const message = `*Kode OTP Pencairan Dana ATSkolla*\n\nHalo ${profile.full_name || 'Penanggung Jawab'},\nKode OTP untuk konfirmasi pencairan dana SPP:\n\n*${otpCode}*\n\nBerlaku 5 menit. Jangan bagikan kode ini ke siapa pun.\nJika Anda tidak meminta pencairan, abaikan pesan ini.\n\n_Pesan otomatis dari ATSkolla_`;
+    const message = `*Kode OTP Pencairan Dana ATSkolla*\n\nHalo ${profile.full_name || 'Penanggung Jawab'},\nKode OTP untuk konfirmasi pencairan dana SPP:\n\n*${otpCode}*\n\nBerlaku 5 menit. Jangan bagikan kode ini ke siapa pun.\nJika Anda tidak meminta pencairan, abaikan pesan ini.\n\n─────────────\n_ATSkolla — Platform Digital Sekolah Terintegrasi_`;
 
     const result = await sendOtpMessage(admin, profile.phone, message, school_id);
 

@@ -95,7 +95,7 @@ export async function sendManualAttendanceWA({
           : integration.attendance_arrive_template || "";
       const message = tpl
         ? apply(tpl)
-        : `📋 *Notifikasi Absensi ${typeLabel}*\n\n${schoolName}\n\nAnanda *${student.name}* (Kelas ${student.class}) telah tercatat ${typeLabel.toLowerCase()} pada ${dayName}, pukul ${hhmm}.\n\nMetode: ${recordedBy}\n\n_Pesan otomatis dari ATSkolla_`;
+        : `📋 *Notifikasi Absensi ${typeLabel}*\n\n${schoolName}\n\nAnanda *${student.name}* (Kelas ${student.class}) telah tercatat ${typeLabel.toLowerCase()} pada ${dayName}, pukul ${hhmm}.\n\nMetode: ${recordedBy}\n\n─────────────\n_ATSkolla — Platform Digital Sekolah Terintegrasi_`;
       tasks.push(
         supabase.functions.invoke("send-whatsapp", {
           body: { school_id: schoolId, phone: parentPhone, message, message_type: "attendance", student_name: student.name },
@@ -107,7 +107,7 @@ export async function sendManualAttendanceWA({
       const tpl = integration.attendance_group_template || "";
       const message = tpl
         ? apply(tpl)
-        : `📋 *Notifikasi Absensi ${typeLabel}*\n\n${schoolName}\n\nSiswa *${student.name}* (Kelas ${student.class}) telah tercatat ${typeLabel.toLowerCase()} pada ${dayName}, pukul ${hhmm}.\n\nMetode: ${recordedBy}\n\n_Pesan otomatis dari ATSkolla_`;
+        : `📋 *Notifikasi Absensi ${typeLabel}*\n\n${schoolName}\n\nSiswa *${student.name}* (Kelas ${student.class}) telah tercatat ${typeLabel.toLowerCase()} pada ${dayName}, pukul ${hhmm}.\n\nMetode: ${recordedBy}\n\n─────────────\n_ATSkolla — Platform Digital Sekolah Terintegrasi_`;
       tasks.push(
         supabase.functions.invoke("send-whatsapp", {
           body: { school_id: schoolId, group_id: groupId, message, message_type: "attendance_group", student_name: student.name },
