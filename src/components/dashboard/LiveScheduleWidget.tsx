@@ -150,7 +150,7 @@ export function LiveScheduleWidget({ schoolId }: { schoolId: string }) {
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => navigate("/live-schedule")}
+            onClick={() => navigate(viewAllPath)}
             className="bg-white/15 hover:bg-white/25 text-white border border-white/20 backdrop-blur rounded-full text-[11px] h-8 px-3 gap-1"
           >
             Lihat Semua
