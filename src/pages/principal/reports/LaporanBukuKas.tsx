@@ -55,13 +55,14 @@ export default function LaporanBukuKas() {
           .gte("paid_at", from).lte("paid_at", to + "T23:59:59"),
         supabase.from("spp_settlements")
           .select("settlement_code, withdraw_fee, status, paid_at, approved_at, requested_at, bank_name, account_number")
-          .eq("school_id", schoolId).eq("status", "paid").gt("withdraw_fee", 0),
+          .eq("school_id", schoolId).eq("status", "paid").gt("withdraw_fee", 0)
+          .gte("paid_at", from).lte("paid_at", to + "T23:59:59"),
         supabase.from("cash_book_entries")
           .select("direction, amount").eq("school_id", schoolId).lt("entry_date", from),
         supabase.from("spp_invoices")
           .select("total_amount, paid_at").eq("school_id", schoolId).eq("status", "paid").not("paid_at", "is", null).lt("paid_at", from),
         supabase.from("spp_settlements")
-          .select("withdraw_fee, status, paid_at").eq("school_id", schoolId).eq("status", "paid").gt("withdraw_fee", 0),
+          .select("withdraw_fee, paid_at").eq("school_id", schoolId).eq("status", "paid").gt("withdraw_fee", 0).lt("paid_at", from),
       ]);
 
       const manual: Entry[] = ((m.data as any[]) || []).map((r) => ({
@@ -86,34 +87,26 @@ export default function LaporanBukuKas() {
         status: "Lunas",
         source: "auto",
       }));
-      const feeAll = (stl.data as any[]) || [];
-      const autoFee: Entry[] = feeAll
-        .filter((s) => {
-          const d = (s.paid_at || s.approved_at || s.requested_at || "").slice(0, 10);
-          return d >= from && d <= to;
-        })
-        .map((s) => ({
-          entry_date: (s.paid_at || s.approved_at || s.requested_at || "").slice(0, 10),
-          direction: "out",
-          category: "Biaya Pencairan ATSkolla",
-          amount: s.withdraw_fee || 0,
-          description: `Biaya pencairan ${s.settlement_code} → ${s.bank_name || "-"} ${s.account_number || ""}`.trim(),
-          reference: s.settlement_code || "-",
-          method: "Auto",
-          status: "Tercatat",
-          source: "auto",
-        }));
+      const autoFee: Entry[] = ((stl.data as any[]) || []).map((s) => ({
+        entry_date: (s.paid_at || s.approved_at || s.requested_at || "").slice(0, 10),
+        direction: "out",
+        category: "Biaya Pencairan ATSkolla",
+        amount: s.withdraw_fee || 0,
+        description: `Biaya pencairan ${s.settlement_code} → ${s.bank_name || "-"} ${s.account_number || ""}`.trim(),
+        reference: s.settlement_code || "-",
+        method: "Auto",
+        status: "Tercatat",
+        source: "auto",
+      }));
 
       const combined = [...manual, ...autoIn, ...autoFee].sort((a, b) => a.entry_date.localeCompare(b.entry_date));
       setAll(combined);
 
-      // Saldo Awal — jumlah semua transaksi sebelum tanggal `from`
+      // Saldo Awal — jumlah semua transaksi sebelum tanggal `from` (server-side filter)
       const priorManualIn = ((mPrior.data as any[]) || []).filter((e) => e.direction === "in").reduce((s, e) => s + (e.amount || 0), 0);
       const priorManualOut = ((mPrior.data as any[]) || []).filter((e) => e.direction === "out").reduce((s, e) => s + (e.amount || 0), 0);
       const priorInvIn = ((invPrior.data as any[]) || []).reduce((s, e) => s + (e.total_amount || 0), 0);
-      const priorFeeOut = ((stlPrior.data as any[]) || [])
-        .filter((s: any) => ((s.paid_at || "").slice(0, 10)) && s.paid_at < from)
-        .reduce((s: number, e: any) => s + (e.withdraw_fee || 0), 0);
+      const priorFeeOut = ((stlPrior.data as any[]) || []).reduce((s: number, e: any) => s + (e.withdraw_fee || 0), 0);
       setPriorSum({ in: priorManualIn + priorInvIn, out: priorManualOut + priorFeeOut });
 
       setLoading(false);
@@ -123,33 +116,46 @@ export default function LaporanBukuKas() {
   const opening = priorSum.in - priorSum.out;
 
   const categories = useMemo(() => Array.from(new Set(all.map((r) => r.category))).sort(), [all]);
-  const filtered = useMemo(
-    () => all.filter((r) => (dir === "all" || r.direction === dir) && (cat === "all" || r.category === cat) && (src === "all" || r.source === src)),
-    [all, dir, cat, src],
+
+  // Running balance dihitung dari SELURUH entri kronologis (bukan yang difilter),
+  // supaya kolom Saldo Berjalan tetap benar meskipun user memfilter arah/kategori/sumber.
+  const allWithBalance = useMemo(() => {
+    let running = opening;
+    return all.map((e) => {
+      running += e.direction === "in" ? e.amount : -e.amount;
+      return { entry: e, running };
+    });
+  }, [all, opening]);
+
+  const filteredRows = useMemo(
+    () => allWithBalance.filter(({ entry: r }) =>
+      (dir === "all" || r.direction === dir) &&
+      (cat === "all" || r.category === cat) &&
+      (src === "all" || r.source === src),
+    ),
+    [allWithBalance, dir, cat, src],
   );
 
-  // Running balance dari saldo awal
-  const withBalance = useMemo(() => {
-    let running = opening;
-    return filtered.map((e) => {
-      running += e.direction === "in" ? e.amount : -e.amount;
-      return {
-        Tanggal: e.entry_date,
-        Sumber: e.source === "auto" ? "Otomatis" : "Manual",
-        Kategori: e.category,
-        Keterangan: e.description,
-        Referensi: e.reference,
-        Metode: e.method,
-        Status: e.status,
-        Masuk: e.direction === "in" ? e.amount : 0,
-        Keluar: e.direction === "out" ? e.amount : 0,
-        Saldo: running,
-      } as Row;
-    });
-  }, [filtered, opening]);
+  const withBalance = useMemo<Row[]>(() =>
+    filteredRows.map(({ entry: e, running }) => ({
+      Tanggal: e.entry_date,
+      Sumber: e.source === "auto" ? "Otomatis" : "Manual",
+      Kategori: e.category,
+      Keterangan: e.description,
+      Referensi: e.reference,
+      Metode: e.method,
+      Status: e.status,
+      Masuk: e.direction === "in" ? e.amount : 0,
+      Keluar: e.direction === "out" ? e.amount : 0,
+      Saldo: running,
+    })),
+    [filteredRows],
+  );
 
+  const filtered = useMemo(() => filteredRows.map((r) => r.entry), [filteredRows]);
   const totalMasuk = filtered.filter((e) => e.direction === "in").reduce((s, e) => s + e.amount, 0);
   const totalKeluar = filtered.filter((e) => e.direction === "out").reduce((s, e) => s + e.amount, 0);
+  // Saldo Akhir = opening + seluruh mutasi periode (independen dari filter arah/kategori/sumber)
   const saldoAkhir = opening + all.reduce((s, e) => s + (e.direction === "in" ? e.amount : -e.amount), 0);
 
   const byCat = useMemo(() => {
