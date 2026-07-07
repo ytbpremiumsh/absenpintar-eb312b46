@@ -140,6 +140,7 @@ export default function LaporanAbsensiGuru() {
       icon={GraduationCap}
       from={from} to={to} onFromChange={setFrom} onToChange={setTo}
       onDownload={() => downloadCSV(`Absensi_Guru_${from}_${to}`, filtered.map(({ _role, _id, ...r }) => r), headers)}
+      datesOptional
       extraFilters={
         <>
           <Select value={roleF} onValueChange={setRoleF}>
