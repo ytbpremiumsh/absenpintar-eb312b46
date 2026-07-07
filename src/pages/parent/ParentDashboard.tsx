@@ -346,12 +346,13 @@ export default function ParentDashboard() {
             </div>
             <div className="flex items-center gap-1.5">
               {(() => {
-                const now = new Date();
-                const curMonth = now.getMonth() + 1;
-                const curYear = now.getFullYear();
                 const tunggakanList = sppData.tunggakan || [];
+                const tunggakanIds = new Set(tunggakanList.map((i: any) => i.id));
+                // Tampilkan SEMUA tagihan aktif (pending/expired) sebagai notifikasi,
+                // termasuk tagihan untuk bulan mendatang (bukan hanya bulan berjalan),
+                // agar tagihan baru yang dibuat operator langsung terlihat wali murid.
                 const bulanBaruList = (sppData.aktif || []).filter(
-                  (i: any) => i.status === "pending" && Number(i.period_month) === curMonth && Number(i.period_year) === curYear,
+                  (i: any) => (i.status === "pending" || i.status === "expired") && !tunggakanIds.has(i.id),
                 );
                 const sppItems = [...tunggakanList, ...bulanBaruList];
                 const totalNotif = sppItems.length + (announcements?.length || 0);
