@@ -213,7 +213,7 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
     <header className={`fixed top-0 inset-x-0 z-50 transition-all ${scrolled ? "bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-[0_1px_0_0_rgba(15,23,42,0.04)]" : "bg-white border-b border-slate-100"}`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         <a href="/" className="flex items-center group" aria-label="ATSkolla">
-          <img src={ATSKOLLA_LOGO_URL} alt="ATSkolla" className="h-9 sm:h-10 w-auto object-contain" />
+          <img src={ATSKOLLA_LOGO_URL} alt="ATSkolla" width={160} height={40} fetchPriority="high" decoding="async" className="h-9 sm:h-10 w-auto object-contain" />
         </a>
 
 
@@ -955,7 +955,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-14 grid md:grid-cols-4 gap-10">
         <div>
           <div className="flex items-center mb-4">
-            <img src={ATSKOLLA_LOGO_URL} alt="ATSkolla" className="h-10 w-auto object-contain" />
+            <img src={ATSKOLLA_LOGO_URL} alt="ATSkolla" width={160} height={40} loading="lazy" decoding="async" className="h-10 w-auto object-contain" />
           </div>
           <p className="text-sm leading-relaxed">Platform Digital Sekolah Terintegrasi untuk sekolah di seluruh Indonesia.</p>
         </div>

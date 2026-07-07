@@ -26,24 +26,28 @@
   <meta name="twitter:description" content="Platform digital sekolah terintegrasi: absensi (QR, RFID, Face Recognition), SPP online, jadwal mengajar, pengumuman, dan portal wali murid dalam satu aplikasi.">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="preconnect" href="https://bohuglednqirnaearrkj.supabase.co" crossorigin>
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://absenpintar.online" crossorigin>
+  <link rel="preload" as="image" href="https://absenpintar.online/images/logo-atskolla.png" fetchpriority="high">
   <link rel="dns-prefetch" href="https://connect.facebook.net">
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
-  <!-- Meta Pixel Code -->
+  <!-- Meta Pixel Code (deferred: load after first paint to unblock LCP) -->
   <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('set', 'autoConfig', 'false', '1235557621985651');
-    fbq('init', '1235557621985651');
-    fbq('track', 'PageView');
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('set', 'autoConfig', 'false', '1235557621985651');
+        fbq('init', '1235557621985651');
+        fbq('track', 'PageView');
+      }, 1500);
+    });
   </script>
   <!-- End Meta Pixel Code -->
 </head>
