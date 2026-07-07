@@ -66,7 +66,7 @@ export default function BendaharaBukuKas() {
     setLoading(true);
     const [m, inv] = await Promise.all([
       supabase.from("cash_book_entries").select("*").eq("school_id", profile.school_id).order("entry_date", { ascending: false }).order("created_at", { ascending: false }),
-      supabase.from("spp_invoices").select("id, invoice_number, student_name, class_name, period_label, total_amount, net_amount, paid_at, payment_method").eq("school_id", profile.school_id).eq("status", "paid").not("paid_at", "is", null).order("paid_at", { ascending: false }),
+      supabase.from("spp_invoices").select("id, invoice_number, student_name, class_name, period_label, total_amount, net_amount, paid_at, payment_method, status").eq("school_id", profile.school_id).eq("status", "paid").not("paid_at", "is", null).order("paid_at", { ascending: false }),
     ]);
     const manualRows: Entry[] = ((m.data as any[]) || []).map((r) => ({
       id: r.id,
@@ -76,6 +76,8 @@ export default function BendaharaBukuKas() {
       amount: r.amount,
       description: r.description,
       reference: r.reference,
+      method: null,
+      status: null,
       source: "manual",
     }));
     const autoRows: Entry[] = ((inv.data as any[]) || []).map((i) => ({
@@ -83,15 +85,20 @@ export default function BendaharaBukuKas() {
       entry_date: (i.paid_at || "").slice(0, 10),
       direction: "in",
       category: "SPP Online",
-      amount: i.net_amount ?? i.total_amount ?? 0,
+      // GROSS: nilai pembayaran asli sesuai tagihan siswa (bukan net_amount setelah MDR).
+      // Selisih MDR/biaya gateway dikelola di modul Monitoring Pencairan (Settlement).
+      amount: i.total_amount ?? i.net_amount ?? 0,
       description: `SPP ${i.student_name} • ${i.class_name} • ${i.period_label}`,
-      reference: `${i.invoice_number} — ${formatPaymentMethodLabel(i.payment_method)}`,
+      reference: i.invoice_number || null,
+      method: formatPaymentMethodLabel(i.payment_method),
+      status: "Lunas",
       source: "auto",
     }));
     setManual(manualRows);
     setAutoEntries(autoRows);
     setLoading(false);
   }, [profile?.school_id]);
+
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
