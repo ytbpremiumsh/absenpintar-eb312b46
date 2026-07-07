@@ -131,12 +131,14 @@ function Section({
   items,
   emptyText,
   tone,
+  onSelect,
 }: {
   title: string;
   icon: any;
   items: ClassItem[];
   emptyText: string;
   tone: string;
+  onSelect?: (c: ClassItem) => void;
 }) {
   const t = TONE_MAP[tone];
   return (
@@ -163,7 +165,7 @@ function Section({
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {items.map((c) => (
-              <ClassCard key={c.id} c={c} tone={tone} />
+              <ClassCard key={c.id} c={c} tone={tone} onSelect={onSelect} />
             ))}
           </div>
         )}
