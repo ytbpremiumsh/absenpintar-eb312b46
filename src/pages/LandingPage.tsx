@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 const ATSKOLLA_LOGO_URL = "https://absenpintar.online/images/logo-atskolla.png";
 import { useLandingTheme, LANDING_THEME_CSS } from "@/hooks/useLandingTheme";
 import ThemeToggle from "@/components/landing/ThemeToggle";
+import { isRootHost } from "@/lib/tenant";
 import {
   ArrowRight, CheckCircle2, ShieldCheck, Zap, MapPin, Menu, X,
   QrCode, ScanFace, CreditCard, Wallet, Receipt, Banknote,
@@ -198,6 +199,7 @@ function SectionHeader({ eyebrow, title, sub, dark = false }: { eyebrow: string;
 // ---------- Nav ----------
 function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme: () => void }) {
   const nav = useNavigate();
+  const loginPath = isRootHost() ? "/admin" : "/login";
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -224,7 +226,7 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <button onClick={() => nav("/login")} className="text-sm font-semibold text-[#0b1020] hover:text-[#5B6CF9] px-3 py-2">
+          <button onClick={() => nav(loginPath)} className="text-sm font-semibold text-[#0b1020] hover:text-[#5B6CF9] px-3 py-2">
             Masuk
           </button>
           <button
@@ -250,7 +252,7 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
             </a>
           ))}
           <div className="pt-3 border-t border-slate-100 flex gap-2">
-            <button onClick={() => nav("/login")} className="flex-1 text-sm font-semibold text-[#0b1020] border border-slate-200 rounded-lg py-2.5">
+            <button onClick={() => nav(loginPath)} className="flex-1 text-sm font-semibold text-[#0b1020] border border-slate-200 rounded-lg py-2.5">
               Masuk
             </button>
             <button onClick={() => nav("/register")} className="flex-1 text-sm font-semibold bg-[#5B6CF9] text-white rounded-lg py-2.5">
