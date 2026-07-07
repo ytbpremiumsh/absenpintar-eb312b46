@@ -171,7 +171,7 @@ export function PrincipalDataProvider({ children }: { children: ReactNode }) {
         const item = {
           id: s.id, subject: sMap.get(s.subject_id) || "Pelajaran",
           teacher: tMap.get(s.teacher_id) || "-",
-          className, hadir, total,
+          className, classId: s.class_id, hadir, total,
           startTime: s.start_time.slice(0, 5), endTime: s.end_time.slice(0, 5),
           progress, journalFilled,
           status: curMin < startMin ? "upcoming" : curMin >= endMin ? "done" : "live",
