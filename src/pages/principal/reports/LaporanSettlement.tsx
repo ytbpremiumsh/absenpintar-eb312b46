@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Landmark, ArrowDownToLine, FileText, Loader2, Receipt, TrendingUp, Banknote, CheckCircle2, XCircle, Clock, Download, Wallet } from "lucide-react";
+import { Landmark, ArrowDownToLine, FileText, Loader2, Receipt, TrendingUp, Banknote, CheckCircle2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/PageHeader";
@@ -10,9 +10,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { StatsRow, downloadCSV, type Header, type Row } from "./_common";
+import { downloadCSV, type Header, type Row } from "./_common";
 import { format } from "date-fns";
 import { fmtIDR } from "../_shared";
+
+function StatCard({ label, value, icon: Icon, gradient, sub }: {
+  label: string; value: string; sub?: string; icon: any; gradient: string;
+}) {
+  return (
+    <Card className="border-0 shadow-sm overflow-hidden">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+            <p className="text-xl font-extrabold mt-1 truncate">{value}</p>
+            {sub && <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>}
+          </div>
+          <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0`}>
+            <Icon className="h-5 w-5 text-white" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 
 /**
  * Sinkron dengan Bendahara → Pencairan (read-only untuk Kepsek).
