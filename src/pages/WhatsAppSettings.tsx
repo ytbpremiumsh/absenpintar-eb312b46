@@ -917,8 +917,19 @@ const WhatsAppSettings = () => {
                   <p className="text-[10px] text-muted-foreground">{tmpl.subtitle}</p>
                 </div>
                 <CardContent className="p-4">
-                  <Textarea rows={6} className="font-mono text-xs bg-muted/30 border-border/50 focus:bg-background transition-colors" value={tmpl.value} onChange={(e) => tmpl.setter(e.target.value)} />
+                  <Textarea rows={8} className="font-mono text-xs bg-muted/30 border-border/50 focus:bg-background transition-colors" value={tmpl.value} onChange={(e) => tmpl.setter(e.target.value)} />
                   <PlaceholderButtons placeholders={tmpl.placeholders} onInsert={(key) => tmpl.setter((prev: string) => prev + key)} />
+                  <div className="mt-4 pt-3 border-t border-border/50 space-y-2">
+                    <Label className="text-xs font-semibold">Test Kirim Template</Label>
+                    <div className="flex gap-2">
+                      <Input value={testTemplatePhone} onChange={(e) => setTestTemplatePhone(e.target.value)} placeholder="08xxxxxxxxxx" className="h-9 text-xs" />
+                      <Button onClick={() => handleTestTemplate(tmpl.title, tmpl.value)} disabled={testingTemplate === tmpl.title} size="sm" className="h-9">
+                        {testingTemplate === tmpl.title ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
+                        Test
+                      </Button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">Kirim contoh pesan menggunakan template di atas dengan data dummy.</p>
+                  </div>
                 </CardContent>
               </Card>
             ))}
