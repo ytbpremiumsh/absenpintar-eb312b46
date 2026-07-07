@@ -17,6 +17,7 @@ import { Search, School as SchoolIcon } from "lucide-react";
 import { useLandingTheme, LANDING_THEME_CSS } from "@/hooks/useLandingTheme";
 import ThemeToggle from "@/components/landing/ThemeToggle";
 import loginLogoAsset from "@/assets/logo-atskolla-login.png.asset.json";
+import atskollaLogo from "@/assets/atskolla-logo.png";
 
 type Mode = "school" | "parent";
 

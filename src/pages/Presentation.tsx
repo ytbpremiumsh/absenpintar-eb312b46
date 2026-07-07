@@ -4,6 +4,7 @@ import { Loader2, Shield, QrCode, Monitor, Users, GraduationCap, BarChart3, Cloc
 import { motion } from "framer-motion";
 import { Navigate } from "react-router-dom";
 import TypingEffect from "@/components/TypingEffect";
+import atskollaLogo from "@/assets/atskolla-logo.png";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -362,7 +363,7 @@ const Presentation = () => {
   const [ctaBtn1Link, setCtaBtn1Link] = useState("/register");
   const [ctaBtn2Link, setCtaBtn2Link] = useState("/login");
   const [dark, setDark] = useState(false);
-  const [headerLogo, setHeaderLogo] = useState("https://absenpintar.online/images/logo-atskolla.png");
+  const [headerLogo, setHeaderLogo] = useState(atskollaLogo);
 
   useEffect(() => {
     const fetchData = async () => {

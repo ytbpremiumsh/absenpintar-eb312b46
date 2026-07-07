@@ -1,7 +1,8 @@
 // Lightweight loading screen — pure CSS animations, no framer-motion, no network fetch.
 // Keeps the whole component cheap so it never blocks initial render.
+import atskollaLogo from "@/assets/atskolla-logo.png";
 
-const LOGO_SRC = "https://absenpintar.online/images/logo-atskolla-loading.png";
+const LOGO_SRC = atskollaLogo;
 
 export function LoadingScreen() {
   return (
