@@ -106,8 +106,7 @@ const MODULES = [
 ];
 
 const PAYMENT_ITEMS = [
-  { icon: QrCode, title: "QRIS Terintegrasi", desc: "Wali murid membayar SPP kapan saja lewat aplikasi bank/e-wallet apapun." },
-  { icon: Landmark, title: "Virtual Account", desc: "VA otomatis untuk BCA, Mandiri, BNI, BRI, dan bank utama lainnya." },
+  { icon: QrCode, title: "QRIS & Virtual Account", desc: "Wali murid bayar SPP kapan saja lewat QRIS atau VA otomatis BCA, Mandiri, BNI, BRI, dan bank utama lainnya." },
   { icon: MessageSquare, title: "Reminder WhatsApp", desc: "Pengingat tagihan terjadwal otomatis, siap kirim sebelum jatuh tempo." },
   { icon: CheckCircle2, title: "Rekonsiliasi Otomatis", desc: "Pembayaran masuk langsung tercatat sebagai lunas — tanpa konfirmasi manual." },
   { icon: LineChart, title: "Dashboard Bendahara", desc: "Ringkasan pemasukan, tunggakan, dan proyeksi kas dalam satu layar." },
