@@ -157,7 +157,7 @@ function Section({
 
 function ClassCard({ c, tone }: { c: ClassItem; tone: string }) {
   const t = TONE_MAP[tone];
-  const pct = c.status === "done" ? 100 : Math.max(0, Math.min(100, c.progress));
+  const pct = c.status === "done" ? 100 : Math.round(Math.max(0, Math.min(100, c.progress)));
   const attendancePct = c.total > 0 ? Math.round((c.hadir / c.total) * 100) : 0;
 
   return (
