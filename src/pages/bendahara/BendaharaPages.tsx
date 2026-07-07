@@ -1400,10 +1400,10 @@ export function BendaharaTarif() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-[#5B6CF9]/10 to-transparent"><CardContent className="p-4"><div className="flex items-center justify-between"><div><p className="text-xs text-muted-foreground">Total Tarif</p><p className="text-xl font-bold mt-0.5">{summary.total}</p></div><div className="h-9 w-9 rounded-lg bg-[#5B6CF9]/15 flex items-center justify-center"><Receipt className="h-4 w-4 text-[#5B6CF9]" /></div></div></CardContent></Card>
-        <Card className="border-0 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><div><p className="text-xs text-muted-foreground">Aktif</p><p className="text-xl font-bold mt-0.5 text-emerald-600">{summary.aktif}</p></div><div className="h-9 w-9 rounded-lg bg-emerald-100 flex items-center justify-center"><CheckCircle2 className="h-4 w-4 text-emerald-600" /></div></div></CardContent></Card>
-        <Card className="border-0 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><div><p className="text-xs text-muted-foreground">Rata-rata</p><p className="text-base font-bold mt-0.5">{fmtIDR(summary.rata)}</p></div><div className="h-9 w-9 rounded-lg bg-sky-100 flex items-center justify-center"><TrendingUp className="h-4 w-4 text-sky-600" /></div></div></CardContent></Card>
-        <Card className="border-0 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><div><p className="text-xs text-muted-foreground">Kelas Belum</p><p className="text-xl font-bold mt-0.5 text-amber-600">{summary.kelasBelum}</p></div><div className="h-9 w-9 rounded-lg bg-amber-100 flex items-center justify-center"><AlertCircle className="h-4 w-4 text-amber-600" /></div></div></CardContent></Card>
+        <StatCard label="Total Tarif" value={summary.total} icon={Receipt} gradient="from-indigo-500 to-indigo-600" />
+        <StatCard label="Aktif" value={summary.aktif} icon={CheckCircle2} gradient="from-emerald-500 to-emerald-600" />
+        <StatCard label="Rata-rata" value={fmtIDR(summary.rata)} icon={TrendingUp} gradient="from-sky-500 to-sky-600" />
+        <StatCard label="Kelas Belum" value={summary.kelasBelum} icon={AlertCircle} gradient="from-amber-500 to-amber-600" />
       </div>
 
       {/* Filter bar */}
