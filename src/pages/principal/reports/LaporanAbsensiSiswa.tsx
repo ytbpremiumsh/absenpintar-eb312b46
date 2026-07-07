@@ -6,6 +6,7 @@ import { ReportShell, ReportTable, StatsRow, downloadCSV, useMonthRange, type He
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { PrincipalAttendanceDetailDialog } from "./PrincipalAttendanceDetailDialog";
 import { AttendanceHighlights } from "./AttendanceHighlights";
+import { AttendanceRecapGrid } from "./AttendanceRecapGrid";
 
 export default function LaporanAbsensiSiswa() {
   const { profile } = useAuth();
@@ -109,6 +110,7 @@ export default function LaporanAbsensiSiswa() {
         loading={loading}
         rows={filtered.map((r) => ({ id: r._id, name: r.Nama, hadir: r.Hadir || 0, sakit: r.Sakit || 0, izin: r.Izin || 0, alfa: r.Alfa || 0 }))}
       />
+      <AttendanceRecapGrid schoolId={schoolId} kind="student" />
       <ReportTable loading={loading} rows={filtered} headers={headers} onRowClick={(r) => setDetailId(r._id)} />
       <PrincipalAttendanceDetailDialog open={!!detailId} onClose={() => setDetailId(null)} kind="student" targetId={detailId} />
     </ReportShell>
