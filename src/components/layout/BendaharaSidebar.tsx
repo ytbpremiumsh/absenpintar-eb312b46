@@ -22,7 +22,7 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
     items: [
       { title: "Data Siswa", url: "/bendahara/siswa", icon: Users },
       { title: "Tarif SPP", url: "/bendahara/tarif", icon: Receipt },
-      { title: "Jenis Pembayaran", url: "/bendahara/jenis-pembayaran", icon: Tag },
+      
     ],
   },
   {
