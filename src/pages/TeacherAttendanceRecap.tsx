@@ -65,7 +65,11 @@ const TeacherAttendanceRecap = ({ schoolId: schoolIdProp, hideHeader }: Props = 
         const end = new Date(year, month + 1, 0).toISOString().slice(0, 10);
 
         const { data: school } = await supabase.from("schools").select("name, city, principal_name").eq("id", schoolId).maybeSingle();
-        if (school) { setSchoolName(school.name || ""); setSchoolCity(school.city || ""); }
+        if (school) {
+          setSchoolName(school.name || "");
+          setSchoolCity(school.city || "");
+          if ((school as any).principal_name) setPrincipalName((school as any).principal_name);
+        }
 
         const { data: profs } = await supabase.from("profiles")
           .select("user_id, full_name, photo_url").eq("school_id", schoolId);
@@ -81,9 +85,11 @@ const TeacherAttendanceRecap = ({ schoolId: schoolIdProp, hideHeader }: Props = 
           roleMap.set(r.user_id, arr);
         });
 
-        // Find principal (first school_admin)
-        const adminEntry = (profs || []).find((p) => (roleMap.get(p.user_id) || []).includes("school_admin"));
-        if (adminEntry) setPrincipalName(adminEntry.full_name || "");
+        // Fallback: use school_admin's full_name if principal_name is not set on schools
+        if (!(school as any)?.principal_name) {
+          const adminEntry = (profs || []).find((p) => (roleMap.get(p.user_id) || []).includes("school_admin"));
+          if (adminEntry) setPrincipalName(adminEntry.full_name || "");
+        }
 
         const filtered = (profs || []).filter((p) => {
           const r = roleMap.get(p.user_id) || [];
