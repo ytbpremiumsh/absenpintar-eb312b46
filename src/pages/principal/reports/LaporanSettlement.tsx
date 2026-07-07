@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Landmark, ArrowDownToLine, FileText, Loader2, Receipt, TrendingUp, Banknote, CheckCircle2, XCircle, Clock, Download, Wallet } from "lucide-react";
+import { Landmark, ArrowDownToLine, FileText, Loader2, Receipt, TrendingUp, Banknote, CheckCircle2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/PageHeader";
@@ -10,9 +10,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { StatsRow, downloadCSV, type Header, type Row } from "./_common";
+import { downloadCSV, type Header, type Row } from "./_common";
 import { format } from "date-fns";
 import { fmtIDR } from "../_shared";
+
+function StatCard({ label, value, icon: Icon, gradient, sub }: {
+  label: string; value: string; sub?: string; icon: any; gradient: string;
+}) {
+  return (
+    <Card className="border-0 shadow-sm overflow-hidden">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+            <p className="text-xl font-extrabold mt-1 truncate">{value}</p>
+            {sub && <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>}
+          </div>
+          <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0`}>
+            <Icon className="h-5 w-5 text-white" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 
 /**
  * Sinkron dengan Bendahara → Pencairan (read-only untuk Kepsek).
@@ -30,7 +52,7 @@ export default function LaporanSettlement() {
   const [settlements, setSettlements] = useState<any[]>([]);
   const [paidInvoices, setPaidInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<"settlement" | "riwayat">("settlement");
+  const [tab, setTab] = useState<"settlement" | "riwayat">("riwayat");
 
   useEffect(() => {
     if (!schoolId) return;
@@ -277,29 +299,32 @@ export default function LaporanSettlement() {
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:w-fit gap-1 bg-indigo-50 dark:bg-indigo-950/40 p-1 rounded-xl border border-indigo-200/60 dark:border-indigo-800/60">
           <TabsTrigger
-            value="settlement"
-            className="gap-2 rounded-lg font-semibold text-[#3D4FE0] dark:text-indigo-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#5B6CF9] data-[state=active]:to-[#3D4FE0] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#5B6CF9]/30 transition-all duration-300"
-          >
-            <ArrowDownToLine className="h-4 w-4" /> Settlement
-          </TabsTrigger>
-          <TabsTrigger
             value="riwayat"
             className="gap-2 rounded-lg font-semibold text-[#3D4FE0] dark:text-indigo-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#5B6CF9] data-[state=active]:to-[#3D4FE0] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#5B6CF9]/30 transition-all duration-300"
           >
             <FileText className="h-4 w-4" /> Riwayat
           </TabsTrigger>
+          <TabsTrigger
+            value="settlement"
+            className="gap-2 rounded-lg font-semibold text-[#3D4FE0] dark:text-indigo-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#5B6CF9] data-[state=active]:to-[#3D4FE0] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#5B6CF9]/30 transition-all duration-300"
+          >
+            <ArrowDownToLine className="h-4 w-4" /> Settlement
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="settlement" className="space-y-4 mt-4">
-          <StatsRow items={[
-            { label: "Total Pengajuan", value: settlementSummary.total, tone: "primary", icon: Receipt },
-            { label: "Pending", value: settlementSummary.pending, tone: "amber", icon: Clock },
-            { label: "Disetujui", value: settlementSummary.approved, tone: "indigo", icon: CheckCircle2 },
-            { label: "Dicairkan", value: settlementSummary.paid, tone: "emerald", icon: Banknote },
-            { label: "Ditolak", value: settlementSummary.rejected, tone: "rose", icon: XCircle },
-            { label: "Menunggu Pencairan", value: fmtIDR(settlementSummary.pendingPayout), tone: "amber" },
-            { label: "Sudah Cair", value: fmtIDR(settlementSummary.totalPaid), tone: "emerald" },
-          ]} />
+          {(() => {
+            const active = filteredSettlements.filter((s) => ["pending", "approved"].includes(s.status));
+            const bruto = active.reduce((a, x) => a + (x.total_gross || 0), 0);
+            const finalPayout = active.reduce((a, x) => a + (x.final_payout ?? Math.max(0, (x.total_gross || 0) - (x.withdraw_fee ?? 3000))), 0);
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <StatCard label="Transaksi Siap Cair" value={String(active.length)} icon={Receipt} gradient="from-violet-500 to-purple-600" />
+                <StatCard label="Total Bruto" value={fmtIDR(bruto)} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
+                <StatCard label="Final Payout" value={fmtIDR(finalPayout)} icon={Banknote} sub="setelah biaya pencairan Rp 3.000" gradient="from-amber-500 to-orange-600" />
+              </div>
+            );
+          })()}
 
           {/* Filter tanggal — opsional (pilihan kedua) */}
           <Card className="border-0 shadow-sm">
@@ -325,13 +350,12 @@ export default function LaporanSettlement() {
         </TabsContent>
 
         <TabsContent value="riwayat" className="space-y-4 mt-4">
-          <StatsRow items={[
-            { label: "Transaksi Lunas", value: paidSummary.total, tone: "primary", icon: Receipt },
-            { label: "Total Bruto", value: fmtIDR(paidSummary.totalGross), tone: "indigo", icon: TrendingUp },
-            { label: "Sudah Cair", value: `${paidSummary.settledCount} · ${fmtIDR(paidSummary.settledGross)}`, tone: "emerald", icon: CheckCircle2 },
-            { label: "Belum Cair (Online)", value: `${paidSummary.unsettledCount} · ${fmtIDR(paidSummary.unsettledGross)}`, tone: "amber", icon: Clock },
-            { label: "Kas Manual (Offline)", value: `${paidSummary.offlineCount} · ${fmtIDR(paidSummary.offlineGross)}`, tone: "sky", icon: Wallet },
-          ]} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <StatCard label="Total Bruto SPP" value={fmtIDR(paidSummary.totalGross)} sub={`${paidSummary.total} transaksi`} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
+            <StatCard label="Sudah Dicairkan" value={fmtIDR(paidSummary.settledGross)} sub={`${paidSummary.settledCount} transaksi`} icon={ArrowDownToLine} gradient="from-violet-500 to-purple-600" />
+            <StatCard label="Pending Pencairan" value={fmtIDR(paidSummary.unsettledGross)} sub={`${paidSummary.unsettledCount} transaksi`} icon={Loader2} gradient="from-amber-500 to-orange-600" />
+          </div>
+
 
           {/* Filter tanggal — opsional (pilihan kedua) */}
           <Card className="border-0 shadow-sm">
