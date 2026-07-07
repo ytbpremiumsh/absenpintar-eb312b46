@@ -1,4 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendLovableEmail } from "npm:@lovable.dev/email-js";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,26 +8,40 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-function json(body: unknown, status = 200) {
+const SITE_NAME = "ATSkolla";
+const SITE_URL = "https://absenpintar.online";
+const SENDER_DOMAIN = "notify.atskolla.com";
+
+function json(body: unknown) {
   return new Response(JSON.stringify(body), {
-    status,
+    status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
 
-// Map our template types → supported auth generateLink types.
-// email_change & reauthentication cannot be triggered as ad-hoc test emails,
-// so we fall back to magiclink for those (the visual template is still the
-// one under test if the admin chose "magiclink"; for the other two we just
-// send a magiclink to the recipient so they can visually inspect delivery).
-const LINK_TYPE: Record<string, "signup" | "magiclink" | "recovery" | "invite"> = {
-  signup: "signup",
-  magiclink: "magiclink",
-  recovery: "recovery",
-  invite: "invite",
-  email_change: "magiclink",
-  reauthentication: "magiclink",
-};
+const SUPPORTED_TYPES = new Set([
+  "signup",
+  "magiclink",
+  "recovery",
+  "invite",
+  "email_change",
+  "reauthentication",
+]);
+
+function replaceVars(input: string, vars: Record<string, string>) {
+  return input.replace(/\{\{\s*([a-z_]+)\s*\}\}/gi, (_m, key) => vars[String(key).toLowerCase()] ?? "");
+}
+
+function stripHtml(html: string) {
+  return html.replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function smtpUsesImplicitTls(settings: { smtp_port: number; smtp_secure: boolean }) {
+  const port = Number(settings.smtp_port);
+  if (port === 465) return true;
+  if (port === 587) return false;
+  return Boolean(settings.smtp_secure);
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -38,13 +54,13 @@ Deno.serve(async (req) => {
     // Auth: caller must be super admin
     const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.replace(/^Bearer\s+/i, "");
-    if (!token) return json({ error: "Unauthorized" }, 401);
+      if (!token) return json({ success: false, error: "Unauthorized" });
 
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
     const { data: userData, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
+    if (userErr || !userData?.user) return json({ success: false, error: "Unauthorized" });
 
     const admin = createClient(supabaseUrl, serviceKey, {
       auth: { autoRefreshToken: false, persistSession: false },
@@ -53,84 +69,137 @@ Deno.serve(async (req) => {
       _user_id: userData.user.id,
       _role: "super_admin",
     });
-    if (!isSuper) return json({ error: "Forbidden" }, 403);
+    if (!isSuper) return json({ success: false, error: "Forbidden" });
 
     // Input
     const body = await req.json().catch(() => ({}));
     const type = String(body.type || "").trim();
     const to = String(body.to || "").trim();
     if (!type || !to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) {
-      return json({ error: "type dan email tujuan wajib diisi" }, 400);
+      return json({ success: false, error: "type dan email tujuan wajib diisi" });
     }
-    const linkType = LINK_TYPE[type];
-    if (!linkType) return json({ error: `Tipe tidak didukung: ${type}` }, 400);
+    if (!SUPPORTED_TYPES.has(type)) return json({ success: false, error: `Tipe tidak didukung: ${type}` });
 
-    // Trigger the real Supabase auth flow → fires auth-email-hook with a valid
-    // run_id, which enqueues via the Lovable email pipeline using our custom
-    // template + sender domain (notify.atskolla.com).
-    const redirectTo = `https://${new URL(supabaseUrl).host.split(".")[0]}.lovable.app`;
+    const { data: template, error: templateError } = await admin
+      .from("auth_email_templates")
+      .select("type, sender_name, subject, html")
+      .eq("type", type)
+      .maybeSingle();
 
-    let genErr: unknown = null;
-    if (linkType === "signup") {
-      // Signup requires a password; use a random one — user only receives the
-      // confirmation email. If the email already exists, fall back to magiclink.
-      const tmpPassword = crypto.randomUUID() + "Aa1!";
-      const { error } = await admin.auth.admin.generateLink({
-        type: "signup",
-        email: to,
-        password: tmpPassword,
-        options: { redirectTo },
-      });
-      if (error && /already|registered|exists/i.test(error.message)) {
-        const { error: e2 } = await admin.auth.admin.generateLink({
-          type: "magiclink",
-          email: to,
-          options: { redirectTo },
-        });
-        genErr = e2;
-      } else {
-        genErr = error;
-      }
-    } else if (linkType === "invite") {
-      const { error } = await admin.auth.admin.generateLink({
-        type: "invite",
-        email: to,
-        options: { redirectTo },
-      });
-      if (error && /already|registered|exists/i.test(error.message)) {
-        const { error: e2 } = await admin.auth.admin.generateLink({
-          type: "magiclink",
-          email: to,
-          options: { redirectTo },
-        });
-        genErr = e2;
-      } else {
-        genErr = error;
-      }
-    } else {
-      const { error } = await admin.auth.admin.generateLink({
-        type: linkType,
-        email: to,
-        options: { redirectTo },
-      });
-      genErr = error;
+    if (templateError || !template?.html) {
+      return json({ success: false, error: "Template email custom belum tersedia untuk tipe ini" });
     }
 
-    if (genErr) {
-      const msg = genErr instanceof Error ? genErr.message : String(genErr);
-      return json({ error: "Gagal memicu email: " + msg }, 500);
+    const vars: Record<string, string> = {
+      site_name: SITE_NAME,
+      site_url: SITE_URL,
+      recipient: to,
+      email: to,
+      confirmation_url: `${SITE_URL}/auth/callback?test_email=1&type=${encodeURIComponent(type)}`,
+      token: "123456",
+      old_email: "lama@contoh.com",
+      new_email: to,
+    };
+
+    const subject = `[TEST] ${replaceVars(template.subject || "Email ATSkolla", vars)}`;
+    const senderName = template.sender_name || SITE_NAME;
+    const html = replaceVars(template.html, vars);
+    const text = stripHtml(html);
+    const messageId = crypto.randomUUID();
+
+    const { data: settings } = await admin
+      .from("email_settings")
+      .select("smtp_host, smtp_port, smtp_username, smtp_password, smtp_secure, from_email, from_name, is_active")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let via = "lovable_email";
+    try {
+      if (settings?.smtp_host && settings?.smtp_username && settings?.smtp_password && settings?.from_email) {
+        via = "smtp_settings";
+        const client = new SMTPClient({
+          connection: {
+            hostname: settings.smtp_host,
+            port: Number(settings.smtp_port) || 587,
+            tls: smtpUsesImplicitTls(settings),
+            auth: { username: settings.smtp_username, password: settings.smtp_password },
+          },
+        });
+
+        try {
+          await client.send({
+            from: `${senderName || settings.from_name || SITE_NAME} <${settings.from_email}>`,
+            to,
+            subject,
+            html,
+            content: text,
+          });
+        } finally {
+          try { await client.close(); } catch { /* ignore */ }
+        }
+      } else {
+        const apiKey = Deno.env.get("LOVABLE_API_KEY");
+        if (!apiKey) throw new Error("LOVABLE_API_KEY belum tersedia");
+
+        await sendLovableEmail(
+          {
+            to,
+            from: `${senderName} <noreply@${SENDER_DOMAIN}>`,
+            sender_domain: SENDER_DOMAIN,
+            subject,
+            html,
+            text,
+            purpose: "transactional",
+            label: `${type}_test`,
+            idempotency_key: messageId,
+            message_id: messageId,
+          },
+          { apiKey }
+        );
+      }
+
+      await admin.from("email_logs").insert({
+        to_email: to,
+        subject,
+        event_type: "test",
+        status: "sent",
+      });
+      await admin.from("email_send_log").insert({
+        message_id: messageId,
+        template_name: `${type}_test`,
+        recipient_email: to,
+        status: "sent",
+        metadata: { via },
+      });
+    } catch (sendError) {
+      const msg = sendError instanceof Error ? sendError.message : String(sendError);
+      await admin.from("email_logs").insert({
+        to_email: to,
+        subject,
+        event_type: "test",
+        status: "failed",
+        error: msg.slice(0, 1000),
+      });
+      await admin.from("email_send_log").insert({
+        message_id: messageId,
+        template_name: `${type}_test`,
+        recipient_email: to,
+        status: "failed",
+        error_message: msg.slice(0, 1000),
+        metadata: { via },
+      });
+      return json({ success: false, error: `Gagal mengirim email uji: ${msg}`, via });
     }
 
     return json({
       success: true,
-      via: "lovable_auth_hook",
-      note:
-        type === "email_change" || type === "reauthentication"
-          ? "Tipe ini tidak bisa diuji langsung; magiclink dikirim sebagai gantinya untuk verifikasi pengiriman."
-          : undefined,
+      via,
+      message: `Email uji terkirim ke ${to}`,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return json({ error: msg }, 500);
+    return json({ success: false, error: msg });
   }
 });
