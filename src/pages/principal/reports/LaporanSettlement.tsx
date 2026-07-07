@@ -272,13 +272,13 @@ export default function LaporanSettlement() {
 
         <TabsContent value="settlement" className="space-y-4 mt-4">
           {(() => {
-            const active = settlements.filter((s) => ["pending", "approved"].includes(s.status));
-            const nominal = active.reduce((a, x) => a + (x.total_gross || 0), 0);
-            const finalPayout = active.reduce((a, x) => a + (x.final_payout ?? Math.max(0, (x.total_gross || 0) - (x.withdraw_fee ?? 3000))), 0);
+            const availableCount = paidSummary.unsettledCount;
+            const availableGross = paidSummary.unsettledGross;
+            const finalPayout = availableCount > 0 ? Math.max(0, availableGross - 3000) : 0;
             return (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <StatCard label="Transaksi Siap Cair" value={String(active.length)} icon={Receipt} gradient="from-violet-500 to-purple-600" />
-                <StatCard label="Total Nominal" value={fmtIDR(nominal)} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
+                <StatCard label="Transaksi Siap Cair" value={String(availableCount)} icon={Receipt} gradient="from-violet-500 to-purple-600" />
+                <StatCard label="Total Bruto" value={fmtIDR(availableGross)} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
                 <StatCard label="Final Payout" value={fmtIDR(finalPayout)} icon={Banknote} sub="setelah biaya pencairan Rp 3.000" gradient="from-amber-500 to-orange-600" />
               </div>
             );
