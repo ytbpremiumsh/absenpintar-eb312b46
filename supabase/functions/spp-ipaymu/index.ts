@@ -247,6 +247,7 @@ async function ensureFreshLink(
   inv: any,
   forceRegen = false,
   channel: string | null = null,
+  subChannel: string | null = null,
 ) {
   const cfg = await getIpaymuConfig(admin);
   if (!cfg.va || !cfg.apiKey) {
@@ -269,7 +270,7 @@ async function ensureFreshLink(
   const supaUrl = Deno.env.get("SUPABASE_URL")!;
   const notifyUrl = `${supaUrl}/functions/v1/ipaymu-webhook`;
   const returnUrl = "https://absenpintar.online/parent";
-  const created = await createIpaymuPayment(cfg, { ...inv, _amount_override: totalCharged }, channel, notifyUrl, returnUrl);
+  const created = await createIpaymuPayment(cfg, { ...inv, _amount_override: totalCharged }, channel, notifyUrl, returnUrl, subChannel);
   await admin.from("spp_logs").insert({
     school_id: inv.school_id, invoice_id: inv.id,
     event_type: "create_invoice_ipaymu",
