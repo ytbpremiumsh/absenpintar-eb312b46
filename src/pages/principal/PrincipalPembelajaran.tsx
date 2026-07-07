@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, CheckCircle2, XCircle, Clock, PlayCircle, CalendarClock, Users } from "lucide-react";
 import { usePrincipalData } from "@/hooks/usePrincipalData";
 import { ClassAttendanceDetailDialog } from "@/components/principal/ClassAttendanceDetailDialog";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 type ClassItem = {
   id: string;
@@ -163,11 +164,21 @@ function Section({
         {items.length === 0 ? (
           <div className="text-sm text-muted-foreground py-8 text-center">{emptyText}</div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {items.map((c) => (
-              <ClassCard key={c.id} c={c} tone={tone} onSelect={onSelect} />
-            ))}
-          </div>
+          <Carousel opts={{ align: "start", loop: false }} className="w-full">
+            <CarouselContent className="-ml-3">
+              {items.map((c) => (
+                <CarouselItem key={c.id} className="pl-3 basis-full sm:basis-1/2">
+                  <ClassCard c={c} tone={tone} onSelect={onSelect} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            {items.length > 2 && (
+              <>
+                <CarouselPrevious className="hidden sm:flex -left-3" />
+                <CarouselNext className="hidden sm:flex -right-3" />
+              </>
+            )}
+          </Carousel>
         )}
       </CardContent>
     </Card>
