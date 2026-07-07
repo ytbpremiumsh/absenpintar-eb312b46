@@ -316,6 +316,7 @@ const ManageStaff = () => {
       staff: member.roles.includes("staff"),
       teacher: member.roles.includes("teacher"),
       bendahara: member.roles.includes("bendahara"),
+      principal: member.roles.includes("principal"),
     });
     setEditMode(false);
     setDetailDialog(true);
