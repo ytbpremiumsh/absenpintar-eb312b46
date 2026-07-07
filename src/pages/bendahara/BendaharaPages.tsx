@@ -4208,6 +4208,23 @@ export function BendaharaPencairan() {
   const [history, setHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailSettlement, setDetailSettlement] = useState<any>(null);
+  const [detailItems, setDetailItems] = useState<any[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  const openSettlementDetail = async (s: any) => {
+    setDetailSettlement(s);
+    setDetailItems([]);
+    setDetailOpen(true);
+    setDetailLoading(true);
+    const { data } = await supabase.from("spp_invoices")
+      .select("id, invoice_number, student_name, class_name, period_label, total_amount, gateway_fee, net_amount, payment_method, paid_at")
+      .eq("settlement_id", s.id)
+      .order("paid_at", { ascending: true });
+    setDetailItems((data as any[]) || []);
+    setDetailLoading(false);
+  };
   const syncingRef = useRef(false);
   // OTP state
   const [otpStep, setOtpStep] = useState(false);
