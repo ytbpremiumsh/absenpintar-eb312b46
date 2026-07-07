@@ -82,6 +82,7 @@ export default function LaporanAbsensiSiswa() {
       icon={Users}
       from={from} to={to} onFromChange={setFrom} onToChange={setTo}
       onDownload={() => downloadCSV(`Absensi_Siswa_${from}_${to}`, filtered.map(({ _id, ...r }) => r), headers)}
+      datesOptional
       extraFilters={
         <Select value={cls} onValueChange={setCls}>
           <SelectTrigger className="h-9 w-[140px]"><SelectValue placeholder="Kelas" /></SelectTrigger>
