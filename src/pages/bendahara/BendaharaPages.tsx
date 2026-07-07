@@ -359,7 +359,7 @@ export function BendaharaDashboard() {
       />
 
       {/* Ringkasan utama — 6 metrik esensial (tanpa duplikasi) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <StatCard label="Saldo Siap Cair" value={fmtIDR(stats.availableBalance)} sub="Online, belum di-settle" icon={Wallet} gradient="from-emerald-500 to-teal-600" />
         <StatCard label="Pemasukan Hari Ini" value={fmtIDR(quickMetrics.incomeToday)} icon={TrendingUp} gradient="from-emerald-500 to-lime-600" />
         <StatCard label="Pemasukan Bulan Ini" value={fmtIDR(quickMetrics.incomeMonth)} sub={`${MONTHS[new Date().getMonth()]} ${new Date().getFullYear()}`} icon={BarChart3} gradient="from-[#5B6CF9] to-[#4c5ded]" />
