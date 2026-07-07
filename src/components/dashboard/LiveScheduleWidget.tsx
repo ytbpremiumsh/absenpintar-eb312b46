@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Radio, PlayCircle, Timer, CheckCircle2, Users, BookOpen, MapPin, ChevronRight, ChevronLeft, Calendar, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Schedule {
@@ -50,6 +50,9 @@ const GRADIENTS = [
 
 export function LiveScheduleWidget({ schoolId }: { schoolId: string }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isPrincipal = location.pathname.startsWith("/kepsek");
+  const viewAllPath = isPrincipal ? "/kepsek/monitoring?tab=pembelajaran" : "/live-schedule";
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [classes, setClasses] = useState<ClassData[]>([]);
@@ -147,7 +150,7 @@ export function LiveScheduleWidget({ schoolId }: { schoolId: string }) {
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => navigate("/live-schedule")}
+            onClick={() => navigate(viewAllPath)}
             className="bg-white/15 hover:bg-white/25 text-white border border-white/20 backdrop-blur rounded-full text-[11px] h-8 px-3 gap-1"
           >
             Lihat Semua
