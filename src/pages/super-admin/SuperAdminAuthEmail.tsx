@@ -99,7 +99,7 @@ export default function SuperAdminAuthEmail() {
       <PageHeader
         icon={Mail}
         title="Custom Auth Email"
-        description="Kelola template email otentikasi (konfirmasi pendaftaran, reset password, dll.) — subjek, nama pengirim, dan isi HTML."
+        subtitle="Kelola template email otentikasi (konfirmasi pendaftaran, reset password, dll.) — subjek, nama pengirim, dan isi HTML."
       />
 
       {loading ? (
