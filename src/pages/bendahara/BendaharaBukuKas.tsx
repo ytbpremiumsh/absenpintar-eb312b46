@@ -144,6 +144,7 @@ export default function BendaharaBukuKas() {
       .channel("bendahara-buku-kas")
       .on("postgres_changes", { event: "*", schema: "public", table: "spp_invoices", filter: `school_id=eq.${profile.school_id}` }, () => fetchData())
       .on("postgres_changes", { event: "*", schema: "public", table: "cash_book_entries", filter: `school_id=eq.${profile.school_id}` }, () => fetchData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "spp_settlements", filter: `school_id=eq.${profile.school_id}` }, () => fetchData())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [profile?.school_id, fetchData]);
