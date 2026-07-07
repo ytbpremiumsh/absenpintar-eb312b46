@@ -164,14 +164,11 @@ export default function LaporanAbsensiGuru() {
       }
       summary={
         <StatsRow items={[
-          { label: "Total Guru/Staff", value: summary.total, tone: "primary", icon: GraduationCap },
-          { label: "Hadir Hari Ini", value: summary.hadir, tone: "emerald", icon: UserCheck },
-          { label: "Izin", value: summary.izin, tone: "sky" },
-          { label: "Sakit", value: summary.sakit, tone: "amber" },
-          { label: "Alfa", value: summary.alfa, tone: "rose" },
-          { label: "Belum Absen", value: summary.belum, tone: "slate", icon: UserX },
-          { label: "Terlambat (periode)", value: summary.terlambat, tone: "amber" },
-          { label: "Rata-rata %", value: `${summary.rata}%`, tone: "indigo" },
+          { label: "Total Personil", value: summary.total, tone: "primary", icon: GraduationCap },
+          { label: "Hadir", value: summary.totalH, tone: "emerald", icon: UserCheck, sub: `Rate ${summary.rate}%` },
+          { label: "Sakit", value: summary.totalS, tone: "violet" },
+          { label: "Izin", value: summary.totalI, tone: "amber" },
+          { label: "Alfa", value: summary.totalA, tone: "rose", icon: UserX },
         ]} />
       }
     >
