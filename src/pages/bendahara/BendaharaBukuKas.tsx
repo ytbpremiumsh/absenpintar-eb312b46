@@ -65,9 +65,10 @@ export default function BendaharaBukuKas() {
   const fetchData = useCallback(async () => {
     if (!profile?.school_id) return;
     setLoading(true);
-    const [m, inv] = await Promise.all([
+    const [m, inv, stl] = await Promise.all([
       supabase.from("cash_book_entries").select("*").eq("school_id", profile.school_id).order("entry_date", { ascending: false }).order("created_at", { ascending: false }),
       supabase.from("spp_invoices").select("id, invoice_number, student_name, class_name, period_label, total_amount, net_amount, paid_at, payment_method, status").eq("school_id", profile.school_id).eq("status", "paid").not("paid_at", "is", null).order("paid_at", { ascending: false }),
+      supabase.from("spp_settlements").select("id, settlement_code, withdraw_fee, final_payout, total_gross, status, requested_at, approved_at, paid_at, bank_name, account_number, account_holder").eq("school_id", profile.school_id).order("requested_at", { ascending: false }),
     ]);
     const manualRows: Entry[] = ((m.data as any[]) || []).map((r) => ({
       id: r.id,
@@ -81,13 +82,14 @@ export default function BendaharaBukuKas() {
       status: null,
       source: "manual",
     }));
-    const autoRows: Entry[] = ((inv.data as any[]) || []).map((i) => ({
+    const autoInvoiceRows: Entry[] = ((inv.data as any[]) || []).map((i) => ({
       id: `auto-${i.id}`,
       entry_date: (i.paid_at || "").slice(0, 10),
       direction: "in",
       category: "SPP Online",
       // GROSS: nilai pembayaran asli sesuai tagihan siswa (bukan net_amount setelah MDR).
-      // Selisih MDR/biaya gateway dikelola di modul Monitoring Pencairan (Settlement).
+      // Biaya pencairan (Rp 3.000/settlement) dicatat terpisah sebagai Kas Keluar
+      // kategori "Biaya Pencairan ATSkolla" dari data spp_settlements.
       amount: i.total_amount ?? i.net_amount ?? 0,
       description: `SPP ${i.student_name} • ${i.class_name} • ${i.period_label}`,
       reference: i.invoice_number || null,
@@ -95,8 +97,25 @@ export default function BendaharaBukuKas() {
       status: "Lunas",
       source: "auto",
     }));
+    // Biaya Pencairan: hanya settlement yang sudah paid (dana benar-benar cair ke rekening sekolah)
+    // dan withdraw_fee > 0 — inilah biaya riil yang dipotong ATSkolla.
+    const autoFeeRows: Entry[] = ((stl.data as any[]) || [])
+      .filter((s) => s.status === "paid" && (s.withdraw_fee || 0) > 0)
+      .map((s) => ({
+        id: `fee-${s.id}`,
+        entry_date: (s.paid_at || s.approved_at || s.requested_at || "").slice(0, 10),
+        direction: "out",
+        category: "Biaya Pencairan ATSkolla",
+        amount: s.withdraw_fee || 0,
+        description: `Biaya pencairan ${s.settlement_code} → ${s.bank_name || "-"} ${s.account_number || ""}`.trim(),
+        reference: s.settlement_code || null,
+        method: "Auto",
+        status: "Tercatat",
+        source: "auto",
+      }));
     setManual(manualRows);
-    setAutoEntries(autoRows);
+    setAutoEntries([...autoInvoiceRows, ...autoFeeRows]);
+    setSettlements((stl.data as any[]) || []);
     setLoading(false);
   }, [profile?.school_id]);
 
