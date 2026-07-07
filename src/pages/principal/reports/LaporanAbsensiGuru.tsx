@@ -108,14 +108,13 @@ export default function LaporanAbsensiGuru() {
 
   const summary = useMemo(() => {
     const total = filtered.length;
-    const hadir = filtered.filter((r) => r["Status Hari Ini"] === "hadir").length;
-    const izin = filtered.filter((r) => r["Status Hari Ini"] === "izin").length;
-    const sakit = filtered.filter((r) => r["Status Hari Ini"] === "sakit").length;
-    const alfa = filtered.filter((r) => r["Status Hari Ini"] === "alfa").length;
-    const belum = filtered.filter((r) => r["Status Hari Ini"] === "belum").length;
-    const terlambat = filtered.reduce((s, r) => s + r.Terlambat, 0);
-    const rata = total > 0 ? Math.round(filtered.reduce((s, r) => s + r["% Hadir"], 0) / total) : 0;
-    return { total, hadir, izin, sakit, alfa, belum, terlambat, rata };
+    const totalH = filtered.reduce((s, r) => s + (r.Hadir || 0), 0);
+    const totalS = filtered.reduce((s, r) => s + (r.Sakit || 0), 0);
+    const totalI = filtered.reduce((s, r) => s + (r.Izin || 0), 0);
+    const totalA = filtered.reduce((s, r) => s + (r.Alfa || 0), 0);
+    const totalDays = filtered.reduce((s, r) => s + (r["Total Hari"] || 0), 0);
+    const rate = totalDays > 0 ? Math.round((totalH / totalDays) * 100) : 0;
+    return { total, totalH, totalS, totalI, totalA, rate };
   }, [filtered]);
 
   const headers: Header[] = [
