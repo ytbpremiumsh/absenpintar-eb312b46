@@ -70,8 +70,12 @@ export default function SelectRole() {
         <div className="px-6 sm:px-12 py-10 sm:py-14">
           {/* Header / Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#5B6CF9] to-violet-600 flex items-center justify-center shadow-md mb-3">
-              <img src={atskollaLogo} alt="ATSkolla" className="h-7 w-7 object-contain" />
+            <div className="h-14 w-14 flex items-center justify-center mb-3">
+              {school?.logo ? (
+                <img src={school.logo} alt={school.name} className="h-14 w-14 object-contain" />
+              ) : (
+                <SchoolIcon className="h-10 w-10 text-[#5B6CF9]" strokeWidth={1.5} />
+              )}
             </div>
             <h1 className="text-xl sm:text-2xl font-semibold tracking-wide text-[#5B6CF9]">
               Pilih Dashboard
