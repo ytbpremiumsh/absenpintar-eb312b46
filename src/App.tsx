@@ -251,10 +251,21 @@ function AppRoutes() {
         </Route>
 
         <Route path="/s/:code" element={<ShortlinkRedirect />} />
+        {/* Kepala Sekolah */}
+        <Route element={<PrincipalLayout />}>
+          <Route path="/kepsek" element={<PrincipalOverview />} />
+          <Route path="/kepsek/kehadiran" element={<PrincipalKehadiran />} />
+          <Route path="/kepsek/pembelajaran" element={<PrincipalPembelajaran />} />
+          <Route path="/kepsek/keuangan" element={<PrincipalKeuangan />} />
+          <Route path="/kepsek/persetujuan" element={<PrincipalPersetujuan />} />
+          <Route path="/kepsek/agenda" element={<PrincipalAgenda />} />
+          <Route path="/kepsek/laporan" element={<PrincipalLaporan />} />
+        </Route>
         {/* School Admin / Staff */}
         <Route element={<AppLayout />}>
-          <Route path="/kepsek" element={<PrincipalDashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/monitoring" element={<Monitoring />} />
+          <Route path="/scan" element={<ScanQR />} />
           <Route path="/monitoring" element={<Monitoring />} />
           <Route path="/scan" element={<ScanQR />} />
           <Route path="/classes" element={<Classes />} />
