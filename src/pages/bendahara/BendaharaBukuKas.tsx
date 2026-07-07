@@ -40,6 +40,7 @@ export default function BendaharaBukuKas() {
   const { profile, user } = useAuth();
   const [manual, setManual] = useState<Entry[]>([]);
   const [autoEntries, setAutoEntries] = useState<Entry[]>([]);
+  const [settlements, setSettlements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -64,9 +65,10 @@ export default function BendaharaBukuKas() {
   const fetchData = useCallback(async () => {
     if (!profile?.school_id) return;
     setLoading(true);
-    const [m, inv] = await Promise.all([
+    const [m, inv, stl] = await Promise.all([
       supabase.from("cash_book_entries").select("*").eq("school_id", profile.school_id).order("entry_date", { ascending: false }).order("created_at", { ascending: false }),
       supabase.from("spp_invoices").select("id, invoice_number, student_name, class_name, period_label, total_amount, net_amount, paid_at, payment_method, status").eq("school_id", profile.school_id).eq("status", "paid").not("paid_at", "is", null).order("paid_at", { ascending: false }),
+      supabase.from("spp_settlements").select("id, settlement_code, withdraw_fee, final_payout, total_gross, status, requested_at, approved_at, paid_at, bank_name, account_number, account_holder").eq("school_id", profile.school_id).order("requested_at", { ascending: false }),
     ]);
     const manualRows: Entry[] = ((m.data as any[]) || []).map((r) => ({
       id: r.id,
@@ -80,13 +82,14 @@ export default function BendaharaBukuKas() {
       status: null,
       source: "manual",
     }));
-    const autoRows: Entry[] = ((inv.data as any[]) || []).map((i) => ({
+    const autoInvoiceRows: Entry[] = ((inv.data as any[]) || []).map((i) => ({
       id: `auto-${i.id}`,
       entry_date: (i.paid_at || "").slice(0, 10),
       direction: "in",
       category: "SPP Online",
       // GROSS: nilai pembayaran asli sesuai tagihan siswa (bukan net_amount setelah MDR).
-      // Selisih MDR/biaya gateway dikelola di modul Monitoring Pencairan (Settlement).
+      // Biaya pencairan (Rp 3.000/settlement) dicatat terpisah sebagai Kas Keluar
+      // kategori "Biaya Pencairan ATSkolla" dari data spp_settlements.
       amount: i.total_amount ?? i.net_amount ?? 0,
       description: `SPP ${i.student_name} • ${i.class_name} • ${i.period_label}`,
       reference: i.invoice_number || null,
@@ -94,8 +97,25 @@ export default function BendaharaBukuKas() {
       status: "Lunas",
       source: "auto",
     }));
+    // Biaya Pencairan: hanya settlement yang sudah paid (dana benar-benar cair ke rekening sekolah)
+    // dan withdraw_fee > 0 — inilah biaya riil yang dipotong ATSkolla.
+    const autoFeeRows: Entry[] = ((stl.data as any[]) || [])
+      .filter((s) => s.status === "paid" && (s.withdraw_fee || 0) > 0)
+      .map((s) => ({
+        id: `fee-${s.id}`,
+        entry_date: (s.paid_at || s.approved_at || s.requested_at || "").slice(0, 10),
+        direction: "out",
+        category: "Biaya Pencairan ATSkolla",
+        amount: s.withdraw_fee || 0,
+        description: `Biaya pencairan ${s.settlement_code} → ${s.bank_name || "-"} ${s.account_number || ""}`.trim(),
+        reference: s.settlement_code || null,
+        method: "Auto",
+        status: "Tercatat",
+        source: "auto",
+      }));
     setManual(manualRows);
-    setAutoEntries(autoRows);
+    setAutoEntries([...autoInvoiceRows, ...autoFeeRows]);
+    setSettlements((stl.data as any[]) || []);
     setLoading(false);
   }, [profile?.school_id]);
 
@@ -124,6 +144,7 @@ export default function BendaharaBukuKas() {
       .channel("bendahara-buku-kas")
       .on("postgres_changes", { event: "*", schema: "public", table: "spp_invoices", filter: `school_id=eq.${profile.school_id}` }, () => fetchData())
       .on("postgres_changes", { event: "*", schema: "public", table: "cash_book_entries", filter: `school_id=eq.${profile.school_id}` }, () => fetchData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "spp_settlements", filter: `school_id=eq.${profile.school_id}` }, () => fetchData())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [profile?.school_id, fetchData]);
@@ -402,6 +423,75 @@ export default function BendaharaBukuKas() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Monitoring Pencairan — audit trail dana keluar ATSkolla */}
+      <Card className="border-0 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="p-4 flex items-center gap-2 border-b">
+            <div className="h-9 w-9 shrink-0 rounded-xl bg-rose-500/15 flex items-center justify-center">
+              <Landmark className="h-4 w-4 text-rose-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">Monitoring Pencairan</p>
+              <p className="text-[11px] text-muted-foreground">Ringkasan pencairan dana ATSkolla ke rekening sekolah — biaya pencairan otomatis muncul sebagai Kas Keluar di tabel bawah.</p>
+            </div>
+            <Link to="/bendahara/withdraw?tab=pencairan" className="text-[11px] text-[#5B6CF9] hover:underline whitespace-nowrap inline-flex items-center gap-1">
+              Kelola <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          {settlements.length === 0 ? (
+            <div className="p-6 text-center text-xs text-muted-foreground">Belum ada pengajuan pencairan.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="[&_th]:whitespace-nowrap [&_th]:text-[11px]">
+                    <TableHead>Kode</TableHead>
+                    <TableHead>Tanggal Pencairan</TableHead>
+                    <TableHead className="text-right">Nominal Dicairkan</TableHead>
+                    <TableHead className="text-right">Biaya Pencairan</TableHead>
+                    <TableHead className="text-right">Dana Bersih Diterima</TableHead>
+                    <TableHead>Rekening</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {settlements.slice(0, 10).map((s) => {
+                    const fee = s.withdraw_fee || 0;
+                    const gross = s.total_gross || 0;
+                    const net = s.final_payout || Math.max(0, gross - fee);
+                    const tgl = s.paid_at || s.approved_at || s.requested_at;
+                    const statusMap: Record<string, { label: string; cls: string }> = {
+                      paid: { label: "Dicairkan", cls: "bg-emerald-500/15 text-emerald-700" },
+                      approved: { label: "Disetujui", cls: "bg-sky-500/15 text-sky-700" },
+                      pending: { label: "Menunggu", cls: "bg-amber-500/15 text-amber-700" },
+                      rejected: { label: "Ditolak", cls: "bg-rose-500/15 text-rose-700" },
+                    };
+                    const st = statusMap[s.status] || { label: s.status || "-", cls: "bg-muted text-foreground" };
+                    return (
+                      <TableRow key={s.id} className="[&_td]:whitespace-nowrap [&_td]:text-xs">
+                        <TableCell className="font-mono">{s.settlement_code}</TableCell>
+                        <TableCell>{tgl ? new Date(tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</TableCell>
+                        <TableCell className="text-right font-mono">{fmtIDR(gross)}</TableCell>
+                        <TableCell className="text-right font-mono text-rose-600">{fmtIDR(fee)}</TableCell>
+                        <TableCell className="text-right font-mono font-semibold text-emerald-600">{fmtIDR(net)}</TableCell>
+                        <TableCell className="max-w-[180px] truncate" title={`${s.bank_name || ""} ${s.account_number || ""} ${s.account_holder ? `a.n. ${s.account_holder}` : ""}`}>
+                          {s.bank_name ? `${s.bank_name} • ${s.account_number || "-"}` : "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`text-[10px] border-0 hover:${st.cls} ${st.cls}`}>{st.label}</Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+
 
 
 
