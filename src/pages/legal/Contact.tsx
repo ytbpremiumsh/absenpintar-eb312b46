@@ -130,7 +130,7 @@ export default function Contact() {
               <MapPin className="h-4 w-4 text-[#5B6CF9]" />
               <p className="font-semibold text-slate-900">Alamat Usaha</p>
             </div>
-            <p className="text-sm text-slate-600 leading-relaxed">Indonesia</p>
+            <p className="text-sm text-slate-600 leading-relaxed">JL Logawa Raya RT 4 / RW 2, Pangebatan, Banyumas, Jawa Tengah 53161, Indonesia</p>
             <p className="text-xs text-slate-400 mt-2">Layanan tersedia untuk sekolah di seluruh wilayah Indonesia (100% online).</p>
           </div>
 
