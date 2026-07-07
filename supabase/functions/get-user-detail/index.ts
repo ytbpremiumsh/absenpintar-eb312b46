@@ -12,7 +12,7 @@ serve(async (req) => {
 
   try {
     const caller = await verifyCaller(req);
-    if (!caller) return fail("Unauthorized");
+    if (!caller) return json({ error: "Unauthorized" });
 
     const admin = getAdminClient();
 
@@ -22,12 +22,12 @@ serve(async (req) => {
       .eq("user_id", caller.userId);
     const callerRoles = (rolesData || []).map((r: { role: string }) => r.role);
     if (!callerRoles.includes("school_admin") && !callerRoles.includes("super_admin")) {
-      return fail("Insufficient permissions");
+      return json({ error: "Insufficient permissions" });
     }
 
     const body = await req.json().catch(() => ({}));
     const user_id = body?.user_id as string | undefined;
-    if (!user_id) return fail("user_id is required");
+    if (!user_id) return json({ error: "user_id is required" });
 
     const { data: prof } = await admin
       .from("profiles")
@@ -37,13 +37,14 @@ serve(async (req) => {
 
     const { data: authData } = await admin.auth.admin.getUserById(user_id);
 
-    return ok({
+    return json({
+      success: true,
       email: authData?.user?.email || "",
       phone: prof?.phone || "",
       nip: (prof as { nip?: string } | null)?.nip || "",
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    return fail(msg);
+    return json({ error: msg });
   }
 });
