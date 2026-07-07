@@ -1,124 +1,85 @@
 project_id = "bohuglednqirnaearrkj"
 
-[functions.public-scan-attendance]
-verify_jwt = false
-
-[functions.mayar-webhook]
-verify_jwt = false
-
-[functions.create-mayar-payment]
-verify_jwt = false
-
-[functions.admin-approve-payment]
-verify_jwt = false
-
-[functions.manage-mayar-key]
-verify_jwt = false
-
-[functions.update-user]
-verify_jwt = false
-
-[functions.create-user]
-verify_jwt = false
-
-[functions.referral]
-verify_jwt = false
-
-[functions.forgot-password]
-verify_jwt = false
-
-[functions.send-otp]
-verify_jwt = false
-
-[functions.verify-otp-reset]
-verify_jwt = false
-
-[functions.trial-check]
-verify_jwt = false
-
-[functions.mpwa-qr]
-verify_jwt = false
-
-[functions.mpwa-proxy]
-verify_jwt = false
-
-[functions.parent-portal]
-verify_jwt = false
-
-[functions.spp-mayar]
-verify_jwt = false
-
-[functions.send-email]
-verify_jwt = false
-
-[functions.auto-caption]
-verify_jwt = false
-
-[functions.auto-mark-alfa]
-verify_jwt = false
-
-[functions.notify-admin-wa]
-verify_jwt = false
-
-[functions.affiliate]
-verify_jwt = false
-
-[functions.database-backup]
-verify_jwt = false
-
-[functions.face-recognition]
-verify_jwt = false
-
-[functions.gdrive-backup]
-verify_jwt = false
-
-[functions.lookup-npsn]
-verify_jwt = false
-
-[functions.public-attendance]
-verify_jwt = false
-
-[functions.public-monitoring]
-verify_jwt = false
-
-[functions.public-dismissal]
-verify_jwt = false
-
-[functions.seed-demo]
-verify_jwt = false
-
-[functions.seed-demo-garuda]
-verify_jwt = false
-
-[functions.send-whatsapp]
-verify_jwt = false
-
-[functions.teaching-reminder]
-verify_jwt = false
-
-[functions.send-bendahara-otp]
-verify_jwt = false
-
-[functions.verify-bendahara-otp]
-verify_jwt = false
-
-[functions.meta-capi]
-verify_jwt = false
-
-[functions.spp-doku]
-verify_jwt = false
-
-[functions.doku-webhook]
-verify_jwt = false
-
-[functions.manage-payment-gateway]
-verify_jwt = false
-
-[functions.rfid-device]
-verify_jwt = false
-
-[functions.process-email-queue]
-verify_jwt = true
-
-
-
+[functions]
+  [functions.admin-approve-payment]
+    verify_jwt = false
+  [functions.affiliate]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.auto-caption]
+    verify_jwt = false
+  [functions.auto-mark-alfa]
+    verify_jwt = false
+  [functions.create-mayar-payment]
+    verify_jwt = false
+  [functions.create-user]
+    verify_jwt = false
+  [functions.database-backup]
+    verify_jwt = false
+  [functions.doku-webhook]
+    verify_jwt = false
+  [functions.face-recognition]
+    verify_jwt = false
+  [functions.forgot-password]
+    verify_jwt = false
+  [functions.gdrive-backup]
+    verify_jwt = false
+  [functions.lookup-npsn]
+    verify_jwt = false
+  [functions.manage-mayar-key]
+    verify_jwt = false
+  [functions.manage-payment-gateway]
+    verify_jwt = false
+  [functions.mayar-webhook]
+    verify_jwt = false
+  [functions.meta-capi]
+    verify_jwt = false
+  [functions.mpwa-proxy]
+    verify_jwt = false
+  [functions.mpwa-qr]
+    verify_jwt = false
+  [functions.notify-admin-wa]
+    verify_jwt = false
+  [functions.parent-portal]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.public-attendance]
+    verify_jwt = false
+  [functions.public-dismissal]
+    verify_jwt = false
+  [functions.public-monitoring]
+    verify_jwt = false
+  [functions.public-scan-attendance]
+    verify_jwt = false
+  [functions.referral]
+    verify_jwt = false
+  [functions.rfid-device]
+    verify_jwt = false
+  [functions.seed-demo]
+    verify_jwt = false
+  [functions.seed-demo-garuda]
+    verify_jwt = false
+  [functions.send-bendahara-otp]
+    verify_jwt = false
+  [functions.send-email]
+    verify_jwt = false
+  [functions.send-otp]
+    verify_jwt = false
+  [functions.send-whatsapp]
+    verify_jwt = false
+  [functions.spp-doku]
+    verify_jwt = false
+  [functions.spp-mayar]
+    verify_jwt = false
+  [functions.teaching-reminder]
+    verify_jwt = false
+  [functions.trial-check]
+    verify_jwt = false
+  [functions.update-user]
+    verify_jwt = false
+  [functions.verify-bendahara-otp]
+    verify_jwt = false
+  [functions.verify-otp-reset]
+    verify_jwt = false
