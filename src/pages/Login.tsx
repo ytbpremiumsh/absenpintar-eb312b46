@@ -10,7 +10,7 @@ import {
   Phone, MessageSquare, Sparkles, Users, Calendar, ScanFace, Wallet, BarChart3, MessageCircle, LogIn,
 } from "lucide-react";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import BackendStatusBanner, { isBackendNetworkError } from "@/components/BackendStatusBanner";
 import { useTenant, buildTenantUrl, getRootDomain } from "@/lib/tenant";
 import { Search, School as SchoolIcon } from "lucide-react";
