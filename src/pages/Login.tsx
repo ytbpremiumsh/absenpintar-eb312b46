@@ -273,9 +273,10 @@ const Login = ({ forcedMode }: LoginProps) => {
   ];
 
   return (
+    <MotionConfig transition={{ duration: 0 }}>
     <div
       data-ls-theme={theme}
-      className="min-h-screen flex relative overflow-hidden bg-white text-[#0b1020] transition-colors"
+      className="no-motion min-h-screen flex relative overflow-hidden bg-white text-[#0b1020]"
     >
       <style dangerouslySetInnerHTML={{ __html: LANDING_THEME_CSS }} />
 
