@@ -81,22 +81,18 @@ export default function LaporanSPP() {
     total: filtered.length,
     lunas: filtered.filter((r) => r.Status === "paid").length,
     belum: filtered.filter((r) => r.Status !== "paid").length,
-    tagihan: filtered.reduce((s, r) => s + (r.Total || 0), 0),
-    bruto: paidOnline.reduce((s, r) => s + (r.Total || 0), 0),
-    fee: paidOnline.reduce((s, r) => s + (r["Biaya Gateway"] || 0), 0),
-    bersih: paidOnline.reduce((s, r) => s + (r["Diterima"] || 0), 0),
+    pemasukan: paidOnline.reduce((s, r) => s + (r["Diterima"] || 0), 0),
     dicairkan: paidOnline.filter((r) => r._settlement_id).reduce((s, r) => s + (r["Diterima"] || 0), 0),
     saldoAktif: paidOnline.filter((r) => !r._settlement_id).reduce((s, r) => s + (r["Diterima"] || 0), 0),
-    denda: filtered.reduce((s, r) => s + (r.Denda || 0), 0),
   }), [filtered, paidOnline]);
 
   const headers: Header[] = [
     { key: "No Invoice", label: "No Invoice" }, { key: "Siswa", label: "Siswa" }, { key: "Kelas", label: "Kelas" },
     { key: "Jenis", label: "Jenis" }, { key: "Kategori", label: "Kategori" }, { key: "Periode", label: "Periode" },
     { key: "Jatuh Tempo", label: "Jatuh Tempo" },
-    { key: "Nominal", label: "Nominal", type: "money" }, { key: "Denda", label: "Denda", type: "money" },
-    { key: "Total", label: "Total", type: "money" }, { key: "Biaya Gateway", label: "Biaya Gateway", type: "money" },
-    { key: "Diterima", label: "Diterima Bersih", type: "money" },
+    { key: "Nominal", label: "Nominal", type: "money" },
+    { key: "Total", label: "Total", type: "money" },
+    { key: "Diterima", label: "Diterima", type: "money" },
     { key: "Status", label: "Status", type: "status" },
     { key: "Metode", label: "Metode" },
     { key: "Kanal", label: "Kanal" },
@@ -108,7 +104,7 @@ export default function LaporanSPP() {
   return (
     <ReportShell
       title="Rekap Pembayaran SPP"
-      subtitle="Sinkron dengan Bendahara — Saldo Aktif, Pencairan, Fee Gateway"
+      subtitle="Sinkron dengan Bendahara — Pemasukan, Saldo Aktif & Pencairan"
       icon={Receipt}
       from={from} to={to} onFromChange={setFrom} onToChange={setTo}
       onDownload={() => downloadCSV(`SPP_${from}_${to}`, filtered.map(({ _method, _settlement_id, ...r }) => r), headers)}
@@ -138,12 +134,9 @@ export default function LaporanSPP() {
         <StatsRow items={[
           { label: "Invoice", value: summary.total, tone: "primary" },
           { label: "Lunas / Belum", value: `${summary.lunas} / ${summary.belum}`, tone: "emerald" },
-          { label: "Total Bruto (Online)", value: fmtIDR(summary.bruto), tone: "indigo" },
-          { label: "Fee Gateway", value: fmtIDR(summary.fee), tone: "amber" },
-          { label: "Diterima Bersih", value: fmtIDR(summary.bersih), tone: "emerald" },
+          { label: "Total Pemasukan", value: fmtIDR(summary.pemasukan), tone: "emerald" },
+          { label: "Saldo Aktif", value: fmtIDR(summary.saldoAktif), tone: "indigo" },
           { label: "Sudah Dicairkan", value: fmtIDR(summary.dicairkan), tone: "primary" },
-          { label: "Saldo Aktif", value: fmtIDR(summary.saldoAktif), tone: "emerald" },
-          { label: "Denda", value: fmtIDR(summary.denda), tone: "rose" },
         ]} />
       }
     >
