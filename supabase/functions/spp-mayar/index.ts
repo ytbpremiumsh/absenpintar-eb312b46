@@ -223,7 +223,10 @@ async function createMayarLink(apiKey: string, inv: any, attempt = 0): Promise<{
   const payload = {
     name: recipientName,
     amount: safeAmount,
-    description: `SPP ${inv.period_label} ${inv.student_name}`,
+    // Sertakan nomor invoice DB (SPP/YYYYMM/NIS) di description agar format
+    // referensi pembayaran seragam antara Mayar & Doku saat perekapan.
+    description: `${inv.invoice_number || ""} • SPP ${inv.period_label} ${inv.student_name}`.trim(),
+
     email: buyerEmail,
     mobile: `0800${mobileDigits}`,
     redirectUrl: "https://atskolla.com/parent",

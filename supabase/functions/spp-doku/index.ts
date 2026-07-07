@@ -189,7 +189,12 @@ async function createDokuPayment(
   channel: string | null,
 ) {
   const totalCharged = Number(inv._amount_override ?? inv.total_amount) || 0;
-  const invoiceNumber = `SPP-${(inv.id || "").slice(0, 8)}-${Date.now().toString(36).slice(-4)}`;
+  // Samakan format nomor invoice dengan yang tersimpan di DB (SPP/YYYYMM/NIS).
+  // Sanitasi karakter yang tidak diizinkan Doku ("/") menjadi "-", dan
+  // tambahkan suffix pendek agar unik saat regenerate link.
+  const baseNo = String(inv.invoice_number || `SPP-${(inv.id || "").slice(0, 8)}`).replace(/[^A-Za-z0-9-]/g, "-");
+  const invoiceNumber = `${baseNo}-${Date.now().toString(36).slice(-4)}`;
+
   const expiredAt = new Date(Date.now() + DOKU_LINK_TTL_MIN * 60 * 1000);
 
   const body: any = {
