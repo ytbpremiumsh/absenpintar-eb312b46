@@ -201,6 +201,8 @@ const ManageWaliKelas = () => {
 
   // Filter out teachers already assigned
   const assignedTeacherIds = new Set(assignments.map(a => a.user_id));
+  const assignedClassNames = new Set(assignments.map(a => a.class_name));
+
 
   return (
     <PremiumGate featureLabel="Kelola Wali Kelas" requiredPlan="School">
