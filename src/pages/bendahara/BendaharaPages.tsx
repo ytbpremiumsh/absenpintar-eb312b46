@@ -4487,15 +4487,6 @@ export function BendaharaPencairan() {
          <StatCard label="Final Payout" value={fmtIDR(finalPayout)} icon={Banknote} sub="setelah fee Rp 3.000" gradient="from-amber-500 to-orange-600" />
       </div>
 
-      {/* Info banner: pembayaran offline tidak ikut */}
-      <div className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/30 p-3 flex gap-2">
-        <AlertCircle className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-        <div className="text-xs text-blue-900 dark:text-blue-100 leading-relaxed space-y-1.5">
-          <p>
-            Saldo di sini <b>hanya pembayaran online (QRIS / Transfer Bank)</b>. Pembayaran <b>offline</b> (tunai / transfer manual ke rekening sekolah) tidak ikut dicairkan karena uangnya sudah ada di tangan sekolah. Catatan offline tetap bisa dilihat di <b>Detail Siswa &gt; Riwayat Pembayaran</b>.
-          </p>
-        </div>
-      </div>
 
       <Tabs defaultValue="pencairan" className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:w-fit gap-1 bg-indigo-50 dark:bg-indigo-950/40 p-1 rounded-xl border border-indigo-200/60 dark:border-indigo-800/60">
