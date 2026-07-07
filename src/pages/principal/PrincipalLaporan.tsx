@@ -123,12 +123,23 @@ export default function PrincipalLaporan() {
       <div className="space-y-2">
         <div className="flex items-center gap-2 px-1">
           <div className="h-7 w-7 rounded-lg bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
-            <Wallet className="h-3.5 w-3.5" />
+            <Receipt className="h-3.5 w-3.5" />
           </div>
-          <h2 className="text-sm font-bold">Laporan Keuangan</h2>
-          <span className="text-[11px] text-muted-foreground">SPP, kas & pencairan dana</span>
+          <h2 className="text-sm font-bold">Keuangan Siswa (SPP)</h2>
+          <span className="text-[11px] text-muted-foreground">Tagihan & tunggakan SPP siswa</span>
         </div>
-        <ReportGrid items={keuangan} />
+        <ReportGrid items={keuanganSiswa} />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 px-1">
+          <div className="h-7 w-7 rounded-lg bg-sky-500/15 text-sky-600 flex items-center justify-center">
+            <Landmark className="h-3.5 w-3.5" />
+          </div>
+          <h2 className="text-sm font-bold">Kas Sekolah</h2>
+          <span className="text-[11px] text-muted-foreground">Kas umum sekolah & pencairan dana</span>
+        </div>
+        <ReportGrid items={kasSekolah} />
       </div>
     </div>
   );
