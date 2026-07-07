@@ -151,7 +151,7 @@ export default function SuperAdminAuthEmail() {
                           onChange={(e) => update({ sender_name: e.target.value })}
                           placeholder="ATSkolla"
                         />
-                        <p className="text-[11px] text-muted-foreground mt-1">Ditampilkan di kolom "From" penerima. Alamat: noreply@atskolla.com</p>
+                        <p className="text-[11px] text-muted-foreground mt-1">Ditampilkan di kolom "From" penerima. Alamat: noreply@notify.atskolla.com</p>
                       </div>
                       <div>
                         <Label>Subjek Email</Label>
