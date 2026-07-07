@@ -3,6 +3,7 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { parseEmailWebhookPayload } from 'npm:@lovable.dev/email-js'
 import { WebhookError, verifyWebhookRequest } from 'npm:@lovable.dev/webhooks-js'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 import { SignupEmail } from '../_shared/email-templates/signup.tsx'
 import { InviteEmail } from '../_shared/email-templates/invite.tsx'
 import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
@@ -39,7 +40,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 const SITE_NAME = "absenpintar"
 const SENDER_DOMAIN = "notify.atskolla.com"
 const ROOT_DOMAIN = "atskolla.com"
-const FROM_DOMAIN = "atskolla.com" // Domain shown in From address (may be root or sender subdomain)
+const FROM_DOMAIN = SENDER_DOMAIN
 
 // Sample data for preview mode ONLY (not used in actual email sending).
 // URLs are baked in at scaffold time from the project's real data.
@@ -78,6 +79,21 @@ const SAMPLE_DATA: Record<string, object> = {
   reauthentication: {
     token: '123456',
   },
+}
+
+function stripHtml(html: string) {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function smtpUsesImplicitTls(settings: { smtp_port: number; smtp_secure: boolean }) {
+  const port = Number(settings.smtp_port)
+  if (port === 465) return true
+  if (port === 587) return false
+  return Boolean(settings.smtp_secure)
 }
 
 // Preview endpoint handler - returns rendered HTML without sending email
@@ -272,6 +288,14 @@ async function handleWebhook(req: Request): Promise<Response> {
 
   const messageId = crypto.randomUUID()
 
+  const { data: smtpSettings } = await supabase
+    .from('email_settings')
+    .select('smtp_host, smtp_port, smtp_username, smtp_password, smtp_secure, from_email, from_name, is_active')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
   // Log pending BEFORE enqueue so we have a record even if enqueue crashes
   await supabase.from('email_send_log').insert({
     message_id: messageId,
@@ -279,6 +303,74 @@ async function handleWebhook(req: Request): Promise<Response> {
     recipient_email: payload.data.email,
     status: 'pending',
   })
+
+  if (smtpSettings?.smtp_host && smtpSettings?.smtp_username && smtpSettings?.smtp_password && smtpSettings?.from_email) {
+    try {
+      const client = new SMTPClient({
+        connection: {
+          hostname: smtpSettings.smtp_host,
+          port: Number(smtpSettings.smtp_port) || 587,
+          tls: smtpUsesImplicitTls(smtpSettings),
+          auth: { username: smtpSettings.smtp_username, password: smtpSettings.smtp_password },
+        },
+      })
+
+      try {
+        await client.send({
+          from: `${senderName || smtpSettings.from_name || SITE_NAME} <${smtpSettings.from_email}>`,
+          to: payload.data.email,
+          subject,
+          html,
+          content: text || stripHtml(html),
+        })
+      } finally {
+        try { await client.close() } catch { /* ignore */ }
+      }
+
+      await supabase.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: emailType,
+        recipient_email: payload.data.email,
+        status: 'sent',
+        metadata: { via: 'smtp_settings' },
+      })
+      await supabase.from('email_logs').insert({
+        to_email: payload.data.email,
+        subject,
+        event_type: `auth_${emailType}`,
+        status: 'sent',
+      })
+
+      console.log('Auth email sent via SMTP settings', { emailType, email: payload.data.email, run_id })
+      return new Response(
+        JSON.stringify({ success: true, sent: true, via: 'smtp_settings' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      console.error('SMTP auth email send failed', { emailType, run_id, error: errorMsg })
+      await supabase.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: emailType,
+        recipient_email: payload.data.email,
+        status: 'failed',
+        error_message: errorMsg.slice(0, 1000),
+        metadata: { via: 'smtp_settings' },
+      })
+      await supabase.from('email_logs').insert({
+        to_email: payload.data.email,
+        subject,
+        event_type: `auth_${emailType}`,
+        status: 'failed',
+        error: errorMsg.slice(0, 1000),
+      })
+
+      return new Response(JSON.stringify({ success: false, error: errorMsg, via: 'smtp_settings' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
 
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
     queue_name: 'auth_emails',
