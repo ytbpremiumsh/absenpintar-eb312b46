@@ -330,7 +330,7 @@ export default function PrincipalDashboard() {
     <div className="space-y-6 pb-6">
       <PageHeader
         title={`Dashboard Kepala Sekolah`}
-        description={`${schoolName || "Sekolah"} • ${format(now, "EEEE, d MMMM yyyy • HH:mm", { locale: idLocale })} WIB`}
+        subtitle={`${schoolName || "Sekolah"} • ${format(now, "EEEE, d MMMM yyyy • HH:mm", { locale: idLocale })} WIB`}
         icon={SchoolIcon}
       />
 
