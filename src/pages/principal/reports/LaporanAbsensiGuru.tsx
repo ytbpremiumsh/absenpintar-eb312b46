@@ -140,7 +140,7 @@ export default function LaporanAbsensiGuru() {
       subtitle="Rekapitulasi kehadiran guru & staff — jam datang, pulang, dan status hari ini"
       icon={GraduationCap}
       from={from} to={to} onFromChange={setFrom} onToChange={setTo}
-      onDownload={() => downloadCSV(`Absensi_Guru_${from}_${to}`, filtered.map(({ _role, ...r }) => r), headers)}
+      onDownload={() => downloadCSV(`Absensi_Guru_${from}_${to}`, filtered.map(({ _role, _id, ...r }) => r), headers)}
       extraFilters={
         <>
           <Select value={roleF} onValueChange={setRoleF}>
