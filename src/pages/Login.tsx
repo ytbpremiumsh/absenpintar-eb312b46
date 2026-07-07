@@ -506,17 +506,17 @@ const Login = ({ forcedMode }: LoginProps) => {
                             <div className="flex p-1 bg-secondary/60 rounded-xl">
                               <button
                                 type="button"
-                                onClick={() => setParentMethod("phone")}
-                                className={`flex-1 h-8 text-[11px] font-semibold rounded-lg transition-all ${parentMethod === "phone" ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground"}`}
-                              >
-                                No. WhatsApp
-                              </button>
-                              <button
-                                type="button"
                                 onClick={() => setParentMethod("card")}
                                 className={`flex-1 h-8 text-[11px] font-semibold rounded-lg transition-all ${parentMethod === "card" ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground"}`}
                               >
                                 Nomor Kartu Identitas
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setParentMethod("phone")}
+                                className={`flex-1 h-8 text-[11px] font-semibold rounded-lg transition-all ${parentMethod === "phone" ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground"}`}
+                              >
+                                No. WhatsApp
                               </button>
                             </div>
 
