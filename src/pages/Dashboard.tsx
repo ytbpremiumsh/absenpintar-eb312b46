@@ -331,7 +331,8 @@ const Dashboard = () => {
 
 
   return (
-    <div className="space-y-6">
+    <MotionConfig transition={{ duration: 0 }}>
+    <div className="no-motion space-y-6">
       <AnimatePresence>
         {showTrialPopup && subFeatures.isTrial && subFeatures.trialDaysLeft !== null && (
           <motion.div
