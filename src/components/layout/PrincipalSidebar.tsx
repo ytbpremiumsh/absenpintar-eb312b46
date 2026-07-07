@@ -35,12 +35,17 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
     ],
   },
   {
-    label: "Laporan Keuangan",
+    label: "Keuangan Siswa (SPP)",
     items: [
       { title: "Pembayaran SPP", url: "/kepsek/laporan/spp", icon: Receipt },
-      { title: "Tunggakan", url: "/kepsek/laporan/tunggakan", icon: Wallet },
-      { title: "Buku Kas", url: "/kepsek/laporan/buku-kas", icon: BookOpen },
-      { title: "Settlement", url: "/kepsek/laporan/settlement", icon: Landmark },
+      { title: "Tunggakan SPP", url: "/kepsek/laporan/tunggakan", icon: Wallet },
+    ],
+  },
+  {
+    label: "Kas Sekolah",
+    items: [
+      { title: "Buku Kas Sekolah", url: "/kepsek/laporan/buku-kas", icon: BookOpen },
+      { title: "Settlement Dana", url: "/kepsek/laporan/settlement", icon: Landmark },
     ],
   },
 ];
