@@ -704,6 +704,9 @@ function PaymentSystem() {
                 { name: "Ahmad Fadli — VI-A", status: "Lunas via QRIS", color: "emerald" },
                 { name: "Sari Mulyani — V-B", status: "Reminder terkirim", color: "amber" },
                 { name: "Rendi Pratama — IV-C", status: "Lunas via VA BCA", color: "emerald" },
+                { name: "Dina Kartika — III-A", status: "Lunas via QRIS", color: "emerald" },
+                { name: "Bagas Wicaksono — II-B", status: "Reminder terkirim", color: "amber" },
+                { name: "Nadia Salsabila — VI-B", status: "Lunas via VA Mandiri", color: "emerald" },
               ].map((r) => (
                 <div key={r.name} className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-2.5">
                   <div className="text-[#0b1020] text-sm font-medium">{r.name}</div>
