@@ -5071,8 +5071,10 @@ export function BendaharaLaporan() {
     const filterTag = `${expAY === "all" ? "ALL" : expAY.replace("/", "-")}_${expClass === "all" ? "SEMUA-KELAS" : expClass.replace(/\s/g, "-")}_${expStatus.toUpperCase()}`;
     const fname = `SPP_${filterTag}_${new Date().toISOString().slice(0, 10)}`;
 
+    const metaSubtitle = `TA: ${expAY === "all" ? "Semua" : expAY} • Kelas: ${expClass === "all" ? "Semua" : expClass} • Status: ${expStatus === "all" ? "Semua" : expStatus}`;
+
     if (format === "xlsx") {
-      const wb = XLSX.utils.book_new();
+      const wb = XLSXStyle.utils.book_new();
 
       // Ringkasan Per Tahun Ajaran (selalu ada — memudahkan pembacaan lintas TA)
       const perTA = new Map<string, any[]>();
@@ -5091,9 +5093,11 @@ export function BendaharaLaporan() {
           "Total Tagihan": list.reduce((a, x) => a + (x.Total || 0), 0),
           "Total Diterima": list.filter(x => x.Status === "Lunas").reduce((a, x) => a + (x.Total || 0), 0),
         }));
-      const wsTA = XLSX.utils.json_to_sheet(summaryTA);
-      wsTA["!cols"] = [{ wch: 14 }, { wch: 16 }, { wch: 10 }, { wch: 12 }, { wch: 16 }, { wch: 16 }];
-      XLSX.utils.book_append_sheet(wb, wsTA, "Ringkasan per TA");
+      XLSXStyle.utils.book_append_sheet(
+        wb,
+        buildStyledSheet(summaryTA, { title: "Ringkasan per Tahun Ajaran", subtitle: `${school?.name || "-"} • ${metaSubtitle}` }),
+        "Ringkasan per TA",
+      );
 
       if (expClass === "all") {
         // Ringkasan per Kelas
@@ -5111,34 +5115,41 @@ export function BendaharaLaporan() {
           "Total Tagihan": list.reduce((a, x) => a + (x.Total || 0), 0),
           "Total Diterima": list.filter(x => x.Status === "Lunas").reduce((a, x) => a + (x.Total || 0), 0),
         }));
-        const wsSum = XLSX.utils.json_to_sheet(summary);
-        wsSum["!cols"] = [{ wch: 12 }, { wch: 16 }, { wch: 10 }, { wch: 12 }, { wch: 16 }, { wch: 16 }];
-        XLSX.utils.book_append_sheet(wb, wsSum, "Ringkasan per Kelas");
+        XLSXStyle.utils.book_append_sheet(
+          wb,
+          buildStyledSheet(summary, { title: "Ringkasan per Kelas", subtitle: `${school?.name || "-"} • ${metaSubtitle}` }),
+          "Ringkasan per Kelas",
+        );
 
         // Rincian per Kelas × TA supaya ekspor lebih rapih (satu sheet per Kelas-TA jika multi-TA)
         Array.from(grouped.entries()).forEach(([cls, list]) => {
           const tas = new Set(list.map(x => String(x["Tahun Ajaran"] || "-")));
           if (tas.size > 1) {
-            // Split per TA
             Array.from(tas).sort().forEach((ta) => {
               const subset = list.filter(x => String(x["Tahun Ajaran"]) === ta);
-              const ws = XLSX.utils.json_to_sheet(subset);
-              ws["!cols"] = Object.keys(subset[0]).map(k => ({ wch: Math.min(Math.max(k.length + 2, 10), 28) }));
               const sheetName = `${cls} ${ta}`.slice(0, 31);
-              XLSX.utils.book_append_sheet(wb, ws, sheetName);
+              XLSXStyle.utils.book_append_sheet(
+                wb,
+                buildStyledSheet(subset, { title: `Rincian SPP — Kelas ${cls}`, subtitle: `TA ${ta} • ${school?.name || "-"}` }),
+                sheetName,
+              );
             });
           } else {
-            const ws = XLSX.utils.json_to_sheet(list);
-            ws["!cols"] = Object.keys(list[0]).map(k => ({ wch: Math.min(Math.max(k.length + 2, 10), 28) }));
-            XLSX.utils.book_append_sheet(wb, ws, cls.slice(0, 31));
+            XLSXStyle.utils.book_append_sheet(
+              wb,
+              buildStyledSheet(list, { title: `Rincian SPP — Kelas ${cls}`, subtitle: `${school?.name || "-"}` }),
+              cls.slice(0, 31),
+            );
           }
         });
       } else {
-        const ws = XLSX.utils.json_to_sheet(rows);
-        ws["!cols"] = Object.keys(rows[0]).map(k => ({ wch: Math.min(Math.max(k.length + 2, 10), 28) }));
-        XLSX.utils.book_append_sheet(wb, ws, expClass.slice(0, 31));
+        XLSXStyle.utils.book_append_sheet(
+          wb,
+          buildStyledSheet(rows, { title: `Rincian SPP — Kelas ${expClass}`, subtitle: `${school?.name || "-"} • ${metaSubtitle}` }),
+          expClass.slice(0, 31),
+        );
       }
-      XLSX.writeFile(wb, `${fname}.xlsx`);
+      XLSXStyle.writeFile(wb, `${fname}.xlsx`);
     } else if (format === "csv") {
       const ws = XLSX.utils.json_to_sheet(rows);
       const csv = XLSX.utils.sheet_to_csv(ws);
@@ -5147,27 +5158,34 @@ export function BendaharaLaporan() {
       const a = document.createElement("a"); a.href = url; a.download = `${fname}.csv`; a.click();
       URL.revokeObjectURL(url);
     } else {
-      const doc = new jsPDF("l", "mm", "a4");
-      doc.setFontSize(14); doc.setFont("helvetica", "bold");
-      doc.text("LAPORAN TAGIHAN SPP", 14, 14);
-      doc.setFontSize(10); doc.setFont("helvetica", "normal");
-      doc.text(school?.name || "", 14, 21);
-      doc.setFontSize(9);
-      doc.text(`NPSN: ${school?.npsn || "-"}`, 14, 27);
-      doc.text(`Tahun Ajaran: ${expAY === "all" ? "Semua" : expAY}  •  Kelas: ${expClass === "all" ? "Semua" : expClass}  •  Status: ${expStatus === "all" ? "Semua" : expStatus}`, 14, 33);
-      doc.text(`Total: ${rows.length} tagihan • ${fmtIDR(rows.reduce((a, r) => a + (r.Total || 0), 0))}`, 14, 39);
-      autoTable(doc, {
-        startY: 45,
-        head: [["No", "NIS", "Nama Siswa", "Kelas", "Periode", "Total", "Jatuh Tempo", "Status"]],
-        body: rows.map(r => [r.No, r.NIS, r["Nama Siswa"], r.Kelas, r.Periode, fmtIDR(r.Total), r["Jatuh Tempo"], r.Status]),
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [91, 108, 249], textColor: 255 },
-        alternateRowStyles: { fillColor: [248, 249, 252] },
+      buildStyledPdf({
+        title: "Laporan Tagihan SPP",
+        subtitle: metaSubtitle,
+        schoolName: school?.name || "",
+        schoolNpsn: school?.npsn || undefined,
+        meta: [
+          `Total: ${rows.length} tagihan • ${fmtIDR(rows.reduce((a, r) => a + (r.Total || 0), 0))}`,
+          `Sudah Lunas: ${rows.filter(r => r.Status === "Lunas").length} • Belum Lunas: ${rows.filter(r => r.Status !== "Lunas").length}`,
+        ],
+        orientation: "l",
+        columns: [
+          { header: "No", dataKey: "No", align: "center", width: 10 },
+          { header: "No. Invoice", dataKey: "No. Invoice", align: "left", width: 34 },
+          { header: "NIS", dataKey: "NIS", align: "left", width: 22 },
+          { header: "Nama Siswa", dataKey: "Nama Siswa", align: "left" },
+          { header: "Kelas", dataKey: "Kelas", align: "center", width: 16 },
+          { header: "Periode", dataKey: "Periode", align: "left", width: 26 },
+          { header: "Total", dataKey: "Total", isCurrency: true, width: 28 },
+          { header: "Jatuh Tempo", dataKey: "Jatuh Tempo", align: "center", width: 22 },
+          { header: "Status", dataKey: "Status", align: "center", width: 22 },
+        ],
+        rows,
+        fileName: fname,
       });
-      doc.save(`${fname}.pdf`);
     }
     toast.success("Export selesai");
   };
+
 
   return (
     <div className="space-y-4">
