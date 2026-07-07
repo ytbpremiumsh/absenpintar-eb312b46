@@ -82,6 +82,23 @@ export default function SuperAdminAuthEmail() {
     toast.success("Template tersimpan");
   };
 
+  const sendTest = async () => {
+    if (!current) return;
+    const to = testEmail.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) {
+      return toast.error("Masukkan alamat email tujuan yang valid");
+    }
+    setSending(true);
+    const { data, error } = await supabase.functions.invoke("send-auth-email-test", {
+      body: { type: current.type, to },
+    });
+    setSending(false);
+    if (error) return toast.error("Gagal mengirim: " + error.message);
+    if ((data as any)?.error) return toast.error("Gagal mengirim: " + (data as any).error);
+    toast.success(`Email uji terkirim ke ${to}`);
+  };
+
+
   const previewSrc = useMemo(() => {
     if (!current) return "";
     const vars: Record<string, string> = {
