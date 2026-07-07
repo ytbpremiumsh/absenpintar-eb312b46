@@ -53,6 +53,7 @@ const WhatsAppSettings = lazy(() => import("./pages/WhatsAppSettings"));
 const SuperAdminAnnouncements = lazy(() => import("./pages/super-admin/SuperAdminAnnouncements"));
 const SuperAdminTickets = lazy(() => import("./pages/super-admin/SuperAdminTickets"));
 const SuperAdminEmail = lazy(() => import("./pages/super-admin/SuperAdminEmail"));
+const SuperAdminAuthEmail = lazy(() => import("./pages/super-admin/SuperAdminAuthEmail"));
 
 const Panduan = lazy(() => import("./pages/Panduan"));
 const PanduanDetail = lazy(() => import("./pages/PanduanDetail"));
