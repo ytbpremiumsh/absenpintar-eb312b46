@@ -461,8 +461,21 @@ export default function BendaharaBukuKas() {
                   <TableCell className="text-xs whitespace-nowrap">{new Date(e.entry_date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <Badge variant="secondary" className="text-[10px]">{e.category}</Badge>
-                      {e.source === "auto" && <Badge className="text-[9px] bg-blue-500/15 text-blue-700 hover:bg-blue-500/15 border-0"><Zap className="h-2.5 w-2.5 mr-0.5" />Auto</Badge>}
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] whitespace-nowrap"
+                        title={e.category}
+                      >
+                        {e.category === "SPP Online" ? "SPP" : e.category}
+                      </Badge>
+                      {e.source === "auto" && (
+                        <span
+                          title="Otomatis dari pembayaran SPP"
+                          className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-blue-500/15 text-blue-700"
+                        >
+                          <Zap className="h-2.5 w-2.5" />
+                        </span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-xs font-mono max-w-[180px] truncate">
@@ -470,7 +483,21 @@ export default function BendaharaBukuKas() {
                   </TableCell>
                   <TableCell>
                     {e.method
-                      ? <Badge variant="outline" className="text-[10px] font-normal">{e.method}</Badge>
+                      ? (() => {
+                          const short =
+                            e.method === "QRIS / Transfer Bank" ? "Online" :
+                            e.method === "Transfer Manual ke Rekening" ? "Transfer Manual" :
+                            e.method;
+                          return (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-normal whitespace-nowrap"
+                              title={e.method}
+                            >
+                              {short}
+                            </Badge>
+                          );
+                        })()
                       : <span className="text-[11px] text-muted-foreground italic">{e.source === "manual" ? "Tunai/Manual" : "—"}</span>}
                   </TableCell>
                   <TableCell>
