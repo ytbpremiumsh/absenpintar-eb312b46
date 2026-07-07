@@ -677,6 +677,7 @@ const Dashboard = () => {
       </Card>
 
     </div>
+    </MotionConfig>
   );
 };
 
