@@ -33,7 +33,6 @@ export default function LaporanBukuKas() {
   const [to, setTo] = useState(last);
   const [dir, setDir] = useState("all");
   const [cat, setCat] = useState("all");
-  const [src, setSrc] = useState("all");
   const [all, setAll] = useState<Entry[]>([]);
   const [priorSum, setPriorSum] = useState({ in: 0, out: 0 });
   const [loading, setLoading] = useState(false);
