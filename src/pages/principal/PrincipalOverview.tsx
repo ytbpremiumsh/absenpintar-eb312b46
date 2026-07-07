@@ -101,7 +101,7 @@ export default function PrincipalOverview() {
             <Row label="Tunggakan" value={fmtIDR(finance.tunggakan)} tone="rose" />
             <Row label="Saldo Buku Kas" value={fmtIDR(finance.saldoKas)} tone="sky" />
             <Row label="Menunggu Pencairan" value={fmtIDR(finance.danaPending)} tone="amber" />
-            <button onClick={() => navigate("/kepsek/keuangan")} className="mt-2 w-full text-xs text-primary hover:underline flex items-center justify-end gap-1">
+            <button onClick={() => navigate("/kepsek/laporan")} className="mt-2 w-full text-xs text-primary hover:underline flex items-center justify-end gap-1">
               Detail keuangan <ArrowRight className="h-3 w-3" />
             </button>
           </CardContent>
