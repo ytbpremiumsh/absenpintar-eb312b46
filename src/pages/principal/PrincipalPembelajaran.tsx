@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, CheckCircle2, XCircle, Clock, PlayCircle, CalendarClock, Users } from "lucide-react";
 import { usePrincipalData } from "@/hooks/usePrincipalData";
+import { ClassAttendanceDetailDialog } from "@/components/principal/ClassAttendanceDetailDialog";
 
 type ClassItem = {
   id: string;
