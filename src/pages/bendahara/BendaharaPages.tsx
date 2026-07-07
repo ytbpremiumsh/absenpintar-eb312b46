@@ -4561,21 +4561,24 @@ export function BendaharaPencairan() {
               {loadingHistory ? <div className="p-8 text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto" /></div> : (
                 <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader><TableRow className="[&_th]:whitespace-nowrap"><TableHead>Code</TableHead><TableHead>Tgl</TableHead><TableHead>Trx</TableHead><TableHead>Gross</TableHead><TableHead>Biaya Layanan</TableHead><TableHead>Biaya Pencairan</TableHead><TableHead>Final</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow className="[&_th]:whitespace-nowrap"><TableHead>Code</TableHead><TableHead>Tgl</TableHead><TableHead>Trx</TableHead><TableHead>Bruto</TableHead><TableHead>Biaya Pencairan</TableHead><TableHead>Final</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
                   <TableBody>
-                    {history.length === 0 && <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Belum ada settlement</TableCell></TableRow>}
-                    {history.map(s => (
-                      <TableRow key={s.id} className="[&_td]:whitespace-nowrap">
-                        <TableCell className="text-xs font-mono">{s.settlement_code}</TableCell>
-                        <TableCell className="text-xs">{new Date(s.requested_at).toLocaleDateString("id-ID")}</TableCell>
-                        <TableCell>{s.total_transactions}</TableCell>
-                        <TableCell className="text-xs">{fmtIDR(s.total_gross)}</TableCell>
-                        <TableCell className="text-xs">{fmtIDR(s.total_gateway_fee)}</TableCell>
-                        <TableCell className="text-xs">{fmtIDR(s.withdraw_fee)}</TableCell>
-                        <TableCell className="font-semibold text-emerald-600">{fmtIDR(s.final_payout)}</TableCell>
-                        <TableCell>{badge(s.status)}</TableCell>
-                      </TableRow>
-                    ))}
+                    {history.length === 0 && <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Belum ada settlement</TableCell></TableRow>}
+                    {history.map(s => {
+                      const withdrawFee = s.withdraw_fee ?? 3000;
+                      const finalPayoutGross = Math.max(0, (s.total_gross || 0) - withdrawFee);
+                      return (
+                        <TableRow key={s.id} className="[&_td]:whitespace-nowrap">
+                          <TableCell className="text-xs font-mono">{s.settlement_code}</TableCell>
+                          <TableCell className="text-xs">{new Date(s.requested_at).toLocaleDateString("id-ID")}</TableCell>
+                          <TableCell>{s.total_transactions}</TableCell>
+                          <TableCell className="text-xs">{fmtIDR(s.total_gross)}</TableCell>
+                          <TableCell className="text-xs">{fmtIDR(withdrawFee)}</TableCell>
+                          <TableCell className="font-semibold text-emerald-600">{fmtIDR(finalPayoutGross)}</TableCell>
+                          <TableCell>{badge(s.status)}</TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
                 </div>
