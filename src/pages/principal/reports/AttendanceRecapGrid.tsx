@@ -71,6 +71,7 @@ export function AttendanceRecapGrid({ schoolId, kind }: Props) {
           const students = studentsQ.data || [];
           const classes = Array.from(new Set(students.map((s: any) => s.class))).sort();
           setFilterOptions(classes.map((c) => ({ value: c, label: c })));
+          setFilter((prev) => (prev !== "all" && classes.includes(prev)) ? prev : (classes[0] || "all"));
           setPeople(students.map((s: any) => ({ id: s.id, name: s.name, sub: s.student_id, photo_url: s.photo_url, cls: s.class })));
           setLogs(logsQ.data || []);
         } else {
