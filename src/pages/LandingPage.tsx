@@ -226,7 +226,7 @@ function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme:
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <button onClick={() => nav("/login")} className="text-sm font-semibold text-[#0b1020] hover:text-[#5B6CF9] px-3 py-2">
+          <button onClick={() => nav(loginPath)} className="text-sm font-semibold text-[#0b1020] hover:text-[#5B6CF9] px-3 py-2">
             Masuk
           </button>
           <button
