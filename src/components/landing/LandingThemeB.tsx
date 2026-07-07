@@ -206,9 +206,9 @@ const LandingThemeB = () => {
       {/* ─── Floating Navbar ─── */}
       <nav className="fixed top-3 left-3 right-3 z-50 transition-all duration-300 rounded-2xl bg-white dark:bg-slate-900 shadow-lg border border-slate-200/80 dark:border-slate-700/50">
         <div className="relative px-4 sm:px-5 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 z-10">
-            <span className="font-extrabold text-slate-900 dark:text-white text-xl tracking-tight">atskolla</span>
-          </div>
+          <button onClick={() => navigate("/")} className="flex items-center z-10" aria-label="ATSkolla">
+            <img src={headerLogo} alt="ATSkolla" className="h-9 sm:h-10 w-auto object-contain" />
+          </button>
           <div className="hidden md:flex items-center gap-6 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             {[
               { href: "#features", label: "Fitur" },
@@ -646,7 +646,7 @@ const LandingThemeB = () => {
               {/* Brand */}
               <div className="col-span-2 space-y-4">
                 <div className="flex items-center gap-3">
-                  <p className="font-extrabold text-slate-900 dark:text-white text-xl tracking-tight">{get("footer_brand_name", "atskolla")}</p>
+                  <img src={headerLogo} alt={get("footer_brand_name", "ATSkolla")} className="h-10 w-auto object-contain" />
                 </div>
                 <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs">
                   {get("footer_description", "Solusi digital terpadu untuk sekolah modern Indonesia — absensi, jadwal mengajar, SPP, dan portal wali murid dalam satu platform.")}
