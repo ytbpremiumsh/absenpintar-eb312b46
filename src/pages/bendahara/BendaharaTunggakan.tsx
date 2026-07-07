@@ -326,7 +326,7 @@ export default function BendaharaTunggakan() {
                     <Button
                       size="sm"
                       variant="outline"
-                      disabled={!s.phone || !waFlag || sending === s.student_id}
+                      disabled={!s.phone || sending === s.student_id}
                       onClick={() => sendReminder(s)}
                       className="h-8 text-xs"
                     >
