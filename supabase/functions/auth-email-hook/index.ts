@@ -372,43 +372,25 @@ async function handleWebhook(req: Request): Promise<Response> {
     }
   }
 
-  const { error: enqueueError } = await supabase.rpc('enqueue_email', {
-    queue_name: 'auth_emails',
-    payload: {
-      run_id,
-      message_id: messageId,
-      to: payload.data.email,
-      from: `${senderName} <noreply@${FROM_DOMAIN}>`,
-      sender_domain: SENDER_DOMAIN,
-      subject,
-      html,
-      text,
-      purpose: 'transactional',
-      label: emailType,
-      queued_at: new Date().toISOString(),
-    },
+  // SMTP VPS wajib aktif — tidak ada fallback ke domain lain.
+  const errMsg = 'SMTP VPS belum dikonfigurasi. Aktifkan di Pengaturan Email (SMTP) terlebih dahulu.'
+  console.error(errMsg, { emailType, run_id })
+  await supabase.from('email_send_log').insert({
+    message_id: messageId,
+    template_name: emailType,
+    recipient_email: payload.data.email,
+    status: 'failed',
+    error_message: errMsg,
   })
-
-
-  if (enqueueError) {
-    console.error('Failed to enqueue auth email', { error: enqueueError, run_id, emailType })
-    await supabase.from('email_send_log').insert({
-      message_id: messageId,
-      template_name: emailType,
-      recipient_email: payload.data.email,
-      status: 'failed',
-      error_message: 'Failed to enqueue email',
-    })
-    return new Response(JSON.stringify({ error: 'Failed to enqueue email' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
-
-  console.log('Auth email enqueued', { emailType, email: payload.data.email, run_id })
-
+  await supabase.from('email_logs').insert({
+    to_email: payload.data.email,
+    subject,
+    event_type: `auth_${emailType}`,
+    status: 'failed',
+    error: errMsg,
+  })
   return new Response(
-    JSON.stringify({ success: true, queued: true }),
+    JSON.stringify({ success: false, error: errMsg }),
     { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
 }
