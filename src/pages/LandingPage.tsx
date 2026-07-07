@@ -933,7 +933,7 @@ function FinalCTA() {
             Mulai Gratis <ArrowRight className="h-4 w-4" />
           </button>
           <a
-            href="https://wa.me/6285155124304"
+            href="https://wa.me/628886117537"
             target="_blank" rel="noreferrer"
             className="inline-flex items-center gap-2 px-7 py-4 bg-transparent hover:bg-slate-100  text-[#0b1020] border border-slate-200 font-semibold rounded-xl font-display"
           >
@@ -977,7 +977,7 @@ function Footer() {
         <div>
           <div className="font-display font-semibold text-[#0b1020] text-sm mb-4">Kontak</div>
           <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-[#5B6CF9]" /> +62 851 5512 4304</li>
+            <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-[#5B6CF9]" /> +62 888 6117 537</li>
             <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-[#5B6CF9]" /> halo@atskolla.com</li>
             <li className="flex items-center gap-2"><MapPin className="h-4 w-4 text-[#5B6CF9]" /> Indonesia</li>
           </ul>
