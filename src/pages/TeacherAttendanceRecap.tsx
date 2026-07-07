@@ -433,18 +433,29 @@ const TeacherAttendanceRecap = ({ schoolId: schoolIdProp, hideHeader }: Props = 
                     <th rowSpan={2} className="px-3 py-2.5 text-left font-semibold text-muted-foreground w-10 sticky left-0 bg-card z-10">No</th>
                     <th rowSpan={2} className="px-3 py-2.5 text-left font-semibold text-muted-foreground min-w-[200px]">Nama & Jabatan</th>
                     <th colSpan={daysInMonth} className="px-1 py-2 text-center font-bold text-primary uppercase text-[10px] tracking-wider">Tanggal</th>
-                    <th colSpan={5} className="px-1 py-2 text-center font-bold text-primary uppercase text-[10px] tracking-wider">Keterangan</th>
+                    {isPulangMode ? (
+                      <th className="px-1 py-2 text-center font-bold text-primary uppercase text-[10px] tracking-wider">Ket</th>
+                    ) : (
+                      <th colSpan={5} className="px-1 py-2 text-center font-bold text-primary uppercase text-[10px] tracking-wider">Keterangan</th>
+                    )}
                   </tr>
                   <tr className="border-b border-border bg-muted/30">
                     {dayArray.map((d) => (
                       <th key={d} className="px-0.5 py-1.5 text-center font-medium text-muted-foreground w-7 text-[10px]">{d}</th>
                     ))}
-                    <th className="px-1 py-1.5 text-center font-bold text-emerald-600 w-7 text-[10px]">H</th>
-                    <th className="px-1 py-1.5 text-center font-bold text-violet-600 w-7 text-[10px]">S</th>
-                    <th className="px-1 py-1.5 text-center font-bold text-amber-600 w-7 text-[10px]">I</th>
-                    <th className="px-1 py-1.5 text-center font-bold text-red-600 w-7 text-[10px]">A</th>
-                    <th className="px-1 py-1.5 text-center font-bold text-primary w-10 text-[10px]">%</th>
+                    {isPulangMode ? (
+                      <th className="px-1 py-1.5 text-center font-bold text-emerald-600 w-7 text-[10px]">✓</th>
+                    ) : (
+                      <>
+                        <th className="px-1 py-1.5 text-center font-bold text-emerald-600 w-7 text-[10px]">H</th>
+                        <th className="px-1 py-1.5 text-center font-bold text-violet-600 w-7 text-[10px]">S</th>
+                        <th className="px-1 py-1.5 text-center font-bold text-amber-600 w-7 text-[10px]">I</th>
+                        <th className="px-1 py-1.5 text-center font-bold text-red-600 w-7 text-[10px]">A</th>
+                        <th className="px-1 py-1.5 text-center font-bold text-primary w-10 text-[10px]">%</th>
+                      </>
+                    )}
                   </tr>
+
                 </thead>
                 <tbody>
                   {rows.map((r, i) => {
