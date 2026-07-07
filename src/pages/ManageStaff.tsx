@@ -362,7 +362,7 @@ const ManageStaff = () => {
 
   const handleSaveEdit = async () => {
     if (!selectedStaff || !editName.trim()) return;
-    if (!editRoles.staff && !editRoles.teacher && !editRoles.bendahara) {
+    if (!editRoles.staff && !editRoles.teacher && !editRoles.bendahara && !editRoles.principal) {
       toast.error("Minimal pilih satu role");
       return;
     }
@@ -386,6 +386,7 @@ const ManageStaff = () => {
       if (editRoles.staff) wantedRoles.push("staff");
       if (editRoles.teacher) wantedRoles.push("teacher");
       if (editRoles.bendahara) wantedRoles.push("bendahara");
+      if (editRoles.principal) wantedRoles.push("principal");
 
       for (const role of wantedRoles) {
         if (!currentRoles.includes(role)) {
