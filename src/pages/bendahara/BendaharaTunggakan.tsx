@@ -149,7 +149,7 @@ export default function BendaharaTunggakan() {
           <Button
             size="sm"
             onClick={() => setBroadcastOpen(true)}
-            disabled={perStudent.length === 0 || !waFlag}
+            disabled={perStudent.length === 0}
             className="bg-white/20 hover:bg-white/30 text-white border border-white/20"
           >
             <Send className="h-4 w-4 mr-1.5" /> Kirim Semua
