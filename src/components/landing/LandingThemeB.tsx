@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { isRootHost } from "@/lib/tenant";
 import { supabase } from "@/integrations/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import TypingEffect from "@/components/TypingEffect";
 import {
   ArrowRight, CheckCircle2, Mail, Phone, MapPin,
@@ -203,7 +203,8 @@ const LandingThemeB = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-white overflow-x-hidden">
+    <MotionConfig transition={{ duration: 0 }}>
+    <div className="no-motion min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-white overflow-x-hidden">
 
       {/* ─── Floating Navbar ─── */}
       <nav className="fixed top-3 left-3 right-3 z-50 transition-all duration-300 rounded-2xl bg-white dark:bg-slate-900 shadow-lg border border-slate-200/80 dark:border-slate-700/50">
@@ -724,6 +725,7 @@ const LandingThemeB = () => {
         </div>
       </footer>
     </div>
+    </MotionConfig>
   );
 };
 

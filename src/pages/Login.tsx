@@ -10,7 +10,7 @@ import {
   Phone, MessageSquare, Sparkles, Users, Calendar, ScanFace, Wallet, BarChart3, MessageCircle, LogIn,
 } from "lucide-react";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import BackendStatusBanner, { isBackendNetworkError } from "@/components/BackendStatusBanner";
 import { useTenant, buildTenantUrl, getRootDomain } from "@/lib/tenant";
 import { Search, School as SchoolIcon } from "lucide-react";
@@ -273,9 +273,10 @@ const Login = ({ forcedMode }: LoginProps) => {
   ];
 
   return (
+    <MotionConfig transition={{ duration: 0 }}>
     <div
       data-ls-theme={theme}
-      className="min-h-screen flex relative overflow-hidden bg-white text-[#0b1020] transition-colors"
+      className="no-motion min-h-screen flex relative overflow-hidden bg-white text-[#0b1020]"
     >
       <style dangerouslySetInnerHTML={{ __html: LANDING_THEME_CSS }} />
 
@@ -587,6 +588,7 @@ const Login = ({ forcedMode }: LoginProps) => {
         <p className="text-center text-[#0b1020]/40 text-xs mt-8 w-full max-w-6xl">© 2026 ATSkolla — Platform Digital Sekolah</p>
       </div>
     </div>
+    </MotionConfig>
   );
 };
 

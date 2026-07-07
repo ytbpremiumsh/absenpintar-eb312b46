@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscriptionFeatures } from "@/hooks/useSubscriptionFeatures";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/PageHeader";
@@ -331,7 +331,8 @@ const Dashboard = () => {
 
 
   return (
-    <div className="space-y-6">
+    <MotionConfig transition={{ duration: 0 }}>
+    <div className="no-motion space-y-6">
       <AnimatePresence>
         {showTrialPopup && subFeatures.isTrial && subFeatures.trialDaysLeft !== null && (
           <motion.div
@@ -676,6 +677,7 @@ const Dashboard = () => {
       </Card>
 
     </div>
+    </MotionConfig>
   );
 };
 

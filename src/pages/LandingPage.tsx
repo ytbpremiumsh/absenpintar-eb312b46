@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, MotionConfig } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 const ATSKOLLA_LOGO_URL = "https://absenpintar.online/images/logo-atskolla.png";
 import { useLandingTheme, LANDING_THEME_CSS } from "@/hooks/useLandingTheme";
@@ -1017,9 +1017,10 @@ export default function LandingPage() {
   const { theme, toggle } = useLandingTheme();
 
   return (
+    <MotionConfig transition={{ duration: 0 }}>
     <div
       data-ls-theme={theme}
-      className="min-h-screen bg-white font-sans text-[#0b1020] antialiased selection:bg-[#5B6CF9]/30 selection:text-white transition-colors"
+      className="no-motion min-h-screen bg-white font-sans text-[#0b1020] antialiased selection:bg-[#5B6CF9]/30 selection:text-white"
     >
       <style dangerouslySetInnerHTML={{ __html: LANDING_THEME_CSS }} />
       <Nav theme={theme} onToggleTheme={toggle} />
@@ -1038,5 +1039,6 @@ export default function LandingPage() {
       </main>
       <Footer />
     </div>
+    </MotionConfig>
   );
 }
