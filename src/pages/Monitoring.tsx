@@ -377,7 +377,7 @@ const Monitoring = () => {
       <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center gap-2">
           <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-          <h2 className="text-base sm:text-lg font-bold text-foreground">Per Kelas</h2>
+          <h2 className="text-base sm:text-lg font-bold text-foreground">Absen Manual - Per Kelas</h2>
           <Badge variant="secondary" className="text-[10px] sm:text-xs">{classNames.length} kelas</Badge>
         </div>
 
