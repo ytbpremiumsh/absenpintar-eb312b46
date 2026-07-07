@@ -4086,11 +4086,12 @@ export function BendaharaSaldo() {
   // Saldo — sumber kebenaran: spp_invoices (sinkron dengan halaman Pencairan)
   // "Sudah Dicairkan" = invoice online lunas yang sudah terikat settlement
   const settledItems = items.filter((i) => !!i.settlement_id);
-  const settledNet = settledItems.reduce((s, x) => s + (x.net_amount || 0), 0);
+  const settledGross = settledItems.reduce((s, x) => s + (x.total_amount || 0), 0);
   const settledCount = settledItems.length;
   const settledFeePencairan = settlements.filter(s => s.status === "paid").reduce((s, x) => s + (x.withdraw_fee || 0), 0);
-  const pendingPayout = settlements.filter(s => ["pending", "approved"].includes(s.status)).reduce((s, x) => s + (x.total_net || 0), 0);
-  const activeBalance = Math.max(0, activeTotals.net);
+  const pendingPayout = settlements.filter(s => ["pending", "approved"].includes(s.status)).reduce((s, x) => s + (x.total_amount || x.total_net || 0), 0);
+  const activeBalance = Math.max(0, activeTotals.gross);
+  const lockedGross = Math.max(0, totals.gross - activeTotals.gross);
 
   // Banner info: dismiss selama 7 hari via localStorage
   const [showSaldoInfo, setShowSaldoInfo] = useState(() => {
