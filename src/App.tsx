@@ -129,6 +129,7 @@ const BendaharaSettlement = lazy(() => BendaharaPagesMod().then(m => ({ default:
 const BendaharaJenisPembayaran = lazy(() => import("./pages/bendahara/BendaharaJenisPembayaran"));
 const BendaharaBukuKas = lazy(() => import("./pages/bendahara/BendaharaBukuKas"));
 const BendaharaTunggakan = lazy(() => import("./pages/bendahara/BendaharaTunggakan"));
+const BendaharaLaporanSPP = lazy(() => import("./pages/bendahara/BendaharaLaporanSPP"));
 
 import { GoogleAnalytics } from "./components/GoogleAnalytics";
 import MetaPixel from "./components/MetaPixel";
