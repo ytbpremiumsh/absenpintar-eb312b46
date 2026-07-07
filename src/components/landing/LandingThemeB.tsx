@@ -150,6 +150,7 @@ const TestimonialSlider = ({ testimonials }: { testimonials: Testimonial[] }) =>
 /* ─── Main Theme B Component ─── */
 const LandingThemeB = () => {
   const navigate = useNavigate();
+  const loginPath = isRootHost() ? "/admin" : "/login";
   const { enabled: waCreditEnabled } = useWaCreditEnabled();
   const [content, setContent] = useState<Record<string, string>>({});
   const [plans, setPlans] = useState<PlanRow[]>([]);
