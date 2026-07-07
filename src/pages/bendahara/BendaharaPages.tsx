@@ -358,14 +358,28 @@ export function BendaharaDashboard() {
         variant="primary"
       />
 
-      {/* Ringkasan Cepat — Pemasukan Hari/Bulan/Tahun, Jatuh Tempo, Saldo Kas */}
+      {/* Ringkasan utama — 6 metrik esensial (tanpa duplikasi) */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard label="Pemasukan Hari Ini" value={fmtIDR(quickMetrics.incomeToday)} icon={TrendingUp} gradient="from-emerald-500 to-teal-600" />
-        <StatCard label="Pemasukan Bulan Ini" value={fmtIDR(quickMetrics.incomeMonth)} icon={BarChart3} gradient="from-[#5B6CF9] to-[#4c5ded]" />
-        <StatCard label="Pemasukan Tahun Ini" value={fmtIDR(quickMetrics.incomeYear)} icon={Banknote} gradient="from-indigo-500 to-violet-600" />
+        <StatCard label="Saldo Siap Cair" value={fmtIDR(stats.availableBalance)} sub="Online, belum di-settle" icon={Wallet} gradient="from-emerald-500 to-teal-600" />
+        <StatCard label="Pemasukan Hari Ini" value={fmtIDR(quickMetrics.incomeToday)} icon={TrendingUp} gradient="from-emerald-500 to-lime-600" />
+        <StatCard label="Pemasukan Bulan Ini" value={fmtIDR(quickMetrics.incomeMonth)} sub={`${MONTHS[new Date().getMonth()]} ${new Date().getFullYear()}`} icon={BarChart3} gradient="from-[#5B6CF9] to-[#4c5ded]" />
+        <StatCard label="Tunggakan" value={fmtIDR(stats.tunggakan)} sub={`${stats.pendingCount} pending`} icon={AlertCircle} gradient="from-rose-500 to-red-600" />
         <StatCard label="Jatuh Tempo Hari Ini" value={quickMetrics.dueTodayCount} sub={fmtIDR(quickMetrics.dueTodayTotal)} icon={AlertCircle} gradient="from-amber-500 to-orange-600" />
-        <StatCard label="Sudah Bayar (Bulan Ini)" value={quickMetrics.paidStudentsMonth} sub={`${quickMetrics.unpaidStudentsMonth} belum bayar`} icon={CheckCircle2} gradient="from-emerald-500 to-lime-600" />
-        <StatCard label="Total Saldo Kas" value={fmtIDR(quickMetrics.saldoKas)} sub="Kas manual + siap cair" icon={Wallet} gradient="from-sky-500 to-blue-600" />
+        <StatCard label="Total Saldo Kas" value={fmtIDR(quickMetrics.saldoKas)} sub="Kas manual + siap cair" icon={Banknote} gradient="from-sky-500 to-blue-600" />
+      </div>
+
+      {/* Progress pelunasan (ringkas, tanpa card berat) */}
+      <div className="rounded-2xl bg-white dark:bg-card ring-1 ring-slate-200/70 dark:ring-slate-800/60 p-4 flex items-center gap-4">
+        <div className="shrink-0 h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm">
+          <CheckCircle2 className="h-5 w-5 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline justify-between mb-1.5">
+            <p className="text-xs font-semibold text-muted-foreground">Persentase Pelunasan</p>
+            <p className="text-sm font-extrabold text-emerald-600">{completionRate}% <span className="text-[10px] font-medium text-muted-foreground">• {stats.paidCount} lunas / {stats.pendingCount} pending</span></p>
+          </div>
+          <Progress value={completionRate} className="h-1.5 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-teal-600" />
+        </div>
       </div>
 
       {quickMetrics.dueTodayList.length > 0 && (
@@ -389,71 +403,6 @@ export function BendaharaDashboard() {
         </Card>
       )}
 
-
-
-      {/* KEUANGAN AKTIF — Siap Dicairkan (dipisah supaya jelas beda dengan rincian pembayaran) */}
-      <div className="rounded-2xl overflow-hidden bg-white dark:bg-card shadow-lg shadow-slate-900/5 ring-1 ring-emerald-200/70 dark:ring-emerald-800/40">
-        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-3.5 flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
-            <Wallet className="h-4 w-4 text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold text-white leading-tight">Keuangan Aktif — Siap Dicairkan</p>
-            <p className="text-[10px] text-white/80 leading-tight">Saldo online yang dapat langsung di-withdraw ke rekening sekolah</p>
-          </div>
-        </div>
-        <div className="p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Saldo Live (Siap Cair)</p>
-            <p className="text-3xl font-extrabold text-emerald-600 mt-1">{fmtIDR(stats.availableBalance)}</p>
-            <p className="text-[11px] text-muted-foreground mt-1">Otomatis dari invoice online (bukan offline) yang sudah lunas & belum di-settle.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* RINCIAN KEUANGAN PEMBAYARAN SEKOLAH — snapshot tagihan/lunas/tunggakan */}
-      <div className="rounded-2xl overflow-hidden bg-white dark:bg-card shadow-lg shadow-slate-900/5 ring-1 ring-slate-200/70 dark:ring-slate-800/60">
-        <div className="bg-gradient-to-r from-[#5B6CF9] to-[#4c5ded] px-5 py-3.5 flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
-            <Receipt className="h-4 w-4 text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-white leading-tight">Rincian Keuangan Pembayaran Sekolah</p>
-            <p className="text-[10px] text-white/70 leading-tight">Tagihan bulan berjalan, total lunas, dan tunggakan</p>
-          </div>
-        </div>
-        <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {[
-            { label: "Tagihan Bulan Ini", value: fmtIDR(stats.monthBills), grad: "from-sky-500 to-blue-600", icon: Receipt, sub: `${MONTHS[new Date().getMonth()]} ${new Date().getFullYear()}` },
-            { label: "Lunas", value: fmtIDR(stats.totalGross), grad: "from-violet-500 to-indigo-600", icon: CheckCircle2, sub: `${stats.paidCount} transaksi` },
-            { label: "Tunggakan", value: fmtIDR(stats.tunggakan), grad: "from-rose-500 to-red-600", icon: AlertCircle, sub: `${stats.pendingCount} pending` },
-          ].map((t) => (
-            <div key={t.label} className="relative overflow-hidden rounded-xl p-3.5 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 ring-1 ring-slate-200/70 dark:ring-slate-800/60 hover:-translate-y-0.5 hover:shadow-md transition-all">
-              <div className={`h-9 w-9 rounded-lg bg-gradient-to-br ${t.grad} flex items-center justify-center mb-2 shadow-sm`}>
-                <t.icon className="h-4 w-4 text-white" />
-              </div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t.label}</p>
-              <p className="text-sm font-extrabold mt-0.5 truncate">{t.value}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{t.sub}</p>
-              <div className={`absolute -right-6 -bottom-6 h-16 w-16 rounded-full bg-gradient-to-br ${t.grad} opacity-10 blur-xl`} />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Persentase pelunasan */}
-      <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50/70 to-teal-50/40 dark:from-emerald-950/20 dark:to-teal-950/10">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Persentase Pelunasan</p>
-              <p className="text-2xl font-extrabold text-emerald-600">{completionRate}%</p>
-            </div>
-            <CheckCircle2 className="h-10 w-10 text-emerald-500/30" />
-          </div>
-          <Progress value={completionRate} className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-teal-600" />
-        </CardContent>
-      </Card>
 
       {/* CHARTS */}
       <div className="grid lg:grid-cols-2 gap-4">
