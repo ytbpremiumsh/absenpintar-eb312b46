@@ -4263,32 +4263,35 @@ export function BendaharaPencairan() {
   useEffect(() => {
     if (!profile?.school_id) { setLoadingHistory(false); return; }
     let cancelled = false;
-    const load = async () => {
-      if (!syncingRef.current) {
-        syncingRef.current = true;
-        await supabase.functions.invoke("spp-mayar", { body: { action: "sync_paid_invoices" } }).catch(() => null);
-        syncingRef.current = false;
-      }
-      const [avRes, hRes, allPaidRes] = await Promise.all([
-        supabase.from("spp_invoices").select("id,total_amount,gateway_fee,net_amount").eq("school_id", profile.school_id).eq("status", "paid").not("payment_method", "in", "(offline_cash,offline_transfer)").is("settlement_id", null),
+
+    const loadLocal = async () => {
+      // Satu query saja: ambil semua paid online sekaligus, lalu bagi di client.
+      const [paidRes, hRes] = await Promise.all([
+        supabase.from("spp_invoices")
+          .select("id, payment_method, settlement_id, total_amount, gateway_fee, net_amount")
+          .eq("school_id", profile.school_id)
+          .eq("status", "paid"),
         supabase.from("spp_settlements").select("*").eq("school_id", profile.school_id).order("created_at", { ascending: false }),
-        supabase.from("spp_invoices").select("payment_method, settlement_id, total_amount, gateway_fee, net_amount").eq("school_id", profile.school_id).eq("status", "paid"),
       ]);
       if (cancelled) return;
-      const items = avRes.data || [];
-      setAvailableItems(items);
-      setAvailable({
-        count: items.length,
-        gross: items.reduce((s, i) => s + (i.total_amount || 0), 0),
-        fee: items.reduce((s, i) => s + (i.gateway_fee || 0), 0),
-        net: items.reduce((s, i) => s + (i.net_amount || 0), 0),
-      });
-      const allPaid = (allPaidRes.data || []) as any[];
+
+      const allPaid = (paidRes.data || []) as any[];
       const isOffline = (m: string | null) => {
         const v = (m || "").toLowerCase();
         return v === "offline_cash" || v === "offline_transfer";
       };
       const online = allPaid.filter((x) => !isOffline(x.payment_method));
+      const offline = allPaid.filter((x) => isOffline(x.payment_method));
+      const availableList = online.filter((x) => !x.settlement_id);
+
+      setAvailableItems(availableList);
+      setAvailable({
+        count: availableList.length,
+        gross: availableList.reduce((s, i) => s + (i.total_amount || 0), 0),
+        fee: availableList.reduce((s, i) => s + (i.gateway_fee || 0), 0),
+        net: availableList.reduce((s, i) => s + (i.net_amount || 0), 0),
+      });
+
       const invoiceBySettlement = online.reduce((map, x) => {
         if (!x.settlement_id) return map;
         const current = map.get(x.settlement_id) || { count: 0, gross: 0, fee: 0, net: 0 };
@@ -4299,6 +4302,7 @@ export function BendaharaPencairan() {
         map.set(x.settlement_id, current);
         return map;
       }, new Map<string, { count: number; gross: number; fee: number; net: number }>());
+
       const reconciledHistory = ((hRes.data || []) as any[]).map((s) => {
         const inv = invoiceBySettlement.get(s.id) || { count: 0, gross: 0, fee: 0, net: 0 };
         const withdrawFee = s.withdraw_fee ?? 3000;
@@ -4311,7 +4315,7 @@ export function BendaharaPencairan() {
           final_payout: Math.max(0, inv.net - withdrawFee),
         };
       });
-      const offline = allPaid.filter((x) => isOffline(x.payment_method));
+
       setBreakdown({
         onlineTotal: online.length,
         onlineSettled: online.filter((x) => x.settlement_id).length,
@@ -4321,12 +4325,37 @@ export function BendaharaPencairan() {
       setHistory(reconciledHistory);
       setLoadingHistory(false);
     };
-    load();
+
+    // 1) Render cepat dari DB lokal
+    loadLocal();
     loadAccounts();
     loadStaff();
+
+    // 2) Sync gateway di background; refresh data setelah selesai (non-blocking UI)
+    if (!syncingRef.current) {
+      syncingRef.current = true;
+      supabase.functions.invoke("spp-mayar", { body: { action: "sync_paid_invoices" } })
+        .catch(() => null)
+        .finally(() => {
+          syncingRef.current = false;
+          if (!cancelled) loadLocal();
+        });
+    }
+
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.school_id, open, refreshKey]);
+
+  // Realtime: refresh saldo & riwayat saat ada perubahan invoice/settlement
+  useEffect(() => {
+    if (!profile?.school_id) return;
+    const channel = supabase
+      .channel("bendahara-pencairan-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "spp_invoices", filter: `school_id=eq.${profile.school_id}` }, () => setRefreshKey((k) => k + 1))
+      .on("postgres_changes", { event: "*", schema: "public", table: "spp_settlements", filter: `school_id=eq.${profile.school_id}` }, () => setRefreshKey((k) => k + 1))
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [profile?.school_id]);
 
   const finalPayout = Math.max(0, available.net - 3000);
 
