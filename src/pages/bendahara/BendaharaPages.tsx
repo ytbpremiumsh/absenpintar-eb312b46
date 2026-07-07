@@ -4924,7 +4924,7 @@ function PresetLaporan({ items, students, school, year }: { items: any[]; studen
                 <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30" onClick={() => exportPdf(p.title, p.subtitle, p.rows())}>
                   <Download className="h-3 w-3 mr-1" /> PDF
                 </Button>
-                <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" onClick={() => exportXlsx(`${p.title.replace(/\s+/g, "_")}_${todayStr}`, p.rows())}>
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" onClick={() => exportXlsx(`${p.title.replace(/\s+/g, "_")}_${todayStr}`, p.rows(), p.title, p.subtitle)}>
                   <Download className="h-3 w-3 mr-1" /> Excel
                 </Button>
               </div>
