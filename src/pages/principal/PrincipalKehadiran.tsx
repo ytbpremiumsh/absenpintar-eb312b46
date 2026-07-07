@@ -1,15 +1,48 @@
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, UserCheck } from "lucide-react";
+import { Trophy, UserCheck, Clock, UserX } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend } from "recharts";
 import { usePrincipalData } from "@/hooks/usePrincipalData";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function PrincipalKehadiran() {
   const { loading, stats, teacherAtt, classAtt, monthly, ranking } = usePrincipalData();
+  const { profile } = useAuth();
+  const [teacherList, setTeacherList] = useState<{ hadir: any[]; izin: any[]; belum: any[] }>({ hadir: [], izin: [], belum: [] });
+
+  useEffect(() => {
+    if (!profile?.school_id) return;
+    (async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const [teachersQ, rolesQ, logsQ] = await Promise.all([
+        supabase.from("profiles").select("user_id, full_name, phone").eq("school_id", profile.school_id),
+        supabase.from("user_roles").select("user_id, role").eq("role", "teacher" as any),
+        supabase.from("teacher_attendance_logs").select("user_id, status, attendance_type, time").eq("school_id", profile.school_id).eq("date", today),
+      ]);
+      const teacherIds = new Set((rolesQ.data || []).map((r: any) => r.user_id));
+      const teachers = (teachersQ.data || []).filter((t: any) => teacherIds.has(t.user_id));
+      const arrival = new Map<string, any>();
+      (logsQ.data || []).forEach((l: any) => {
+        if ((l.attendance_type ?? "datang") === "datang") arrival.set(l.user_id, l);
+      });
+      const hadir: any[] = [], izin: any[] = [], belum: any[] = [];
+      teachers.forEach((t: any) => {
+        const l = arrival.get(t.user_id);
+        const item = { user_id: t.user_id, name: t.full_name || "-", phone: t.phone || "-", status: l?.status || "belum", time: l?.time || null };
+        if (item.status === "hadir") hadir.push(item);
+        else if (["izin", "sakit", "alfa"].includes(item.status)) izin.push(item);
+        else belum.push(item);
+      });
+      setTeacherList({ hadir, izin, belum });
+    })();
+  }, [profile?.school_id]);
 
   if (loading) return <Skeleton className="h-96 w-full rounded-2xl" />;
+
 
   return (
     <div className="space-y-6">
