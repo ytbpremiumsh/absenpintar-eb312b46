@@ -322,8 +322,17 @@ const ManageWaliKelas = () => {
               <Select value={formClass} onValueChange={setFormClass}>
                 <SelectTrigger><SelectValue placeholder="Pilih kelas" /></SelectTrigger>
                 <SelectContent>
-                  {classes.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+                  {classes.filter(c => !assignedClassNames.has(c)).length === 0 ? (
+                    <div className="p-3 text-center text-xs text-muted-foreground">
+                      Semua kelas sudah memiliki wali kelas.
+                    </div>
+                  ) : (
+                    classes.filter(c => !assignedClassNames.has(c)).map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))
+                  )}
                 </SelectContent>
+
               </Select>
             </div>
             <Button onClick={handleAssign} disabled={creating || !formTeacherId || !formClass} className="w-full gradient-primary hover:opacity-90">
