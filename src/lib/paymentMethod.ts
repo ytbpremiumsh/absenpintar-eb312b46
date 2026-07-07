@@ -5,7 +5,9 @@ export const formatPaymentMethodLabel = (m?: string | null): string => {
   if (v === "offline_transfer") return "Transfer Manual ke Rekening";
   if (v === "qris") return "QRIS";
   if (v === "wa_credit" || v.includes("wa_credit")) return "Kredit WA";
-  if (v.includes("transfer") || v.includes("bank")) return "Transfer Bank";
-  if (v === "mayar" || v === "spp" || v === "" || !v) return "QRIS / Transfer Bank";
+  if (v === "doku" || v.includes("doku")) return "Transfer Bank";
+  if (v === "mayar" || v.includes("mayar")) return "QRIS";
+  if (v.includes("transfer") || v.includes("bank") || v === "va") return "Transfer Bank";
+  if (v === "spp" || v === "" || !v) return "QRIS / Transfer Bank";
   return m || "-";
 };
