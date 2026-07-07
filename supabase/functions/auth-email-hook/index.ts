@@ -230,17 +230,45 @@ async function handleWebhook(req: Request): Promise<Response> {
     newEmail: payload.data.new_email,
   }
 
-  // Render React Email to HTML and plain text
-  const html = await renderAsync(React.createElement(EmailTemplate, templateProps))
-  const text = await renderAsync(React.createElement(EmailTemplate, templateProps), {
-    plainText: true,
-  })
-
-  // Enqueue email for async processing by the dispatcher (process-email-queue).
+  // Initialize backend client early to fetch custom DB template.
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
+
+  // Try to load a custom template (subject/html/sender_name) from DB. Fallback to React template.
+  let subject = EMAIL_SUBJECTS[emailType] || 'Notification'
+  let senderName = SITE_NAME
+  let html: string
+  let text: string
+
+  const { data: dbTpl } = await supabase
+    .from('auth_email_templates')
+    .select('subject, html, sender_name')
+    .eq('type', emailType)
+    .maybeSingle()
+
+  if (dbTpl && dbTpl.html) {
+    const vars: Record<string, string> = {
+      site_name: SITE_NAME,
+      site_url: `https://${ROOT_DOMAIN}`,
+      recipient: payload.data.email ?? '',
+      email: payload.data.email ?? '',
+      confirmation_url: payload.data.url ?? '',
+      token: payload.data.token ?? '',
+      old_email: payload.data.old_email ?? '',
+      new_email: payload.data.new_email ?? '',
+    }
+    const replace = (input: string) =>
+      input.replace(/\{\{\s*([a-z_]+)\s*\}\}/gi, (_m, k) => vars[String(k).toLowerCase()] ?? '')
+    subject = replace(dbTpl.subject || subject)
+    senderName = dbTpl.sender_name || SITE_NAME
+    html = replace(dbTpl.html)
+    text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  } else {
+    html = await renderAsync(React.createElement(EmailTemplate, templateProps))
+    text = await renderAsync(React.createElement(EmailTemplate, templateProps), { plainText: true })
+  }
 
   const messageId = crypto.randomUUID()
 
@@ -258,9 +286,9 @@ async function handleWebhook(req: Request): Promise<Response> {
       run_id,
       message_id: messageId,
       to: payload.data.email,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+      from: `${senderName} <noreply@${FROM_DOMAIN}>`,
       sender_domain: SENDER_DOMAIN,
-      subject: EMAIL_SUBJECTS[emailType] || 'Notification',
+      subject,
       html,
       text,
       purpose: 'transactional',
@@ -268,6 +296,7 @@ async function handleWebhook(req: Request): Promise<Response> {
       queued_at: new Date().toISOString(),
     },
   })
+
 
   if (enqueueError) {
     console.error('Failed to enqueue auth email', { error: enqueueError, run_id, emailType })
