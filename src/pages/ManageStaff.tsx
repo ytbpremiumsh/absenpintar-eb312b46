@@ -70,7 +70,7 @@ const ManageStaff = () => {
   const [formPhone, setFormPhone] = useState("");
   const [formNip, setFormNip] = useState("");
   const [formPosition, setFormPosition] = useState("Guru");
-  const [formRoles, setFormRoles] = useState<{ staff: boolean; teacher: boolean; bendahara: boolean }>({ staff: true, teacher: false, bendahara: false });
+  const [formRoles, setFormRoles] = useState<{ staff: boolean; teacher: boolean; bendahara: boolean; principal: boolean }>({ staff: true, teacher: false, bendahara: false, principal: false });
 
   // Detail/Edit
   const [detailDialog, setDetailDialog] = useState(false);
