@@ -4816,38 +4816,42 @@ function PresetLaporan({ items, students, school, year }: { items: any[]; studen
       "Total": a.total,
     }));
 
-  const exportXlsx = (fname: string, rows: any[]) => {
+  const exportXlsx = (fname: string, rows: any[], title?: string, subtitle?: string) => {
     if (rows.length === 0) { toast.error("Tidak ada data untuk periode ini"); return; }
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(rows);
-    ws["!cols"] = Object.keys(rows[0]).map(k => ({ wch: Math.min(Math.max(k.length + 2, 12), 30) }));
-    XLSX.utils.book_append_sheet(wb, ws, "Laporan");
-    XLSX.writeFile(wb, `${fname}.xlsx`);
+    const wb = XLSXStyle.utils.book_new();
+    const ws = buildStyledSheet(rows, {
+      title: title || fname,
+      subtitle: `${school?.name || "-"}${subtitle ? " • " + subtitle : ""}`,
+    });
+    XLSXStyle.utils.book_append_sheet(wb, ws, "Laporan");
+    XLSXStyle.writeFile(wb, `${fname}.xlsx`);
     toast.success("Excel diunduh");
   };
 
   const exportPdf = (title: string, subtitle: string, rows: any[]) => {
     if (rows.length === 0) { toast.error("Tidak ada data untuk periode ini"); return; }
-    const doc = new jsPDF("l", "mm", "a4");
-    doc.setFontSize(14); doc.setFont("helvetica", "bold");
-    doc.text(title, 14, 14);
-    doc.setFontSize(10); doc.setFont("helvetica", "normal");
-    doc.text(school?.name || "-", 14, 21);
-    doc.setFontSize(9);
-    doc.text(subtitle, 14, 27);
-    const total = rows.reduce((s, r) => s + (r["Total"] || r["Nominal"] || 0), 0);
-    doc.text(`Total: ${rows.length} baris • Rp ${total.toLocaleString("id-ID")}`, 14, 33);
-    const head = [Object.keys(rows[0])];
-    const body = rows.map(r => Object.values(r).map(v => typeof v === "number" ? v.toLocaleString("id-ID") : String(v ?? "")));
-    autoTable(doc, {
-      startY: 39, head, body,
-      styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [91, 108, 249], textColor: 255 },
-      alternateRowStyles: { fillColor: [248, 249, 252] },
+    const keys = Object.keys(rows[0]);
+    const columns = keys.map((k) => ({
+      header: k,
+      dataKey: k,
+      isCurrency: CURRENCY_KEYS.has(k),
+      align: (CURRENCY_KEYS.has(k) ? "right" : (k === "No" ? "center" : "left")) as any,
+    }));
+    buildStyledPdf({
+      title,
+      subtitle,
+      schoolName: school?.name || "-",
+      schoolNpsn: school?.npsn || undefined,
+      meta: [`Jumlah baris: ${rows.length}`],
+      orientation: "l",
+      columns,
+      rows,
+      fileName: title.replace(/\s+/g, "_"),
     });
-    doc.save(`${title.replace(/\s+/g, "_")}.pdf`);
     toast.success("PDF diunduh");
   };
+
+
 
   // Presets
   const dailyRows = () => buildRows(paid.filter((i: any) => (i.paid_at || "").slice(0, 10) === todayStr));
