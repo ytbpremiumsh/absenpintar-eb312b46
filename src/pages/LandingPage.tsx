@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 const ATSKOLLA_LOGO_URL = "https://absenpintar.online/images/logo-atskolla.png";
 import { useLandingTheme, LANDING_THEME_CSS } from "@/hooks/useLandingTheme";
 import ThemeToggle from "@/components/landing/ThemeToggle";
+import { isRootHost } from "@/lib/tenant";
 import {
   ArrowRight, CheckCircle2, ShieldCheck, Zap, MapPin, Menu, X,
   QrCode, ScanFace, CreditCard, Wallet, Receipt, Banknote,
