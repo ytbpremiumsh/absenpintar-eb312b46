@@ -3960,10 +3960,10 @@ export function BendaharaImportExport() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-[#5B6CF9]/10 to-transparent"><CardContent className="p-4"><div className="flex items-center justify-between"><div><p className="text-xs text-muted-foreground">Total Tagihan</p><p className="text-xl font-bold mt-0.5">{expCount.total}</p></div><div className="h-9 w-9 rounded-lg bg-[#5B6CF9]/15 flex items-center justify-center"><Receipt className="h-4 w-4 text-[#5B6CF9]" /></div></div></CardContent></Card>
-        <Card className="border-0 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><div><p className="text-xs text-muted-foreground">Lunas</p><p className="text-xl font-bold mt-0.5 text-emerald-600">{expCount.paid}</p></div><div className="h-9 w-9 rounded-lg bg-emerald-100 flex items-center justify-center"><CheckCircle2 className="h-4 w-4 text-emerald-600" /></div></div></CardContent></Card>
-        <Card className="border-0 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><div><p className="text-xs text-muted-foreground">Belum Bayar</p><p className="text-xl font-bold mt-0.5 text-amber-600">{expCount.unpaid}</p></div><div className="h-9 w-9 rounded-lg bg-amber-100 flex items-center justify-center"><AlertCircle className="h-4 w-4 text-amber-600" /></div></div></CardContent></Card>
-        <Card className="border-0 shadow-sm"><CardContent className="p-4"><div className="flex items-center justify-between"><div><p className="text-xs text-muted-foreground">Total Nominal</p><p className="text-base font-bold mt-0.5">{fmtIDR(expCount.sum)}</p></div><div className="h-9 w-9 rounded-lg bg-sky-100 flex items-center justify-center"><Banknote className="h-4 w-4 text-sky-600" /></div></div></CardContent></Card>
+        <StatCard label="Total Tagihan" value={expCount.total} icon={Receipt} gradient="from-indigo-500 to-indigo-600" />
+        <StatCard label="Lunas" value={expCount.paid} icon={CheckCircle2} gradient="from-emerald-500 to-emerald-600" />
+        <StatCard label="Belum Bayar" value={expCount.unpaid} icon={AlertCircle} gradient="from-amber-500 to-amber-600" />
+        <StatCard label="Total Nominal" value={fmtIDR(expCount.sum)} icon={Banknote} gradient="from-sky-500 to-sky-600" />
       </div>
 
       {/* Import */}
