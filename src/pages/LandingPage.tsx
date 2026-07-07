@@ -348,7 +348,7 @@ function Hero() {
                   <div className="h-2 w-2 rounded-full bg-red-500/40" />
                   <div className="h-2 w-2 rounded-full bg-yellow-500/40" />
                   <div className="h-2 w-2 rounded-full bg-green-500/40" />
-                  <div className="ml-3 text-[10px] font-mono text-[#0b1020]/40">app.atskolla.com/dashboard</div>
+                  <div className="ml-3 text-[10px] font-mono text-[#0b1020]/40">namasekolah.atskolla.com/dashboard</div>
                 </div>
                 <div className="flex gap-1.5">
                   <div className="w-7 h-7 rounded-lg bg-slate-50" />
