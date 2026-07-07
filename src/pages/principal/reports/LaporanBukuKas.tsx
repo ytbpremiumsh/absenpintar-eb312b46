@@ -127,10 +127,9 @@ export default function LaporanBukuKas() {
   const filteredRows = useMemo(
     () => allWithBalance.filter(({ entry: r }) =>
       (dir === "all" || r.direction === dir) &&
-      (cat === "all" || r.category === cat) &&
-      (src === "all" || r.source === src),
+      (cat === "all" || r.category === cat),
     ),
-    [allWithBalance, dir, cat, src],
+    [allWithBalance, dir, cat],
   );
 
   const withBalance = useMemo<Row[]>(() =>
