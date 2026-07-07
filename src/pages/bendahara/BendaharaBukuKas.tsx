@@ -247,7 +247,10 @@ export default function BendaharaBukuKas() {
     const aoa: any[][] = [];
     aoa.push([`BUKU KAS — ${school.name || "Sekolah"}`]);
     aoa.push([`${school.address || ""}${school.npsn ? ` • NPSN ${school.npsn}` : ""}`.trim() || "—"]);
-    aoa.push([`Periode: ${new Date(dateFrom).toLocaleDateString("id-ID")} s.d. ${new Date(dateTo).toLocaleDateString("id-ID")}`]);
+    const periodeLabel = (dateFrom || dateTo)
+      ? `${dateFrom ? new Date(dateFrom).toLocaleDateString("id-ID") : "Awal"} s.d. ${dateTo ? new Date(dateTo).toLocaleDateString("id-ID") : "Sekarang"}`
+      : "Semua Tanggal";
+    aoa.push([`Periode: ${periodeLabel}`]);
     aoa.push([`Dicetak: ${new Date().toLocaleString("id-ID")}`]);
     aoa.push([]);
     const headerRowIdx = aoa.length; // 0-based
