@@ -325,7 +325,7 @@ export default function ParentDashboard() {
   const monthRate = workingDaysElapsed ? Math.round((monthHadir / workingDaysElapsed) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F4F5FB] via-background to-background pb-32 md:pb-10">
+    <div className="no-motion min-h-screen bg-gradient-to-b from-[#F4F5FB] via-background to-background pb-32 md:pb-10">
 
       {/* TOP BAR — full width, sticky, spans across sidebar + content */}
       <div className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border/40 shadow-sm">
