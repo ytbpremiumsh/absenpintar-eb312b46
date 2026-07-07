@@ -82,6 +82,7 @@ const ParentLogin = lazy(() => import("./pages/parent/ParentLogin"));
 const ParentDashboard = lazy(() => import("./pages/parent/ParentDashboard"));
 const ManageBendahara = lazy(() => import("./pages/ManageBendahara"));
 const SelectRole = lazy(() => import("./pages/SelectRole"));
+const PrincipalDashboard = lazy(() => import("./pages/PrincipalDashboard"));
 const BendaharaWithdraw = lazy(() => import("./pages/bendahara/BendaharaWithdraw"));
 const BendaharaKeuanganSekolah = lazy(() => import("./pages/bendahara/BendaharaKeuanganSekolah"));
 const LaporanAbsensi = lazy(() => import("./pages/LaporanAbsensi"));
