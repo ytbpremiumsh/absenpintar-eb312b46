@@ -5395,7 +5395,7 @@ export function BendaharaLaporan() {
                       <div className="space-y-1">
                         <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-sky-500 transition-all"
+                            className="h-full rounded-full bg-slate-400 dark:bg-slate-500 transition-all"
                             style={{ width: `${Math.min(pct, 100)}%` }}
                           />
                         </div>
