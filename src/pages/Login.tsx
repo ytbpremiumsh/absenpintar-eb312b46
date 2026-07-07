@@ -312,7 +312,7 @@ const Login = ({ forcedMode }: LoginProps) => {
                   {tenantLogo ? (
                     <img src={tenantLogo} alt={tenantName || "Sekolah"} className="h-10 w-auto object-contain" />
                   ) : (
-                    <span className="font-extrabold text-2xl tracking-tight text-[#0b1020]">atskolla</span>
+                    <img src={loginLogo} alt="ATSkolla" className="h-10 w-auto object-contain" />
                   )}
                   {tenantName && <span className="font-bold text-lg tracking-tight">{tenantName}</span>}
                 </div>
