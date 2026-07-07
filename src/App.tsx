@@ -59,6 +59,10 @@ const PanduanDetail = lazy(() => import("./pages/PanduanDetail"));
 const Presentation = lazy(() => import("./pages/Presentation"));
 const Proposal = lazy(() => import("./pages/Proposal"));
 const PitchDeck = lazy(() => import("./pages/PitchDeck"));
+const LegalTerms = lazy(() => import("./pages/legal/Terms"));
+const LegalRefund = lazy(() => import("./pages/legal/Refund"));
+const LegalFAQ = lazy(() => import("./pages/legal/FAQ"));
+const LegalContact = lazy(() => import("./pages/legal/Contact"));
 
 const Penawaran = lazy(() => import("./pages/Penawaran"));
 const SuperAdminPenawaran = lazy(() => import("./pages/super-admin/SuperAdminPenawaran"));
