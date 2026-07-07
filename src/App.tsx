@@ -202,6 +202,10 @@ function AppRoutes() {
         <Route path="/penawaran" element={<Penawaran />} />
         <Route path="/proposal" element={<Proposal />} />
         <Route path="/pitchdeck" element={<PitchDeck />} />
+        <Route path="/syarat-ketentuan" element={<LegalTerms />} />
+        <Route path="/kebijakan-refund" element={<LegalRefund />} />
+        <Route path="/faq" element={<LegalFAQ />} />
+        <Route path="/kontak" element={<LegalContact />} />
         <Route path="/parent/login" element={<ParentLogin />} />
         <Route path="/parent" element={<ParentDashboard />} />
         {/* Bendahara */}
