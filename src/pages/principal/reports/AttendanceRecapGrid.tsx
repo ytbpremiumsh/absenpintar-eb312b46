@@ -307,6 +307,7 @@ export function AttendanceRecapGrid({ schoolId, kind }: Props) {
         </div>
       )}
 
+      {mainTab === "rekap" && (<>
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-3 text-xs pt-1">
         <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-emerald-500 text-white text-[10px] font-bold">H</span> Hadir</div>
