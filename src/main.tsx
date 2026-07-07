@@ -23,4 +23,16 @@ if (typeof window !== "undefined") {
   }
 }
 
+// Global safety nets — catch stray errors so they don't vanish silently.
+if (typeof window !== "undefined") {
+  window.addEventListener("unhandledrejection", (event) => {
+    // eslint-disable-next-line no-console
+    console.error("[unhandledrejection]", event.reason);
+  });
+  window.addEventListener("error", (event) => {
+    // eslint-disable-next-line no-console
+    console.error("[window.error]", event.message, event.error);
+  });
+}
+
 createRoot(document.getElementById("root")!).render(<App />);
