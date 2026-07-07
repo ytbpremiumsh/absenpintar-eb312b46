@@ -112,11 +112,17 @@ async function ipaymuFetch(
 
 // Map ATSkolla channel → iPaymu paymentMethod + optional paymentChannel filter.
 // Leaving paymentChannel empty on VA/Retail lets user pick any bank/store on iPaymu page.
-function channelToIpaymu(ch: string | null): { paymentMethod?: string; paymentChannel?: string } {
+function channelToIpaymu(
+  ch: string | null,
+  sub?: string | null,
+): { paymentMethod?: string; paymentChannel?: string } {
   switch (ch) {
-    case "va":     return { paymentMethod: "va" };
+    case "va":
+      return sub
+        ? { paymentMethod: "va", paymentChannel: sub.toLowerCase() }
+        : { paymentMethod: "va" };
     case "qris":   return { paymentMethod: "qris", paymentChannel: "qris" };
-    case "retail": return { paymentMethod: "cstore" };
+    case "retail": return { paymentMethod: "cstore", paymentChannel: (sub === "indomaret" ? "indomaret" : "alfamart") };
     default:       return {};
   }
 }
@@ -138,6 +144,7 @@ async function createIpaymuPayment(
   channel: string | null,
   notifyUrl: string,
   returnUrl: string,
+  subChannel: string | null = null,
 ) {
   const totalCharged = Number(inv._amount_override ?? inv.total_amount) || 0;
   const amount = Math.max(1000, Math.round(totalCharged));
@@ -150,7 +157,7 @@ async function createIpaymuPayment(
   const isCustom = (inv.bill_type || "spp") === "custom";
   const productName = `${isCustom ? (inv.bill_category || "Tagihan") : "SPP"} ${inv.period_label || ""} - ${inv.student_name || ""}`.trim();
 
-  const chMap = channelToIpaymu(channel);
+  const chMap = channelToIpaymu(channel, subChannel);
   const body: any = {
     product: [productName || `SPP ${referenceId}`],
     qty: [1],
@@ -240,6 +247,7 @@ async function ensureFreshLink(
   inv: any,
   forceRegen = false,
   channel: string | null = null,
+  subChannel: string | null = null,
 ) {
   const cfg = await getIpaymuConfig(admin);
   if (!cfg.va || !cfg.apiKey) {
@@ -262,7 +270,7 @@ async function ensureFreshLink(
   const supaUrl = Deno.env.get("SUPABASE_URL")!;
   const notifyUrl = `${supaUrl}/functions/v1/ipaymu-webhook`;
   const returnUrl = "https://absenpintar.online/parent";
-  const created = await createIpaymuPayment(cfg, { ...inv, _amount_override: totalCharged }, channel, notifyUrl, returnUrl);
+  const created = await createIpaymuPayment(cfg, { ...inv, _amount_override: totalCharged }, channel, notifyUrl, returnUrl, subChannel);
   await admin.from("spp_logs").insert({
     school_id: inv.school_id, invoice_id: inv.id,
     event_type: "create_invoice_ipaymu",
@@ -336,7 +344,7 @@ serve(async (req) => {
         sesVariants.some((p) => studentVariants.includes(p)) ||
         sesVariants.some((p) => invVariants.includes(p));
       if (!owned) return err("Akses ditolak");
-      const result = await ensureFreshLink(admin, inv, false, normalizeChannel(body.channel));
+      const result = await ensureFreshLink(admin, inv, false, normalizeChannel(body.channel), body.sub_channel || null);
       if (!result.success) return err(result.error || "Gagal");
       return ok({
         payment_url: brandPaymentUrl(result.payment_url),
@@ -386,7 +394,7 @@ serve(async (req) => {
       const { data: inv } = await admin.from("spp_invoices").select("*").eq("id", invoice_id).eq("school_id", schoolId).maybeSingle();
       if (!inv) return err("Invoice tidak ditemukan");
       if (inv.status === "paid") return err("Invoice sudah dibayar");
-      const result = await ensureFreshLink(admin, inv, action === "regenerate_payment_link", normalizeChannel(body.channel));
+      const result = await ensureFreshLink(admin, inv, action === "regenerate_payment_link", normalizeChannel(body.channel), body.sub_channel || null);
       if (!result.success) return err(result.error || "Gagal");
       return ok({ payment_url: brandPaymentUrl(result.payment_url), invoice_id: result.invoice_id });
     }

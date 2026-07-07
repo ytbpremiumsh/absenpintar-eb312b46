@@ -508,6 +508,11 @@ const SuperAdminPaymentGateway = () => {
               <p className="text-[10px] text-muted-foreground">
                 Sandbox: <code>sandbox.ipaymu.com</code> · Production: <code>my.ipaymu.com</code>
               </p>
+              {ipaymuEnv === "sandbox" && (
+                <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-1.5">
+                  Sandbox butuh VA & API Key khusus dari <code>sandbox.ipaymu.com</code> (berbeda dari production). Login/daftar di dashboard sandbox untuk mendapatkannya.
+                </p>
+              )}
             </div>
             <div className="grid gap-1.5">
               <Label className="text-xs">Status</Label>
