@@ -5357,25 +5357,23 @@ export function BendaharaLaporan() {
                     className="text-left rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
                   >
                     {/* Header gradient seperti card SPP */}
-                    <div className="relative overflow-hidden bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100">
-                      <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/15 blur-2xl" />
-                      <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-white/10 blur-xl" />
+                    <div className="relative overflow-hidden bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700">
                       <div className="relative z-10 flex items-center gap-3 px-4 py-3">
-                        <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/25 flex items-center justify-center shrink-0 shadow-md">
-                          <Users className="h-5 w-5 text-white" />
+                        <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center shrink-0 shadow-sm">
+                          <Users className="h-5 w-5 text-slate-600 dark:text-slate-300" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-[15px] text-white truncate">Kelas {r.cls}</span>
-                            <span className="text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full border border-white/20">{r.totalCount} tagihan</span>
+                            <span className="font-bold text-[15px] truncate">Kelas {r.cls}</span>
+                            <span className="text-[10px] font-semibold bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-600">{r.totalCount} tagihan</span>
                           </div>
                           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                            <span className="text-[10px] font-semibold bg-sky-600/80 px-2 py-0.5 rounded-full">{r.paidCount} Lunas</span>
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${belum > 0 ? "bg-rose-500/90" : "bg-white/20"}`}>{belum} Belum</span>
+                            <span className="text-[10px] font-semibold bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-600">{r.paidCount} Lunas</span>
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${belum > 0 ? "bg-white dark:bg-slate-700 text-rose-600 dark:text-rose-300 border-rose-200 dark:border-rose-900" : "bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600"}`}>{belum} Belum</span>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <div className="text-[10px] uppercase tracking-wide text-white/80">Pelunasan</div>
+                          <div className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Pelunasan</div>
                           <div className="text-xl font-extrabold leading-none">{pct}%</div>
                         </div>
                       </div>
