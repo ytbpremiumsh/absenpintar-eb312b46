@@ -4687,29 +4687,34 @@ function PresetLaporan({ items, students, school, year }: { items: any[]; studen
 
   return (
     <Card className="border-0 shadow-sm">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2"><FileText className="h-4 w-4 text-[#5B6CF9]" /> Laporan Cepat (PDF & Excel)</CardTitle>
-        <p className="text-[11px] text-muted-foreground">Klik untuk mengunduh laporan langsung dari data pembayaran online yang sudah tercatat.</p>
+        <p className="text-[11px] text-muted-foreground">Unduh laporan langsung dari data pembayaran online.</p>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {presets.map((p) => (
-          <div key={p.key} className="rounded-xl border border-border/60 p-3 bg-gradient-to-br from-muted/20 to-transparent">
-            <p className="text-sm font-bold">{p.title}</p>
-            <p className="text-[11px] text-muted-foreground mb-2">{p.subtitle}</p>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => exportPdf(p.title, p.subtitle, p.rows())}>
-                <Download className="h-3.5 w-3.5 mr-1" /> PDF
-              </Button>
-              <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => exportXlsx(`${p.title.replace(/\s+/g, "_")}_${todayStr}`, p.rows())}>
-                <Download className="h-3.5 w-3.5 mr-1" /> Excel
-              </Button>
+      <CardContent className="p-3 pt-0">
+        <div className="rounded-lg border border-border/60 divide-y divide-border/50 overflow-hidden">
+          {presets.map((p) => (
+            <div key={p.key} className="flex items-center gap-3 px-3 py-2 hover:bg-muted/30 transition-colors">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold truncate">{p.title}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{p.subtitle}</p>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30" onClick={() => exportPdf(p.title, p.subtitle, p.rows())}>
+                  <Download className="h-3 w-3 mr-1" /> PDF
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" onClick={() => exportXlsx(`${p.title.replace(/\s+/g, "_")}_${todayStr}`, p.rows())}>
+                  <Download className="h-3 w-3 mr-1" /> Excel
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
 }
+
 
 
 // Backward-compat alias: route /bendahara/settlement now redirects to gabungan
