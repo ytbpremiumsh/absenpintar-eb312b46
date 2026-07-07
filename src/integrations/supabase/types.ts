@@ -246,6 +246,36 @@ export type Database = {
           },
         ]
       }
+      auth_email_templates: {
+        Row: {
+          html: string
+          id: string
+          sender_name: string
+          subject: string
+          type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          html: string
+          id?: string
+          sender_name?: string
+          subject: string
+          type: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          html?: string
+          id?: string
+          sender_name?: string
+          subject?: string
+          type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       bendahara_bank_accounts: {
         Row: {
           account_holder: string
@@ -643,6 +673,69 @@ export type Database = {
         }
         Relationships: []
       }
+      email_send_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          message_id: string | null
+          metadata: Json | null
+          recipient_email: string
+          status: string
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email: string
+          status: string
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email?: string
+          status?: string
+          template_name?: string
+        }
+        Relationships: []
+      }
+      email_send_state: {
+        Row: {
+          auth_email_ttl_minutes: number
+          batch_size: number
+          id: number
+          retry_after_until: string | null
+          send_delay_ms: number
+          transactional_email_ttl_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          auth_email_ttl_minutes?: number
+          batch_size?: number
+          id?: number
+          retry_after_until?: string | null
+          send_delay_ms?: number
+          transactional_email_ttl_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          auth_email_ttl_minutes?: number
+          batch_size?: number
+          id?: number
+          retry_after_until?: string | null
+          send_delay_ms?: number
+          transactional_email_ttl_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_settings: {
         Row: {
           created_at: string
@@ -700,6 +793,30 @@ export type Database = {
           template_spp_html?: string
           template_spp_subject?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      email_unsubscribe_tokens: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          token?: string
+          used_at?: string | null
         }
         Relationships: []
       }
@@ -2946,6 +3063,30 @@ export type Database = {
           },
         ]
       }
+      suppressed_emails: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string
+        }
+        Relationships: []
+      }
       teacher_attendance_logs: {
         Row: {
           attendance_type: string
@@ -3249,6 +3390,15 @@ export type Database = {
     }
     Functions: {
       _fmt_idr: { Args: { amt: number }; Returns: string }
+      delete_email: {
+        Args: { message_id: number; queue_name: string }
+        Returns: boolean
+      }
+      email_queue_dispatch: { Args: never; Returns: undefined }
+      enqueue_email: {
+        Args: { payload: Json; queue_name: string }
+        Returns: number
+      }
       generate_student_card_number: { Args: never; Returns: string }
       get_user_school_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
@@ -3261,9 +3411,26 @@ export type Database = {
       increment_shortlink_click: { Args: { _code: string }; Returns: undefined }
       is_reserved_slug: { Args: { _slug: string }; Returns: boolean }
       mark_offline_rfid_devices: { Args: never; Returns: undefined }
+      move_to_dlq: {
+        Args: {
+          dlq_name: string
+          message_id: number
+          payload: Json
+          source_queue: string
+        }
+        Returns: number
+      }
       notify_admin_wa: {
         Args: { _event_type: string; _payload: Json }
         Returns: undefined
+      }
+      read_email_batch: {
+        Args: { batch_size: number; queue_name: string; vt: number }
+        Returns: {
+          message: Json
+          msg_id: number
+          read_ct: number
+        }[]
       }
       rfid_required_min_devices: {
         Args: { _school_id: string }

@@ -53,6 +53,7 @@ const WhatsAppSettings = lazy(() => import("./pages/WhatsAppSettings"));
 const SuperAdminAnnouncements = lazy(() => import("./pages/super-admin/SuperAdminAnnouncements"));
 const SuperAdminTickets = lazy(() => import("./pages/super-admin/SuperAdminTickets"));
 const SuperAdminEmail = lazy(() => import("./pages/super-admin/SuperAdminEmail"));
+const SuperAdminAuthEmail = lazy(() => import("./pages/super-admin/SuperAdminAuthEmail"));
 
 const Panduan = lazy(() => import("./pages/Panduan"));
 const PanduanDetail = lazy(() => import("./pages/PanduanDetail"));
@@ -252,6 +253,7 @@ function AppRoutes() {
           <Route path="/super-admin/announcements" element={<SuperAdminAnnouncements />} />
           <Route path="/super-admin/tickets" element={<SuperAdminTickets />} />
           <Route path="/super-admin/email" element={<SuperAdminEmail />} />
+          <Route path="/super-admin/auth-email" element={<SuperAdminAuthEmail />} />
           <Route path="/super-admin/cms" element={<SuperAdminCMS />} />
           <Route path="/super-admin/landing" element={<Navigate to="/super-admin/cms?tab=landing" replace />} />
           <Route path="/super-admin/fitur" element={<Navigate to="/super-admin/cms?tab=fitur" replace />} />

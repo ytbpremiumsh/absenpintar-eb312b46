@@ -34,6 +34,7 @@ const navItems = [
   { title: "Tiket Bantuan", url: "/super-admin/tickets", icon: UsersRound, group: "comms" },
   { title: "WhatsApp", url: "/super-admin/wa", icon: MessageCircle, group: "comms" },
   { title: "Email Server (SMTP)", url: "/super-admin/email", icon: Mail, group: "comms" },
+  { title: "Custom Auth Email", url: "/super-admin/auth-email", icon: Mail, group: "comms" },
 
   // KONTEN PUBLIK
   { title: "CMS Konten", url: "/super-admin/cms", icon: Palette, group: "content" },
