@@ -163,6 +163,25 @@ export function AttendanceRecapGrid({ schoolId, kind }: Props) {
     return { totalH, totalS, totalI, totalA, avgRate, workingDays, topPresent, topAbsent };
   }, [filtered, daysInMonth, year, month, holidays]);
 
+  // Per-class analytics (all rows regardless of filter) — only meaningful for students
+  const perClassAnalytics = useMemo(() => {
+    if (kind !== "student") return [];
+    const map = new Map<string, { cls: string; count: number; H: number; S: number; I: number; A: number }>();
+    rows.forEach((r) => {
+      const c = r.cls || "-";
+      if (!map.has(c)) map.set(c, { cls: c, count: 0, H: 0, S: 0, I: 0, A: 0 });
+      const item = map.get(c)!;
+      item.count++;
+      item.H += r.totals.H; item.S += r.totals.S; item.I += r.totals.I; item.A += r.totals.A;
+    });
+    return Array.from(map.values()).map((it) => {
+      const total = it.H + it.S + it.I + it.A;
+      const rate = total ? Math.round((it.H / total) * 100) : 0;
+      return { ...it, total, rate };
+    }).sort((a, b) => b.rate - a.rate);
+  }, [rows, kind]);
+
+
   const isPulangMode = rekapTab === "pulang";
   const monthLabel = `${MONTH_NAMES[month]} ${year}`;
   const label = kind === "student" ? "siswa" : "guru & staff";
@@ -304,8 +323,50 @@ export function AttendanceRecapGrid({ schoolId, kind }: Props) {
               </CardContent>
             </Card>
           </div>
+
+          {/* Per-Class Analytics (student only) */}
+          {kind === "student" && perClassAnalytics.length > 0 && (
+            <Card className="border border-border/50 rounded-xl">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-3">
+                  <TrendingUp className="h-3.5 w-3.5 text-[#5B6CF9]" />
+                  <p className="text-xs font-semibold">Analitik Per Kelas — {monthLabel}</p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs border-collapse min-w-[520px]">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/30">
+                        <th className="px-3 py-2 text-left font-semibold text-muted-foreground">Kelas</th>
+                        <th className="px-2 py-2 text-center font-semibold text-muted-foreground">Siswa</th>
+                        <th className="px-2 py-2 text-center font-semibold text-emerald-600">H</th>
+                        <th className="px-2 py-2 text-center font-semibold text-violet-600">S</th>
+                        <th className="px-2 py-2 text-center font-semibold text-amber-600">I</th>
+                        <th className="px-2 py-2 text-center font-semibold text-red-600">A</th>
+                        <th className="px-3 py-2 text-right font-semibold text-[#5B6CF9]">% Hadir</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {perClassAnalytics.map((c) => (
+                        <tr key={c.cls} className="border-b border-border/40 hover:bg-muted/20 cursor-pointer" onClick={() => { setFilter(c.cls); setMainTab("rekap"); }}>
+                          <td className="px-3 py-2 font-semibold text-foreground">{c.cls}</td>
+                          <td className="px-2 py-2 text-center text-muted-foreground">{c.count}</td>
+                          <td className="px-2 py-2 text-center font-bold text-emerald-600">{c.H}</td>
+                          <td className="px-2 py-2 text-center font-bold text-violet-600">{c.S}</td>
+                          <td className="px-2 py-2 text-center font-bold text-amber-600">{c.I}</td>
+                          <td className="px-2 py-2 text-center font-bold text-red-600">{c.A}</td>
+                          <td className={`px-3 py-2 text-right font-bold ${c.rate >= 80 ? "text-emerald-600" : c.rate >= 60 ? "text-amber-600" : "text-red-600"}`}>{c.total > 0 ? `${c.rate}%` : "-"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-2">Klik kelas untuk melihat rekap detail.</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
+
 
       {mainTab === "rekap" && (<>
       {/* Legend */}
