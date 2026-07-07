@@ -1146,7 +1146,7 @@ export default function ParentDashboard() {
                 ))}
               </div>
             )}
-          </>
+          </Card>
         )}
 
 
