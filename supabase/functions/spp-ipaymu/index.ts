@@ -117,7 +117,10 @@ function channelToIpaymu(
   sub?: string | null,
 ): { paymentMethod?: string; paymentChannel?: string } {
   switch (ch) {
-    case "va":     return { paymentMethod: "va", paymentChannel: (sub || "bca").toLowerCase() };
+    case "va":
+      return sub
+        ? { paymentMethod: "va", paymentChannel: sub.toLowerCase() }
+        : { paymentMethod: "va" };
     case "qris":   return { paymentMethod: "qris", paymentChannel: "qris" };
     case "retail": return { paymentMethod: "cstore", paymentChannel: (sub === "indomaret" ? "indomaret" : "alfamart") };
     default:       return {};
