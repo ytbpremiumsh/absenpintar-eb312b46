@@ -100,7 +100,8 @@ export default function BendaharaTunggakan() {
   }, [filtered]);
 
   const sendReminder = async (student: { student_id: string; name: string; class: string; phone: string | null; count: number; total: number }) => {
-    if (!waFlag) { toast.error("Pengiriman WA dinonaktifkan Super Admin"); return; }
+    // WA reminder tunggakan selalu aktif meski WA sekolah dinonaktifkan Super Admin
+
     if (!student.phone) { toast.error("Nomor WA wali tidak tersedia"); return; }
     setSending(student.student_id);
     const msg = `*${school?.name || "Sekolah"} — Pengingat Pembayaran*\n\nYth. Wali dari *${student.name}* (Kelas ${student.class}),\n\nSaat ini terdapat ${student.count} tagihan yang belum dilunasi dengan total *${fmtIDR(student.total)}*.\n\nMohon segera melakukan pembayaran melalui aplikasi wali murid ATSkolla atau hubungi bendahara sekolah.\n\nTerima kasih.`;
@@ -113,7 +114,7 @@ export default function BendaharaTunggakan() {
   };
 
   const broadcastAll = async () => {
-    if (!waFlag) { toast.error("Pengiriman WA dinonaktifkan Super Admin"); return; }
+    // WA reminder tunggakan selalu aktif meski WA sekolah dinonaktifkan Super Admin
     const targets = perStudent.filter((s) => s.phone);
     if (targets.length === 0) { toast.error("Tidak ada nomor WA yang bisa dikirimi"); return; }
     setBroadcasting(true);
@@ -149,7 +150,7 @@ export default function BendaharaTunggakan() {
           <Button
             size="sm"
             onClick={() => setBroadcastOpen(true)}
-            disabled={perStudent.length === 0 || !waFlag}
+            disabled={perStudent.length === 0}
             className="bg-white/20 hover:bg-white/30 text-white border border-white/20"
           >
             <Send className="h-4 w-4 mr-1.5" /> Kirim Semua
@@ -295,7 +296,7 @@ export default function BendaharaTunggakan() {
       <Card className="border-0 shadow-sm overflow-hidden">
         <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
           <h3 className="text-sm font-bold">Daftar Siswa Menunggak</h3>
-          {!waFlag && <Badge variant="secondary" className="text-[10px]">WA dinonaktifkan Super Admin</Badge>}
+          {!waFlag && <Badge variant="secondary" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200">WA reminder tunggakan tetap aktif</Badge>}
         </div>
         <div className="overflow-x-auto">
           <Table>
@@ -325,7 +326,7 @@ export default function BendaharaTunggakan() {
                     <Button
                       size="sm"
                       variant="outline"
-                      disabled={!s.phone || !waFlag || sending === s.student_id}
+                      disabled={!s.phone || sending === s.student_id}
                       onClick={() => sendReminder(s)}
                       className="h-8 text-xs"
                     >
