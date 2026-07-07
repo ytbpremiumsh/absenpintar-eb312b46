@@ -12,6 +12,8 @@ import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { usePrincipalData } from "@/hooks/usePrincipalData";
 import { StatCard, fmtIDR } from "./_shared";
+import { LiveScheduleWidget } from "@/components/dashboard/LiveScheduleWidget";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function PrincipalOverview() {
   const {
