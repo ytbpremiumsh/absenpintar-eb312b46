@@ -63,8 +63,11 @@ project_id = "bohuglednqirnaearrkj"
     verify_jwt = false
   [functions.send-bendahara-otp]
     verify_jwt = false
+  [functions.send-auth-email-test]
+    verify_jwt = false
   [functions.send-email]
     verify_jwt = false
+
   [functions.send-otp]
     verify_jwt = false
   [functions.send-whatsapp]
