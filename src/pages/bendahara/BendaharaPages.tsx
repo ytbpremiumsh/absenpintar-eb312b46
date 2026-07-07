@@ -4122,7 +4122,7 @@ export function BendaharaSaldo() {
             </span>
           </div>
           <p className="text-3xl md:text-4xl font-extrabold tracking-tight">{fmtIDR(activeBalance)}</p>
-          <p className="text-[11px] opacity-80 mt-1">Total Net Rp {fmtIDR(totals.net).replace("Rp ", "")} − Sudah/akan dicairkan {fmtIDR(lockedNet)}</p>
+          <p className="text-[11px] opacity-80 mt-1">Total Bruto {fmtIDR(totals.gross)} − Sudah/akan dicairkan {fmtIDR(lockedGross)}</p>
         </CardContent>
       </Card>
 
@@ -4144,19 +4144,10 @@ export function BendaharaSaldo() {
       )}
 
       {/* Ringkasan Saldo */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <StatCard label="Total Bruto SPP" value={fmtIDR(totals.gross)} sub={`${txCount} transaksi`} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
-        <StatCard label="Sudah Dicairkan" value={fmtIDR(settledNet)} sub={`${settledCount} transaksi`} icon={ArrowDownToLine} gradient="from-violet-500 to-purple-600" />
+        <StatCard label="Sudah Dicairkan" value={fmtIDR(settledGross)} sub={`${settledCount} transaksi`} icon={ArrowDownToLine} gradient="from-violet-500 to-purple-600" />
         <StatCard label="Pending Pencairan" value={fmtIDR(pendingPayout)} sub="menunggu admin" icon={Loader2} gradient="from-amber-500 to-orange-600" />
-        <StatCard label="Total Fee Dibebankan" value={fmtIDR(totals.fee)} sub="lihat rincian" icon={Banknote} gradient="from-slate-500 to-slate-700" />
-      </div>
-
-      {/* Info tarif - ringkas */}
-      <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 p-3 flex gap-2 items-start">
-        <AlertCircle className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
-        <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-          Setiap transaksi online otomatis dipotong <b>{feeCfg.percent}%</b> sebagai biaya layanan, ditambah <b>Rp 3.000</b> per pencairan. Tarif ini sudah ditetapkan dan berlaku otomatis.
-        </div>
       </div>
 
       {/* Tabel Riwayat */}
@@ -4171,31 +4162,24 @@ export function BendaharaSaldo() {
                 <TableRow>
                   <TableHead className="whitespace-nowrap">Tanggal</TableHead>
                   <TableHead className="whitespace-nowrap">Deskripsi</TableHead>
-                  <TableHead className="text-right whitespace-nowrap">Bruto</TableHead>
-                  <TableHead className="text-right whitespace-nowrap">Biaya Layanan ({feeCfg.percent}%)</TableHead>
-                  <TableHead className="text-right whitespace-nowrap">Net</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">Nominal</TableHead>
                   <TableHead className="whitespace-nowrap">Status Cair</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.length === 0 && <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Belum ada transaksi paid</TableCell></TableRow>}
-                {items.map(i => {
-                  const feePct = (i.gateway_fee != null) ? i.gateway_fee : Math.round((i.total_amount || 0) * (feeCfg.percent / 100));
-                  return (
-                    <TableRow key={i.id}>
-                      <TableCell className="text-xs whitespace-nowrap">{i.paid_at ? new Date(i.paid_at).toLocaleDateString("id-ID") : "-"}</TableCell>
-                      <TableCell className="text-xs whitespace-nowrap">{i.description}</TableCell>
-                      <TableCell className="text-sm text-right whitespace-nowrap">{fmtIDR(i.total_amount)}</TableCell>
-                      <TableCell className="text-xs text-right text-muted-foreground whitespace-nowrap">{fmtIDR(feePct)}</TableCell>
-                      <TableCell className="text-sm text-right font-semibold text-emerald-600 whitespace-nowrap">{fmtIDR(i.net_amount)}</TableCell>
-                      <TableCell>
-                        {i.settlement_id
-                          ? <Badge className="bg-emerald-500 text-[10px] whitespace-nowrap">DICAIRKAN</Badge>
-                          : <Badge className="bg-amber-500 text-[10px] whitespace-nowrap">SALDO AKTIF</Badge>}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {items.length === 0 && <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Belum ada transaksi paid</TableCell></TableRow>}
+                {items.map(i => (
+                  <TableRow key={i.id}>
+                    <TableCell className="text-xs whitespace-nowrap">{i.paid_at ? new Date(i.paid_at).toLocaleDateString("id-ID") : "-"}</TableCell>
+                    <TableCell className="text-xs whitespace-nowrap">{i.description}</TableCell>
+                    <TableCell className="text-sm text-right font-semibold text-emerald-600 whitespace-nowrap">{fmtIDR(i.total_amount)}</TableCell>
+                    <TableCell>
+                      {i.settlement_id
+                        ? <Badge className="bg-emerald-500 text-[10px] whitespace-nowrap">DICAIRKAN</Badge>
+                        : <Badge className="bg-amber-500 text-[10px] whitespace-nowrap">SALDO AKTIF</Badge>}
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           )}
