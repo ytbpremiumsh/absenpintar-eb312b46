@@ -13,9 +13,10 @@ import { PageHeader } from "@/components/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { BookOpen, Plus, TrendingUp, TrendingDown, Wallet, Loader2, Download, Trash2, Zap } from "lucide-react";
+import { BookOpen, Plus, TrendingUp, TrendingDown, Wallet, Loader2, Download, Trash2, Zap, Receipt, Landmark, ArrowRight } from "lucide-react";
 import * as XLSX from "xlsx";
 import { formatPaymentMethodLabel } from "@/lib/paymentMethod";
+import { Link } from "react-router-dom";
 
 const fmtIDR = (n: number) => `Rp ${(n || 0).toLocaleString("id-ID")}`;
 const OUT_CATEGORIES = ["Operasional", "Gaji", "Perlengkapan", "Perawatan", "Utilitas", "Kegiatan", "Lainnya"];
@@ -26,11 +27,14 @@ type Entry = {
   entry_date: string;
   direction: "in" | "out";
   category: string;
-  amount: number;
+  amount: number; // Gross amount — nilai pembayaran asli sesuai tagihan
   description: string | null;
-  reference: string | null;
+  reference: string | null;   // No. Invoice / No. Bukti
+  method: string | null;      // Metode pembayaran (QRIS, VA, Transfer, Tunai, dll)
+  status: string | null;      // Status pembayaran (Lunas, Manual, dll)
   source: "manual" | "auto";
 };
+
 
 export default function BendaharaBukuKas() {
   const { profile, user } = useAuth();
