@@ -118,7 +118,7 @@ const ManageStaff = () => {
     if (!profiles || profiles.length === 0) { setStaff([]); setLoading(false); return; }
 
     const userIds = profiles.map((p: any) => p.user_id);
-    const { data: roles } = await supabase.from("user_roles").select("user_id, role").in("user_id", userIds).in("role", ["staff", "teacher", "bendahara"]);
+    const { data: roles } = await supabase.from("user_roles").select("user_id, role").in("user_id", userIds).in("role", ["staff", "teacher", "bendahara", "principal"]);
 
     const roleMap = new Map<string, string[]>();
     (roles || []).forEach((r) => {
