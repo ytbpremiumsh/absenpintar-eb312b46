@@ -344,7 +344,7 @@ serve(async (req) => {
         sesVariants.some((p) => studentVariants.includes(p)) ||
         sesVariants.some((p) => invVariants.includes(p));
       if (!owned) return err("Akses ditolak");
-      const result = await ensureFreshLink(admin, inv, false, normalizeChannel(body.channel));
+      const result = await ensureFreshLink(admin, inv, false, normalizeChannel(body.channel), body.sub_channel || null);
       if (!result.success) return err(result.error || "Gagal");
       return ok({
         payment_url: brandPaymentUrl(result.payment_url),
