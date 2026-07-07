@@ -62,11 +62,11 @@ export default function PrincipalMonitoring() {
       </div>
 
       <Tabs value={active} onValueChange={(v) => setParams({ tab: v })}>
-        <TabsList className="bg-muted/50 p-1 rounded-2xl">
-          <TabsTrigger value="kehadiran" className="gap-1.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
+        <TabsList className="bg-muted/50 p-1 rounded-2xl h-auto">
+          <TabsTrigger value="kehadiran" className="gap-1.5 rounded-xl px-4 py-2 text-foreground/70 hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-[#5B6CF9] data-[state=active]:text-white data-[state=active]:shadow-md">
             <UserCheck className="h-4 w-4" /> Kehadiran
           </TabsTrigger>
-          <TabsTrigger value="pembelajaran" className="gap-1.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          <TabsTrigger value="pembelajaran" className="gap-1.5 rounded-xl px-4 py-2 text-foreground/70 hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-[#5B6CF9] data-[state=active]:text-white data-[state=active]:shadow-md">
             <BookOpen className="h-4 w-4" /> Pembelajaran
           </TabsTrigger>
         </TabsList>
