@@ -1095,7 +1095,7 @@ export default function ParentDashboard() {
                 {sppData.aktif.map((inv) => {
                   const isExpired = inv.status === "expired";
                   return (
-                    <Card key={inv.id} className="p-3.5 border-0 shadow-card rounded-2xl">
+                    <Card key={inv.id} className="p-3.5 border shadow-none rounded-2xl bg-muted/30">
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="min-w-0">
                           <p className="text-sm font-bold truncate">{inv.period_label}</p>
