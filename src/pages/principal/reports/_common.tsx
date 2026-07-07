@@ -40,7 +40,7 @@ export function downloadCSV(name: string, rows: Row[], headers: Header[]) {
  */
 export function ReportShell({
   title, subtitle, icon, from, to, onFromChange, onToChange, onDownload,
-  summary, children, extraFilters, headerActions, datesOptional, hideFilters, hideDates,
+  summary, children, extraFilters, headerActions, datesOptional, hideFilters, hideDates, hideExport,
 }: {
   title: string; subtitle: string; icon: any;
   from: string; to: string;
@@ -49,12 +49,10 @@ export function ReportShell({
   summary?: ReactNode;
   extraFilters?: ReactNode;
   headerActions?: ReactNode;
-  /** Bila true → filter tanggal ditempatkan setelah filter lain & bertindak sebagai opsi kedua. */
   datesOptional?: boolean;
-  /** Bila true → seluruh card filter (tanggal + extra) tidak dirender. */
   hideFilters?: boolean;
-  /** Bila true → hanya sembunyikan field tanggal, extraFilters tetap dirender. */
   hideDates?: boolean;
+  hideExport?: boolean;
   children: ReactNode;
 }) {
   const dateFields = (
