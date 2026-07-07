@@ -98,7 +98,7 @@ const LaporanBukuKas = lazy(() => import("./pages/principal/reports/LaporanBukuK
 const LaporanSettlement = lazy(() => import("./pages/principal/reports/LaporanSettlement"));
 const LaporanJurnal = lazy(() => import("./pages/principal/reports/LaporanJurnal"));
 const PrincipalMonitoring = lazy(() => import("./pages/principal/PrincipalMonitoring"));
-const PrincipalManajemen = lazy(() => import("./pages/principal/PrincipalManajemen"));
+
 const BendaharaWithdraw = lazy(() => import("./pages/bendahara/BendaharaWithdraw"));
 const BendaharaKeuanganSekolah = lazy(() => import("./pages/bendahara/BendaharaKeuanganSekolah"));
 const LaporanAbsensi = lazy(() => import("./pages/LaporanAbsensi"));
