@@ -24,6 +24,7 @@ export default function LaporanAbsensiGuru() {
   const [statusF, setStatusF] = useState("all");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(false);
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!schoolId) return;
