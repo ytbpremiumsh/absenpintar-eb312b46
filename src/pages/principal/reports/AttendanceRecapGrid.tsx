@@ -184,16 +184,18 @@ export function AttendanceRecapGrid({ schoolId, kind }: Props) {
             <SelectContent>{years.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <div>
-          <label className="text-[10px] font-semibold text-muted-foreground block mb-1">{filterLabel}</label>
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="h-9 w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua {filterLabel}</SelectItem>
-              {filterOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
+        {kind !== "student" && (
+          <div>
+            <label className="text-[10px] font-semibold text-muted-foreground block mb-1">{filterLabel}</label>
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="h-9 w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua {filterLabel}</SelectItem>
+                {filterOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {/* Analytics (based on grid data, same as admin dashboard) */}
