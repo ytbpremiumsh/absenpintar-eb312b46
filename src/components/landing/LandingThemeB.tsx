@@ -157,7 +157,7 @@ const LandingThemeB = () => {
   const [showPricing, setShowPricing] = useState(false);
   const [trustedSchools, setTrustedSchools] = useState<TrustedSchool[]>(DEFAULT_TRUSTED_SCHOOLS);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(DEFAULT_TESTIMONIALS);
-  const [headerLogo, setHeaderLogo] = useState("/images/logo-atskolla.png");
+  const [headerLogo, setHeaderLogo] = useState("https://absenpintar.online/images/logo-atskolla.png");
 
   useEffect(() => {
     Promise.all([

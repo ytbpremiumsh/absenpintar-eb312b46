@@ -46,7 +46,7 @@ const Login = ({ forcedMode }: LoginProps) => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem("remembered_email"));
   const [loading, setLoading] = useState(false);
-  const [loginLogo, setLoginLogo] = useState("/images/logo-atskolla.png");
+  const [loginLogo, setLoginLogo] = useState("https://absenpintar.online/images/logo-atskolla.png");
   const [networkIssue, setNetworkIssue] = useState(false);
   const [recheckKey, setRecheckKey] = useState(0);
 
