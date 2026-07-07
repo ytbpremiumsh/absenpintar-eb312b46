@@ -134,8 +134,14 @@ const ManageWaliKelas = () => {
       setFormTeacherId(""); setFormClass("");
       fetchData();
     } catch (err: any) {
-      toast.error(err.message || "Gagal menugaskan wali kelas");
+      const msg = (err?.message || "").toLowerCase();
+      if (err?.code === "23505" || msg.includes("duplicate") || msg.includes("class_teachers_school_class_unique")) {
+        toast.error(`Kelas ${formClass} sudah memiliki wali kelas. Satu kelas hanya bisa memiliki 1 wali kelas.`);
+      } else {
+        toast.error(err.message || "Gagal menugaskan wali kelas");
+      }
     } finally { setCreating(false); }
+
   };
 
   const handleDelete = async (assignment: ClassTeacher) => {
