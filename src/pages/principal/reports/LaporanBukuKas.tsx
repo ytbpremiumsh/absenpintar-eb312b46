@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BookOpen, TrendingUp, TrendingDown, Wallet, Receipt, Zap, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ReportShell, StatsRow, downloadCSV, useMonthRange, type Header, type Row } from "./_common";
+import { ReportShell, StatsRow, downloadCSV, type Header, type Row } from "./_common";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
