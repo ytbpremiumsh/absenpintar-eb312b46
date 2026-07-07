@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { AlertTriangle, Users, GraduationCap, Loader2, Send } from "lucide-react";
+import { StatCard } from "./BendaharaPages";
 
 // Icon WhatsApp (inline SVG) — brand-consistent
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -168,39 +169,9 @@ export default function BendaharaTunggakan() {
 
       {/* KPI */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-rose-500/10 to-transparent">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-rose-500/15 flex items-center justify-center">
-              <AlertTriangle className="h-5 w-5 text-rose-600" />
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Tunggakan</p>
-              <p className="text-lg font-extrabold text-rose-600">{fmtIDR(totals.total)}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-500/10 to-transparent">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-amber-500/15 flex items-center justify-center">
-              <Users className="h-5 w-5 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Siswa Menunggak</p>
-              <p className="text-lg font-extrabold text-amber-600">{totals.students}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-[#5B6CF9]/10 to-transparent">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-[#5B6CF9]/15 flex items-center justify-center">
-              <GraduationCap className="h-5 w-5 text-[#5B6CF9]" />
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Jumlah Tagihan</p>
-              <p className="text-lg font-extrabold text-[#5B6CF9]">{totals.invoices}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard label="Total Tunggakan" value={fmtIDR(totals.total)} icon={AlertTriangle} gradient="from-rose-500 to-rose-600" />
+        <StatCard label="Siswa Menunggak" value={totals.students} icon={Users} gradient="from-amber-500 to-amber-600" />
+        <StatCard label="Jumlah Tagihan" value={totals.invoices} icon={GraduationCap} gradient="from-indigo-500 to-indigo-600" />
       </div>
 
       {/* Filter */}
