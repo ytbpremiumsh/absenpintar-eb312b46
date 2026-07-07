@@ -420,9 +420,10 @@ const ManageWaliKelas = () => {
                     <Select value={editClass} onValueChange={setEditClass}>
                       <SelectTrigger className="flex-1"><SelectValue placeholder="Pilih kelas" /></SelectTrigger>
                       <SelectContent>
-                        {classes.filter(c => !selectedTeacher.assignments.some(a => a.class_name === c)).map((c) => (
+                        {classes.filter(c => !assignedClassNames.has(c)).map((c) => (
                           <SelectItem key={c} value={c}>{c}</SelectItem>
                         ))}
+
                       </SelectContent>
                     </Select>
                     <Button size="sm" onClick={handleAddClass} disabled={!editClass || savingEdit}>
