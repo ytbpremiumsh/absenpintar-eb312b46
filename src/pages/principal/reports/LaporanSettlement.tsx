@@ -264,7 +264,7 @@ export default function LaporanSettlement() {
     <div className="space-y-4">
       <PageHeader
         title="Rekap Settlement"
-        subtitle="Sinkron dengan Bendahara — pantau pengajuan pencairan dan riwayat transaksi lunas"
+        subtitle="Pantau pengajuan aktif dan riwayat pencairan"
         icon={Landmark}
         variant="primary"
         actions={
