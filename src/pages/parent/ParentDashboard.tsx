@@ -971,13 +971,13 @@ export default function ParentDashboard() {
 
         {/* INFO */}
         {tab === "info" && (
-          <>
+          <Card className="p-4 md:p-5 border-0 shadow-card rounded-2xl space-y-3">
             <SectionTitle icon={Megaphone} title="Informasi dari Sekolah" />
             <p className="text-[11px] text-muted-foreground -mt-2">Hanya menampilkan pengumuman yang ditujukan kepada wali murid.</p>
             {announcements.length === 0 ? <EmptyMini text="Belum ada informasi untuk wali murid." /> : (
               <div className="space-y-2.5">
                 {announcements.map((a) => (
-                  <Card key={a.id} className={cn("p-4 border-0 shadow-card rounded-2xl", a.is_pinned && "ring-1 ring-amber-400/40 bg-amber-50/40 dark:bg-amber-950/10")}>
+                  <Card key={a.id} className={cn("p-4 border shadow-none rounded-2xl bg-muted/30", a.is_pinned && "ring-1 ring-amber-400/40 bg-amber-50/40 dark:bg-amber-950/10")}>
                     <div className="flex items-start justify-between gap-2 mb-1.5">
                       <div className="flex items-center gap-2 min-w-0">
                         {a.is_pinned && <Pin className="h-3.5 w-3.5 text-amber-500 shrink-0" />}
@@ -991,7 +991,7 @@ export default function ParentDashboard() {
                 ))}
               </div>
             )}
-          </>
+          </Card>
         )}
 
         {/* LEAVE */}
