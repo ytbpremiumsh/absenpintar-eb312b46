@@ -3390,6 +3390,7 @@ export type Database = {
     }
     Functions: {
       _fmt_idr: { Args: { amt: number }; Returns: string }
+      cleanup_old_logs: { Args: never; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
