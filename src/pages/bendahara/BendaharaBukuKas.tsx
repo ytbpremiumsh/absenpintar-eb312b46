@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,9 +47,9 @@ export default function BendaharaBukuKas() {
   const [deleting, setDeleting] = useState<Entry | null>(null);
 
   const today = new Date().toISOString().slice(0, 10);
-  const firstOfMonth = `${today.slice(0, 7)}-01`;
-  const [dateFrom, setDateFrom] = useState<string>(firstOfMonth);
-  const [dateTo, setDateTo] = useState<string>(today);
+  // Default: tampilkan SEMUA data (tanpa filter tanggal). Filter tanggal adalah opsi kedua.
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
   const [fDir, setFDir] = useState<string>("all");
   const [fCat, setFCat] = useState<string>("all");
 
@@ -122,20 +122,9 @@ export default function BendaharaBukuKas() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Sekali di awal: kalau ada transaksi historis lebih lama dari default filter (awal bulan),
-  // mundurkan otomatis "Dari Tanggal" ke transaksi paling lama supaya seluruh data lampau ikut terlihat.
-  const autoExpandedRef = useRef(false);
-  useEffect(() => {
-    if (autoExpandedRef.current) return;
-    if (loading) return;
-    const all = [...manual, ...autoEntries];
-    if (all.length === 0) return;
-    const earliest = all.reduce((min, e) => (e.entry_date < min ? e.entry_date : min), all[0].entry_date);
-    if (earliest && earliest < dateFrom) {
-      setDateFrom(earliest);
-    }
-    autoExpandedRef.current = true;
-  }, [loading, manual, autoEntries, dateFrom]);
+  // (Default sekarang menampilkan semua entri tanpa filter tanggal.)
+
+
 
   // Realtime updates when new paid invoices come in
   useEffect(() => {
@@ -258,7 +247,10 @@ export default function BendaharaBukuKas() {
     const aoa: any[][] = [];
     aoa.push([`BUKU KAS — ${school.name || "Sekolah"}`]);
     aoa.push([`${school.address || ""}${school.npsn ? ` • NPSN ${school.npsn}` : ""}`.trim() || "—"]);
-    aoa.push([`Periode: ${new Date(dateFrom).toLocaleDateString("id-ID")} s.d. ${new Date(dateTo).toLocaleDateString("id-ID")}`]);
+    const periodeLabel = (dateFrom || dateTo)
+      ? `${dateFrom ? new Date(dateFrom).toLocaleDateString("id-ID") : "Awal"} s.d. ${dateTo ? new Date(dateTo).toLocaleDateString("id-ID") : "Sekarang"}`
+      : "Semua Tanggal";
+    aoa.push([`Periode: ${periodeLabel}`]);
     aoa.push([`Dicetak: ${new Date().toLocaleString("id-ID")}`]);
     aoa.push([]);
     const headerRowIdx = aoa.length; // 0-based
@@ -338,7 +330,8 @@ export default function BendaharaBukuKas() {
 
     const wb = XLSXStyle.utils.book_new();
     XLSXStyle.utils.book_append_sheet(wb, ws, "Buku Kas");
-    XLSXStyle.writeFile(wb, `Buku_Kas_${dateFrom}_sd_${dateTo}.xlsx`);
+    const fileTag = (dateFrom || dateTo) ? `${dateFrom || "awal"}_sd_${dateTo || "sekarang"}` : "semua";
+    XLSXStyle.writeFile(wb, `Buku_Kas_${fileTag}.xlsx`);
     toast.success("Export selesai");
   };
 
@@ -434,17 +427,9 @@ export default function BendaharaBukuKas() {
 
 
 
-      {/* Filter */}
+      {/* Filter — Arah & Kategori diprioritaskan; filter tanggal opsional (pilihan kedua) */}
       <Card className="border-0 shadow-sm">
-        <CardContent className="p-3 grid grid-cols-2 md:grid-cols-4 gap-2">
-          <div>
-            <Label className="text-[10px] text-muted-foreground">Dari Tanggal</Label>
-            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-9" />
-          </div>
-          <div>
-            <Label className="text-[10px] text-muted-foreground">Sampai Tanggal</Label>
-            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9" />
-          </div>
+        <CardContent className="p-3 grid grid-cols-2 md:grid-cols-4 gap-2 items-end">
           <div>
             <Label className="text-[10px] text-muted-foreground">Arah</Label>
             <Select value={fDir} onValueChange={setFDir}>
@@ -466,8 +451,25 @@ export default function BendaharaBukuKas() {
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label className="text-[10px] text-muted-foreground">Dari Tanggal (opsional)</Label>
+            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-9" placeholder="Semua" />
+          </div>
+          <div>
+            <Label className="text-[10px] text-muted-foreground">Sampai Tanggal (opsional)</Label>
+            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9" placeholder="Semua" />
+          </div>
+          {(dateFrom || dateTo) && (
+            <div className="col-span-2 md:col-span-4 flex items-center justify-between text-[11px] text-muted-foreground -mt-1">
+              <span>Filter tanggal aktif — tampilkan sebagian data saja.</span>
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-[11px]" onClick={() => { setDateFrom(""); setDateTo(""); }}>
+                Tampilkan Semua Tanggal
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
+
 
       {/* Table */}
       <Card className="border-0 shadow-sm overflow-hidden">

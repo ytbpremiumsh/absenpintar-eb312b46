@@ -40,7 +40,7 @@ export function downloadCSV(name: string, rows: Row[], headers: Header[]) {
  */
 export function ReportShell({
   title, subtitle, icon, from, to, onFromChange, onToChange, onDownload,
-  summary, children, extraFilters, headerActions,
+  summary, children, extraFilters, headerActions, datesOptional,
 }: {
   title: string; subtitle: string; icon: any;
   from: string; to: string;
@@ -49,8 +49,23 @@ export function ReportShell({
   summary?: ReactNode;
   extraFilters?: ReactNode;
   headerActions?: ReactNode;
+  /** Bila true → filter tanggal ditempatkan setelah filter lain & bertindak sebagai opsi kedua. */
+  datesOptional?: boolean;
   children: ReactNode;
 }) {
+  const dateFields = (
+    <>
+      <div>
+        <Label className="text-[10px] text-muted-foreground">{datesOptional ? "Dari Tanggal (opsional)" : "Dari Tanggal"}</Label>
+        <Input type="date" value={from} onChange={(e) => onFromChange(e.target.value)} className="h-9" />
+      </div>
+      <div>
+        <Label className="text-[10px] text-muted-foreground">{datesOptional ? "Sampai Tanggal (opsional)" : "Sampai Tanggal"}</Label>
+        <Input type="date" value={to} onChange={(e) => onToChange(e.target.value)} className="h-9" />
+      </div>
+    </>
+  );
+
   return (
     <div className="space-y-4">
       <PageHeader
@@ -76,15 +91,17 @@ export function ReportShell({
 
       <Card className="border-0 shadow-sm">
         <CardContent className="p-3 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 items-end">
-          <div>
-            <Label className="text-[10px] text-muted-foreground">Dari Tanggal</Label>
-            <Input type="date" value={from} onChange={(e) => onFromChange(e.target.value)} className="h-9" />
-          </div>
-          <div>
-            <Label className="text-[10px] text-muted-foreground">Sampai Tanggal</Label>
-            <Input type="date" value={to} onChange={(e) => onToChange(e.target.value)} className="h-9" />
-          </div>
+          {!datesOptional && dateFields}
           {extraFilters}
+          {datesOptional && dateFields}
+          {datesOptional && (from || to) && (
+            <div className="col-span-2 md:col-span-4 lg:col-span-6 flex items-center justify-between text-[11px] text-muted-foreground -mt-1">
+              <span>Filter tanggal aktif — hanya menampilkan sebagian data.</span>
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-[11px]" onClick={() => { onFromChange(""); onToChange(""); }}>
+                Tampilkan Semua Tanggal
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -92,6 +109,7 @@ export function ReportShell({
     </div>
   );
 }
+
 
 /**
  * Tabel bergaya Bendahara: shadcn Table, teks kecil, badge sekunder,

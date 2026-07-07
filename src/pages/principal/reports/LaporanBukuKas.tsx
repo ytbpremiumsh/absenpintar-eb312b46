@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BookOpen, TrendingUp, TrendingDown, Wallet, Receipt, Zap, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ReportShell, StatsRow, downloadCSV, useMonthRange, type Header, type Row } from "./_common";
+import { ReportShell, StatsRow, downloadCSV, type Header, type Row } from "./_common";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,9 +31,9 @@ type Entry = {
 export default function LaporanBukuKas() {
   const { profile } = useAuth();
   const schoolId = profile?.school_id;
-  const { first, last } = useMonthRange();
-  const [from, setFrom] = useState(first);
-  const [to, setTo] = useState(last);
+  // Default: tampilkan SEMUA data (tanpa filter tanggal). Filter tanggal opsional.
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [dir, setDir] = useState("all");
   const [cat, setCat] = useState("all");
   const [all, setAll] = useState<Entry[]>([]);
@@ -44,25 +44,31 @@ export default function LaporanBukuKas() {
     if (!schoolId) return;
     (async () => {
       setLoading(true);
+      let qCash = supabase.from("cash_book_entries")
+        .select("entry_date, direction, category, description, reference, amount, created_at")
+        .eq("school_id", schoolId);
+      let qInv = supabase.from("spp_invoices")
+        .select("invoice_number, student_name, class_name, period_label, total_amount, net_amount, paid_at, payment_method, status")
+        .eq("school_id", schoolId).eq("status", "paid").not("paid_at", "is", null);
+      let qStl = supabase.from("spp_settlements")
+        .select("settlement_code, withdraw_fee, status, paid_at, approved_at, requested_at, bank_name, account_number")
+        .eq("school_id", schoolId).eq("status", "paid").gt("withdraw_fee", 0);
+      if (from) { qCash = qCash.gte("entry_date", from); qInv = qInv.gte("paid_at", from); qStl = qStl.gte("paid_at", from); }
+      if (to)   { qCash = qCash.lte("entry_date", to);   qInv = qInv.lte("paid_at", to + "T23:59:59"); qStl = qStl.lte("paid_at", to + "T23:59:59"); }
+
       const [m, inv, stl, mPrior, invPrior, stlPrior] = await Promise.all([
-        supabase.from("cash_book_entries")
-          .select("entry_date, direction, category, description, reference, amount, created_at")
-          .eq("school_id", schoolId).gte("entry_date", from).lte("entry_date", to)
-          .order("entry_date", { ascending: true }).order("created_at", { ascending: true }),
-        supabase.from("spp_invoices")
-          .select("invoice_number, student_name, class_name, period_label, total_amount, net_amount, paid_at, payment_method, status")
-          .eq("school_id", schoolId).eq("status", "paid").not("paid_at", "is", null)
-          .gte("paid_at", from).lte("paid_at", to + "T23:59:59"),
-        supabase.from("spp_settlements")
-          .select("settlement_code, withdraw_fee, status, paid_at, approved_at, requested_at, bank_name, account_number")
-          .eq("school_id", schoolId).eq("status", "paid").gt("withdraw_fee", 0)
-          .gte("paid_at", from).lte("paid_at", to + "T23:59:59"),
-        supabase.from("cash_book_entries")
-          .select("direction, amount").eq("school_id", schoolId).lt("entry_date", from),
-        supabase.from("spp_invoices")
-          .select("total_amount, paid_at").eq("school_id", schoolId).eq("status", "paid").not("paid_at", "is", null).lt("paid_at", from),
-        supabase.from("spp_settlements")
-          .select("withdraw_fee, paid_at").eq("school_id", schoolId).eq("status", "paid").gt("withdraw_fee", 0).lt("paid_at", from),
+        qCash.order("entry_date", { ascending: true }).order("created_at", { ascending: true }),
+        qInv,
+        qStl,
+        from
+          ? supabase.from("cash_book_entries").select("direction, amount").eq("school_id", schoolId).lt("entry_date", from)
+          : Promise.resolve({ data: [] as any[] }),
+        from
+          ? supabase.from("spp_invoices").select("total_amount, paid_at").eq("school_id", schoolId).eq("status", "paid").not("paid_at", "is", null).lt("paid_at", from)
+          : Promise.resolve({ data: [] as any[] }),
+        from
+          ? supabase.from("spp_settlements").select("withdraw_fee, paid_at").eq("school_id", schoolId).eq("status", "paid").gt("withdraw_fee", 0).lt("paid_at", from)
+          : Promise.resolve({ data: [] as any[] }),
       ]);
 
       const manual: Entry[] = ((m.data as any[]) || []).map((r) => ({
@@ -111,6 +117,7 @@ export default function LaporanBukuKas() {
       setLoading(false);
     })();
   }, [schoolId, from, to]);
+
 
   const opening = priorSum.in - priorSum.out;
 
@@ -175,7 +182,8 @@ export default function LaporanBukuKas() {
       subtitle="Kas masuk & keluar sekolah — sinkron dengan Buku Kas Bendahara"
       icon={BookOpen}
       from={from} to={to} onFromChange={setFrom} onToChange={setTo}
-      onDownload={() => downloadCSV(`Buku_Kas_${from}_${to}`, csvRows, csvHeaders)}
+      datesOptional
+      onDownload={() => downloadCSV(`Buku_Kas_${(from || to) ? `${from || "awal"}_${to || "sekarang"}` : "semua"}`, csvRows, csvHeaders)}
       extraFilters={
         <>
           <Select value={dir} onValueChange={setDir}>
