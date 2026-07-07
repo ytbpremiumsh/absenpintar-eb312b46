@@ -50,6 +50,9 @@ const GRADIENTS = [
 
 export function LiveScheduleWidget({ schoolId }: { schoolId: string }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isPrincipal = location.pathname.startsWith("/kepsek");
+  const viewAllPath = isPrincipal ? "/kepsek/monitoring?tab=pembelajaran" : "/live-schedule";
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [classes, setClasses] = useState<ClassData[]>([]);
