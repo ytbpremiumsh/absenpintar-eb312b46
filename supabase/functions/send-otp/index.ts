@@ -59,7 +59,7 @@ serve(async (req) => {
       email: email.toLowerCase(), otp_code: otpCode, phone: targetPhone,
     });
 
-    const message = `*Kode OTP Reset Password ATSkolla*\n\nKode OTP Anda: ${otpCode}\n\nKode ini berlaku selama 5 menit.\nJangan bagikan kode ini kepada siapapun.\n\n_Pesan otomatis dari ATSkolla_`;
+    const message = `*Kode OTP Reset Password ATSkolla*\n\nKode OTP Anda: ${otpCode}\n\nKode ini berlaku selama 5 menit.\nJangan bagikan kode ini kepada siapapun.\n\n─────────────\n_ATSkolla — Platform Digital Sekolah Terintegrasi_`;
 
     const result = await sendOtpMessage(supabaseAdmin, targetPhone, message, school_id || null);
 
