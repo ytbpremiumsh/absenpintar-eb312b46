@@ -309,7 +309,11 @@ const Login = ({ forcedMode }: LoginProps) => {
 
               <div className="relative text-[#0b1020]">
                 <div className="flex items-center gap-3 mb-4">
-                  <img src={tenantLogo || loginLogo} alt={tenantName || "ATSkolla"} className="h-10 w-auto object-contain" />
+                  {tenantLogo ? (
+                    <img src={tenantLogo} alt={tenantName || "Sekolah"} className="h-10 w-auto object-contain" />
+                  ) : (
+                    <span className="font-extrabold text-2xl tracking-tight text-[#0b1020]">atskolla</span>
+                  )}
                   {tenantName && <span className="font-bold text-lg tracking-tight">{tenantName}</span>}
                 </div>
                 <h2 className="text-2xl font-bold mb-2 leading-tight">
@@ -346,18 +350,24 @@ const Login = ({ forcedMode }: LoginProps) => {
             className="w-full max-w-md"
           >
             <div className="flex lg:hidden items-center justify-center gap-3 mb-6">
-              <img src={mode === "parent" ? loginLogo : (tenantLogo || loginLogo)} alt="ATSkolla" className="h-10 w-auto object-contain" />
-              {(mode === "parent" || tenantName) && (
-                <span className="font-bold text-xl text-[#0b1020] tracking-tight">{mode === "parent" ? "" : (tenantName || "")}</span>
+              {mode === "parent" ? (
+                <span className="font-extrabold text-2xl tracking-tight text-[#0b1020]">atskolla</span>
+              ) : tenantLogo ? (
+                <>
+                  <img src={tenantLogo} alt={tenantName || "Sekolah"} className="h-10 w-auto object-contain" />
+                  {tenantName && <span className="font-bold text-xl text-[#0b1020] tracking-tight">{tenantName}</span>}
+                </>
+              ) : (
+                <span className="font-extrabold text-2xl tracking-tight text-[#0b1020]">atskolla</span>
               )}
             </div>
 
             <div className="text-center mb-5">
-              {mode === "parent" && (
+              {mode === "parent" && tenantLogo && (
                 <div className="flex justify-center mb-4">
                   <img
-                    src={tenantLogo || loginLogo}
-                    alt={tenantName || "ATSkolla"}
+                    src={tenantLogo}
+                    alt={tenantName || "Sekolah"}
                     className="h-16 w-16 rounded-2xl shadow-lg object-contain bg-white border border-slate-200 p-2"
                   />
                 </div>
