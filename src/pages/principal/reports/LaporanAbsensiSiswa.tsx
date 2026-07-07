@@ -104,6 +104,11 @@ export default function LaporanAbsensiSiswa() {
         ]} />
       }
     >
+      <AttendanceHighlights
+        title="Analitik Kehadiran Siswa"
+        loading={loading}
+        rows={filtered.map((r) => ({ id: r._id, name: r.Nama, hadir: r.Hadir || 0, sakit: r.Sakit || 0, izin: r.Izin || 0, alfa: r.Alfa || 0 }))}
+      />
       <ReportTable loading={loading} rows={filtered} headers={headers} onRowClick={(r) => setDetailId(r._id)} />
       <PrincipalAttendanceDetailDialog open={!!detailId} onClose={() => setDetailId(null)} kind="student" targetId={detailId} />
     </ReportShell>
