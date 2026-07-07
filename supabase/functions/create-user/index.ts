@@ -348,7 +348,8 @@ serve(async (req) => {
             .replace(/{parent_url}/g, parentUrl);
 
           // Append link info if template did not include it
-          if (!/\{url\}|\{site_url\}|\{admin_url\}|\{parent_url\}|absenpintar\.online/i.test(template)) {
+          const domainRe = new RegExp(baseDomain.replace(/\./g, '\\.'), 'i');
+          if (!/\{url\}|\{site_url\}|\{admin_url\}|\{parent_url\}/i.test(template) && !domainRe.test(template)) {
             message += `\n\n🌐 *Website Sekolah Anda:*\n${siteUrl}\n\n🔐 *Login Admin Sekolah:*\n${adminUrl}\n\n👨‍👩‍👧 *Login Wali Murid:*\n${parentUrl}`;
           }
 
