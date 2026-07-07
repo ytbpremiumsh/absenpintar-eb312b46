@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ReportShell, ReportTable, StatsRow, downloadCSV, useMonthRange, type Header, type Row } from "./_common";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { PrincipalAttendanceDetailDialog } from "./PrincipalAttendanceDetailDialog";
 
 export default function LaporanAbsensiSiswa() {
   const { profile } = useAuth();
