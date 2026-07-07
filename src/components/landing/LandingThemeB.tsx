@@ -32,7 +32,6 @@ const dashboardTeacherImg = "/panduan/teacher-dashboard-uswatun.jpg";
 const dashboardParentImg = "/panduan/parent-login.jpg";
 const dashboardBendaharaImg = "/panduan/bendahara-dashboard.jpg";
 import { cn } from "@/lib/utils";
-import atskollaLogo from "@/assets/atskolla-logo.png";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -158,7 +157,7 @@ const LandingThemeB = () => {
   const [showPricing, setShowPricing] = useState(false);
   const [trustedSchools, setTrustedSchools] = useState<TrustedSchool[]>(DEFAULT_TRUSTED_SCHOOLS);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(DEFAULT_TESTIMONIALS);
-  const [headerLogo, setHeaderLogo] = useState(atskollaLogo);
+  const [headerLogo, setHeaderLogo] = useState("https://absenpintar.online/images/logo-atskolla.png");
 
   useEffect(() => {
     Promise.all([

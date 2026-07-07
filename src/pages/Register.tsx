@@ -28,7 +28,6 @@ const motion: any = new Proxy({}, {
 const AnimatePresence = ({ children }: { children: ReactNode; mode?: string; initial?: boolean }) => <Fragment>{children}</Fragment>;
 import { supabase } from "@/integrations/supabase/client";
 import { getRootDomain } from "@/lib/tenant";
-import atskollaLogo from "@/assets/atskolla-logo.png";
 
 interface SchoolData {
   npsn: string;
@@ -65,7 +64,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [referralInput, setReferralInput] = useState(refCode);
   const [registering, setRegistering] = useState(false);
-  const [logo, setLogo] = useState(atskollaLogo);
+  const [logo, setLogo] = useState("https://absenpintar.online/images/logo-atskolla.png");
   const [agreeTos, setAgreeTos] = useState(false);
 
   // School-level extra info (required)

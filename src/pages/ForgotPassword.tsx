@@ -8,7 +8,6 @@ import { ArrowLeft, Loader2, Mail, Lock, ShieldCheck, KeyRound, MessageCircle, C
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import atskollaLogo from "@/assets/atskolla-logo.png";
 
 type Step = "email" | "otp" | "new-password" | "done";
 
@@ -25,7 +24,7 @@ const ForgotPassword = () => {
   const [maskedPhone, setMaskedPhone] = useState("");
   const [otpCooldown, setOtpCooldown] = useState(0);
   const [otpError, setOtpError] = useState("");
-  const [logo, setLogo] = useState(atskollaLogo);
+  const [logo, setLogo] = useState("https://absenpintar.online/images/logo-atskolla.png");
 
   useEffect(() => {
     supabase
