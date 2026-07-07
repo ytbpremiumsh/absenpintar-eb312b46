@@ -334,30 +334,47 @@ export default function BendaharaBukuKas() {
               <TableRow>
                 <TableHead>Tanggal</TableHead>
                 <TableHead>Kategori</TableHead>
+                <TableHead>Referensi / Invoice</TableHead>
+                <TableHead>Metode</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Keterangan</TableHead>
                 <TableHead className="text-right">Masuk</TableHead>
                 <TableHead className="text-right">Keluar</TableHead>
-                <TableHead className="text-right">Saldo</TableHead>
+                <TableHead className="text-right">Saldo Berjalan</TableHead>
                 <TableHead className="w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
+                <TableRow><TableCell colSpan={10} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
               ) : withBalance.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-sm text-muted-foreground">Belum ada entri kas dalam rentang ini</TableCell></TableRow>
+                <TableRow><TableCell colSpan={10} className="text-center py-8 text-sm text-muted-foreground">Belum ada entri kas dalam rentang ini</TableCell></TableRow>
               ) : withBalance.map((e) => (
                 <TableRow key={e.id}>
                   <TableCell className="text-xs whitespace-nowrap">{new Date(e.entry_date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <Badge variant="secondary" className="text-[10px]">{e.category}</Badge>
                       {e.source === "auto" && <Badge className="text-[9px] bg-blue-500/15 text-blue-700 hover:bg-blue-500/15 border-0"><Zap className="h-2.5 w-2.5 mr-0.5" />Auto</Badge>}
                     </div>
                   </TableCell>
-                  <TableCell className="max-w-[280px]">
-                    <div className="text-sm truncate">{e.description}</div>
-                    {e.reference && <div className="text-[11px] text-muted-foreground truncate">{e.reference}</div>}
+                  <TableCell className="text-xs font-mono max-w-[180px] truncate">
+                    {e.reference || <span className="text-muted-foreground italic font-sans">—</span>}
+                  </TableCell>
+                  <TableCell>
+                    {e.method
+                      ? <Badge variant="outline" className="text-[10px] font-normal">{e.method}</Badge>
+                      : <span className="text-[11px] text-muted-foreground italic">{e.source === "manual" ? "Tunai/Manual" : "—"}</span>}
+                  </TableCell>
+                  <TableCell>
+                    {e.status === "Lunas"
+                      ? <Badge className="text-[10px] bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 border-0">Lunas</Badge>
+                      : e.status
+                        ? <Badge variant="secondary" className="text-[10px]">{e.status}</Badge>
+                        : <Badge variant="outline" className="text-[10px] font-normal text-muted-foreground">Tercatat</Badge>}
+                  </TableCell>
+                  <TableCell className="max-w-[260px]">
+                    <div className="text-sm truncate">{e.description || <span className="text-muted-foreground italic">—</span>}</div>
                   </TableCell>
                   <TableCell className="text-right font-mono text-sm text-emerald-600">{e.direction === "in" ? fmtIDR(e.amount) : "-"}</TableCell>
                   <TableCell className="text-right font-mono text-sm text-rose-600">{e.direction === "out" ? fmtIDR(e.amount) : "-"}</TableCell>
@@ -371,6 +388,7 @@ export default function BendaharaBukuKas() {
                   </TableCell>
                 </TableRow>
               ))}
+
             </TableBody>
           </Table>
         </div>
