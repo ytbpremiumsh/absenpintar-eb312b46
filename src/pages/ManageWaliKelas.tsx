@@ -258,10 +258,10 @@ const ManageWaliKelas = () => {
                           >
                             <GraduationCap className="h-3 w-3" />
                             <span className="text-xs font-medium whitespace-nowrap">{a.class_name}</span>
-                            <span className="text-[9px] font-semibold uppercase tracking-wide bg-primary/15 px-1 py-px rounded-full">Wali</span>
                           </div>
                         ))}
                       </div>
+
                       <p className="text-[10px] text-muted-foreground/70 italic pt-0.5">
                         Klik ikon mata untuk mengubah atau menghapus wali kelas
                       </p>
