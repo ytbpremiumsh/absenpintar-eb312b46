@@ -33,16 +33,26 @@ interface TeacherRow {
 
 const STATUS_TO_CODE: Record<string, string> = { hadir: "H", sakit: "S", izin: "I", alfa: "A" };
 
-const TeacherAttendanceRecap = () => {
+interface Props {
+  /** Optional override; falls back to signed-in user's school_id. */
+  schoolId?: string;
+  /** Hide the top gradient hero (useful when embedded in another page shell). */
+  hideHeader?: boolean;
+}
+
+const TeacherAttendanceRecap = ({ schoolId: schoolIdProp, hideHeader }: Props = {}) => {
   const { profile } = useAuth();
+  const schoolId = schoolIdProp ?? profile?.school_id;
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [teachers, setTeachers] = useState<{ user_id: string; full_name: string; photo_url: string | null; roles: string[] }[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [rekapTab, setRekapTab] = useState<"datang" | "pulang">("datang");
   const [schoolName, setSchoolName] = useState("");
   const [schoolCity, setSchoolCity] = useState("");
   const [principalName, setPrincipalName] = useState("");
+
 
   useEffect(() => {
     const load = async () => {
