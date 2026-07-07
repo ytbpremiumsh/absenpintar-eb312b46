@@ -489,13 +489,19 @@ const TeacherAttendanceRecap = ({ schoolId: schoolIdProp, hideHeader }: Props = 
                             </td>
                           );
                         })}
-                        <td className="px-1 py-2 text-center font-bold text-emerald-600">{r.totals.H || 0}</td>
-                        <td className="px-1 py-2 text-center font-bold text-violet-600">{r.totals.S || 0}</td>
-                        <td className="px-1 py-2 text-center font-bold text-amber-600">{r.totals.I || 0}</td>
-                        <td className="px-1 py-2 text-center font-bold text-red-600">{r.totals.A || 0}</td>
-                        <td className={`px-1 py-2 text-center font-bold text-[10px] ${pct >= 80 ? "text-emerald-600" : pct >= 60 ? "text-amber-600" : "text-red-600"}`}>
-                          {total > 0 ? `${pct}%` : "-"}
-                        </td>
+                        {isPulangMode ? (
+                          <td className="px-1 py-2 text-center font-bold text-emerald-600">{r.totals.H || 0}</td>
+                        ) : (
+                          <>
+                            <td className="px-1 py-2 text-center font-bold text-emerald-600">{r.totals.H || 0}</td>
+                            <td className="px-1 py-2 text-center font-bold text-violet-600">{r.totals.S || 0}</td>
+                            <td className="px-1 py-2 text-center font-bold text-amber-600">{r.totals.I || 0}</td>
+                            <td className="px-1 py-2 text-center font-bold text-red-600">{r.totals.A || 0}</td>
+                            <td className={`px-1 py-2 text-center font-bold text-[10px] ${pct >= 80 ? "text-emerald-600" : pct >= 60 ? "text-amber-600" : "text-red-600"}`}>
+                              {total > 0 ? `${pct}%` : "-"}
+                            </td>
+                          </>
+                        )}
                       </tr>
                     );
                   })}
@@ -503,6 +509,7 @@ const TeacherAttendanceRecap = ({ schoolId: schoolIdProp, hideHeader }: Props = 
               </table>
             </div>
           )}
+
 
           {rows.length > 0 && (
             <div className="p-6 border-t border-border">
