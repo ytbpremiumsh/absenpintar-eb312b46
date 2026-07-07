@@ -199,6 +199,7 @@ function SectionHeader({ eyebrow, title, sub, dark = false }: { eyebrow: string;
 // ---------- Nav ----------
 function Nav({ theme, onToggleTheme }: { theme: "light" | "dark"; onToggleTheme: () => void }) {
   const nav = useNavigate();
+  const loginPath = isRootHost() ? "/admin" : "/login";
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
