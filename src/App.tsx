@@ -90,6 +90,13 @@ const PrincipalKeuangan = lazy(() => import("./pages/principal/PrincipalKeuangan
 const PrincipalPersetujuan = lazy(() => import("./pages/principal/PrincipalPersetujuan"));
 const PrincipalAgenda = lazy(() => import("./pages/principal/PrincipalAgenda"));
 const PrincipalLaporan = lazy(() => import("./pages/principal/PrincipalLaporan"));
+const LaporanAbsensiSiswa = lazy(() => import("./pages/principal/reports/LaporanAbsensiSiswa"));
+const LaporanAbsensiGuru = lazy(() => import("./pages/principal/reports/LaporanAbsensiGuru"));
+const LaporanSPP = lazy(() => import("./pages/principal/reports/LaporanSPP"));
+const LaporanTunggakan = lazy(() => import("./pages/principal/reports/LaporanTunggakan"));
+const LaporanBukuKas = lazy(() => import("./pages/principal/reports/LaporanBukuKas"));
+const LaporanSettlement = lazy(() => import("./pages/principal/reports/LaporanSettlement"));
+const LaporanJurnal = lazy(() => import("./pages/principal/reports/LaporanJurnal"));
 const BendaharaWithdraw = lazy(() => import("./pages/bendahara/BendaharaWithdraw"));
 const BendaharaKeuanganSekolah = lazy(() => import("./pages/bendahara/BendaharaKeuanganSekolah"));
 const LaporanAbsensi = lazy(() => import("./pages/LaporanAbsensi"));
@@ -260,6 +267,13 @@ function AppRoutes() {
           <Route path="/kepsek/persetujuan" element={<PrincipalPersetujuan />} />
           <Route path="/kepsek/agenda" element={<PrincipalAgenda />} />
           <Route path="/kepsek/laporan" element={<PrincipalLaporan />} />
+          <Route path="/kepsek/laporan/absensi-siswa" element={<LaporanAbsensiSiswa />} />
+          <Route path="/kepsek/laporan/absensi-guru" element={<LaporanAbsensiGuru />} />
+          <Route path="/kepsek/laporan/spp" element={<LaporanSPP />} />
+          <Route path="/kepsek/laporan/tunggakan" element={<LaporanTunggakan />} />
+          <Route path="/kepsek/laporan/buku-kas" element={<LaporanBukuKas />} />
+          <Route path="/kepsek/laporan/settlement" element={<LaporanSettlement />} />
+          <Route path="/kepsek/laporan/jurnal" element={<LaporanJurnal />} />
         </Route>
         {/* School Admin / Staff */}
         <Route element={<AppLayout />}>
