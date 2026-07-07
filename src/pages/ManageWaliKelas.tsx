@@ -250,23 +250,23 @@ const ManageWaliKelas = () => {
                       <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                         Kelas ({teacherAssignments.length})
                       </p>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-1 px-1 pb-1">
                         {teacherAssignments.map((a) => (
-                          <div key={a.id} className="group/chip inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary">
+                          <div
+                            key={a.id}
+                            className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary"
+                          >
                             <GraduationCap className="h-3 w-3" />
-                            <span className="text-xs font-medium">{a.class_name}</span>
-                            <span className="text-[9px] font-semibold uppercase tracking-wide bg-primary/15 px-1 py-px rounded-full ml-0.5">Wali</span>
-                            <button
-                              onClick={() => handleDelete(a)}
-                              className="ml-0.5 h-4 w-4 rounded-full flex items-center justify-center text-destructive/60 hover:text-destructive hover:bg-destructive/10 transition-colors"
-                              aria-label={`Hapus ${a.class_name}`}
-                            >
-                              <Trash2 className="h-2.5 w-2.5" />
-                            </button>
+                            <span className="text-xs font-medium whitespace-nowrap">{a.class_name}</span>
+                            <span className="text-[9px] font-semibold uppercase tracking-wide bg-primary/15 px-1 py-px rounded-full">Wali</span>
                           </div>
                         ))}
                       </div>
+                      <p className="text-[10px] text-muted-foreground/70 italic pt-0.5">
+                        Klik ikon mata untuk mengubah atau menghapus wali kelas
+                      </p>
                     </div>
+
 
                   </CardContent>
                 </Card>
