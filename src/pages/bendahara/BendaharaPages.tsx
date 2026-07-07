@@ -24,8 +24,10 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import * as XLSX from "xlsx";
+import XLSXStyle from "xlsx-js-style";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+
 import { downloadSppInvoicePDF, generateSppInvoicePDF } from "@/lib/sppInvoicePDF";
 import { PaymentIframeDialog } from "@/components/PaymentIframeDialog";
 import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
@@ -53,6 +55,221 @@ const academicYearList = (currentYear: number) => {
   for (let y = currentYear - 2; y <= currentYear + 1; y++) arr.push(`${y}/${y + 1}`);
   return arr;
 };
+
+// ============ Helpers Export Profesional (PDF & Excel) ============
+const CURRENCY_KEYS = new Set(["Nominal","Denda","Total","Total Tagihan","Total Diterima","Total Bayar","Jumlah","Amount"]);
+const IDR_FMT = '"Rp"#,##0;[Red]"Rp"#,##0;"-"';
+
+/** Buat worksheet ber-style: header biru, zebra, border, format IDR, freeze, auto width. */
+function buildStyledSheet(rows: Record<string, any>[], opts?: { title?: string; subtitle?: string; totalsLabel?: string }) {
+  const keys = rows.length ? Object.keys(rows[0]) : [];
+  const header = opts?.title;
+  const sub = opts?.subtitle;
+  const preRows: any[][] = [];
+  if (header) preRows.push([header]);
+  if (sub) preRows.push([sub]);
+  if (header || sub) preRows.push([]);
+  const headerRowIdx = preRows.length; // 0-based
+  const dataStart = headerRowIdx + 1;
+  const aoa: any[][] = [
+    ...preRows,
+    keys,
+    ...rows.map((r) => keys.map((k) => r[k])),
+  ];
+  // Baris total untuk kolom currency
+  const totalsRow: any[] = [];
+  let hasTotal = false;
+  keys.forEach((k, i) => {
+    if (CURRENCY_KEYS.has(k)) {
+      hasTotal = true;
+      totalsRow[i] = rows.reduce((s, r) => s + (Number(r[k]) || 0), 0);
+    } else if (i === 0) {
+      totalsRow[i] = opts?.totalsLabel || "TOTAL";
+    } else {
+      totalsRow[i] = "";
+    }
+  });
+  if (hasTotal) aoa.push(totalsRow);
+  const ws = XLSXStyle.utils.aoa_to_sheet(aoa);
+
+  const border = {
+    top: { style: "thin", color: { rgb: "D9DDE8" } },
+    bottom: { style: "thin", color: { rgb: "D9DDE8" } },
+    left: { style: "thin", color: { rgb: "D9DDE8" } },
+    right: { style: "thin", color: { rgb: "D9DDE8" } },
+  } as any;
+
+  // Style baris judul & subjudul
+  if (header) {
+    const c = XLSXStyle.utils.encode_cell({ r: 0, c: 0 });
+    (ws as any)[c].s = {
+      font: { name: "Calibri", sz: 16, bold: true, color: { rgb: "1F2437" } },
+      alignment: { vertical: "center" },
+    };
+    ws["!merges"] = ws["!merges"] || [];
+    ws["!merges"].push({ s: { r: 0, c: 0 }, e: { r: 0, c: Math.max(0, keys.length - 1) } });
+  }
+  if (sub) {
+    const rIdx = header ? 1 : 0;
+    const c = XLSXStyle.utils.encode_cell({ r: rIdx, c: 0 });
+    (ws as any)[c].s = {
+      font: { name: "Calibri", sz: 10, italic: true, color: { rgb: "6B7280" } },
+    };
+    ws["!merges"] = ws["!merges"] || [];
+    ws["!merges"].push({ s: { r: rIdx, c: 0 }, e: { r: rIdx, c: Math.max(0, keys.length - 1) } });
+  }
+
+  // Header kolom
+  keys.forEach((_k, ci) => {
+    const addr = XLSXStyle.utils.encode_cell({ r: headerRowIdx, c: ci });
+    (ws as any)[addr].s = {
+      font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } },
+      fill: { patternType: "solid", fgColor: { rgb: "5B6CF9" } },
+      alignment: { horizontal: "center", vertical: "center", wrapText: true },
+      border,
+    };
+  });
+
+  // Body rows (zebra + currency)
+  rows.forEach((r, ri) => {
+    keys.forEach((k, ci) => {
+      const addr = XLSXStyle.utils.encode_cell({ r: dataStart + ri, c: ci });
+      if (!(ws as any)[addr]) return;
+      const isCurrency = CURRENCY_KEYS.has(k);
+      (ws as any)[addr].s = {
+        font: { name: "Calibri", sz: 10, color: { rgb: "1F2437" } },
+        fill: { patternType: "solid", fgColor: { rgb: ri % 2 === 0 ? "FFFFFF" : "F5F7FB" } },
+        alignment: { horizontal: isCurrency ? "right" : (typeof r[k] === "number" ? "right" : "left"), vertical: "center", wrapText: false },
+        border,
+        ...(isCurrency ? { numFmt: IDR_FMT } : {}),
+      };
+    });
+  });
+
+  // Totals row style
+  if (hasTotal) {
+    const rIdx = dataStart + rows.length;
+    keys.forEach((k, ci) => {
+      const addr = XLSXStyle.utils.encode_cell({ r: rIdx, c: ci });
+      if (!(ws as any)[addr]) (ws as any)[addr] = { t: "s", v: "" };
+      const isCurrency = CURRENCY_KEYS.has(k);
+      (ws as any)[addr].s = {
+        font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } },
+        fill: { patternType: "solid", fgColor: { rgb: "1F2437" } },
+        alignment: { horizontal: isCurrency ? "right" : "left", vertical: "center" },
+        border,
+        ...(isCurrency ? { numFmt: IDR_FMT } : {}),
+      };
+    });
+  }
+
+  // Kolom width
+  ws["!cols"] = keys.map((k) => {
+    const maxLen = Math.max(
+      k.length,
+      ...rows.map((r) => String(r[k] ?? "").length),
+    );
+    return { wch: Math.min(Math.max(maxLen + 2, 10), 32) };
+  });
+  // Baris tinggi header
+  ws["!rows"] = [];
+  ws["!rows"][headerRowIdx] = { hpt: 22 };
+
+  // Freeze pane di bawah header
+  ws["!freeze"] = { xSplit: 0, ySplit: dataStart } as any;
+  (ws as any)["!autofilter"] = { ref: XLSXStyle.utils.encode_range({ s: { r: headerRowIdx, c: 0 }, e: { r: headerRowIdx + rows.length, c: Math.max(0, keys.length - 1) } }) };
+
+  return ws;
+}
+
+/** PDF profesional: header brand, sub info, tabel grid berwarna, footer halaman + total. */
+function buildStyledPdf(opts: {
+  title: string;
+  subtitle?: string;
+  schoolName?: string;
+  schoolNpsn?: string;
+  meta?: string[]; // baris info tambahan
+  orientation?: "l" | "p";
+  columns: { header: string; dataKey: string; align?: "left" | "right" | "center"; isCurrency?: boolean; width?: number }[];
+  rows: Record<string, any>[];
+  fileName: string;
+}) {
+  const doc = new jsPDF(opts.orientation || "l", "mm", "a4");
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+
+  // Header band brand
+  doc.setFillColor(91, 108, 249);
+  doc.rect(0, 0, pageW, 22, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text(opts.title.toUpperCase(), 12, 10);
+  if (opts.schoolName) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(opts.schoolName, 12, 16.5);
+  }
+  // Accent bar
+  doc.setFillColor(255, 214, 88);
+  doc.rect(0, 22, pageW, 1.5, "F");
+
+  // Meta block
+  let y = 30;
+  doc.setTextColor(31, 36, 55);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  if (opts.subtitle) { doc.text(opts.subtitle, 12, y); y += 5; }
+  doc.setFont("helvetica", "normal");
+  if (opts.schoolNpsn) { doc.text(`NPSN: ${opts.schoolNpsn}`, 12, y); y += 4.5; }
+  (opts.meta || []).forEach((m) => { doc.text(m, 12, y); y += 4.5; });
+  doc.text(`Dicetak: ${new Date().toLocaleString("id-ID")}`, 12, y);
+  y += 3;
+
+  // Totals summary
+  const currencyCols = opts.columns.filter((c) => c.isCurrency);
+  const totals: Record<string, number> = {};
+  currencyCols.forEach((c) => {
+    totals[c.dataKey] = opts.rows.reduce((s, r) => s + (Number(r[c.dataKey]) || 0), 0);
+  });
+
+  autoTable(doc, {
+    startY: y + 3,
+    head: [opts.columns.map((c) => c.header)],
+    body: opts.rows.map((r) => opts.columns.map((c) => {
+      const v = r[c.dataKey];
+      if (c.isCurrency) return `Rp ${Number(v || 0).toLocaleString("id-ID")}`;
+      return v == null ? "" : String(v);
+    })),
+    foot: currencyCols.length
+      ? [opts.columns.map((c, i) => {
+          if (i === 0) return "TOTAL";
+          if (c.isCurrency) return `Rp ${(totals[c.dataKey] || 0).toLocaleString("id-ID")}`;
+          return "";
+        })]
+      : undefined,
+    styles: { fontSize: 8, cellPadding: 2.2, lineColor: [217, 221, 232], lineWidth: 0.15, textColor: [31, 36, 55] },
+    headStyles: { fillColor: [91, 108, 249], textColor: 255, fontStyle: "bold", halign: "center", valign: "middle" },
+    bodyStyles: { valign: "middle" },
+    alternateRowStyles: { fillColor: [245, 247, 251] },
+    footStyles: { fillColor: [31, 36, 55], textColor: 255, fontStyle: "bold", halign: "right" },
+    columnStyles: Object.fromEntries(opts.columns.map((c, i) => [i, { halign: c.align || (c.isCurrency ? "right" : "left"), cellWidth: c.width || "auto" }])) as any,
+    margin: { left: 10, right: 10 },
+    theme: "grid",
+    didDrawPage: () => {
+      // Footer
+      const str = `Halaman ${doc.getNumberOfPages()}`;
+      doc.setFontSize(8);
+      doc.setTextColor(120, 125, 140);
+      doc.text(str, pageW - 12, pageH - 6, { align: "right" });
+      doc.text(opts.schoolName || "", 12, pageH - 6);
+    },
+  });
+
+  doc.save(`${opts.fileName}.pdf`);
+}
+
+
 const monthsOfAcademicYear = (ay: string): { month: number; year: number; label: string }[] => {
   const [y1, y2] = ay.split("/").map(Number);
   const arr: { month: number; year: number; label: string }[] = [];
@@ -4599,38 +4816,42 @@ function PresetLaporan({ items, students, school, year }: { items: any[]; studen
       "Total": a.total,
     }));
 
-  const exportXlsx = (fname: string, rows: any[]) => {
+  const exportXlsx = (fname: string, rows: any[], title?: string, subtitle?: string) => {
     if (rows.length === 0) { toast.error("Tidak ada data untuk periode ini"); return; }
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(rows);
-    ws["!cols"] = Object.keys(rows[0]).map(k => ({ wch: Math.min(Math.max(k.length + 2, 12), 30) }));
-    XLSX.utils.book_append_sheet(wb, ws, "Laporan");
-    XLSX.writeFile(wb, `${fname}.xlsx`);
+    const wb = XLSXStyle.utils.book_new();
+    const ws = buildStyledSheet(rows, {
+      title: title || fname,
+      subtitle: `${school?.name || "-"}${subtitle ? " • " + subtitle : ""}`,
+    });
+    XLSXStyle.utils.book_append_sheet(wb, ws, "Laporan");
+    XLSXStyle.writeFile(wb, `${fname}.xlsx`);
     toast.success("Excel diunduh");
   };
 
   const exportPdf = (title: string, subtitle: string, rows: any[]) => {
     if (rows.length === 0) { toast.error("Tidak ada data untuk periode ini"); return; }
-    const doc = new jsPDF("l", "mm", "a4");
-    doc.setFontSize(14); doc.setFont("helvetica", "bold");
-    doc.text(title, 14, 14);
-    doc.setFontSize(10); doc.setFont("helvetica", "normal");
-    doc.text(school?.name || "-", 14, 21);
-    doc.setFontSize(9);
-    doc.text(subtitle, 14, 27);
-    const total = rows.reduce((s, r) => s + (r["Total"] || r["Nominal"] || 0), 0);
-    doc.text(`Total: ${rows.length} baris • Rp ${total.toLocaleString("id-ID")}`, 14, 33);
-    const head = [Object.keys(rows[0])];
-    const body = rows.map(r => Object.values(r).map(v => typeof v === "number" ? v.toLocaleString("id-ID") : String(v ?? "")));
-    autoTable(doc, {
-      startY: 39, head, body,
-      styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [91, 108, 249], textColor: 255 },
-      alternateRowStyles: { fillColor: [248, 249, 252] },
+    const keys = Object.keys(rows[0]);
+    const columns = keys.map((k) => ({
+      header: k,
+      dataKey: k,
+      isCurrency: CURRENCY_KEYS.has(k),
+      align: (CURRENCY_KEYS.has(k) ? "right" : (k === "No" ? "center" : "left")) as any,
+    }));
+    buildStyledPdf({
+      title,
+      subtitle,
+      schoolName: school?.name || "-",
+      schoolNpsn: school?.npsn || undefined,
+      meta: [`Jumlah baris: ${rows.length}`],
+      orientation: "l",
+      columns,
+      rows,
+      fileName: title.replace(/\s+/g, "_"),
     });
-    doc.save(`${title.replace(/\s+/g, "_")}.pdf`);
     toast.success("PDF diunduh");
   };
+
+
 
   // Presets
   const dailyRows = () => buildRows(paid.filter((i: any) => (i.paid_at || "").slice(0, 10) === todayStr));
@@ -4703,7 +4924,7 @@ function PresetLaporan({ items, students, school, year }: { items: any[]; studen
                 <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30" onClick={() => exportPdf(p.title, p.subtitle, p.rows())}>
                   <Download className="h-3 w-3 mr-1" /> PDF
                 </Button>
-                <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" onClick={() => exportXlsx(`${p.title.replace(/\s+/g, "_")}_${todayStr}`, p.rows())}>
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px] text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" onClick={() => exportXlsx(`${p.title.replace(/\s+/g, "_")}_${todayStr}`, p.rows(), p.title, p.subtitle)}>
                   <Download className="h-3 w-3 mr-1" /> Excel
                 </Button>
               </div>
@@ -4850,8 +5071,10 @@ export function BendaharaLaporan() {
     const filterTag = `${expAY === "all" ? "ALL" : expAY.replace("/", "-")}_${expClass === "all" ? "SEMUA-KELAS" : expClass.replace(/\s/g, "-")}_${expStatus.toUpperCase()}`;
     const fname = `SPP_${filterTag}_${new Date().toISOString().slice(0, 10)}`;
 
+    const metaSubtitle = `TA: ${expAY === "all" ? "Semua" : expAY} • Kelas: ${expClass === "all" ? "Semua" : expClass} • Status: ${expStatus === "all" ? "Semua" : expStatus}`;
+
     if (format === "xlsx") {
-      const wb = XLSX.utils.book_new();
+      const wb = XLSXStyle.utils.book_new();
 
       // Ringkasan Per Tahun Ajaran (selalu ada — memudahkan pembacaan lintas TA)
       const perTA = new Map<string, any[]>();
@@ -4870,9 +5093,11 @@ export function BendaharaLaporan() {
           "Total Tagihan": list.reduce((a, x) => a + (x.Total || 0), 0),
           "Total Diterima": list.filter(x => x.Status === "Lunas").reduce((a, x) => a + (x.Total || 0), 0),
         }));
-      const wsTA = XLSX.utils.json_to_sheet(summaryTA);
-      wsTA["!cols"] = [{ wch: 14 }, { wch: 16 }, { wch: 10 }, { wch: 12 }, { wch: 16 }, { wch: 16 }];
-      XLSX.utils.book_append_sheet(wb, wsTA, "Ringkasan per TA");
+      XLSXStyle.utils.book_append_sheet(
+        wb,
+        buildStyledSheet(summaryTA, { title: "Ringkasan per Tahun Ajaran", subtitle: `${school?.name || "-"} • ${metaSubtitle}` }),
+        "Ringkasan per TA",
+      );
 
       if (expClass === "all") {
         // Ringkasan per Kelas
@@ -4890,34 +5115,41 @@ export function BendaharaLaporan() {
           "Total Tagihan": list.reduce((a, x) => a + (x.Total || 0), 0),
           "Total Diterima": list.filter(x => x.Status === "Lunas").reduce((a, x) => a + (x.Total || 0), 0),
         }));
-        const wsSum = XLSX.utils.json_to_sheet(summary);
-        wsSum["!cols"] = [{ wch: 12 }, { wch: 16 }, { wch: 10 }, { wch: 12 }, { wch: 16 }, { wch: 16 }];
-        XLSX.utils.book_append_sheet(wb, wsSum, "Ringkasan per Kelas");
+        XLSXStyle.utils.book_append_sheet(
+          wb,
+          buildStyledSheet(summary, { title: "Ringkasan per Kelas", subtitle: `${school?.name || "-"} • ${metaSubtitle}` }),
+          "Ringkasan per Kelas",
+        );
 
         // Rincian per Kelas × TA supaya ekspor lebih rapih (satu sheet per Kelas-TA jika multi-TA)
         Array.from(grouped.entries()).forEach(([cls, list]) => {
           const tas = new Set(list.map(x => String(x["Tahun Ajaran"] || "-")));
           if (tas.size > 1) {
-            // Split per TA
             Array.from(tas).sort().forEach((ta) => {
               const subset = list.filter(x => String(x["Tahun Ajaran"]) === ta);
-              const ws = XLSX.utils.json_to_sheet(subset);
-              ws["!cols"] = Object.keys(subset[0]).map(k => ({ wch: Math.min(Math.max(k.length + 2, 10), 28) }));
               const sheetName = `${cls} ${ta}`.slice(0, 31);
-              XLSX.utils.book_append_sheet(wb, ws, sheetName);
+              XLSXStyle.utils.book_append_sheet(
+                wb,
+                buildStyledSheet(subset, { title: `Rincian SPP — Kelas ${cls}`, subtitle: `TA ${ta} • ${school?.name || "-"}` }),
+                sheetName,
+              );
             });
           } else {
-            const ws = XLSX.utils.json_to_sheet(list);
-            ws["!cols"] = Object.keys(list[0]).map(k => ({ wch: Math.min(Math.max(k.length + 2, 10), 28) }));
-            XLSX.utils.book_append_sheet(wb, ws, cls.slice(0, 31));
+            XLSXStyle.utils.book_append_sheet(
+              wb,
+              buildStyledSheet(list, { title: `Rincian SPP — Kelas ${cls}`, subtitle: `${school?.name || "-"}` }),
+              cls.slice(0, 31),
+            );
           }
         });
       } else {
-        const ws = XLSX.utils.json_to_sheet(rows);
-        ws["!cols"] = Object.keys(rows[0]).map(k => ({ wch: Math.min(Math.max(k.length + 2, 10), 28) }));
-        XLSX.utils.book_append_sheet(wb, ws, expClass.slice(0, 31));
+        XLSXStyle.utils.book_append_sheet(
+          wb,
+          buildStyledSheet(rows, { title: `Rincian SPP — Kelas ${expClass}`, subtitle: `${school?.name || "-"} • ${metaSubtitle}` }),
+          expClass.slice(0, 31),
+        );
       }
-      XLSX.writeFile(wb, `${fname}.xlsx`);
+      XLSXStyle.writeFile(wb, `${fname}.xlsx`);
     } else if (format === "csv") {
       const ws = XLSX.utils.json_to_sheet(rows);
       const csv = XLSX.utils.sheet_to_csv(ws);
@@ -4926,27 +5158,34 @@ export function BendaharaLaporan() {
       const a = document.createElement("a"); a.href = url; a.download = `${fname}.csv`; a.click();
       URL.revokeObjectURL(url);
     } else {
-      const doc = new jsPDF("l", "mm", "a4");
-      doc.setFontSize(14); doc.setFont("helvetica", "bold");
-      doc.text("LAPORAN TAGIHAN SPP", 14, 14);
-      doc.setFontSize(10); doc.setFont("helvetica", "normal");
-      doc.text(school?.name || "", 14, 21);
-      doc.setFontSize(9);
-      doc.text(`NPSN: ${school?.npsn || "-"}`, 14, 27);
-      doc.text(`Tahun Ajaran: ${expAY === "all" ? "Semua" : expAY}  •  Kelas: ${expClass === "all" ? "Semua" : expClass}  •  Status: ${expStatus === "all" ? "Semua" : expStatus}`, 14, 33);
-      doc.text(`Total: ${rows.length} tagihan • ${fmtIDR(rows.reduce((a, r) => a + (r.Total || 0), 0))}`, 14, 39);
-      autoTable(doc, {
-        startY: 45,
-        head: [["No", "NIS", "Nama Siswa", "Kelas", "Periode", "Total", "Jatuh Tempo", "Status"]],
-        body: rows.map(r => [r.No, r.NIS, r["Nama Siswa"], r.Kelas, r.Periode, fmtIDR(r.Total), r["Jatuh Tempo"], r.Status]),
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [91, 108, 249], textColor: 255 },
-        alternateRowStyles: { fillColor: [248, 249, 252] },
+      buildStyledPdf({
+        title: "Laporan Tagihan SPP",
+        subtitle: metaSubtitle,
+        schoolName: school?.name || "",
+        schoolNpsn: school?.npsn || undefined,
+        meta: [
+          `Total: ${rows.length} tagihan • ${fmtIDR(rows.reduce((a, r) => a + (r.Total || 0), 0))}`,
+          `Sudah Lunas: ${rows.filter(r => r.Status === "Lunas").length} • Belum Lunas: ${rows.filter(r => r.Status !== "Lunas").length}`,
+        ],
+        orientation: "l",
+        columns: [
+          { header: "No", dataKey: "No", align: "center", width: 10 },
+          { header: "No. Invoice", dataKey: "No. Invoice", align: "left", width: 34 },
+          { header: "NIS", dataKey: "NIS", align: "left", width: 22 },
+          { header: "Nama Siswa", dataKey: "Nama Siswa", align: "left" },
+          { header: "Kelas", dataKey: "Kelas", align: "center", width: 16 },
+          { header: "Periode", dataKey: "Periode", align: "left", width: 26 },
+          { header: "Total", dataKey: "Total", isCurrency: true, width: 28 },
+          { header: "Jatuh Tempo", dataKey: "Jatuh Tempo", align: "center", width: 22 },
+          { header: "Status", dataKey: "Status", align: "center", width: 22 },
+        ],
+        rows,
+        fileName: fname,
       });
-      doc.save(`${fname}.pdf`);
     }
     toast.success("Export selesai");
   };
+
 
   return (
     <div className="space-y-4">
@@ -5106,9 +5345,8 @@ export function BendaharaLaporan() {
         </TabsContent>
         {/* TAB 5 — EXPORT DATA */}
         <TabsContent value="export" className="mt-4 space-y-3">
-          {/* Laporan Cepat (PDF & Excel) — kompak di atas export lengkap */}
-          <PresetLaporan items={items} students={students} school={school} year={year} />
           <Card className="border-0 shadow-sm">
+
 
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
@@ -5232,6 +5470,9 @@ export function BendaharaLaporan() {
               </div>
             </CardContent>
           </Card>
+          {/* Laporan Cepat (PDF & Excel) — pintasan cepat di bawah export utama */}
+          <PresetLaporan items={items} students={students} school={school} year={year} />
+
         </TabsContent>
       </Tabs>
 
