@@ -10,7 +10,15 @@ import { PageHeader } from "@/components/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { AlertTriangle, Users, GraduationCap, MessageCircle, Loader2, Send } from "lucide-react";
+import { AlertTriangle, Users, GraduationCap, Loader2, Send } from "lucide-react";
+
+// Icon WhatsApp (inline SVG) — brand-consistent
+const WhatsAppIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 32 32" className={className} fill="currentColor" aria-hidden="true">
+    <path d="M16.001 3.2c-7.07 0-12.8 5.73-12.8 12.8 0 2.26.6 4.47 1.74 6.42L3.2 28.8l6.55-1.71a12.75 12.75 0 0 0 6.25 1.62h.01c7.07 0 12.8-5.73 12.8-12.8s-5.73-12.8-12.81-12.8Zm0 23.34h-.01a10.5 10.5 0 0 1-5.36-1.47l-.38-.23-3.89 1.02 1.04-3.79-.25-.39a10.55 10.55 0 0 1-1.61-5.58c0-5.83 4.75-10.58 10.58-10.58s10.58 4.75 10.58 10.58-4.74 10.44-10.7 10.44Zm5.8-7.83c-.32-.16-1.89-.93-2.18-1.04-.29-.11-.5-.16-.72.16-.21.32-.83 1.04-1.02 1.25-.19.21-.38.24-.7.08-.32-.16-1.35-.5-2.57-1.58-.95-.85-1.59-1.9-1.77-2.22-.19-.32-.02-.5.14-.66.14-.14.32-.38.48-.57.16-.19.21-.32.32-.53.11-.21.05-.4-.03-.57-.08-.16-.72-1.73-.99-2.37-.26-.63-.53-.54-.72-.55l-.62-.01c-.21 0-.55.08-.83.4-.29.32-1.1 1.07-1.1 2.62s1.13 3.04 1.29 3.25c.16.21 2.24 3.42 5.42 4.79.76.33 1.35.52 1.81.67.76.24 1.45.21 1.99.13.61-.09 1.89-.77 2.16-1.51.27-.75.27-1.39.19-1.51-.08-.13-.29-.21-.61-.37Z"/>
+  </svg>
+);
+
 
 const fmtIDR = (n: number) => `Rp ${(n || 0).toLocaleString("id-ID")}`;
 const MONTHS = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
@@ -296,7 +304,7 @@ export default function BendaharaTunggakan() {
       <Card className="border-0 shadow-sm overflow-hidden">
         <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
           <h3 className="text-sm font-bold">Daftar Siswa Menunggak</h3>
-          {!waFlag && <Badge variant="secondary" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200">WA reminder tunggakan tetap aktif</Badge>}
+          
         </div>
         <div className="overflow-x-auto">
           <Table>
@@ -330,7 +338,7 @@ export default function BendaharaTunggakan() {
                       onClick={() => sendReminder(s)}
                       className="h-8 text-xs"
                     >
-                      {sending === s.student_id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <MessageCircle className="h-3.5 w-3.5 mr-1 text-emerald-600" />}
+                      {sending === s.student_id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <WhatsAppIcon className="h-3.5 w-3.5 mr-1 text-emerald-600" />}
                       Reminder
                     </Button>
                   </TableCell>
