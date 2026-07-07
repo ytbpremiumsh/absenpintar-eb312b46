@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Activity, Briefcase,
   CalendarDays, FileSpreadsheet, LogOut, ChevronRight, Crown,
+  Users, GraduationCap, ClipboardList, Receipt, Wallet, BookOpen, Landmark,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -26,9 +27,21 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
     ],
   },
   {
-    label: "Laporan",
+    label: "Laporan Akademik",
     items: [
-      { title: "Laporan Sekolah", url: "/kepsek/laporan", icon: FileSpreadsheet },
+      { title: "Ringkasan Laporan", url: "/kepsek/laporan", icon: FileSpreadsheet, end: true },
+      { title: "Absensi Siswa", url: "/kepsek/laporan/absensi-siswa", icon: Users },
+      { title: "Absensi Guru", url: "/kepsek/laporan/absensi-guru", icon: GraduationCap },
+      { title: "Jurnal Mengajar", url: "/kepsek/laporan/jurnal", icon: ClipboardList },
+    ],
+  },
+  {
+    label: "Laporan Keuangan",
+    items: [
+      { title: "Pembayaran SPP", url: "/kepsek/laporan/spp", icon: Receipt },
+      { title: "Tunggakan", url: "/kepsek/laporan/tunggakan", icon: Wallet },
+      { title: "Buku Kas", url: "/kepsek/laporan/buku-kas", icon: BookOpen },
+      { title: "Settlement", url: "/kepsek/laporan/settlement", icon: Landmark },
     ],
   },
 ];
