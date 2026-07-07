@@ -75,7 +75,8 @@ export function PrincipalDataProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const today = todayStr();
-      const dow = new Date().getDay();
+      const jsDay = new Date().getDay();
+      const dow = jsDay === 0 ? 6 : jsDay - 1; // Monday=0..Sunday=6 sesuai skema jadwal
       const hhmm = new Date().toTimeString().slice(0, 8);
       const monthAgo = format(subMonths(new Date(), 5), "yyyy-MM-dd");
 
