@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Radio, PlayCircle, Timer, CheckCircle2, Users, BookOpen, MapPin, ChevronRight, ChevronLeft, Calendar, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Schedule {
