@@ -143,6 +143,7 @@ function Section({
   onSelect?: (c: ClassItem) => void;
 }) {
   const t = TONE_MAP[tone];
+  const autoplay = useRef(Autoplay({ delay: 3500, stopOnInteraction: false, stopOnMouseEnter: true }));
   return (
     <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
       <div className={`px-5 py-3 flex items-center justify-between bg-gradient-to-r ${t.soft} border-b border-border/40`}>
