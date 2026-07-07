@@ -129,6 +129,7 @@ const BendaharaSettlement = lazy(() => BendaharaPagesMod().then(m => ({ default:
 const BendaharaJenisPembayaran = lazy(() => import("./pages/bendahara/BendaharaJenisPembayaran"));
 const BendaharaBukuKas = lazy(() => import("./pages/bendahara/BendaharaBukuKas"));
 const BendaharaTunggakan = lazy(() => import("./pages/bendahara/BendaharaTunggakan"));
+const BendaharaLaporanSPP = lazy(() => import("./pages/bendahara/BendaharaLaporanSPP"));
 
 import { GoogleAnalytics } from "./components/GoogleAnalytics";
 import MetaPixel from "./components/MetaPixel";
@@ -222,6 +223,7 @@ function AppRoutes() {
           <Route path="/bendahara/jenis-pembayaran" element={<BendaharaJenisPembayaran />} />
           <Route path="/bendahara/buku-kas" element={<BendaharaBukuKas />} />
           <Route path="/bendahara/tunggakan" element={<BendaharaTunggakan />} />
+          <Route path="/bendahara/laporan-spp" element={<BendaharaLaporanSPP />} />
           <Route path="/bendahara/gateway" element={<Navigate to="/bendahara" replace />} />
         </Route>
         <Route element={<SuperAdminLayout />}>
