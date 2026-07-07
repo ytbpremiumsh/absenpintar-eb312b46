@@ -394,7 +394,7 @@ serve(async (req) => {
       const { data: inv } = await admin.from("spp_invoices").select("*").eq("id", invoice_id).eq("school_id", schoolId).maybeSingle();
       if (!inv) return err("Invoice tidak ditemukan");
       if (inv.status === "paid") return err("Invoice sudah dibayar");
-      const result = await ensureFreshLink(admin, inv, action === "regenerate_payment_link", normalizeChannel(body.channel));
+      const result = await ensureFreshLink(admin, inv, action === "regenerate_payment_link", normalizeChannel(body.channel), body.sub_channel || null);
       if (!result.success) return err(result.error || "Gagal");
       return ok({ payment_url: brandPaymentUrl(result.payment_url), invoice_id: result.invoice_id });
     }
