@@ -506,62 +506,6 @@ export default function SuperAdminBendahara() {
 
         {/* KONFIGURASI */}
         <TabsContent value="settings" className="mt-5 space-y-5">
-          {/* Konfigurasi Biaya Layanan */}
-          <Card className="border-0 shadow-card">
-            <CardContent className="p-5 space-y-4">
-              <div className="flex items-start justify-between gap-3 flex-wrap">
-                <div>
-                  <h3 className="font-bold text-base flex items-center gap-2">
-                    <Settings2 className="h-4 w-4 text-primary" />
-                    Biaya Layanan Pembayaran
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Atur persentase biaya layanan untuk setiap pembayaran SPP. Berlaku global ke semua sekolah.
-                  </p>
-                </div>
-                <Badge className="bg-indigo-500 text-white border-0 text-[10px]">Berlaku Global</Badge>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="fee-percent" className="text-xs font-semibold">Persentase Biaya Layanan (%)</Label>
-                  <Input
-                    id="fee-percent"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    value={feePercent}
-                    onChange={(e) => setFeePercent(e.target.value)}
-                    placeholder="0.7"
-                  />
-                  <p className="text-[11px] text-muted-foreground">Misal: 0.7 untuk 0,7% dari nominal pembayaran</p>
-                </div>
-              </div>
-
-              <div className="rounded-lg bg-muted/40 border p-3 text-xs">
-                <p className="font-semibold mb-1">Simulasi (SPP Rp 500.000)</p>
-                <p className="text-muted-foreground">
-                  Biaya = {fmtIDR(Math.round(500000 * ((parseFloat(feePercent) || 0) / 100)))}
-                  {" • "}
-                  Diterima sekolah ={" "}
-                  <span className="font-semibold text-foreground">
-                    {fmtIDR(500000 - Math.round(500000 * ((parseFloat(feePercent) || 0) / 100)))}
-                  </span>
-                </p>
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" size="sm" onClick={() => { setFeePercent("0.7"); setFeeFlat("0"); }}>
-                  Reset Default
-                </Button>
-                <Button size="sm" onClick={saveFeeConfig} disabled={savingFee} className="bg-primary">
-                  {savingFee ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : null}
-                  Simpan Konfigurasi
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Toggle Fitur Bendahara per Sekolah */}
           <Card className="border-0 shadow-card overflow-hidden">
