@@ -483,13 +483,13 @@ export default function ParentDashboard() {
         <nav className="flex-1 flex flex-col gap-0.5 overflow-y-auto">
           {[
             { id: "home", label: "Beranda", icon: Home },
+            { id: "card", label: "Kartu Pelajar", icon: CreditCard },
             { id: "attendance", label: "Absensi", icon: ClipboardList },
             { id: "schedule", label: "Jadwal", icon: CalendarDays },
             { id: "spp", label: "SPP", icon: Wallet },
             { id: "info", label: "Pengumuman", icon: Megaphone },
             { id: "leave", label: "Pengajuan Izin", icon: FileText },
             { id: "contact", label: "Wali Kelas", icon: Phone },
-            { id: "card", label: "Kartu Pelajar", icon: CreditCard },
           ].map((t) => {
             const Active = tab === t.id;
             return (
@@ -797,7 +797,7 @@ export default function ParentDashboard() {
 
         {/* ATTENDANCE */}
         {tab === "attendance" && (
-          <>
+          <Card className="p-4 md:p-5 border-0 shadow-card rounded-2xl space-y-3">
             <SectionTitle icon={ClipboardList} title="Riwayat Absensi 30 Hari" />
             <div className="flex gap-2 mb-3">
               <button
@@ -815,7 +815,7 @@ export default function ParentDashboard() {
               return (
                 <div className="space-y-2">
                   {filtered.map((a) => (
-                    <Card key={a.id} className="p-3 border-0 shadow-card rounded-2xl flex items-center justify-between">
+                    <Card key={a.id} className="p-3 border shadow-none rounded-2xl flex items-center justify-between bg-muted/30">
                       <div>
                         <p className="text-sm font-semibold">{new Date(a.date).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "short" })}</p>
                         <p className="text-xs text-muted-foreground">{a.attendance_type === "pulang" ? "Pulang" : "Datang"} • {a.time?.slice(0, 5) || "-"} • {a.method}</p>
@@ -826,12 +826,12 @@ export default function ParentDashboard() {
                 </div>
               );
             })()}
-          </>
+          </Card>
         )}
 
         {/* SCHEDULE */}
         {tab === "schedule" && (
-          <>
+          <Card className="p-4 md:p-5 border-0 shadow-card rounded-2xl space-y-3">
             {(() => {
               const DAY_NAMES = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
               const today = new Date();
@@ -966,18 +966,18 @@ export default function ParentDashboard() {
                 </>
               );
             })()}
-          </>
+          </Card>
         )}
 
         {/* INFO */}
         {tab === "info" && (
-          <>
+          <Card className="p-4 md:p-5 border-0 shadow-card rounded-2xl space-y-3">
             <SectionTitle icon={Megaphone} title="Informasi dari Sekolah" />
             <p className="text-[11px] text-muted-foreground -mt-2">Hanya menampilkan pengumuman yang ditujukan kepada wali murid.</p>
             {announcements.length === 0 ? <EmptyMini text="Belum ada informasi untuk wali murid." /> : (
               <div className="space-y-2.5">
                 {announcements.map((a) => (
-                  <Card key={a.id} className={cn("p-4 border-0 shadow-card rounded-2xl", a.is_pinned && "ring-1 ring-amber-400/40 bg-amber-50/40 dark:bg-amber-950/10")}>
+                  <Card key={a.id} className={cn("p-4 border shadow-none rounded-2xl bg-muted/30", a.is_pinned && "ring-1 ring-amber-400/40 bg-amber-50/40 dark:bg-amber-950/10")}>
                     <div className="flex items-start justify-between gap-2 mb-1.5">
                       <div className="flex items-center gap-2 min-w-0">
                         {a.is_pinned && <Pin className="h-3.5 w-3.5 text-amber-500 shrink-0" />}
@@ -991,7 +991,7 @@ export default function ParentDashboard() {
                 ))}
               </div>
             )}
-          </>
+          </Card>
         )}
 
         {/* LEAVE */}
@@ -1076,7 +1076,7 @@ export default function ParentDashboard() {
 
         {/* SPP */}
         {tab === "spp" && (
-          <>
+          <Card className="p-4 md:p-5 border-0 shadow-card rounded-2xl space-y-3">
             <SectionTitle icon={Wallet} title="Pembayaran SPP" />
 
             {/* Ringkasan Tunggakan */}
@@ -1146,7 +1146,7 @@ export default function ParentDashboard() {
                 ))}
               </div>
             )}
-          </>
+          </Card>
         )}
 
 
