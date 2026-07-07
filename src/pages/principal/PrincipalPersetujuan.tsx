@@ -1,11 +1,10 @@
-import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ClipboardList, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import { ClipboardList, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,7 +13,6 @@ import { fmtIDR } from "./_shared";
 
 export default function PrincipalPersetujuan() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { loading, leaves, setLeaves, pendingSettlements, withdrawals, announcements } = usePrincipalData();
 
   const approveLeave = async (id: string, status: "approved" | "rejected") => {
@@ -71,13 +69,18 @@ export default function PrincipalPersetujuan() {
               {pendingSettlements.length === 0 && <Empty text="Tidak ada pencairan menunggu" />}
               {pendingSettlements.map((s: any) => (
                 <div key={s.id} className="flex items-center justify-between p-3 rounded-xl border border-border/60 gap-3">
-                  <div>
-                    <div className="text-sm font-semibold">{s.settlement_code} • {fmtIDR(s.final_payout)}</div>
-                    <div className="text-xs text-muted-foreground">{s.bank_name} • {s.account_number} • {s.account_holder}</div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold truncate">{s.settlement_code} • {fmtIDR(s.final_payout)}</div>
+                    <div className="text-xs text-muted-foreground truncate">{s.bank_name} • {s.account_number} • {s.account_holder}</div>
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => navigate("/bendahara/settlement")}>Kelola <ArrowRight className="h-3.5 w-3.5 ml-1" /></Button>
+                  <Badge variant="secondary" className="shrink-0">Menunggu proses</Badge>
                 </div>
               ))}
+              {pendingSettlements.length > 0 && (
+                <div className="text-[11px] text-muted-foreground pt-1">
+                  Pencairan diproses otomatis oleh sistem bendahara setelah verifikasi.
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="withdrawals" className="space-y-2">
