@@ -38,7 +38,7 @@ const groups: { label: string; items: { title: string; url: string; icon: any; e
       { title: "Buat Tagihan", url: "/bendahara/generate", icon: FileText },
       { title: "Pembayaran", url: "/bendahara/transaksi", icon: CreditCard },
       { title: "Rekap Tunggakan", url: "/bendahara/tunggakan", icon: AlertTriangle },
-      { title: "Laporan Pembayaran SPP", url: "/bendahara/laporan-spp", icon: FileBarChart },
+      { title: "Laporan SPP", url: "/bendahara/laporan-spp", icon: FileBarChart },
       { title: "Import Tagihan", url: "/bendahara/import-export", icon: Upload },
     ],
   },
