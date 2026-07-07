@@ -154,6 +154,7 @@ Deno.serve(async (req) => {
             purpose: "transactional",
             label: `${type}_test`,
             idempotency_key: messageId,
+            unsubscribe_token: messageId,
             message_id: messageId,
           },
           { apiKey }
