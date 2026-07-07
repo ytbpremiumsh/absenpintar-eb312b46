@@ -421,6 +421,7 @@ export function AttendanceRecapGrid({ schoolId, kind }: Props) {
           )}
         </CardContent>
       </Card>
+      </>)}
     </div>
   );
 }
