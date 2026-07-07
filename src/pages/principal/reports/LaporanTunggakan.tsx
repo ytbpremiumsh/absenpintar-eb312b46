@@ -72,6 +72,7 @@ export default function LaporanTunggakan() {
       icon={Wallet}
       from={from} to={to} onFromChange={setFrom} onToChange={setTo}
       onDownload={() => downloadCSV(`Tunggakan_${from}_${to}`, rows, headers)}
+      datesOptional
       summary={
         <StatsRow items={[
           { label: "Siswa Menunggak", value: summary.total, tone: "rose" },
