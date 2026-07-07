@@ -11,6 +11,7 @@ type ClassItem = {
   id: string;
   subject: string;
   className: string;
+  classId?: string;
   teacher: string;
   startTime: string;
   endTime: string;
@@ -23,6 +24,7 @@ type ClassItem = {
 
 export default function PrincipalPembelajaran() {
   const { loading, liveClasses } = usePrincipalData();
+  const [selected, setSelected] = useState<ClassItem | null>(null);
 
   if (loading) return <Skeleton className="h-96 w-full rounded-2xl" />;
 
@@ -50,6 +52,7 @@ export default function PrincipalPembelajaran() {
         items={live}
         emptyText="Tidak ada kelas berlangsung"
         tone="emerald"
+        onSelect={setSelected}
       />
       <Section
         title="Akan Datang"
@@ -64,6 +67,18 @@ export default function PrincipalPembelajaran() {
         items={done}
         emptyText="Belum ada kelas yang selesai"
         tone="slate"
+        onSelect={setSelected}
+      />
+
+      <ClassAttendanceDetailDialog
+        open={!!selected}
+        onOpenChange={(v) => !v && setSelected(null)}
+        scheduleId={selected?.id ?? null}
+        className={selected?.className ?? ""}
+        subject={selected?.subject ?? ""}
+        teacher={selected?.teacher ?? ""}
+        startTime={selected?.startTime ?? ""}
+        endTime={selected?.endTime ?? ""}
       />
     </div>
   );
