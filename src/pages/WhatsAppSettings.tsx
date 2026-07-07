@@ -35,9 +35,11 @@ const GROUP_PLACEHOLDERS = [
   { key: "{type}", label: "Tipe (Datang/Pulang)" },
 ];
 
-const DEFAULT_ARRIVE = `📋 *Notifikasi Absensi Datang*\n\n{school_name}\n\nAnanda *{student_name}* (Kelas {class}) telah tercatat HADIR pada {day}, pukul {time}.\n\nNIS: {student_id}\nMetode: {method}\n\n_Pesan otomatis dari ATSkolla_`;
-const DEFAULT_DEPART = `📋 *Notifikasi Absensi Pulang*\n\n{school_name}\n\nAnanda *{student_name}* (Kelas {class}) telah tercatat PULANG pada {day}, pukul {time}.\n\nNIS: {student_id}\nMetode: {method}\n\n_Pesan otomatis dari ATSkolla_`;
-const DEFAULT_GROUP = `📋 *Notifikasi Absensi {type}*\n\n{school_name}\n\nSiswa *{student_name}* (Kelas {class}) telah tercatat {type} pada {day}, pukul {time}.\n\nMetode: {method}\n\n_Pesan otomatis dari ATSkolla_`;
+const FOOTER = `─────────────\n_ATSkolla — Platform Digital Sekolah Terintegrasi_`;
+
+const DEFAULT_ARRIVE = `*Notifikasi Kehadiran Siswa*\n\nYth. Bapak/Ibu Wali Murid,\n\nDengan hormat kami sampaikan bahwa ananda *{student_name}* (Kelas {class}) telah tercatat *HADIR* di sekolah pada hari {day}, pukul {time}.\n\nDetail Kehadiran:\n• NIS       : {student_id}\n• Metode : {method}\n• Sekolah : {school_name}\n\nTerima kasih atas perhatian Bapak/Ibu.\n\n${FOOTER}`;
+const DEFAULT_DEPART = `*Notifikasi Kepulangan Siswa*\n\nYth. Bapak/Ibu Wali Murid,\n\nDengan hormat kami sampaikan bahwa ananda *{student_name}* (Kelas {class}) telah tercatat *PULANG* dari sekolah pada hari {day}, pukul {time}.\n\nDetail Kepulangan:\n• NIS       : {student_id}\n• Metode : {method}\n• Sekolah : {school_name}\n\nTerima kasih atas perhatian Bapak/Ibu.\n\n${FOOTER}`;
+const DEFAULT_GROUP = `*Notifikasi Absensi {type}*\n\n{school_name}\n\nSiswa *{student_name}* (Kelas {class}) telah tercatat {type} pada hari {day}, pukul {time}.\n\nMetode: {method}\n\n${FOOTER}`;
 
 const DELIVERY_OPTIONS = [
   { value: "parent_only", label: "Hanya Wali Murid" },
