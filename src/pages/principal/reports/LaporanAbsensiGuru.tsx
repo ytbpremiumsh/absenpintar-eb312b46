@@ -6,9 +6,9 @@ import { ReportShell, ReportTable, StatsRow, downloadCSV, useMonthRange, type He
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { PrincipalAttendanceDetailDialog } from "./PrincipalAttendanceDetailDialog";
 
+// Administrator (school_admin/super_admin) TIDAK dimasukkan ke rekap absensi kepsek.
 const ROLE_LABEL: Record<string, string> = {
   teacher: "Guru",
-  school_admin: "Admin Sekolah",
   staff: "Staff",
   bendahara: "Bendahara",
   principal: "Kepala Sekolah",
