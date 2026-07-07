@@ -163,6 +163,25 @@ export function AttendanceRecapGrid({ schoolId, kind }: Props) {
     return { totalH, totalS, totalI, totalA, avgRate, workingDays, topPresent, topAbsent };
   }, [filtered, daysInMonth, year, month, holidays]);
 
+  // Per-class analytics (all rows regardless of filter) — only meaningful for students
+  const perClassAnalytics = useMemo(() => {
+    if (kind !== "student") return [];
+    const map = new Map<string, { cls: string; count: number; H: number; S: number; I: number; A: number }>();
+    rows.forEach((r) => {
+      const c = r.cls || "-";
+      if (!map.has(c)) map.set(c, { cls: c, count: 0, H: 0, S: 0, I: 0, A: 0 });
+      const item = map.get(c)!;
+      item.count++;
+      item.H += r.totals.H; item.S += r.totals.S; item.I += r.totals.I; item.A += r.totals.A;
+    });
+    return Array.from(map.values()).map((it) => {
+      const total = it.H + it.S + it.I + it.A;
+      const rate = total ? Math.round((it.H / total) * 100) : 0;
+      return { ...it, total, rate };
+    }).sort((a, b) => b.rate - a.rate);
+  }, [rows, kind]);
+
+
   const isPulangMode = rekapTab === "pulang";
   const monthLabel = `${MONTH_NAMES[month]} ${year}`;
   const label = kind === "student" ? "siswa" : "guru & staff";
