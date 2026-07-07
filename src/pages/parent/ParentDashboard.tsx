@@ -966,7 +966,7 @@ export default function ParentDashboard() {
                 </>
               );
             })()}
-          </>
+          </Card>
         )}
 
         {/* INFO */}
