@@ -117,4 +117,8 @@ verify_jwt = false
 [functions.rfid-device]
 verify_jwt = false
 
+[functions.process-email-queue]
+verify_jwt = true
+
+
 
