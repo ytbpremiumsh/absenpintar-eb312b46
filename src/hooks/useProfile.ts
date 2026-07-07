@@ -17,7 +17,7 @@ const EMPTY: ProfileBundle = { profile: null, roles: [] };
 export const profileQueryKey = (userId: string | null | undefined) =>
   ["profile-bundle", userId ?? "anon"] as const;
 
-async function fetchProfileBundle(userId: string): Promise<ProfileBundle> {
+export async function fetchProfileBundle(userId: string): Promise<ProfileBundle> {
   const [profileRes, rolesRes] = await Promise.all([
     supabase
       .from("profiles")
@@ -34,8 +34,8 @@ async function fetchProfileBundle(userId: string): Promise<ProfileBundle> {
 
 /**
  * React Query-backed profile + roles fetcher.
- * Safe to call anywhere below <QueryClientProvider>.
- * When userId is null the hook returns the empty bundle without hitting the network.
+ * Pass `null`/`undefined` when there is no signed-in user; the hook returns the
+ * empty bundle without hitting the network in that case.
  */
 export function useProfileQuery(userId: string | null | undefined) {
   return useQuery({
@@ -46,24 +46,6 @@ export function useProfileQuery(userId: string | null | undefined) {
     gcTime: 5 * 60_000,
     initialData: userId ? undefined : EMPTY,
   });
-}
-
-/**
- * Convenience hook for callers that only need the current user's profile.
- * Uses the auth cache; import { useAuth } separately if you also need the user object.
- */
-export function useProfile() {
-  const { data, isLoading, refetch } = useProfileQuery(
-    // Lazy import to avoid circular ref with useAuth
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    (require("@/hooks/useAuth") as typeof import("@/hooks/useAuth")).useAuth().user?.id ?? null,
-  );
-  return {
-    profile: data?.profile ?? null,
-    roles: data?.roles ?? [],
-    isLoading,
-    refetch,
-  };
 }
 
 export function useInvalidateProfile() {
