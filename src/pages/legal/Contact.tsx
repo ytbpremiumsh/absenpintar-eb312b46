@@ -95,7 +95,7 @@ export default function Contact() {
           <Building2 className="h-6 w-6 text-[#5B6CF9]" />
         </div>
         <div>
-          <p className="text-xs font-semibold text-[#5B6CF9] uppercase tracking-wider">Nama Usaha</p>
+          
           <h2 className="font-display text-xl font-bold text-slate-900 mt-0.5">ATSkolla</h2>
           <p className="text-sm text-slate-600 mt-1">Platform Digital Sekolah Terintegrasi untuk sekolah di seluruh Indonesia.</p>
         </div>
