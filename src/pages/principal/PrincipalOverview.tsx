@@ -72,6 +72,8 @@ export default function PrincipalOverview() {
         </Card>
       )}
 
+      {profile?.school_id && <LiveScheduleWidget schoolId={profile.school_id} />}
+
       <div className="grid lg:grid-cols-3 gap-4">
         <Card className="rounded-2xl lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0">
