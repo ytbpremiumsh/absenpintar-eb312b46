@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ReportShell, ReportTable, StatsRow, downloadCSV, useMonthRange, type Header, type Row } from "./_common";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { PrincipalAttendanceDetailDialog } from "./PrincipalAttendanceDetailDialog";
+import { AttendanceHighlights } from "./AttendanceHighlights";
 
 // Administrator (school_admin/super_admin) TIDAK dimasukkan ke rekap absensi kepsek.
 const ROLE_LABEL: Record<string, string> = {
