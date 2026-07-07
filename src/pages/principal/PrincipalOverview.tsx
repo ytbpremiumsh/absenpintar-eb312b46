@@ -22,6 +22,7 @@ export default function PrincipalOverview() {
     finance, timeline,
   } = usePrincipalData();
   const navigate = useNavigate();
+  const { profile } = useAuth();
 
   if (loading) {
     return (
