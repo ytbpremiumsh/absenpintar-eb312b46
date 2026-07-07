@@ -110,7 +110,6 @@ const PAYMENT_ITEMS = [
   { icon: Landmark, title: "Virtual Account", desc: "VA otomatis untuk BCA, Mandiri, BNI, BRI, dan bank utama lainnya." },
   { icon: MessageSquare, title: "Reminder WhatsApp", desc: "Pengingat tagihan terjadwal otomatis, siap kirim sebelum jatuh tempo." },
   { icon: CheckCircle2, title: "Rekonsiliasi Otomatis", desc: "Pembayaran masuk langsung tercatat sebagai lunas — tanpa konfirmasi manual." },
-  { icon: LineChart, title: "Dashboard Bendahara", desc: "Ringkasan pemasukan, tunggakan, dan proyeksi kas dalam satu layar." },
   { icon: FileBarChart, title: "Laporan Keuangan", desc: "Export Excel & PDF resmi untuk audit dan rapat komite." },
 ];
 
