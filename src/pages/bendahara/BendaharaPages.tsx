@@ -5285,10 +5285,10 @@ export function BendaharaLaporan() {
             <p className="text-base font-bold mt-1">{fmtIDR(yearTotals.tagihan)}</p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-500/10 to-transparent">
+        <Card className="border-0 shadow-sm bg-gradient-to-br from-sky-500/10 to-transparent">
           <CardContent className="p-4">
             <p className="text-[11px] text-muted-foreground">Sudah Lunas</p>
-            <p className="text-base font-bold mt-1 text-emerald-600">{fmtIDR(yearTotals.bayar)}</p>
+            <p className="text-base font-bold mt-1 text-sky-600">{fmtIDR(yearTotals.bayar)}</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-500/10 to-transparent">
@@ -5329,7 +5329,7 @@ export function BendaharaLaporan() {
                   <Tooltip formatter={(v: any) => fmtIDR(v)} />
                   <Legend />
                   <Bar dataKey="tagihan" fill="hsl(220 80% 60%)" name="Tagihan" radius={[4,4,0,0]} />
-                  <Bar dataKey="bayar" fill="hsl(160 84% 39%)" name="Pembayaran" radius={[4,4,0,0]} />
+                  <Bar dataKey="bayar" fill="hsl(200 85% 55%)" name="Pembayaran" radius={[4,4,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -5357,7 +5357,7 @@ export function BendaharaLaporan() {
                     className="text-left rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
                   >
                     {/* Header gradient seperti card SPP */}
-                    <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-white">
+                    <div className="relative overflow-hidden bg-gradient-to-r from-sky-500 via-cyan-500 to-indigo-500 text-white">
                       <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/15 blur-2xl" />
                       <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-white/10 blur-xl" />
                       <div className="relative z-10 flex items-center gap-3 px-4 py-3">
@@ -5370,7 +5370,7 @@ export function BendaharaLaporan() {
                             <span className="text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full border border-white/20">{r.totalCount} tagihan</span>
                           </div>
                           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                            <span className="text-[10px] font-semibold bg-emerald-600/80 px-2 py-0.5 rounded-full">{r.paidCount} Lunas</span>
+                            <span className="text-[10px] font-semibold bg-sky-600/80 px-2 py-0.5 rounded-full">{r.paidCount} Lunas</span>
                             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${belum > 0 ? "bg-rose-500/90" : "bg-white/20"}`}>{belum} Belum</span>
                           </div>
                         </div>
@@ -5397,7 +5397,7 @@ export function BendaharaLaporan() {
                       <div className="space-y-1">
                         <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all"
+                            className="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all"
                             style={{ width: `${Math.min(pct, 100)}%` }}
                           />
                         </div>
