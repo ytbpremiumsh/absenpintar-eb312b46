@@ -5279,28 +5279,28 @@ export function BendaharaLaporan() {
 
       {/* KPI Ringkasan tahun — prioritas utama di atas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="border-0 shadow-sm bg-slate-100 dark:bg-slate-800/40">
+        <Card className="border-0 shadow-sm bg-indigo-50 dark:bg-indigo-950/30">
           <CardContent className="p-4">
             <p className="text-[11px] text-muted-foreground">Total Tagihan {year}</p>
-            <p className="text-base font-bold mt-1">{fmtIDR(yearTotals.tagihan)}</p>
+            <p className="text-base font-bold mt-1 text-indigo-700 dark:text-indigo-300">{fmtIDR(yearTotals.tagihan)}</p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm bg-slate-100 dark:bg-slate-800/40">
+        <Card className="border-0 shadow-sm bg-sky-50 dark:bg-sky-950/30">
           <CardContent className="p-4">
             <p className="text-[11px] text-muted-foreground">Sudah Lunas</p>
-            <p className="text-base font-bold mt-1">{fmtIDR(yearTotals.bayar)}</p>
+            <p className="text-base font-bold mt-1 text-sky-700 dark:text-sky-300">{fmtIDR(yearTotals.bayar)}</p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm bg-slate-100 dark:bg-slate-800/40">
+        <Card className="border-0 shadow-sm bg-amber-50 dark:bg-amber-950/30">
           <CardContent className="p-4">
             <p className="text-[11px] text-muted-foreground">Belum Lunas</p>
-            <p className="text-base font-bold mt-1">{fmtIDR(yearTotals.tagihan - yearTotals.bayar)}</p>
+            <p className="text-base font-bold mt-1 text-amber-700 dark:text-amber-300">{fmtIDR(yearTotals.tagihan - yearTotals.bayar)}</p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm bg-slate-100 dark:bg-slate-800/40">
+        <Card className="border-0 shadow-sm bg-violet-50 dark:bg-violet-950/30">
           <CardContent className="p-4">
             <p className="text-[11px] text-muted-foreground">Tingkat Pelunasan</p>
-            <p className="text-base font-bold mt-1">{collectionRate}%</p>
+            <p className="text-base font-bold mt-1 text-violet-700 dark:text-violet-300">{collectionRate}%</p>
           </CardContent>
         </Card>
       </div>
