@@ -125,10 +125,13 @@ export default function BendaharaBukuKas() {
   }, [combined, dateFrom, dateTo, fDir, fCat]);
 
   const totals = useMemo(() => {
-    const kasMasuk = filtered.filter((e) => e.direction === "in").reduce((s, e) => s + (e.amount || 0), 0);
-    const kasKeluar = filtered.filter((e) => e.direction === "out").reduce((s, e) => s + (e.amount || 0), 0);
-    return { kasMasuk, kasKeluar, saldo: kasMasuk - kasKeluar };
+    const inList = filtered.filter((e) => e.direction === "in");
+    const outList = filtered.filter((e) => e.direction === "out");
+    const kasMasuk = inList.reduce((s, e) => s + (e.amount || 0), 0);
+    const kasKeluar = outList.reduce((s, e) => s + (e.amount || 0), 0);
+    return { kasMasuk, kasKeluar, saldo: kasMasuk - kasKeluar, count: filtered.length, inCount: inList.length, outCount: outList.length };
   }, [filtered]);
+
 
   // Running balance oldest → newest for table display
   const withBalance = useMemo(() => {
