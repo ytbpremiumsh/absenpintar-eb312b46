@@ -91,7 +91,7 @@ export default function BendaharaBukuKas() {
       // Biaya pencairan (Rp 3.000/settlement) dicatat terpisah sebagai Kas Keluar
       // kategori "Biaya Pencairan ATSkolla" dari data spp_settlements.
       amount: i.total_amount ?? i.net_amount ?? 0,
-      description: `Pembayaran SPP a.n. ${i.student_name} (Kelas ${i.class_name}) Periode ${i.period_label}`,
+      description: `Pembayaran SPP - ${i.student_name} (Kelas ${i.class_name}) Periode ${i.period_label}`,
       reference: i.invoice_number || null,
       method: formatPaymentMethodLabel(i.payment_method),
       status: "Lunas",
