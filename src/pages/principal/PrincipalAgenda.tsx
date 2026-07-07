@@ -39,9 +39,18 @@ function relativeDay(d: Date) {
 }
 
 export default function PrincipalAgenda() {
-  const { loading, calendar, timeline } = usePrincipalData();
+  const { user } = useAuth();
+  const { loading, calendar, timeline, leaves, setLeaves } = usePrincipalData();
   const [q, setQ] = useState("");
   const [typeF, setTypeF] = useState("all");
+
+  const approveLeave = async (id: string, status: "approved" | "rejected") => {
+    const { error } = await supabase.from("parent_leave_requests")
+      .update({ status, reviewed_by: user!.id, reviewed_at: new Date().toISOString() }).eq("id", id);
+    if (error) return toast.error("Gagal memperbarui");
+    toast.success(status === "approved" ? "Izin disetujui" : "Izin ditolak");
+    setLeaves(leaves.filter((x: any) => x.id !== id));
+  };
 
   const now = new Date();
 
