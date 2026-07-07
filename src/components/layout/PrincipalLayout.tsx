@@ -4,7 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { PrincipalSidebar } from "./PrincipalSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { LoadingScreen } from "@/components/LoadingScreen";
-import { NotificationBell } from "@/components/NotificationBell";
+import { PrincipalNotificationBell } from "@/components/PrincipalNotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Settings, LogOut, KeyRound, Repeat, RefreshCcw, HelpCircle } from "lucide-react";
