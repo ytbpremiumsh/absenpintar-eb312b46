@@ -351,14 +351,14 @@ const Login = ({ forcedMode }: LoginProps) => {
           >
             <div className="flex lg:hidden items-center justify-center gap-3 mb-6">
               {mode === "parent" ? (
-                <span className="font-extrabold text-2xl tracking-tight text-[#0b1020]">atskolla</span>
+                !tenantLogo && <img src={loginLogo} alt="ATSkolla" className="h-10 w-auto object-contain" />
               ) : tenantLogo ? (
                 <>
                   <img src={tenantLogo} alt={tenantName || "Sekolah"} className="h-10 w-auto object-contain" />
                   {tenantName && <span className="font-bold text-xl text-[#0b1020] tracking-tight">{tenantName}</span>}
                 </>
               ) : (
-                <span className="font-extrabold text-2xl tracking-tight text-[#0b1020]">atskolla</span>
+                <img src={loginLogo} alt="ATSkolla" className="h-10 w-auto object-contain" />
               )}
             </div>
 
