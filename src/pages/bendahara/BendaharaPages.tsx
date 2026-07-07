@@ -5357,7 +5357,7 @@ export function BendaharaLaporan() {
                     className="text-left rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
                   >
                     {/* Header gradient seperti card SPP */}
-                    <div className="relative overflow-hidden bg-indigo-50 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-100 border-b border-indigo-100 dark:border-indigo-900">
+                    <div className="relative overflow-hidden bg-indigo-100 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-100 border-b border-indigo-200 dark:border-indigo-900">
                       <div className="relative z-10 flex items-center gap-3 px-4 py-3">
                         <div className="h-10 w-10 rounded-xl bg-[#5B6CF9] flex items-center justify-center shrink-0 shadow-sm">
                           <Users className="h-5 w-5 text-white" />
