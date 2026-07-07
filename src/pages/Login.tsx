@@ -267,7 +267,7 @@ const Login = ({ forcedMode }: LoginProps) => {
     { icon: ScanFace, title: "Absensi RFID, Face & QR Code", desc: "Pencatatan kehadiran otomatis via RFID, wajah, dan QR." },
     { icon: Wallet, title: "Pembayaran SPP Otomatis", desc: "Tagihan, VA, QRIS, dan rekap SPP siap audit." },
     { icon: MessageCircle, title: "Notifikasi WhatsApp Otomatis", desc: "Kehadiran & tagihan terkirim ke wali murid real-time." },
-    { icon: Calendar, title: "Pemberitahuan Jadwal Pelajaran Realtime", desc: "Update jadwal & pengingat mata pelajaran langsung ke guru dan siswa." },
+    { icon: Calendar, title: "Pemberitahuan Jadwal Pelajaran Realtime", desc: "Update jadwal & pengingat mata pelajaran langsung ke guru" },
   ];
 
   return (
