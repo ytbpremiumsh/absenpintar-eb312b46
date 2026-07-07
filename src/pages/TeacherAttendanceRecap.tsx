@@ -225,18 +225,20 @@ const TeacherAttendanceRecap = ({ schoolId: schoolIdProp, hideHeader }: Props = 
 
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#5B6CF9] to-[#4c5ded] p-5 text-white shadow-xl">
-        <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="h-11 w-11 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
-            <UsersRound className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold">Rekap Absensi Guru & Staff</h1>
-            <p className="text-white/70 text-xs">Format bulanan dengan kode H/S/I/A — siap cetak & TTD Kepala Sekolah</p>
+      {!hideHeader && (
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#5B6CF9] to-[#4c5ded] p-5 text-white shadow-xl">
+          <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="h-11 w-11 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
+              <UsersRound className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold">Rekap Absensi Guru & Staff</h1>
+              <p className="text-white/70 text-xs">Format bulanan dengan kode H/S/I/A — siap cetak & TTD Kepala Sekolah</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <Card className="border border-border/50 shadow-none rounded-2xl">
         <CardContent className="p-4 space-y-3">
@@ -269,15 +271,31 @@ const TeacherAttendanceRecap = ({ schoolId: schoolIdProp, hideHeader }: Props = 
             </div>
           </div>
 
+          {/* Datang / Pulang Tabs */}
+          <Tabs value={rekapTab} onValueChange={(v) => setRekapTab(v as "datang" | "pulang")}>
+            <TabsList>
+              <TabsTrigger value="datang" className="text-xs gap-1.5"><ClipboardList className="h-3.5 w-3.5" /> Rekap Kehadiran</TabsTrigger>
+              <TabsTrigger value="pulang" className="text-xs gap-1.5"><ClockIcon className="h-3.5 w-3.5" /> Rekap Kepulangan</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           {/* Legend */}
-          <div className="flex flex-wrap items-center gap-4 text-xs pt-1">
-            <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-emerald-500 text-white text-[10px] font-bold">H</span> Hadir</div>
-            <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-violet-500 text-white text-[10px] font-bold">S</span> Sakit</div>
-            <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-amber-400 text-white text-[10px] font-bold">I</span> Izin</div>
-            <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-red-500 text-white text-[10px] font-bold">A</span> Alfa</div>
-          </div>
+          {!isPulangMode ? (
+            <div className="flex flex-wrap items-center gap-4 text-xs pt-1">
+              <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-emerald-500 text-white text-[10px] font-bold">H</span> Hadir</div>
+              <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-violet-500 text-white text-[10px] font-bold">S</span> Sakit</div>
+              <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-amber-400 text-white text-[10px] font-bold">I</span> Izin</div>
+              <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-red-500 text-white text-[10px] font-bold">A</span> Alfa</div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-4 text-xs pt-1">
+              <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-emerald-500 text-white text-[10px] font-bold">H</span> Sudah Pulang</div>
+              <div className="flex items-center gap-1.5"><span className="inline-flex items-center justify-center h-5 w-5 rounded-md bg-muted/40 border border-border/30" /> Belum Absen Pulang</div>
+            </div>
+          )}
         </CardContent>
       </Card>
+
 
       {/* Analitik Guru */}
       {!loading && rows.length > 0 && (() => {
