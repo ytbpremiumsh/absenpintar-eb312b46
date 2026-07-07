@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { BookOpen, Plus, TrendingUp, TrendingDown, Wallet, Loader2, Download, Trash2, Zap, Receipt, Landmark, ArrowRight } from "lucide-react";
-import * as XLSX from "xlsx";
+import XLSXStyle from "xlsx-js-style";
 import { formatPaymentMethodLabel } from "@/lib/paymentMethod";
 import { Link } from "react-router-dom";
 
@@ -180,26 +180,129 @@ export default function BendaharaBukuKas() {
     else { toast.success("Entri dihapus"); setDeleting(null); fetchData(); }
   };
 
-  const exportXlsx = () => {
+  const exportXlsx = async () => {
     if (filtered.length === 0) { toast.error("Tidak ada data untuk diexport"); return; }
-    const rows = withBalance.map((e, i) => ({
-      "No": withBalance.length - i,
-      "Tanggal": new Date(e.entry_date).toLocaleDateString("id-ID"),
-      "Kategori": e.category,
-      "No. Referensi/Invoice": e.reference || "",
-      "Metode Pembayaran": e.method || (e.source === "manual" ? "Tunai/Manual" : "-"),
-      "Status": e.status || (e.source === "manual" ? "Tercatat" : "-"),
-      "Keterangan": e.description || "",
-      "Sumber": e.source === "auto" ? "Otomatis" : "Manual",
-      "Kas Masuk (Bruto)": e.direction === "in" ? e.amount : 0,
-      "Kas Keluar": e.direction === "out" ? e.amount : 0,
-      "Saldo Berjalan": e.balance,
-    }));
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(rows);
-    ws["!cols"] = [{ wch: 5 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 16 }, { wch: 12 }, { wch: 40 }, { wch: 10 }, { wch: 16 }, { wch: 14 }, { wch: 16 }];
-    XLSX.utils.book_append_sheet(wb, ws, "Buku Kas");
-    XLSX.writeFile(wb, `Buku_Kas_${dateFrom}_sd_${dateTo}.xlsx`);
+
+    // Ambil identitas sekolah untuk header
+    let school: { name?: string; address?: string; npsn?: string } = {};
+    if (profile?.school_id) {
+      const { data } = await supabase.from("schools").select("name, address, npsn").eq("id", profile.school_id).maybeSingle();
+      if (data) school = data as any;
+    }
+
+    // Urutkan lama → baru (terbaru di bawah) + hitung running balance
+    const ordered = [...filtered].sort((a, b) => (a.entry_date + a.id).localeCompare(b.entry_date + b.id));
+    let bal = 0;
+    const dataRows = ordered.map((e, i) => {
+      bal += e.direction === "in" ? e.amount : -e.amount;
+      return [
+        i + 1,
+        new Date(e.entry_date).toLocaleDateString("id-ID"),
+        e.category,
+        e.reference || "-",
+        e.method || (e.source === "manual" ? "Tunai/Manual" : "-"),
+        e.status || (e.source === "manual" ? "Tercatat" : "-"),
+        e.description || "-",
+        e.source === "auto" ? "Otomatis" : "Manual",
+        e.direction === "in" ? e.amount : 0,
+        e.direction === "out" ? e.amount : 0,
+        bal,
+      ];
+    });
+
+    const headers = ["No", "Tanggal", "Kategori", "No. Referensi/Invoice", "Metode Pembayaran", "Status", "Keterangan", "Sumber", "Kas Masuk (Bruto)", "Kas Keluar", "Saldo Berjalan"];
+    const COLS = headers.length;
+    const lastCol = String.fromCharCode(64 + COLS); // K
+
+    const totalKasMasuk = dataRows.reduce((s, r) => s + (r[8] as number), 0);
+    const totalKasKeluar = dataRows.reduce((s, r) => s + (r[9] as number), 0);
+    const saldoAkhir = totalKasMasuk - totalKasKeluar;
+
+    // Susun AoA: judul, sub-info, spacer, header, data, total
+    const aoa: any[][] = [];
+    aoa.push([`BUKU KAS — ${school.name || "Sekolah"}`]);
+    aoa.push([`${school.address || ""}${school.npsn ? ` • NPSN ${school.npsn}` : ""}`.trim() || "—"]);
+    aoa.push([`Periode: ${new Date(dateFrom).toLocaleDateString("id-ID")} s.d. ${new Date(dateTo).toLocaleDateString("id-ID")}`]);
+    aoa.push([`Dicetak: ${new Date().toLocaleString("id-ID")}`]);
+    aoa.push([]);
+    const headerRowIdx = aoa.length; // 0-based
+    aoa.push(headers);
+    dataRows.forEach((r) => aoa.push(r));
+    const totalRowIdx = aoa.length;
+    aoa.push(["", "", "", "", "", "", "", "TOTAL", totalKasMasuk, totalKasKeluar, saldoAkhir]);
+
+    const ws = XLSXStyle.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = [
+      { wch: 5 }, { wch: 12 }, { wch: 16 }, { wch: 22 }, { wch: 18 },
+      { wch: 12 }, { wch: 42 }, { wch: 10 }, { wch: 18 }, { wch: 16 }, { wch: 18 },
+    ];
+    ws["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: COLS - 1 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: COLS - 1 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: COLS - 1 } },
+      { s: { r: 3, c: 0 }, e: { r: 3, c: COLS - 1 } },
+    ];
+
+    const border = { style: "thin", color: { rgb: "BFBFBF" } } as const;
+    const allBorders = { top: border, bottom: border, left: border, right: border };
+
+    // Title styling
+    ws["A1"].s = { font: { bold: true, sz: 16, color: { rgb: "1F2A5B" } }, alignment: { horizontal: "center", vertical: "center" } };
+    ws["A2"].s = { font: { sz: 10, color: { rgb: "555555" } }, alignment: { horizontal: "center" } };
+    ws["A3"].s = { font: { sz: 10, color: { rgb: "555555" } }, alignment: { horizontal: "center" } };
+    ws["A4"].s = { font: { italic: true, sz: 9, color: { rgb: "888888" } }, alignment: { horizontal: "center" } };
+
+    // Header row
+    for (let c = 0; c < COLS; c++) {
+      const addr = XLSXStyle.utils.encode_cell({ r: headerRowIdx, c });
+      ws[addr].s = {
+        font: { bold: true, color: { rgb: "FFFFFF" }, sz: 11 },
+        fill: { patternType: "solid", fgColor: { rgb: "5B6CF9" } },
+        alignment: { horizontal: "center", vertical: "center", wrapText: true },
+        border: allBorders,
+      };
+    }
+
+    // Data rows: zebra + borders + number formats
+    for (let i = 0; i < dataRows.length; i++) {
+      const rowIdx = headerRowIdx + 1 + i;
+      const zebra = i % 2 === 0 ? "FFFFFF" : "F5F7FF";
+      for (let c = 0; c < COLS; c++) {
+        const addr = XLSXStyle.utils.encode_cell({ r: rowIdx, c });
+        if (!ws[addr]) continue;
+        const isCurrency = c >= 8; // kas masuk / keluar / saldo
+        ws[addr].s = {
+          font: { sz: 10, color: { rgb: c === 10 ? "1F2A5B" : "222222" }, bold: c === 10 },
+          fill: { patternType: "solid", fgColor: { rgb: zebra } },
+          alignment: { horizontal: c === 0 ? "center" : isCurrency ? "right" : "left", vertical: "center", wrapText: c === 6 },
+          border: allBorders,
+          ...(isCurrency ? { numFmt: '"Rp"#,##0;[Red]-"Rp"#,##0;"-"' } : {}),
+        };
+      }
+    }
+
+    // Total row styling
+    for (let c = 0; c < COLS; c++) {
+      const addr = XLSXStyle.utils.encode_cell({ r: totalRowIdx, c });
+      if (!ws[addr]) ws[addr] = { t: "s", v: "" };
+      const isCurrency = c >= 8;
+      ws[addr].s = {
+        font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
+        fill: { patternType: "solid", fgColor: { rgb: "1F2A5B" } },
+        alignment: { horizontal: c === 7 ? "right" : isCurrency ? "right" : "center", vertical: "center" },
+        border: allBorders,
+        ...(isCurrency ? { numFmt: '"Rp"#,##0;[Red]-"Rp"#,##0;"-"' } : {}),
+      };
+    }
+
+    // Freeze header + autofilter on table area
+    ws["!freeze"] = { xSplit: 0, ySplit: headerRowIdx + 1 } as any;
+    (ws as any)["!autofilter"] = { ref: `A${headerRowIdx + 1}:${lastCol}${totalRowIdx}` };
+    ws["!rows"] = [{ hpt: 22 }, { hpt: 16 }, { hpt: 16 }, { hpt: 14 }, { hpt: 8 }, { hpt: 26 }];
+
+    const wb = XLSXStyle.utils.book_new();
+    XLSXStyle.utils.book_append_sheet(wb, ws, "Buku Kas");
+    XLSXStyle.writeFile(wb, `Buku_Kas_${dateFrom}_sd_${dateTo}.xlsx`);
     toast.success("Export selesai");
   };
 
