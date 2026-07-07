@@ -383,6 +383,7 @@ export default function LaporanSPP() {
       icon={Receipt}
       from={from} to={to} onFromChange={setFrom} onToChange={setTo}
       hideDates
+      hideExport
       onDownload={exportCSV}
       headerActions={
         <DropdownMenu>
