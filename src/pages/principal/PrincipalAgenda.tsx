@@ -2,13 +2,17 @@ import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarDays, Activity, Search, PartyPopper, Megaphone, Wallet, Receipt, Landmark, UserCheck, BookOpen, Clock } from "lucide-react";
+import { CalendarDays, Activity, Search, PartyPopper, Megaphone, Wallet, Receipt, Landmark, UserCheck, BookOpen, Clock, ClipboardList, CheckCircle2, XCircle } from "lucide-react";
 import { format, isSameDay, isToday, isTomorrow, differenceInCalendarDays } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { usePrincipalData } from "@/hooks/usePrincipalData";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const TYPE_STYLES: Record<string, { icon: any; badge: string; ring: string }> = {
