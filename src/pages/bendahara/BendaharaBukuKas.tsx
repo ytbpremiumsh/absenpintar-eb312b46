@@ -424,72 +424,9 @@ export default function BendaharaBukuKas() {
         </Card>
       </div>
 
-      {/* Monitoring Pencairan — audit trail dana keluar ATSkolla */}
-      <Card className="border-0 shadow-sm overflow-hidden">
-        <CardContent className="p-0">
-          <div className="p-4 flex items-center gap-2 border-b">
-            <div className="h-9 w-9 shrink-0 rounded-xl bg-rose-500/15 flex items-center justify-center">
-              <Landmark className="h-4 w-4 text-rose-600" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold">Monitoring Pencairan</p>
-              <p className="text-[11px] text-muted-foreground">Ringkasan pencairan dana ATSkolla ke rekening sekolah — biaya pencairan otomatis muncul sebagai Kas Keluar di tabel bawah.</p>
-            </div>
-            <Link to="/bendahara/withdraw?tab=pencairan" className="text-[11px] text-[#5B6CF9] hover:underline whitespace-nowrap inline-flex items-center gap-1">
-              Kelola <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-          {settlements.length === 0 ? (
-            <div className="p-6 text-center text-xs text-muted-foreground">Belum ada pengajuan pencairan.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="[&_th]:whitespace-nowrap [&_th]:text-[11px]">
-                    <TableHead>Kode</TableHead>
-                    <TableHead>Tanggal Pencairan</TableHead>
-                    <TableHead className="text-right">Nominal Dicairkan</TableHead>
-                    <TableHead className="text-right">Biaya Pencairan</TableHead>
-                    <TableHead className="text-right">Dana Bersih Diterima</TableHead>
-                    <TableHead>Rekening</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {settlements.slice(0, 10).map((s) => {
-                    const fee = s.withdraw_fee || 0;
-                    const gross = s.total_gross || 0;
-                    const net = s.final_payout || Math.max(0, gross - fee);
-                    const tgl = s.paid_at || s.approved_at || s.requested_at;
-                    const statusMap: Record<string, { label: string; cls: string }> = {
-                      paid: { label: "Dicairkan", cls: "bg-emerald-500/15 text-emerald-700" },
-                      approved: { label: "Disetujui", cls: "bg-sky-500/15 text-sky-700" },
-                      pending: { label: "Menunggu", cls: "bg-amber-500/15 text-amber-700" },
-                      rejected: { label: "Ditolak", cls: "bg-rose-500/15 text-rose-700" },
-                    };
-                    const st = statusMap[s.status] || { label: s.status || "-", cls: "bg-muted text-foreground" };
-                    return (
-                      <TableRow key={s.id} className="[&_td]:whitespace-nowrap [&_td]:text-xs">
-                        <TableCell className="font-mono">{s.settlement_code}</TableCell>
-                        <TableCell>{tgl ? new Date(tgl).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</TableCell>
-                        <TableCell className="text-right font-mono">{fmtIDR(gross)}</TableCell>
-                        <TableCell className="text-right font-mono text-rose-600">{fmtIDR(fee)}</TableCell>
-                        <TableCell className="text-right font-mono font-semibold text-emerald-600">{fmtIDR(net)}</TableCell>
-                        <TableCell className="max-w-[180px] truncate" title={`${s.bank_name || ""} ${s.account_number || ""} ${s.account_holder ? `a.n. ${s.account_holder}` : ""}`}>
-                          {s.bank_name ? `${s.bank_name} • ${s.account_number || "-"}` : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={`text-[10px] border-0 hover:${st.cls} ${st.cls}`}>{st.label}</Badge>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Monitoring Pencairan dipindah ke halaman Pencairan agar Buku Kas tetap fokus.
+          Biaya pencairan tetap otomatis tercatat sebagai Kas Keluar di tabel bawah. */}
+
 
 
 
