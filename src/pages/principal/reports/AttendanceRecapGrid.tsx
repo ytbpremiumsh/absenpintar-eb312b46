@@ -71,6 +71,7 @@ export function AttendanceRecapGrid({ schoolId, kind }: Props) {
           const students = studentsQ.data || [];
           const classes = Array.from(new Set(students.map((s: any) => s.class))).sort();
           setFilterOptions(classes.map((c) => ({ value: c, label: c })));
+          setFilter((prev) => (prev !== "all" && classes.includes(prev)) ? prev : (classes[0] || "all"));
           setPeople(students.map((s: any) => ({ id: s.id, name: s.name, sub: s.student_id, photo_url: s.photo_url, cls: s.class })));
           setLogs(logsQ.data || []);
         } else {
@@ -183,7 +184,18 @@ export function AttendanceRecapGrid({ schoolId, kind }: Props) {
             <SelectTrigger className="h-9 w-24"><SelectValue /></SelectTrigger>
             <SelectContent>{years.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent>
           </Select>
-        </div>
+        {kind === "student" && filterOptions.length > 0 && (
+          <div>
+            <label className="text-[10px] font-semibold text-muted-foreground block mb-1">{filterLabel}</label>
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="h-9 w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {filterOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
       </div>
 
       {/* Analytics (based on grid data, same as admin dashboard) */}
