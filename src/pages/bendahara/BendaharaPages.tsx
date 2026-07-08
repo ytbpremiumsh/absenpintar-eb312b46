@@ -1356,7 +1356,7 @@ export function BendaharaTarif() {
     setEditing(t);
     setForm({ id: t.id, school_year: t.school_year, class_name: t.class_name, amount: t.amount, due_date_day: t.due_date_day, denda: t.denda, is_active: t.is_active });
     setDiscounts([]);
-    setDiscountForm({ student_id: "", category: "Beasiswa", amount: 0 });
+    setDiscountForm({ student_id: "", category: "Beasiswa", discount_type: "nominal", amount: 0, percent: 0 });
     loadDiscounts(t.id);
     setOpen(true);
   };
