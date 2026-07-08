@@ -327,23 +327,24 @@ export function StatCard({ label, value, icon: Icon, gradient = "from-emerald-50
 }
 
 // ============ Feature Flags (per-sekolah, dikontrol Super Admin) ============
-const bendaharaFlagsCache: Record<string, { wa: boolean; offline: boolean }> = {};
-async function fetchBendaharaFlags(schoolId: string): Promise<{ wa: boolean; offline: boolean }> {
+const bendaharaFlagsCache: Record<string, { wa: boolean; offline: boolean; installment: boolean }> = {};
+async function fetchBendaharaFlags(schoolId: string): Promise<{ wa: boolean; offline: boolean; installment: boolean }> {
   if (bendaharaFlagsCache[schoolId]) return bendaharaFlagsCache[schoolId];
   const { data } = await supabase
     .from("schools")
-    .select("bendahara_wa_enabled, bendahara_offline_enabled")
+    .select("bendahara_wa_enabled, bendahara_offline_enabled, installment_enabled")
     .eq("id", schoolId)
     .maybeSingle();
   const flags = {
     wa: (data as any)?.bendahara_wa_enabled !== false,
     offline: (data as any)?.bendahara_offline_enabled !== false,
+    installment: (data as any)?.installment_enabled !== false,
   };
   bendaharaFlagsCache[schoolId] = flags;
   return flags;
 }
 function useBendaharaFlags(schoolId?: string | null) {
-  const [flags, setFlags] = useState<{ wa: boolean; offline: boolean }>({ wa: true, offline: true });
+  const [flags, setFlags] = useState<{ wa: boolean; offline: boolean; installment: boolean }>({ wa: true, offline: true, installment: true });
   useEffect(() => {
     if (!schoolId) return;
     let alive = true;
