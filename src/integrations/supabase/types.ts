@@ -3523,7 +3523,6 @@ export type Database = {
           id: string | null
           logo: string | null
           name: string | null
-          npsn: string | null
           slug: string | null
         }
         Insert: {
@@ -3531,7 +3530,6 @@ export type Database = {
           id?: string | null
           logo?: string | null
           name?: string | null
-          npsn?: string | null
           slug?: string | null
         }
         Update: {
@@ -3539,7 +3537,6 @@ export type Database = {
           id?: string | null
           logo?: string | null
           name?: string | null
-          npsn?: string | null
           slug?: string | null
         }
         Relationships: []
