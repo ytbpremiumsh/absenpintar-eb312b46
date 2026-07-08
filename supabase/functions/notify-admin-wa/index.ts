@@ -162,7 +162,7 @@ serve(async (req) => {
       }
     }
 
-    // Fire-and-forget email to super admin for support tickets
+    // Fire-and-forget Lovable transactional email to super admin for support tickets
     let emailResp: any = null;
     if (
       event_type === 'support_ticket' &&
@@ -171,30 +171,33 @@ serve(async (req) => {
       /.+@.+\..+/.test(ps.admin_notify_email)
     ) {
       try {
-        const subjTpl = ps.admin_notify_email_ticket_subject || 'Tiket Bantuan Baru — {school}';
-        const htmlTpl = ps.admin_notify_email_ticket_html || `<p><b>Tiket Bantuan Baru</b></p><p>Sekolah: {school}<br>Dari: {user}<br>Prioritas: {priority}<br>Subjek: {subject}</p><p>{message}</p><p>Waktu: {time}</p>`;
-        const vars: Record<string, string> = {
+        const recipients = ps.admin_notify_email
+          .split(/[,;]/).map((e) => e.trim()).filter((e) => /.+@.+\..+/.test(e));
+        const templateData = {
           school: payload?.school || '-',
           user: payload?.user || '-',
           priority: payload?.priority || 'normal',
           subject: payload?.subject || '-',
-          message: (payload?.message || '-').toString().replace(/\n/g, '<br>'),
+          message: payload?.message || '-',
           time: new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
         };
-        const apply = (t: string) => t.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
-        const r = await admin.functions.invoke('send-email', {
-          body: {
-            event_type: 'broadcast',
-            to: ps.admin_notify_email,
-            subject_override: apply(subjTpl),
-            html_override: apply(htmlTpl),
-          },
-        });
-        emailResp = r?.data || r?.error || null;
+        const results: any[] = [];
+        for (const to of recipients) {
+          const r = await admin.functions.invoke('send-transactional-email', {
+            body: {
+              templateName: 'admin-support-ticket',
+              recipientEmail: to,
+              templateData,
+            },
+          });
+          results.push({ to, data: r?.data, error: r?.error?.message || null });
+        }
+        emailResp = results;
       } catch (e) {
         emailResp = { error: String(e) };
       }
     }
+
 
     return new Response(JSON.stringify({
       success: sent,
