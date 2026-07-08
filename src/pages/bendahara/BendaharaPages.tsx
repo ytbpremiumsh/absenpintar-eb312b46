@@ -2406,6 +2406,15 @@ function BendaharaGenerateCustom() {
               <Switch checked={autoSendWa} onCheckedChange={setAutoSendWa} />
             </div>
           )}
+          {flags.installment && (
+            <div className="flex items-center justify-between rounded-lg border p-3 bg-violet-50 border-violet-200 dark:bg-violet-950/20 dark:border-violet-900">
+              <div>
+                <p className="text-sm font-medium flex items-center gap-1.5 text-violet-800 dark:text-violet-200"><Wallet className="h-3.5 w-3.5" /> Izinkan Cicilan</p>
+                <p className="text-xs text-violet-700/80 dark:text-violet-300/80">Wali murid dapat membayar tagihan ini secara bertahap (tidak berlaku untuk SPP)</p>
+              </div>
+              <Switch checked={allowInstallment} onCheckedChange={setAllowInstallment} />
+            </div>
+          )}
           {preview.skipped > 0 && (
             <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 p-3 text-xs">
               <p className="text-amber-800 dark:text-amber-200"><strong>{preview.skipped}</strong> siswa sudah punya tagihan "{billName}" — akan dilewati</p>
