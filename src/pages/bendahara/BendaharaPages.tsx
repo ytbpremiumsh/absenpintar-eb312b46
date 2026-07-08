@@ -3891,6 +3891,14 @@ export function BendaharaSPPDetail() {
         loading={linkPickerLoading}
         onConfirm={confirmCreatePaymentLink}
       />
+
+      <InstallmentDialog
+        open={!!installmentInv}
+        invoice={installmentInv}
+        schoolInstallmentEnabled={flags.installment}
+        onClose={() => setInstallmentInv(null)}
+        onChanged={load}
+      />
     </div>
   );
 }
