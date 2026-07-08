@@ -1520,7 +1520,7 @@ export function BendaharaTarif() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{editing ? "Edit Tarif SPP" : "Tambah Tarif SPP"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
@@ -1547,6 +1547,67 @@ export function BendaharaTarif() {
               <Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} />
             </div>
             <Button onClick={save} className="w-full bg-[#5B6CF9] hover:bg-[#4c5ded]">Simpan</Button>
+
+            {editing && (
+              <div className="rounded-xl border-2 border-dashed border-[#5B6CF9]/30 bg-[#5B6CF9]/5 p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-[#3D4FE0]">Potongan Per Siswa</p>
+                    <p className="text-[11px] text-muted-foreground">Kurangi nominal SPP untuk siswa tertentu (mis. beasiswa, anak guru, kakak-adik).</p>
+                  </div>
+                  <Badge className="bg-[#5B6CF9]/10 text-[#5B6CF9] hover:bg-[#5B6CF9]/10 border-0">{discounts.length}</Badge>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_140px_130px_auto] gap-2 items-end">
+                  <div>
+                    <Label className="text-[11px]">Siswa</Label>
+                    <Select value={discountForm.student_id} onValueChange={v => setDiscountForm({ ...discountForm, student_id: v })}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder={availableStudents.length ? "Pilih siswa" : "Semua siswa sudah ada"} /></SelectTrigger>
+                      <SelectContent>
+                        {availableStudents.map(s => (
+                          <SelectItem key={s.id} value={s.id}>{s.name} <span className="text-muted-foreground">• {s.student_id}</span></SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-[11px]">Kategori</Label>
+                    <Input className="h-9" placeholder="Beasiswa" value={discountForm.category} onChange={e => setDiscountForm({ ...discountForm, category: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label className="text-[11px]">Nominal (Rp)</Label>
+                    <Input className="h-9" type="number" min={0} value={discountForm.amount} onChange={e => setDiscountForm({ ...discountForm, amount: parseInt(e.target.value) || 0 })} />
+                  </div>
+                  <Button size="sm" onClick={addDiscount} className="bg-[#5B6CF9] hover:bg-[#4c5ded] h-9"><Plus className="h-4 w-4 mr-1" />Tambah</Button>
+                </div>
+
+                <div className="rounded-lg bg-background/60 border">
+                  {discountsLoading ? (
+                    <div className="p-4 text-center"><Loader2 className="h-4 w-4 animate-spin mx-auto text-[#5B6CF9]" /></div>
+                  ) : discounts.length === 0 ? (
+                    <p className="p-4 text-xs text-center text-muted-foreground">Belum ada potongan.</p>
+                  ) : (
+                    <div className="divide-y">
+                      {discounts.map(d => {
+                        const s = allStudents.find(x => x.id === d.student_id);
+                        const net = Math.max(0, (form.amount || 0) - (d.amount || 0));
+                        return (
+                          <div key={d.id} className="p-2.5 flex flex-wrap items-center gap-2">
+                            <div className="flex-1 min-w-[140px]">
+                              <p className="text-sm font-medium leading-tight">{s?.name || "—"}</p>
+                              <p className="text-[10px] text-muted-foreground">{s?.student_id} • Bayar {fmtIDR(net)}</p>
+                            </div>
+                            <Input className="h-8 w-32" defaultValue={d.category} onBlur={e => { if (e.target.value !== d.category) updateDiscount(d.id, { category: e.target.value || "Potongan" }); }} />
+                            <Input className="h-8 w-28" type="number" min={0} defaultValue={d.amount} onBlur={e => { const v = parseInt(e.target.value) || 0; if (v !== d.amount) updateDiscount(d.id, { amount: v }); }} />
+                            <Button size="sm" variant="ghost" onClick={() => removeDiscount(d.id)} className="h-8 w-8 p-0 text-red-600 hover:bg-red-50"><Trash2 className="h-3.5 w-3.5" /></Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
