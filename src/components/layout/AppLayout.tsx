@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import atskollaLogo from "@/assets/Logo_atskolla.png";
+import { SchoolAccessGate } from "@/components/SchoolAccessGate";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
