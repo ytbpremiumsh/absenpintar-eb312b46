@@ -2153,7 +2153,7 @@ function BendaharaGenerateCustom() {
     if (!profile?.school_id) return;
     const { data } = await supabase
       .from("spp_invoices")
-      .select("id, student_id, student_name, class_name, period_label, bill_category, total_amount, status, due_date, created_at, bill_type")
+      .select("id, student_id, student_name, class_name, period_label, bill_category, total_amount, status, due_date, created_at, bill_type, allow_installment")
       .eq("school_id", profile.school_id)
       .eq("bill_type", "custom")
       .order("created_at", { ascending: false });
