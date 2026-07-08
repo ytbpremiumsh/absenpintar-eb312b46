@@ -2562,6 +2562,11 @@ function ActiveCustomInvoicesList({ invoices, onChanged }: { invoices: any[]; on
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-semibold text-sm truncate">{g.name}</p>
                       <Badge variant="outline" className="text-[10px]">{g.category}</Badge>
+                      {g.rows.some((r: any) => r.allow_installment) && (
+                        <Badge className="text-[10px] bg-[#5B6CF9]/10 text-[#5B6CF9] border border-[#5B6CF9]/30 hover:bg-[#5B6CF9]/15 gap-1 px-1.5 py-0">
+                          <Wallet className="h-2.5 w-2.5" /> Cicilan
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5 flex-wrap">
                       <span>{total} siswa</span>
@@ -2597,7 +2602,16 @@ function ActiveCustomInvoicesList({ invoices, onChanged }: { invoices: any[]; on
                       <TableBody>
                         {g.rows.map(inv => (
                           <TableRow key={inv.id} className="[&>td]:whitespace-nowrap">
-                            <TableCell className="text-sm">{inv.student_name}</TableCell>
+                            <TableCell className="text-sm">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span>{inv.student_name}</span>
+                                {inv.allow_installment && (
+                                  <Badge className="text-[10px] bg-[#5B6CF9]/10 text-[#5B6CF9] border border-[#5B6CF9]/30 hover:bg-[#5B6CF9]/15 gap-1 px-1.5 py-0">
+                                    <Wallet className="h-2.5 w-2.5" /> Cicilan
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
                             <TableCell className="text-sm"><Badge variant="secondary">{inv.class_name}</Badge></TableCell>
                             <TableCell className="text-sm font-semibold text-right">{fmtIDR(inv.total_amount)}</TableCell>
                             <TableCell><StatusBadge status={inv.status} /></TableCell>
