@@ -725,6 +725,85 @@ const SuperAdminRegistrationWA = () => {
         </CardContent>
       </Card>
 
+      {/* ═══ Notifikasi Email Super Admin (Tiket Bantuan) ═══ */}
+      <Card className="border-0 shadow-card">
+        <CardContent className="p-4 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Mail className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground text-sm">Notifikasi Email Super Admin</h3>
+                <p className="text-xs text-muted-foreground">
+                  Kirim email otomatis ke Super Admin setiap ada Tiket Bantuan baru dari sekolah
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={settings.admin_notify_email_enabled === "true"}
+              onCheckedChange={(v) => setSettings({ ...settings, admin_notify_email_enabled: v ? "true" : "false" })}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-xs">Email Super Admin Tujuan</Label>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                value={settings.admin_notify_email}
+                onChange={(e) => setSettings({ ...settings, admin_notify_email: e.target.value })}
+                placeholder="admin@atskolla.com"
+                className="flex-1"
+              />
+              <Button
+                variant="outline"
+                onClick={handleTestAdminEmail}
+                disabled={emailTesting || !settings.admin_notify_email}
+                className="shrink-0"
+              >
+                {emailTesting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
+                Tes Email
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Pastikan SMTP Email sudah aktif di menu <b>Email Server</b>. Bisa isi beberapa email dipisah koma di kolom template subject/HTML.
+            </p>
+          </div>
+
+          <div className="space-y-2 p-3 rounded-lg border border-border bg-muted/30">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-3.5 w-3.5 text-primary" />
+              <Label className="text-xs font-semibold">Subjek Email</Label>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {["{school}", "{user}", "{priority}", "{subject}", "{message}", "{time}"].map((v) => (
+                <Badge key={v} variant="secondary" className="text-[10px]">{v}</Badge>
+              ))}
+            </div>
+            <Input
+              value={settings.admin_notify_email_ticket_subject}
+              onChange={(e) => setSettings({ ...settings, admin_notify_email_ticket_subject: e.target.value })}
+              placeholder="Tiket Bantuan Baru — {school}"
+              className="text-xs"
+            />
+            <Label className="text-xs font-semibold pt-2 block">Template HTML Email</Label>
+            <Textarea
+              value={settings.admin_notify_email_ticket_html}
+              onChange={(e) => setSettings({ ...settings, admin_notify_email_ticket_html: e.target.value })}
+              rows={8}
+              className="resize-none font-mono text-[11px]"
+              placeholder="<div>Tiket Baru: {subject} dari {school}</div>"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              <Info className="h-3 w-3 inline mr-1" />
+              Boleh kosong — sistem akan pakai template default bawaan yang sudah rapi.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+
       {/* Message Template */}
       <Card className="border-0 shadow-card">
         <CardContent className="p-4 sm:p-6 space-y-4">
