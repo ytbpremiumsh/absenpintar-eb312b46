@@ -2226,6 +2226,7 @@ function BendaharaGenerateCustom() {
         due_date: due.toISOString().slice(0, 10),
         bill_type: "custom" as const,
         bill_category: effectiveCategory,
+        allow_installment: allowInstallment && flags.installment,
       }));
 
       // Server-side dedup by (student, period_label, bill_type='custom')
