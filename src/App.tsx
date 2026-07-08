@@ -78,6 +78,10 @@ const SuperAdminBendahara = lazy(() => import("./pages/super-admin/SuperAdminBen
 const SuperAdminShortlinks = lazy(() => import("./pages/super-admin/SuperAdminShortlinks"));
 const ShortlinkRedirect = lazy(() => import("./pages/ShortlinkRedirect"));
 const SuperAdminMetaPixel = lazy(() => import("./pages/super-admin/SuperAdminMetaPixel"));
+const SuperAdminKeuanganHub = lazy(() => import("./pages/super-admin/SuperAdminKeuanganHub"));
+const SuperAdminKomunikasiHub = lazy(() => import("./pages/super-admin/SuperAdminKomunikasiHub"));
+const SuperAdminEmailHub = lazy(() => import("./pages/super-admin/SuperAdminEmailHub"));
+const SuperAdminSistemHub = lazy(() => import("./pages/super-admin/SuperAdminSistemHub"));
 const CustomDomain = lazy(() => import("./pages/CustomDomain"));
 const Addons = lazy(() => import("./pages/Addons"));
 const OrderIdCard = lazy(() => import("./pages/OrderIdCard"));
