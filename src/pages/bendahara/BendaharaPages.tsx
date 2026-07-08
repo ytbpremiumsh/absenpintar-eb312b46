@@ -1314,7 +1314,7 @@ export function BendaharaTarif() {
 
   // Per-student discounts
   const [discounts, setDiscounts] = useState<any[]>([]);
-  const [discountForm, setDiscountForm] = useState({ student_id: "", category: "Beasiswa", amount: 0 });
+  const [discountForm, setDiscountForm] = useState<{ student_id: string; category: string; discount_type: "nominal" | "percent"; amount: number; percent: number }>({ student_id: "", category: "Beasiswa", discount_type: "nominal", amount: 0, percent: 0 });
   const [discountsLoading, setDiscountsLoading] = useState(false);
 
   const load = () => {
@@ -1356,7 +1356,7 @@ export function BendaharaTarif() {
     setEditing(t);
     setForm({ id: t.id, school_year: t.school_year, class_name: t.class_name, amount: t.amount, due_date_day: t.due_date_day, denda: t.denda, is_active: t.is_active });
     setDiscounts([]);
-    setDiscountForm({ student_id: "", category: "Beasiswa", amount: 0 });
+    setDiscountForm({ student_id: "", category: "Beasiswa", discount_type: "nominal", amount: 0, percent: 0 });
     loadDiscounts(t.id);
     setOpen(true);
   };
@@ -1371,17 +1371,21 @@ export function BendaharaTarif() {
   }, [classStudents, discounts]);
 
   const addDiscount = async () => {
-    if (!editing || !discountForm.student_id || discountForm.amount <= 0) { toast.error("Lengkapi siswa & nominal potongan"); return; }
-    const { error } = await supabase.from("spp_tariff_discounts").insert({
+    if (!editing || !discountForm.student_id) { toast.error("Pilih siswa"); return; }
+    if (discountForm.discount_type === "nominal" && discountForm.amount <= 0) { toast.error("Isi nominal potongan"); return; }
+    if (discountForm.discount_type === "percent" && (discountForm.percent <= 0 || discountForm.percent > 100)) { toast.error("Persen harus 1-100"); return; }
+    const { error } = await (supabase.from("spp_tariff_discounts") as any).insert({
       school_id: profile!.school_id,
       tariff_id: editing.id,
       student_id: discountForm.student_id,
       category: discountForm.category || "Potongan",
-      amount: discountForm.amount,
+      discount_type: discountForm.discount_type,
+      amount: discountForm.discount_type === "nominal" ? discountForm.amount : 0,
+      percent: discountForm.discount_type === "percent" ? discountForm.percent : 0,
     });
     if (error) { toast.error(error.message); return; }
     toast.success("Potongan ditambahkan");
-    setDiscountForm({ student_id: "", category: discountForm.category, amount: 0 });
+    setDiscountForm({ student_id: "", category: discountForm.category, discount_type: discountForm.discount_type, amount: 0, percent: 0 });
     loadDiscounts(editing.id);
   };
   const removeDiscount = async (id: string) => {
@@ -1389,10 +1393,17 @@ export function BendaharaTarif() {
     if (error) { toast.error(error.message); return; }
     loadDiscounts(editing.id);
   };
-  const updateDiscount = async (id: string, patch: { category?: string; amount?: number }) => {
-    const { error } = await supabase.from("spp_tariff_discounts").update(patch).eq("id", id);
+  const updateDiscount = async (id: string, patch: { category?: string; amount?: number; percent?: number; discount_type?: "nominal" | "percent" }) => {
+    const { error } = await (supabase.from("spp_tariff_discounts") as any).update(patch).eq("id", id);
     if (error) toast.error(error.message);
     else loadDiscounts(editing.id);
+  };
+
+  // Compute effective discount amount given base and a discount row
+  const effDisc = (base: number, d: any): number => {
+    if (!d) return 0;
+    if (d.discount_type === "percent") return Math.round(((base || 0) * (Number(d.percent) || 0)) / 100);
+    return d.amount || 0;
   };
 
   const save = async () => {
@@ -1558,7 +1569,7 @@ export function BendaharaTarif() {
                   <Badge className="bg-[#5B6CF9]/10 text-[#5B6CF9] hover:bg-[#5B6CF9]/10 border-0">{discounts.length}</Badge>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_140px_130px_auto] gap-2 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px_110px_120px_auto] gap-2 items-end">
                   <div>
                     <Label className="text-[11px]">Siswa</Label>
                     <Select value={discountForm.student_id} onValueChange={v => setDiscountForm({ ...discountForm, student_id: v })}>
@@ -1575,8 +1586,22 @@ export function BendaharaTarif() {
                     <Input className="h-9" placeholder="Beasiswa" value={discountForm.category} onChange={e => setDiscountForm({ ...discountForm, category: e.target.value })} />
                   </div>
                   <div>
-                    <Label className="text-[11px]">Nominal (Rp)</Label>
-                    <Input className="h-9" type="number" min={0} value={discountForm.amount} onChange={e => setDiscountForm({ ...discountForm, amount: parseInt(e.target.value) || 0 })} />
+                    <Label className="text-[11px]">Jenis</Label>
+                    <Select value={discountForm.discount_type} onValueChange={(v: "nominal" | "percent") => setDiscountForm({ ...discountForm, discount_type: v })}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="nominal">Nominal (Rp)</SelectItem>
+                        <SelectItem value="percent">Persen (%)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-[11px]">{discountForm.discount_type === "percent" ? "Persen (%)" : "Nominal (Rp)"}</Label>
+                    {discountForm.discount_type === "percent" ? (
+                      <Input className="h-9" type="number" min={0} max={100} step="0.01" value={discountForm.percent} onChange={e => setDiscountForm({ ...discountForm, percent: parseFloat(e.target.value) || 0 })} />
+                    ) : (
+                      <Input className="h-9" type="number" min={0} value={discountForm.amount} onChange={e => setDiscountForm({ ...discountForm, amount: parseInt(e.target.value) || 0 })} />
+                    )}
                   </div>
                   <Button size="sm" onClick={addDiscount} className="bg-[#5B6CF9] hover:bg-[#4c5ded] h-9"><Plus className="h-4 w-4 mr-1" />Tambah</Button>
                 </div>
@@ -1590,15 +1615,28 @@ export function BendaharaTarif() {
                     <div className="divide-y">
                       {discounts.map(d => {
                         const s = allStudents.find(x => x.id === d.student_id);
-                        const net = Math.max(0, (form.amount || 0) - (d.amount || 0));
+                        const cut = effDisc(form.amount || 0, d);
+                        const net = Math.max(0, (form.amount || 0) - cut);
+                        const isPct = d.discount_type === "percent";
                         return (
                           <div key={d.id} className="p-2.5 flex flex-wrap items-center gap-2">
                             <div className="flex-1 min-w-[140px]">
                               <p className="text-sm font-medium leading-tight">{s?.name || "—"}</p>
-                              <p className="text-[10px] text-muted-foreground">{s?.student_id} • Bayar {fmtIDR(net)}</p>
+                              <p className="text-[10px] text-muted-foreground">{s?.student_id} • Potong {isPct ? `${d.percent}%` : fmtIDR(d.amount)} • Bayar {fmtIDR(net)}</p>
                             </div>
-                            <Input className="h-8 w-32" defaultValue={d.category} onBlur={e => { if (e.target.value !== d.category) updateDiscount(d.id, { category: e.target.value || "Potongan" }); }} />
-                            <Input className="h-8 w-28" type="number" min={0} defaultValue={d.amount} onBlur={e => { const v = parseInt(e.target.value) || 0; if (v !== d.amount) updateDiscount(d.id, { amount: v }); }} />
+                            <Input className="h-8 w-28" defaultValue={d.category} onBlur={e => { if (e.target.value !== d.category) updateDiscount(d.id, { category: e.target.value || "Potongan" }); }} />
+                            <Select value={d.discount_type || "nominal"} onValueChange={(v: "nominal" | "percent") => updateDiscount(d.id, { discount_type: v })}>
+                              <SelectTrigger className="h-8 w-[100px]"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="nominal">Nominal</SelectItem>
+                                <SelectItem value="percent">Persen</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {isPct ? (
+                              <Input className="h-8 w-24" type="number" min={0} max={100} step="0.01" defaultValue={d.percent} onBlur={e => { const v = parseFloat(e.target.value) || 0; if (v !== Number(d.percent)) updateDiscount(d.id, { percent: v }); }} />
+                            ) : (
+                              <Input className="h-8 w-28" type="number" min={0} defaultValue={d.amount} onBlur={e => { const v = parseInt(e.target.value) || 0; if (v !== d.amount) updateDiscount(d.id, { amount: v }); }} />
+                            )}
                             <Button size="sm" variant="ghost" onClick={() => removeDiscount(d.id)} className="h-8 w-8 p-0 text-red-600 hover:bg-red-50"><Trash2 className="h-3.5 w-3.5" /></Button>
                           </div>
                         );
@@ -1646,7 +1684,7 @@ export function BendaharaGenerate() {
   const [tariffs, setTariffs] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [existingInvs, setExistingInvs] = useState<any[]>([]);
-  const [discountMap, setDiscountMap] = useState<Map<string, { category: string; amount: number }>>(new Map());
+  const [discountMap, setDiscountMap] = useState<Map<string, { category: string; amount: number; discount_type?: string; percent?: number }>>(new Map());
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [mode, setMode] = useState<"single" | "range">("single");
   const currentMonth = new Date().getMonth() + 1;
@@ -1671,7 +1709,7 @@ export function BendaharaGenerate() {
       supabase.from("spp_tariffs").select("*").eq("school_id", profile.school_id).eq("is_active", true),
       supabase.from("students").select("id, name, student_id, class, parent_name, parent_phone").eq("school_id", profile.school_id),
       supabase.from("spp_invoices").select("student_id, period_month, period_year").eq("school_id", profile.school_id),
-      supabase.from("spp_tariff_discounts").select("tariff_id, student_id, category, amount").eq("school_id", profile.school_id),
+      (supabase.from("spp_tariff_discounts") as any).select("tariff_id, student_id, category, amount, discount_type, percent").eq("school_id", profile.school_id),
     ]).then(([c, t, s, inv, d]) => {
       const cls = (c.data || []).map((x: any) => x.name);
       setClasses(cls);
@@ -1680,8 +1718,8 @@ export function BendaharaGenerate() {
       setStudents(s.data || []);
       setExistingInvs(inv.data || []);
       setDiscountMap(() => {
-        const m = new Map<string, { category: string; amount: number }>();
-        (d.data || []).forEach((x: any) => m.set(`${x.tariff_id}|${x.student_id}`, { category: x.category, amount: x.amount }));
+        const m = new Map<string, { category: string; amount: number; discount_type?: string; percent?: number }>();
+        (d.data || []).forEach((x: any) => m.set(`${x.tariff_id}|${x.student_id}`, { category: x.category, amount: x.amount, discount_type: x.discount_type, percent: x.percent }));
         return m;
       });
     });
@@ -1714,11 +1752,16 @@ export function BendaharaGenerate() {
       const tariff = tariffByClass.get(s.class);
       if (!tariff) { noTariff++; continue; }
       const disc = discountMap.get(`${tariff.id}|${s.id}`);
-      const netAmount = Math.max(0, (tariff.amount || 0) - (disc?.amount || 0));
+      const discCut = disc
+        ? (disc.discount_type === "percent"
+            ? Math.round(((tariff.amount || 0) * (Number(disc.percent) || 0)) / 100)
+            : (disc.amount || 0))
+        : 0;
+      const netAmount = Math.max(0, (tariff.amount || 0) - discCut);
       for (const p of periods) {
         const exists = existingInvs.some(i => i.student_id === s.id && i.period_month === p.month && i.period_year === p.year);
         if (exists && skipExisting) { skipped++; continue; }
-        list.push({ student: s, tariff, period: p, exists, discount: disc, netAmount });
+        list.push({ student: s, tariff, period: p, exists, discount: disc, discCut, netAmount });
       }
     }
     const total = list.reduce((a, x) => a + (x.netAmount || 0), 0);
@@ -1734,9 +1777,14 @@ export function BendaharaGenerate() {
     if (preview.list.length === 0) { toast.error("Tidak ada tagihan untuk dibuat"); return; }
     setLoading(true);
     try {
-      const rows = preview.list.map(({ student, tariff, period, discount, netAmount }) => {
+      const rows = preview.list.map(({ student, tariff, period, discount, discCut, netAmount }) => {
         const due = new Date(period.year, period.month - 1, tariff.due_date_day);
         const descBase = `${student.name} - ${student.class} - ${period.label}`;
+        const discLabel = discount && discCut > 0
+          ? (discount.discount_type === "percent"
+              ? `${discount.percent}% = -${fmtIDR(discCut)}`
+              : `-${fmtIDR(discCut)}`)
+          : null;
         return {
           school_id: profile.school_id,
           student_id: student.id,
@@ -1746,8 +1794,8 @@ export function BendaharaGenerate() {
           parent_name: student.parent_name,
           parent_phone: student.parent_phone,
           period_month: period.month, period_year: period.year, period_label: period.label,
-          description: discount && discount.amount > 0
-            ? `${descBase} (Potongan ${discount.category}: -${fmtIDR(discount.amount)})`
+          description: discLabel
+            ? `${descBase} (Potongan ${discount.category}: ${discLabel})`
             : descBase,
           amount: netAmount, denda: 0, total_amount: netAmount,
           due_date: due.toISOString().slice(0, 10),
@@ -2045,11 +2093,14 @@ export function BendaharaGenerate() {
                     <TableCell className="text-sm"><Badge variant="secondary">{x.student.class}</Badge></TableCell>
                     <TableCell className="text-sm">{x.period.label}</TableCell>
                     <TableCell className="text-sm font-semibold text-right">
-                      {x.discount && x.discount.amount > 0 ? (
+                      {x.discCut > 0 ? (
                         <div className="flex flex-col items-end">
                           <span className="line-through text-muted-foreground text-[10px]">{fmtIDR(x.tariff.amount)}</span>
                           <span className="text-[#5B6CF9]">{fmtIDR(x.netAmount)}</span>
-                          <span className="text-[9px] text-emerald-600">−{fmtIDR(x.discount.amount)} {x.discount.category}</span>
+                          <span className="text-[9px] text-emerald-600">
+                            −{fmtIDR(x.discCut)} {x.discount.category}
+                            {x.discount.discount_type === "percent" ? ` (${x.discount.percent}%)` : ""}
+                          </span>
                         </div>
                       ) : fmtIDR(x.netAmount ?? x.tariff.amount)}
                     </TableCell>
