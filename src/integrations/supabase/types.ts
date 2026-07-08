@@ -2707,6 +2707,68 @@ export type Database = {
         }
         Relationships: []
       }
+      spp_tariff_discounts: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          id: string
+          school_id: string
+          student_id: string
+          tariff_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          category?: string
+          created_at?: string
+          id?: string
+          school_id: string
+          student_id: string
+          tariff_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          id?: string
+          school_id?: string
+          student_id?: string
+          tariff_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spp_tariff_discounts_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spp_tariff_discounts_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spp_tariff_discounts_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spp_tariff_discounts_tariff_id_fkey"
+            columns: ["tariff_id"]
+            isOneToOne: false
+            referencedRelation: "spp_tariffs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spp_tariffs: {
         Row: {
           amount: number
