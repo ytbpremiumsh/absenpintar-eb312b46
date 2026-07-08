@@ -1,0 +1,2 @@
+ALTER TABLE public.spp_tariff_discounts ADD COLUMN IF NOT EXISTS discount_type text NOT NULL DEFAULT 'nominal' CHECK (discount_type IN ('nominal','percent'));
+ALTER TABLE public.spp_tariff_discounts ADD COLUMN IF NOT EXISTS percent numeric(5,2) NOT NULL DEFAULT 0 CHECK (percent >= 0 AND percent <= 100);

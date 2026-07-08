@@ -2712,7 +2712,9 @@ export type Database = {
           amount: number
           category: string
           created_at: string
+          discount_type: string
           id: string
+          percent: number
           school_id: string
           student_id: string
           tariff_id: string
@@ -2722,7 +2724,9 @@ export type Database = {
           amount?: number
           category?: string
           created_at?: string
+          discount_type?: string
           id?: string
+          percent?: number
           school_id: string
           student_id: string
           tariff_id: string
@@ -2732,7 +2736,9 @@ export type Database = {
           amount?: number
           category?: string
           created_at?: string
+          discount_type?: string
           id?: string
+          percent?: number
           school_id?: string
           student_id?: string
           tariff_id?: string
