@@ -709,6 +709,62 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "installment_list") {
+      const invoiceId = body.invoice_id as string;
+      if (!invoiceId) return json({ error: "invoice_id wajib" });
+      const { data: inv } = await supabase
+        .from("spp_invoices")
+        .select("id, total_amount, installment_paid_amount, allow_installment, bill_type, period_label")
+        .eq("id", invoiceId)
+        .eq("student_id", studentId)
+        .eq("school_id", schoolId)
+        .maybeSingle();
+      if (!inv) return json({ error: "Tagihan tidak ditemukan" });
+      const { data: rows } = await supabase
+        .from("spp_installments")
+        .select("id, amount, payment_method, payment_channel, gateway, status, paid_at, expired_at, mayar_payment_url, notes, created_at")
+        .eq("invoice_id", invoiceId)
+        .order("created_at", { ascending: false });
+      const nowMs = Date.now();
+      const locked = (rows || []).reduce((s: number, r: any) => {
+        if (r.status === "paid") return s + (r.amount || 0);
+        if (r.status === "pending" && (!r.expired_at || new Date(r.expired_at).getTime() > nowMs)) return s + (r.amount || 0);
+        return s;
+      }, 0);
+      const remaining = Math.max(0, (inv.total_amount || 0) - locked);
+      return json({ ok: true, invoice: inv, installments: rows || [], locked_amount: locked, remaining });
+    }
+
+    if (action === "spp_pay_installment") {
+      const invoiceId = body.invoice_id as string;
+      const amount = Math.round(Number(body.amount) || 0);
+      const channel = body.channel;
+      if (!invoiceId) return json({ error: "invoice_id wajib" });
+      if (!amount) return json({ error: "amount wajib" });
+
+      // Untuk MVP, cicilan online diarahkan ke Mayar (gateway paling banyak dipakai).
+      const sppRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/spp-mayar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-parent-token": session.token,
+          "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        },
+        body: JSON.stringify({ action: "parent_create_installment_payment", invoice_id: invoiceId, amount, channel }),
+      });
+      const sppJson = await sppRes.json();
+      if (!sppJson?.success) return json({ error: sppJson?.error || "Gagal" });
+      return json({
+        ok: true,
+        gateway: "mayar",
+        payment_url: sppJson.payment_url,
+        invoice_id: sppJson.invoice_id,
+        installment_id: sppJson.installment_id,
+        service_fee: sppJson.service_fee || 0,
+        total_charged: sppJson.total_charged || amount,
+      });
+    }
+
     if (action === "school_info") {
       const { data: school } = await supabase
         .from("schools")
