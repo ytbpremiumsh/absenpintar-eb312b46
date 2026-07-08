@@ -3721,7 +3721,16 @@ export function BendaharaSPPDetail() {
                     const dStatus = inv._displayStatus || inv.status;
                     return (
                       <TableRow key={inv.id} className={`[&>td]:whitespace-nowrap ${inv.status === "expired" ? "opacity-60" : ""}`}>
-                        <TableCell className="font-medium text-sm">{inv.period_label}</TableCell>
+                        <TableCell className="font-medium text-sm">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span>{inv.period_label}</span>
+                            {inv.allow_installment && (
+                              <Badge className="text-[10px] bg-[#5B6CF9]/10 text-[#5B6CF9] border border-[#5B6CF9]/30 hover:bg-[#5B6CF9]/15 gap-1 px-1.5 py-0">
+                                <Wallet className="h-2.5 w-2.5" /> Cicilan
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-xs">
                           <Badge variant="outline" className="border-violet-400/50 text-violet-700 bg-violet-50 dark:bg-violet-950/40 dark:text-violet-300">{inv.bill_category || "Lainnya"}</Badge>
                         </TableCell>
