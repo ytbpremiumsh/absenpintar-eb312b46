@@ -3736,6 +3736,11 @@ export function BendaharaSPPDetail() {
                                   <Banknote className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">Bayar Offline</span>
                                 </Button>
                               )}
+                              {flags.installment && (
+                                <Button size="sm" variant="outline" className="h-8 px-2.5 border-[#5B6CF9]/40 text-[#5B6CF9] hover:bg-[#5B6CF9]/10" onClick={() => setInstallmentInv(inv)} title="Kelola cicilan tagihan ini">
+                                  <Wallet className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">{inv.allow_installment ? "Cicilan" : "Aktifkan Cicilan"}</span>
+                                </Button>
+                              )}
                               <Button size="sm" variant="outline" className="h-8 w-8 p-0 border-red-300 text-red-600 hover:bg-red-50" disabled={busy === `del-${inv.id}`} onClick={() => deleteInvoice(inv)} title="Hapus tagihan">
                                 {busy === `del-${inv.id}` ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                               </Button>
