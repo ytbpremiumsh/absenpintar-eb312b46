@@ -66,7 +66,10 @@ const SuperAdminRegistrationWA = () => {
         "admin_notify_phone", "admin_notify_enabled",
         "admin_notify_ticket_template", "admin_notify_withdrawal_template",
         "admin_notify_bendahara_template",
+        "admin_notify_email", "admin_notify_email_enabled",
+        "admin_notify_email_ticket_subject", "admin_notify_email_ticket_html",
       ]);
+
 
     const map: Record<string, string> = {};
     ((data as any[]) || []).forEach((item) => { map[item.key] = item.value; });
