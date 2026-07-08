@@ -81,6 +81,56 @@ serve(async (req) => {
       });
     }
 
+    // ====== INSTALLMENT MATCH (partial online payments by parents) ======
+    // Cek dulu apakah transaksi ini adalah cicilan; jika ya, tandai lunas dan
+    // biarkan trigger DB memperbarui invoice induknya.
+    try {
+      let inst: any = null;
+      if (identifiers.length) {
+        const { data: f } = await supabaseAdmin
+          .from('spp_installments')
+          .select('id, invoice_id, school_id, status')
+          .in('mayar_transaction_id', identifiers)
+          .maybeSingle();
+        inst = f;
+      }
+      if (!inst && productId) {
+        const { data: f } = await supabaseAdmin
+          .from('spp_installments')
+          .select('id, invoice_id, school_id, status')
+          .eq('mayar_invoice_id', productId)
+          .maybeSingle();
+        inst = f;
+      }
+      if (!inst && paymentUrl) {
+        const { data: f } = await supabaseAdmin
+          .from('spp_installments')
+          .select('id, invoice_id, school_id, status')
+          .eq('mayar_payment_url', paymentUrl)
+          .neq('status', 'paid')
+          .maybeSingle();
+        inst = f;
+      }
+      if (inst && inst.status !== 'paid') {
+        await supabaseAdmin.from('spp_installments').update({
+          status: 'paid',
+          paid_at: new Date().toISOString(),
+        }).eq('id', inst.id);
+        // Update sisipan payment_transactions untuk cicilan bila ada
+        await supabaseAdmin.from('payment_transactions').update({
+          status: 'paid', paid_at: new Date().toISOString(),
+        }).eq('mayar_transaction_id', identifiers[0] || productId).eq('payment_method', 'spp_installment');
+        console.log('Installment marked paid via Mayar webhook', inst.id);
+        return new Response(JSON.stringify({ ok: true, installment_id: inst.id }), {
+          status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    } catch (e) {
+      console.error('installment webhook check failed', e);
+    }
+
+
+
     // Find the payment transaction — try multiple matching strategies
     let payment = null;
     
