@@ -1,12 +1,10 @@
-import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SuperAdminWhatsApp from "./SuperAdminWhatsApp";
 import SuperAdminRegistrationWA from "./SuperAdminRegistrationWA";
 
 export default function SuperAdminWhatsAppHub() {
-  const [params, setParams] = useSearchParams();
-  const tab = params.get("tab") || "api";
-  const setTab = (v: string) => setParams({ tab: v }, { replace: true });
+  const [tab, setTab] = useState<string>("api");
 
   return (
     <Tabs value={tab} onValueChange={setTab}>
