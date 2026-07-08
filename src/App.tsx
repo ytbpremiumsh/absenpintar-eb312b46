@@ -226,6 +226,8 @@ function AppRoutes() {
         <Route path="/login" element={<Login forcedMode="parent" />} />
         <Route path="/admin" element={<Login forcedMode="school" />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/unsubscribe" element={<Unsubscribe />} />
+
         <Route path="/register" element={<Register />} />
         <Route path="/select-role" element={<SelectRole />} />
         <Route path="/live/:schoolId" element={<PublicMonitoring />} />
