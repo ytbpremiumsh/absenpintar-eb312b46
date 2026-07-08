@@ -88,7 +88,7 @@ export default function SuperAdminBendahara() {
     setLoading(true);
     try {
       const [sR, iR, stR, bR] = await Promise.all([
-        supabase.from("schools").select("id,name,npsn,bendahara_wa_enabled,bendahara_offline_enabled").order("name"),
+        supabase.from("schools").select("id,name,npsn,bendahara_wa_enabled,bendahara_offline_enabled,installment_enabled").order("name"),
         supabase.from("spp_invoices")
           .select("id,school_id,invoice_number,student_name,class_name,period_label,total_amount,net_amount,gateway_fee,status,payment_method,paid_at,settlement_id,created_at")
           .order("created_at", { ascending: false })
