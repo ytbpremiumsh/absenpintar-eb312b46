@@ -212,14 +212,44 @@ export default function ParentDashboard() {
   }, [tab, selectedStudent, invoke]);
 
   // Membuka picker channel pembayaran (sebelum benar-benar membuat link Mayar).
-  const paySpp = (invoiceOrId: any) => {
+  const paySpp = async (invoiceOrId: any) => {
     // Cari objek invoice lengkap supaya bisa tampilkan info di picker.
     const list = [...(sppData.tunggakan || []), ...(sppData.aktif || [])];
     const inv = typeof invoiceOrId === "string"
       ? list.find((x: any) => x.id === invoiceOrId)
       : invoiceOrId;
     if (!inv) { toast.error("Tagihan tidak ditemukan"); return; }
+
+    // Jika tagihan mengizinkan cicilan (non-SPP), buka dialog pilihan cicil / lunas dulu.
+    if (inv.allow_installment && (inv.bill_type || "spp") !== "spp") {
+      setInstallmentInvoice(inv);
+      setInstallmentSummary(null);
+      setInstallmentMode(null);
+      setInstallmentAmount(0);
+      setInstallmentOpen(true);
+      setInstallmentLoading(true);
+      const d = await invoke("installment_list", { student_id: selectedStudent, invoice_id: inv.id });
+      setInstallmentLoading(false);
+      if (d?.error) { toast.error(d.error); return; }
+      setInstallmentSummary({
+        invoice: d.invoice,
+        installments: d.installments || [],
+        locked_amount: d.locked_amount || 0,
+        remaining: d.remaining ?? inv.total_amount,
+      });
+      return;
+    }
+
     setPickerInvoice(inv);
+    setPickerOpen(true);
+  };
+
+  const onInstallmentContinue = (mode: "full" | "installment", amount: number) => {
+    if (!installmentInvoice) return;
+    setInstallmentMode(mode);
+    setInstallmentAmount(amount);
+    setInstallmentOpen(false);
+    setPickerInvoice(installmentInvoice);
     setPickerOpen(true);
   };
 
@@ -227,7 +257,11 @@ export default function ParentDashboard() {
     if (!pickerInvoice) return;
     setPickerLoading(true);
     setSppBusy(pickerInvoice.id);
-    const d = await invoke("spp_pay", { student_id: selectedStudent, invoice_id: pickerInvoice.id, channel });
+    // Jika sedang dalam alur cicilan (mode=installment) → panggil endpoint installment
+    const useInstallment = installmentMode === "installment" && installmentAmount > 0;
+    const d = useInstallment
+      ? await invoke("spp_pay_installment", { student_id: selectedStudent, invoice_id: pickerInvoice.id, amount: installmentAmount, channel })
+      : await invoke("spp_pay", { student_id: selectedStudent, invoice_id: pickerInvoice.id, channel });
     setSppBusy(null);
     setPickerLoading(false);
     if (d?.error) { toast.error(d.error); return; }
@@ -235,7 +269,10 @@ export default function ParentDashboard() {
       setPickerOpen(false);
       setPayingInvoiceId(d.invoice_id || pickerInvoice.id);
       setPaymentIframe(d.payment_url);
-      toast.success("Membuka halaman pembayaran...");
+      toast.success(useInstallment ? "Membuka pembayaran cicilan..." : "Membuka halaman pembayaran...");
+      // Reset mode setelah dipakai
+      setInstallmentMode(null);
+      setInstallmentAmount(0);
     }
   };
 
