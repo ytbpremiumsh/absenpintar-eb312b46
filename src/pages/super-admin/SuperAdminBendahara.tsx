@@ -502,16 +502,18 @@ export default function SuperAdminBendahara() {
                     <TableHead className="font-bold">Sekolah</TableHead>
                     <TableHead className="text-center font-bold">Kirim WA (Tagihan &amp; Konfirmasi)</TableHead>
                     <TableHead className="text-center font-bold">Pembayaran Offline</TableHead>
+                    <TableHead className="text-center font-bold">Cicilan Non-SPP</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={3} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin inline" /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin inline" /></TableCell></TableRow>
                   ) : filteredSettings.length === 0 ? (
-                    <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground text-sm">Tidak ada data</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground text-sm">Tidak ada data</TableCell></TableRow>
                   ) : filteredSettings.map(({ school }) => {
                     const waOn = school.bendahara_wa_enabled !== false;
                     const offOn = school.bendahara_offline_enabled !== false;
+                    const cicOn = school.installment_enabled !== false;
                     return (
                       <TableRow key={school.id} className="hover:bg-muted/30">
                         <TableCell>
@@ -528,6 +530,12 @@ export default function SuperAdminBendahara() {
                           <div className="inline-flex items-center gap-2">
                             <Switch checked={offOn} onCheckedChange={(v) => toggleSchoolFlag(school.id, "bendahara_offline_enabled", v)} />
                             <Badge className={`${offOn ? "bg-emerald-500" : "bg-slate-400"} text-white border-0 text-[10px]`}>{offOn ? "AKTIF" : "NONAKTIF"}</Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="inline-flex items-center gap-2">
+                            <Switch checked={cicOn} onCheckedChange={(v) => toggleSchoolFlag(school.id, "installment_enabled", v)} />
+                            <Badge className={`${cicOn ? "bg-emerald-500" : "bg-slate-400"} text-white border-0 text-[10px]`}>{cicOn ? "AKTIF" : "NONAKTIF"}</Badge>
                           </div>
                         </TableCell>
                       </TableRow>
