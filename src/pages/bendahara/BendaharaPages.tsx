@@ -1371,17 +1371,21 @@ export function BendaharaTarif() {
   }, [classStudents, discounts]);
 
   const addDiscount = async () => {
-    if (!editing || !discountForm.student_id || discountForm.amount <= 0) { toast.error("Lengkapi siswa & nominal potongan"); return; }
-    const { error } = await supabase.from("spp_tariff_discounts").insert({
+    if (!editing || !discountForm.student_id) { toast.error("Pilih siswa"); return; }
+    if (discountForm.discount_type === "nominal" && discountForm.amount <= 0) { toast.error("Isi nominal potongan"); return; }
+    if (discountForm.discount_type === "percent" && (discountForm.percent <= 0 || discountForm.percent > 100)) { toast.error("Persen harus 1-100"); return; }
+    const { error } = await (supabase.from("spp_tariff_discounts") as any).insert({
       school_id: profile!.school_id,
       tariff_id: editing.id,
       student_id: discountForm.student_id,
       category: discountForm.category || "Potongan",
-      amount: discountForm.amount,
+      discount_type: discountForm.discount_type,
+      amount: discountForm.discount_type === "nominal" ? discountForm.amount : 0,
+      percent: discountForm.discount_type === "percent" ? discountForm.percent : 0,
     });
     if (error) { toast.error(error.message); return; }
     toast.success("Potongan ditambahkan");
-    setDiscountForm({ student_id: "", category: discountForm.category, amount: 0 });
+    setDiscountForm({ student_id: "", category: discountForm.category, discount_type: discountForm.discount_type, amount: 0, percent: 0 });
     loadDiscounts(editing.id);
   };
   const removeDiscount = async (id: string) => {
@@ -1389,10 +1393,17 @@ export function BendaharaTarif() {
     if (error) { toast.error(error.message); return; }
     loadDiscounts(editing.id);
   };
-  const updateDiscount = async (id: string, patch: { category?: string; amount?: number }) => {
-    const { error } = await supabase.from("spp_tariff_discounts").update(patch).eq("id", id);
+  const updateDiscount = async (id: string, patch: { category?: string; amount?: number; percent?: number; discount_type?: "nominal" | "percent" }) => {
+    const { error } = await (supabase.from("spp_tariff_discounts") as any).update(patch).eq("id", id);
     if (error) toast.error(error.message);
     else loadDiscounts(editing.id);
+  };
+
+  // Compute effective discount amount given base and a discount row
+  const effDisc = (base: number, d: any): number => {
+    if (!d) return 0;
+    if (d.discount_type === "percent") return Math.round(((base || 0) * (Number(d.percent) || 0)) / 100);
+    return d.amount || 0;
   };
 
   const save = async () => {
