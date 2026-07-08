@@ -71,7 +71,7 @@ const Login = ({ forcedMode }: LoginProps) => {
     setFinderLoading(true);
     const t = setTimeout(async () => {
       const { data } = await supabase
-        .from("schools")
+        .from("schools_public")
         .select("id, name, slug, city")
         .ilike("name", `%${q}%`)
         .limit(8);

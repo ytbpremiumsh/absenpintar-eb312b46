@@ -106,7 +106,7 @@ const Register = () => {
       try {
         const [{ data: reserved }, { data: existing }] = await Promise.all([
           supabase.rpc("is_reserved_slug", { _slug: slug }),
-          supabase.from("schools").select("id").eq("slug", slug).maybeSingle(),
+          supabase.from("schools_public").select("id").eq("slug", slug).maybeSingle(),
         ]);
         if (reserved === true) setSlugStatus("reserved");
         else if (existing) setSlugStatus("taken");
