@@ -95,7 +95,7 @@ const SchoolCard = ({ school, index, onDetail, onSubscription, onEdit, onSuspend
                 </div>
               )}
             </div>
-            <div className="flex gap-1 shrink-0">
+            <div className="flex gap-1 shrink-0 flex-wrap justify-end">
               <Button variant="ghost" size="icon" className="h-8 w-8" title="Detail" onClick={() => onDetail(school)}>
                 <Eye className="h-3.5 w-3.5" />
               </Button>
@@ -104,6 +104,24 @@ const SchoolCard = ({ school, index, onDetail, onSubscription, onEdit, onSuspend
               </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => onEdit(school)}>
                 <Pencil className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`h-8 w-8 ${school.is_suspended ? "text-success hover:text-success" : "text-amber-600 hover:text-amber-700"}`}
+                title={school.is_suspended ? "Aktifkan kembali" : "Tangguhkan akses"}
+                onClick={() => onSuspend(school)}
+              >
+                {school.is_suspended ? <PlayCircle className="h-3.5 w-3.5" /> : <Ban className="h-3.5 w-3.5" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-destructive hover:text-destructive"
+                title="Hapus sekolah"
+                onClick={() => onDelete(school)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
