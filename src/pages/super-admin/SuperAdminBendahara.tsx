@@ -129,12 +129,18 @@ export default function SuperAdminBendahara() {
         saldo_pending: 0, total_disbursed: 0, pending_settlement: 0,
       };
     }
+    // Saldo aktif = HANYA pembayaran online (gateway). Pembayaran offline
+    // (tunai/transfer manual) tidak masuk saldo karena uangnya sudah di sekolah.
+    // Filter ini WAJIB sama dengan Dashboard Bendahara sekolah.
+    const OFFLINE_METHODS = new Set(["offline_cash", "offline_transfer"]);
     for (const inv of invoices) {
       if (inv.status !== "paid") continue;
       const m = map[inv.school_id]; if (!m) continue;
+      const isOffline = OFFLINE_METHODS.has((inv.payment_method || "").toLowerCase());
       const amt = inv.total_amount || inv.net_amount || 0;
       m.total_paid_invoices += 1;
       m.total_gross += amt;
+      if (isOffline) continue; // uang offline tidak masuk saldo yg bisa dicairkan
       if (!inv.settlement_id) m.saldo_pending += amt;
     }
     for (const st of settlements) {
