@@ -83,14 +83,11 @@ export default function SuperAdminBendahara() {
   const [reviewing, setReviewing] = useState<Settlement | null>(null);
   const [adminNote, setAdminNote] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
-  const [feePercent, setFeePercent] = useState<string>("0.7");
-  const [feeFlat, setFeeFlat] = useState<string>("500");
-  const [savingFee, setSavingFee] = useState(false);
 
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [sR, iR, stR, bR, psR] = await Promise.all([
+      const [sR, iR, stR, bR] = await Promise.all([
         supabase.from("schools").select("id,name,npsn,bendahara_wa_enabled,bendahara_offline_enabled").order("name"),
         supabase.from("spp_invoices")
           .select("id,school_id,invoice_number,student_name,class_name,period_label,total_amount,net_amount,gateway_fee,status,payment_method,paid_at,settlement_id,created_at")
@@ -99,16 +96,11 @@ export default function SuperAdminBendahara() {
         supabase.from("spp_settlements")
           .select("*").order("requested_at", { ascending: false }),
         supabase.from("bendahara_settings").select("*"),
-        supabase.from("platform_settings").select("key,value").in("key", ["gateway_fee_percent", "gateway_fee_flat"]),
       ]);
       setSchools(sR.data || []);
       setInvoices((iR.data || []) as Invoice[]);
       setSettlements((stR.data || []) as Settlement[]);
       setSettings((bR.data || []) as BendaharaSetting[]);
-      const psMap: Record<string, string> = {};
-      (psR.data || []).forEach((r: any) => { psMap[r.key] = r.value; });
-      if (psMap["gateway_fee_percent"] != null) setFeePercent(psMap["gateway_fee_percent"]);
-      if (psMap["gateway_fee_flat"] != null) setFeeFlat(psMap["gateway_fee_flat"]);
     } catch (e: any) {
       toast.error("Gagal memuat data: " + e.message);
     } finally {
@@ -214,32 +206,6 @@ export default function SuperAdminBendahara() {
     setReviewOpen(true);
   };
 
-  const saveFeeConfig = async () => {
-    const pNum = parseFloat(feePercent);
-    const fNum = 0; // Biaya tetap dihilangkan; dipaksa 0
-    if (isNaN(pNum) || pNum < 0 || pNum > 100) {
-      toast.error("Persentase biaya layanan harus 0–100");
-      return;
-    }
-    setSavingFee(true);
-    try {
-      const { error: e1 } = await supabase.from("platform_settings").upsert(
-        { key: "gateway_fee_percent", value: String(pNum) },
-        { onConflict: "key" }
-      );
-      const { error: e2 } = await supabase.from("platform_settings").upsert(
-        { key: "gateway_fee_flat", value: String(fNum) },
-        { onConflict: "key" }
-      );
-      if (e1 || e2) throw e1 || e2;
-      setFeeFlat("0");
-      toast.success("Konfigurasi biaya layanan disimpan");
-    } catch (e: any) {
-      toast.error("Gagal menyimpan: " + e.message);
-    } finally {
-      setSavingFee(false);
-    }
-  };
 
   const toggleSchoolFlag = async (schoolId: string, field: "bendahara_wa_enabled" | "bendahara_offline_enabled", next: boolean) => {
     // Optimistic UI

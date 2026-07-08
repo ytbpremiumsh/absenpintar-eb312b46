@@ -4222,24 +4222,18 @@ export function BendaharaSaldo() {
   const { profile } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [settlements, setSettlements] = useState<any[]>([]);
-  const [feeCfg, setFeeCfg] = useState({ percent: 0.7, flat: 500 });
+  
   const [loading, setLoading] = useState(true);
   const syncingRef = useRef(false);
 
   const fetchAll = useCallback(async () => {
     if (!profile?.school_id) { setLoading(false); return; }
-    const [invRes, stlRes, psRes] = await Promise.all([
+    const [invRes, stlRes] = await Promise.all([
       supabase.from("spp_invoices").select("*").eq("school_id", profile.school_id).eq("status", "paid").not("payment_method", "in", "(offline_cash,offline_transfer)").order("paid_at", { ascending: false }),
       supabase.from("spp_settlements").select("*").eq("school_id", profile.school_id),
-      supabase.from("platform_settings").select("key,value").in("key", ["gateway_fee_percent", "gateway_fee_flat"]),
     ]);
     setItems(invRes.data || []);
     setSettlements(stlRes.data || []);
-    const map: any = Object.fromEntries((psRes.data || []).map((r: any) => [r.key, r.value]));
-    setFeeCfg({
-      percent: parseFloat(map.gateway_fee_percent ?? "0.7"),
-      flat: parseInt(map.gateway_fee_flat ?? "500", 10),
-    });
     setLoading(false);
   }, [profile?.school_id]);
 
@@ -4267,14 +4261,10 @@ export function BendaharaSaldo() {
 
   const totals = items.reduce((acc, i) => ({
     gross: acc.gross + (i.total_amount || 0),
-    fee: acc.fee + (i.gateway_fee || 0),
-    net: acc.net + (i.net_amount || 0),
-  }), { gross: 0, fee: 0, net: 0 });
+    net: acc.net + (i.net_amount || i.total_amount || 0),
+  }), { gross: 0, net: 0 });
 
-  // Pecah fee gateway agar transparan
   const txCount = items.length;
-  const feePercentTotal = items.reduce((s, i) => s + Math.round((i.total_amount || 0) * (feeCfg.percent / 100)), 0);
-  const feeFlatTotal = txCount * feeCfg.flat;
 
   // Saldo aktif harus sama dengan halaman Pencairan:
   // hanya transaksi online yang sudah lunas dan belum terikat settlement.
