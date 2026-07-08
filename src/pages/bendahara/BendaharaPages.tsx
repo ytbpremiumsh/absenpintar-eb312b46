@@ -1752,11 +1752,16 @@ export function BendaharaGenerate() {
       const tariff = tariffByClass.get(s.class);
       if (!tariff) { noTariff++; continue; }
       const disc = discountMap.get(`${tariff.id}|${s.id}`);
-      const netAmount = Math.max(0, (tariff.amount || 0) - (disc?.amount || 0));
+      const discCut = disc
+        ? (disc.discount_type === "percent"
+            ? Math.round(((tariff.amount || 0) * (Number(disc.percent) || 0)) / 100)
+            : (disc.amount || 0))
+        : 0;
+      const netAmount = Math.max(0, (tariff.amount || 0) - discCut);
       for (const p of periods) {
         const exists = existingInvs.some(i => i.student_id === s.id && i.period_month === p.month && i.period_year === p.year);
         if (exists && skipExisting) { skipped++; continue; }
-        list.push({ student: s, tariff, period: p, exists, discount: disc, netAmount });
+        list.push({ student: s, tariff, period: p, exists, discount: disc, discCut, netAmount });
       }
     }
     const total = list.reduce((a, x) => a + (x.netAmount || 0), 0);
