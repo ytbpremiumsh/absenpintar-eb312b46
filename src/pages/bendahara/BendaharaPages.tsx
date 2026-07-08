@@ -1569,7 +1569,7 @@ export function BendaharaTarif() {
                   <Badge className="bg-[#5B6CF9]/10 text-[#5B6CF9] hover:bg-[#5B6CF9]/10 border-0">{discounts.length}</Badge>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_140px_130px_auto] gap-2 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px_110px_120px_auto] gap-2 items-end">
                   <div>
                     <Label className="text-[11px]">Siswa</Label>
                     <Select value={discountForm.student_id} onValueChange={v => setDiscountForm({ ...discountForm, student_id: v })}>
@@ -1586,8 +1586,22 @@ export function BendaharaTarif() {
                     <Input className="h-9" placeholder="Beasiswa" value={discountForm.category} onChange={e => setDiscountForm({ ...discountForm, category: e.target.value })} />
                   </div>
                   <div>
-                    <Label className="text-[11px]">Nominal (Rp)</Label>
-                    <Input className="h-9" type="number" min={0} value={discountForm.amount} onChange={e => setDiscountForm({ ...discountForm, amount: parseInt(e.target.value) || 0 })} />
+                    <Label className="text-[11px]">Jenis</Label>
+                    <Select value={discountForm.discount_type} onValueChange={(v: "nominal" | "percent") => setDiscountForm({ ...discountForm, discount_type: v })}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="nominal">Nominal (Rp)</SelectItem>
+                        <SelectItem value="percent">Persen (%)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-[11px]">{discountForm.discount_type === "percent" ? "Persen (%)" : "Nominal (Rp)"}</Label>
+                    {discountForm.discount_type === "percent" ? (
+                      <Input className="h-9" type="number" min={0} max={100} step="0.01" value={discountForm.percent} onChange={e => setDiscountForm({ ...discountForm, percent: parseFloat(e.target.value) || 0 })} />
+                    ) : (
+                      <Input className="h-9" type="number" min={0} value={discountForm.amount} onChange={e => setDiscountForm({ ...discountForm, amount: parseInt(e.target.value) || 0 })} />
+                    )}
                   </div>
                   <Button size="sm" onClick={addDiscount} className="bg-[#5B6CF9] hover:bg-[#4c5ded] h-9"><Plus className="h-4 w-4 mr-1" />Tambah</Button>
                 </div>
@@ -1601,7 +1615,9 @@ export function BendaharaTarif() {
                     <div className="divide-y">
                       {discounts.map(d => {
                         const s = allStudents.find(x => x.id === d.student_id);
-                        const net = Math.max(0, (form.amount || 0) - (d.amount || 0));
+                        const cut = effDisc(form.amount || 0, d);
+                        const net = Math.max(0, (form.amount || 0) - cut);
+                        const isPct = d.discount_type === "percent";
                         return (
                           <div key={d.id} className="p-2.5 flex flex-wrap items-center gap-2">
                             <div className="flex-1 min-w-[140px]">
