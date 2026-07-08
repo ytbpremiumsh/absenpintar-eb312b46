@@ -70,6 +70,8 @@ const LegalContact = lazy(() => import("./pages/legal/Contact"));
 const Penawaran = lazy(() => import("./pages/Penawaran"));
 const SuperAdminPenawaran = lazy(() => import("./pages/super-admin/SuperAdminPenawaran"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+
 const SuperAdminBackup = lazy(() => import("./pages/super-admin/SuperAdminBackup"));
 const SuperAdminServerInfo = lazy(() => import("./pages/super-admin/SuperAdminServerInfo"));
 const SuperAdminBendahara = lazy(() => import("./pages/super-admin/SuperAdminBendahara"));
