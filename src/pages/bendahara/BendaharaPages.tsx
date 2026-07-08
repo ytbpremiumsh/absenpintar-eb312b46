@@ -1622,10 +1622,21 @@ export function BendaharaTarif() {
                           <div key={d.id} className="p-2.5 flex flex-wrap items-center gap-2">
                             <div className="flex-1 min-w-[140px]">
                               <p className="text-sm font-medium leading-tight">{s?.name || "—"}</p>
-                              <p className="text-[10px] text-muted-foreground">{s?.student_id} • Bayar {fmtIDR(net)}</p>
+                              <p className="text-[10px] text-muted-foreground">{s?.student_id} • Potong {isPct ? `${d.percent}%` : fmtIDR(d.amount)} • Bayar {fmtIDR(net)}</p>
                             </div>
-                            <Input className="h-8 w-32" defaultValue={d.category} onBlur={e => { if (e.target.value !== d.category) updateDiscount(d.id, { category: e.target.value || "Potongan" }); }} />
-                            <Input className="h-8 w-28" type="number" min={0} defaultValue={d.amount} onBlur={e => { const v = parseInt(e.target.value) || 0; if (v !== d.amount) updateDiscount(d.id, { amount: v }); }} />
+                            <Input className="h-8 w-28" defaultValue={d.category} onBlur={e => { if (e.target.value !== d.category) updateDiscount(d.id, { category: e.target.value || "Potongan" }); }} />
+                            <Select value={d.discount_type || "nominal"} onValueChange={(v: "nominal" | "percent") => updateDiscount(d.id, { discount_type: v })}>
+                              <SelectTrigger className="h-8 w-[100px]"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="nominal">Nominal</SelectItem>
+                                <SelectItem value="percent">Persen</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {isPct ? (
+                              <Input className="h-8 w-24" type="number" min={0} max={100} step="0.01" defaultValue={d.percent} onBlur={e => { const v = parseFloat(e.target.value) || 0; if (v !== Number(d.percent)) updateDiscount(d.id, { percent: v }); }} />
+                            ) : (
+                              <Input className="h-8 w-28" type="number" min={0} defaultValue={d.amount} onBlur={e => { const v = parseInt(e.target.value) || 0; if (v !== d.amount) updateDiscount(d.id, { amount: v }); }} />
+                            )}
                             <Button size="sm" variant="ghost" onClick={() => removeDiscount(d.id)} className="h-8 w-8 p-0 text-red-600 hover:bg-red-50"><Trash2 className="h-3.5 w-3.5" /></Button>
                           </div>
                         );
