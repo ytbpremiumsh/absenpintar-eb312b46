@@ -188,6 +188,7 @@ serve(async (req) => {
               templateName: 'admin-support-ticket',
               recipientEmail: to,
               templateData,
+              fromName: 'ATSkolla - Tiket Bantuan Baru',
             },
           });
           results.push({ to, data: r?.data, error: r?.error?.message || null });
