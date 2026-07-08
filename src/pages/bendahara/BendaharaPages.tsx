@@ -3009,7 +3009,7 @@ function ClassGroupedList({ students, filterAY, filterMonth, navigate, invoices,
                   <TableHeader>
                     <TableRow className="bg-secondary/40 hover:bg-secondary/40 border-border/40 [&_th]:whitespace-nowrap">
                       <TableHead className="h-9 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Siswa</TableHead>
-                      <TableHead className="h-9 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">NIS</TableHead>
+                      <TableHead className="h-9 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Nomor Kartu Identitas</TableHead>
                       <TableHead className="h-9 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground text-center">Bulan</TableHead>
                       <TableHead className="h-9 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground text-right">Sisa Tagihan</TableHead>
                       <TableHead className="h-9 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground text-center">Status</TableHead>
