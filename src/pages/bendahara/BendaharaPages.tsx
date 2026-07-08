@@ -2970,7 +2970,7 @@ function ClassGroupedList({ students, filterAY, filterMonth, navigate, invoices,
                         {nunggak}
                       </span>
                       {totalSisa > 0 && (
-                        <span className="text-[10px] font-bold bg-white text-rose-700 px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">Sisa {fmtIDR(totalSisa)}</span>
+                        <span className="text-[10px] font-bold bg-white text-[#5B6CF9] px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">Sisa {fmtIDR(totalSisa)}</span>
                       )}
                     </div>
                   </div>
