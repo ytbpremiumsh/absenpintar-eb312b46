@@ -1371,15 +1371,29 @@ export default function ParentDashboard() {
 
       <PaymentMethodPicker
         open={pickerOpen}
-        onOpenChange={(o) => { if (!pickerLoading) { setPickerOpen(o); if (!o) setPickerInvoice(null); } }}
-        billAmount={pickerInvoice?.total_amount || 0}
-        title="Pilih Metode Pembayaran"
-        subtitle={pickerInvoice ? `Tagihan SPP ${pickerInvoice.period_label || ""}` : undefined}
+        onOpenChange={(o) => { if (!pickerLoading) { setPickerOpen(o); if (!o) { setPickerInvoice(null); setInstallmentMode(null); setInstallmentAmount(0); } } }}
+        billAmount={installmentMode === "installment" && installmentAmount > 0 ? installmentAmount : (pickerInvoice?.total_amount || 0)}
+        title={installmentMode === "installment" ? "Pilih Metode Pembayaran (Cicilan)" : "Pilih Metode Pembayaran"}
+        subtitle={pickerInvoice ? (
+          installmentMode === "installment"
+            ? `Cicilan ${pickerInvoice.period_label || ""} • Rp ${installmentAmount.toLocaleString("id-ID")}`
+            : `Tagihan ${pickerInvoice.period_label || ""}`
+        ) : undefined}
         loading={pickerLoading}
         feeOverrides={channelFees}
         qrisPercent={qrisPercent}
         onConfirm={confirmPaySpp}
       />
+
+      <InstallmentChoiceDialog
+        open={installmentOpen}
+        onClose={() => { setInstallmentOpen(false); setInstallmentInvoice(null); }}
+        invoice={installmentInvoice}
+        loading={installmentLoading}
+        summary={installmentSummary}
+        onContinue={onInstallmentContinue}
+      />
+
     </div>
   );
 }
