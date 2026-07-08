@@ -56,6 +56,8 @@ Deno.serve(async (req) => {
   let messageId: string
   let templateData: Record<string, any> = {}
   let fromNameOverride: string | undefined
+  let htmlOverride: string | undefined
+  let subjectOverride: string | undefined
   try {
     const body = await req.json()
     templateName = body.templateName || body.template_name
@@ -69,6 +71,16 @@ Deno.serve(async (req) => {
       fromNameOverride = body.fromName.trim()
     } else if (typeof body.from_name === 'string' && body.from_name.trim()) {
       fromNameOverride = body.from_name.trim()
+    }
+    if (typeof body.htmlOverride === 'string' && body.htmlOverride.trim()) {
+      htmlOverride = body.htmlOverride
+    } else if (typeof body.html_override === 'string' && body.html_override.trim()) {
+      htmlOverride = body.html_override
+    }
+    if (typeof body.subjectOverride === 'string' && body.subjectOverride.trim()) {
+      subjectOverride = body.subjectOverride.trim()
+    } else if (typeof body.subject_override === 'string' && body.subject_override.trim()) {
+      subjectOverride = body.subject_override.trim()
     }
   } catch {
     return new Response(
