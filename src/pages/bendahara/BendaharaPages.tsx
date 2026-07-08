@@ -1301,6 +1301,7 @@ export function BendaharaTarif() {
   const { profile } = useAuth();
   const [tariffs, setTariffs] = useState<any[]>([]);
   const [classes, setClasses] = useState<string[]>([]);
+  const [allStudents, setAllStudents] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [bulkOpen, setBulkOpen] = useState(false);
@@ -1311,14 +1312,21 @@ export function BendaharaTarif() {
   const [form, setForm] = useState({ id: "" as string | "", school_year: currentAY, class_name: "", amount: 0, due_date_day: 10, denda: 0, is_active: true });
   const [loading, setLoading] = useState(true);
 
+  // Per-student discounts
+  const [discounts, setDiscounts] = useState<any[]>([]);
+  const [discountForm, setDiscountForm] = useState({ student_id: "", category: "Beasiswa", amount: 0 });
+  const [discountsLoading, setDiscountsLoading] = useState(false);
+
   const load = () => {
     if (!profile?.school_id) { setLoading(false); return; }
     Promise.all([
       supabase.from("spp_tariffs").select("*").eq("school_id", profile.school_id).order("class_name"),
       supabase.from("classes").select("name").eq("school_id", profile.school_id).order("name"),
-    ]).then(([t, c]) => {
+      supabase.from("students").select("id, name, student_id, class").eq("school_id", profile.school_id).order("name"),
+    ]).then(([t, c, s]) => {
       setTariffs(t.data || []);
       setClasses((c.data || []).map((x: any) => x.name));
+      setAllStudents(s.data || []);
       setLoading(false);
     });
   };
@@ -1331,15 +1339,60 @@ export function BendaharaTarif() {
     return Array.from(set).sort();
   }, [tariffs]);
 
+  const loadDiscounts = async (tariffId: string) => {
+    setDiscountsLoading(true);
+    const { data } = await supabase.from("spp_tariff_discounts").select("*").eq("tariff_id", tariffId).order("created_at", { ascending: false });
+    setDiscounts(data || []);
+    setDiscountsLoading(false);
+  };
+
   const openAdd = () => {
     setEditing(null);
+    setDiscounts([]);
     setForm({ id: "", school_year: filterAY, class_name: "", amount: 0, due_date_day: 10, denda: 0, is_active: true });
     setOpen(true);
   };
   const openEdit = (t: any) => {
     setEditing(t);
     setForm({ id: t.id, school_year: t.school_year, class_name: t.class_name, amount: t.amount, due_date_day: t.due_date_day, denda: t.denda, is_active: t.is_active });
+    setDiscounts([]);
+    setDiscountForm({ student_id: "", category: "Beasiswa", amount: 0 });
+    loadDiscounts(t.id);
     setOpen(true);
+  };
+
+  const classStudents = useMemo(
+    () => allStudents.filter(s => s.class === form.class_name),
+    [allStudents, form.class_name]
+  );
+  const availableStudents = useMemo(() => {
+    const used = new Set(discounts.map(d => d.student_id));
+    return classStudents.filter(s => !used.has(s.id));
+  }, [classStudents, discounts]);
+
+  const addDiscount = async () => {
+    if (!editing || !discountForm.student_id || discountForm.amount <= 0) { toast.error("Lengkapi siswa & nominal potongan"); return; }
+    const { error } = await supabase.from("spp_tariff_discounts").insert({
+      school_id: profile!.school_id,
+      tariff_id: editing.id,
+      student_id: discountForm.student_id,
+      category: discountForm.category || "Potongan",
+      amount: discountForm.amount,
+    });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Potongan ditambahkan");
+    setDiscountForm({ student_id: "", category: discountForm.category, amount: 0 });
+    loadDiscounts(editing.id);
+  };
+  const removeDiscount = async (id: string) => {
+    const { error } = await supabase.from("spp_tariff_discounts").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    loadDiscounts(editing.id);
+  };
+  const updateDiscount = async (id: string, patch: { category?: string; amount?: number }) => {
+    const { error } = await supabase.from("spp_tariff_discounts").update(patch).eq("id", id);
+    if (error) toast.error(error.message);
+    else loadDiscounts(editing.id);
   };
 
   const save = async () => {
@@ -1467,7 +1520,7 @@ export function BendaharaTarif() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{editing ? "Edit Tarif SPP" : "Tambah Tarif SPP"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
@@ -1494,6 +1547,67 @@ export function BendaharaTarif() {
               <Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} />
             </div>
             <Button onClick={save} className="w-full bg-[#5B6CF9] hover:bg-[#4c5ded]">Simpan</Button>
+
+            {editing && (
+              <div className="rounded-xl border-2 border-dashed border-[#5B6CF9]/30 bg-[#5B6CF9]/5 p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-[#3D4FE0]">Potongan Per Siswa</p>
+                    <p className="text-[11px] text-muted-foreground">Kurangi nominal SPP untuk siswa tertentu (mis. beasiswa, anak guru, kakak-adik).</p>
+                  </div>
+                  <Badge className="bg-[#5B6CF9]/10 text-[#5B6CF9] hover:bg-[#5B6CF9]/10 border-0">{discounts.length}</Badge>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_140px_130px_auto] gap-2 items-end">
+                  <div>
+                    <Label className="text-[11px]">Siswa</Label>
+                    <Select value={discountForm.student_id} onValueChange={v => setDiscountForm({ ...discountForm, student_id: v })}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder={availableStudents.length ? "Pilih siswa" : "Semua siswa sudah ada"} /></SelectTrigger>
+                      <SelectContent>
+                        {availableStudents.map(s => (
+                          <SelectItem key={s.id} value={s.id}>{s.name} <span className="text-muted-foreground">• {s.student_id}</span></SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-[11px]">Kategori</Label>
+                    <Input className="h-9" placeholder="Beasiswa" value={discountForm.category} onChange={e => setDiscountForm({ ...discountForm, category: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label className="text-[11px]">Nominal (Rp)</Label>
+                    <Input className="h-9" type="number" min={0} value={discountForm.amount} onChange={e => setDiscountForm({ ...discountForm, amount: parseInt(e.target.value) || 0 })} />
+                  </div>
+                  <Button size="sm" onClick={addDiscount} className="bg-[#5B6CF9] hover:bg-[#4c5ded] h-9"><Plus className="h-4 w-4 mr-1" />Tambah</Button>
+                </div>
+
+                <div className="rounded-lg bg-background/60 border">
+                  {discountsLoading ? (
+                    <div className="p-4 text-center"><Loader2 className="h-4 w-4 animate-spin mx-auto text-[#5B6CF9]" /></div>
+                  ) : discounts.length === 0 ? (
+                    <p className="p-4 text-xs text-center text-muted-foreground">Belum ada potongan.</p>
+                  ) : (
+                    <div className="divide-y">
+                      {discounts.map(d => {
+                        const s = allStudents.find(x => x.id === d.student_id);
+                        const net = Math.max(0, (form.amount || 0) - (d.amount || 0));
+                        return (
+                          <div key={d.id} className="p-2.5 flex flex-wrap items-center gap-2">
+                            <div className="flex-1 min-w-[140px]">
+                              <p className="text-sm font-medium leading-tight">{s?.name || "—"}</p>
+                              <p className="text-[10px] text-muted-foreground">{s?.student_id} • Bayar {fmtIDR(net)}</p>
+                            </div>
+                            <Input className="h-8 w-32" defaultValue={d.category} onBlur={e => { if (e.target.value !== d.category) updateDiscount(d.id, { category: e.target.value || "Potongan" }); }} />
+                            <Input className="h-8 w-28" type="number" min={0} defaultValue={d.amount} onBlur={e => { const v = parseInt(e.target.value) || 0; if (v !== d.amount) updateDiscount(d.id, { amount: v }); }} />
+                            <Button size="sm" variant="ghost" onClick={() => removeDiscount(d.id)} className="h-8 w-8 p-0 text-red-600 hover:bg-red-50"><Trash2 className="h-3.5 w-3.5" /></Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -1532,6 +1646,7 @@ export function BendaharaGenerate() {
   const [tariffs, setTariffs] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [existingInvs, setExistingInvs] = useState<any[]>([]);
+  const [discountMap, setDiscountMap] = useState<Map<string, { category: string; amount: number }>>(new Map());
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [mode, setMode] = useState<"single" | "range">("single");
   const currentMonth = new Date().getMonth() + 1;
@@ -1556,13 +1671,19 @@ export function BendaharaGenerate() {
       supabase.from("spp_tariffs").select("*").eq("school_id", profile.school_id).eq("is_active", true),
       supabase.from("students").select("id, name, student_id, class, parent_name, parent_phone").eq("school_id", profile.school_id),
       supabase.from("spp_invoices").select("student_id, period_month, period_year").eq("school_id", profile.school_id),
-    ]).then(([c, t, s, inv]) => {
+      supabase.from("spp_tariff_discounts").select("tariff_id, student_id, category, amount").eq("school_id", profile.school_id),
+    ]).then(([c, t, s, inv, d]) => {
       const cls = (c.data || []).map((x: any) => x.name);
       setClasses(cls);
       setSelectedClasses(cls);
       setTariffs(t.data || []);
       setStudents(s.data || []);
       setExistingInvs(inv.data || []);
+      setDiscountMap(() => {
+        const m = new Map<string, { category: string; amount: number }>();
+        (d.data || []).forEach((x: any) => m.set(`${x.tariff_id}|${x.student_id}`, { category: x.category, amount: x.amount }));
+        return m;
+      });
     });
   }, [profile?.school_id]);
 
@@ -1592,15 +1713,17 @@ export function BendaharaGenerate() {
     for (const s of targetStudents) {
       const tariff = tariffByClass.get(s.class);
       if (!tariff) { noTariff++; continue; }
+      const disc = discountMap.get(`${tariff.id}|${s.id}`);
+      const netAmount = Math.max(0, (tariff.amount || 0) - (disc?.amount || 0));
       for (const p of periods) {
         const exists = existingInvs.some(i => i.student_id === s.id && i.period_month === p.month && i.period_year === p.year);
         if (exists && skipExisting) { skipped++; continue; }
-        list.push({ student: s, tariff, period: p, exists });
+        list.push({ student: s, tariff, period: p, exists, discount: disc, netAmount });
       }
     }
-    const total = list.reduce((a, x) => a + (x.tariff.amount || 0), 0);
+    const total = list.reduce((a, x) => a + (x.netAmount || 0), 0);
     return { list, skipped, noTariff, total };
-  }, [targetStudents, tariffByClass, periods, existingInvs, skipExisting]);
+  }, [targetStudents, tariffByClass, periods, existingInvs, skipExisting, discountMap]);
 
   const toggleClass = (c: string) => {
     setSelectedClasses(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]);
@@ -1611,8 +1734,9 @@ export function BendaharaGenerate() {
     if (preview.list.length === 0) { toast.error("Tidak ada tagihan untuk dibuat"); return; }
     setLoading(true);
     try {
-      const rows = preview.list.map(({ student, tariff, period }) => {
+      const rows = preview.list.map(({ student, tariff, period, discount, netAmount }) => {
         const due = new Date(period.year, period.month - 1, tariff.due_date_day);
+        const descBase = `${student.name} - ${student.class} - ${period.label}`;
         return {
           school_id: profile.school_id,
           student_id: student.id,
@@ -1622,8 +1746,10 @@ export function BendaharaGenerate() {
           parent_name: student.parent_name,
           parent_phone: student.parent_phone,
           period_month: period.month, period_year: period.year, period_label: period.label,
-          description: `${student.name} - ${student.class} - ${period.label}`,
-          amount: tariff.amount, denda: 0, total_amount: tariff.amount,
+          description: discount && discount.amount > 0
+            ? `${descBase} (Potongan ${discount.category}: -${fmtIDR(discount.amount)})`
+            : descBase,
+          amount: netAmount, denda: 0, total_amount: netAmount,
           due_date: due.toISOString().slice(0, 10),
         };
       });
@@ -1918,7 +2044,15 @@ export function BendaharaGenerate() {
                     <TableCell className="text-sm">{x.student.name}</TableCell>
                     <TableCell className="text-sm"><Badge variant="secondary">{x.student.class}</Badge></TableCell>
                     <TableCell className="text-sm">{x.period.label}</TableCell>
-                    <TableCell className="text-sm font-semibold text-right">{fmtIDR(x.tariff.amount)}</TableCell>
+                    <TableCell className="text-sm font-semibold text-right">
+                      {x.discount && x.discount.amount > 0 ? (
+                        <div className="flex flex-col items-end">
+                          <span className="line-through text-muted-foreground text-[10px]">{fmtIDR(x.tariff.amount)}</span>
+                          <span className="text-[#5B6CF9]">{fmtIDR(x.netAmount)}</span>
+                          <span className="text-[9px] text-emerald-600">−{fmtIDR(x.discount.amount)} {x.discount.category}</span>
+                        </div>
+                      ) : fmtIDR(x.netAmount ?? x.tariff.amount)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
