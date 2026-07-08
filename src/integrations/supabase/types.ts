@@ -2478,8 +2478,11 @@ export type Database = {
           amount: number
           created_at: string
           created_by: string | null
+          expired_at: string | null
+          gateway: string | null
           id: string
           invoice_id: string
+          mayar_invoice_id: string | null
           mayar_payment_url: string | null
           mayar_transaction_id: string | null
           notes: string | null
@@ -2495,8 +2498,11 @@ export type Database = {
           amount: number
           created_at?: string
           created_by?: string | null
+          expired_at?: string | null
+          gateway?: string | null
           id?: string
           invoice_id: string
+          mayar_invoice_id?: string | null
           mayar_payment_url?: string | null
           mayar_transaction_id?: string | null
           notes?: string | null
@@ -2512,8 +2518,11 @@ export type Database = {
           amount?: number
           created_at?: string
           created_by?: string | null
+          expired_at?: string | null
+          gateway?: string | null
           id?: string
           invoice_id?: string
+          mayar_invoice_id?: string | null
           mayar_payment_url?: string | null
           mayar_transaction_id?: string | null
           notes?: string | null

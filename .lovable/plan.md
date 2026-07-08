@@ -1,93 +1,45 @@
-## Tujuan
-Menambahkan role **Kepala Sekolah** (`principal`) dan Dashboard khusus sebagai pusat monitoring seluruh aktivitas sekolah (akademik, kehadiran, keuangan, approval). Tidak mengubah fitur yang sudah berjalan.
+## Fitur: Wali Murid Bayar Cicilan Langsung Online
 
-## Ruang lingkup
+Wali murid buka tagihan yang mengaktifkan cicilan. Klik **Bayar** → muncul pilihan **Bayar Penuh** atau **Cicil (isi nominal)** → lanjut ke pemilihan metode (QRIS/VA/Retail) sesuai gateway aktif sekolah. Setelah wali membayar, cicilan otomatis tercatat "paid" dan progress invoice terupdate.
 
-### 1. Backend (Migration)
-- Tambah nilai `principal` ke enum `app_role`.
-- Perluas kebijakan akses (RLS) agar Kepala Sekolah dapat **membaca** seluruh data di sekolahnya (siswa, guru, kelas, absensi, SPP, kas, settlement, pengumuman, izin, jurnal) dan **menyetujui** item approval (izin, pengumuman, pengeluaran kas, pencairan bendahara/settlement).
-- Tidak membuat tabel baru — memanfaatkan tabel yang sudah ada.
+### 1. Database (migration)
+- Tambah kolom `gateway text` dan `expired_at timestamptz` di `spp_installments` (menandai gateway asal & masa aktif link).
+- Tambah kolom `mayar_invoice_id text` (untuk sinkron via Mayar API).
+- Index `idx_spp_installments_mayar_txn` pada `mayar_transaction_id` (webhook lookup cepat).
 
-### 2. Auth & Routing
-- Register/ManageStaff: opsi role "Kepala Sekolah".
-- SelectRole: kartu Kepala Sekolah.
-- Router: `/kepsek` (atau reuse `/admin` view khusus principal) → `PrincipalDashboard`.
-- Redirect login: user dengan role principal masuk ke dashboard baru.
-- Sidebar principal: menu read-only ke Absensi, SPP, Kas, Pengumuman, Laporan, Approval, Kalender.
+### 2. Edge Functions Gateway (spp-mayar, spp-doku, spp-ipaymu)
+Tambah action baru **`parent_create_installment_payment`** di masing-masing:
+- Validasi: parent token, invoice bukan SPP, `allow_installment=true`, sekolah `installment_enabled`, `amount ≤ sisa tagihan`, `amount ≥ 10.000`.
+- Buat link payment provider dengan amount = nominal cicilan (deskripsi: "Cicilan {period_label} - {student_name}").
+- Insert row `spp_installments` status `pending` dengan `gateway`, `mayar_transaction_id`, `mayar_payment_url`, `expired_at`, `payment_method: online_{gateway}`.
+- Return `payment_url` + `installment_id`.
 
-### 3. Dashboard Kepala Sekolah — komponen baru
-Susunan atas → bawah, mobile-first, semantic tokens (tanpa emoji).
+### 3. Webhook Handler (mayar-webhook, doku-webhook, ipaymu-webhook)
+Setelah update invoice biasa, cek: `SELECT * FROM spp_installments WHERE mayar_transaction_id = <txn_id>`. Jika match, update `status='paid'`, `paid_at=now()`. Trigger DB `recalc_invoice_after_installment` otomatis mengupdate `installment_paid_amount` & menandai invoice `paid` bila lunas.
 
-**A. Header Ringkas**
-- Nama sekolah, tanggal, jam realtime, kondisi cuaca opsional (skip jika kompleks).
+### 4. Parent Portal Edge Function (parent-portal)
+- `spp_list`: tambah `allow_installment, installment_paid_amount, bill_type` di select.
+- Action baru **`installment_list`**: return semua cicilan (paid/pending) untuk invoice tertentu.
+- Action baru **`spp_pay_installment`**: routing ke `spp-{gateway}` action `parent_create_installment_payment`, teruskan `amount` + `channel`.
 
-**B. Statistik Utama (grid 6 kartu)**
-Total Siswa, Total Guru, Guru Hadir, Siswa Hadir, Kelas Aktif Hari Ini, % Kehadiran Hari Ini.
+### 5. UI Parent Dashboard (ParentDashboard.tsx)
+- Setelah klik **Bayar** pada invoice `allow_installment=true` (non-SPP), buka **InstallmentChoiceDialog** baru:
+  - Info total tagihan, sudah dibayar, sisa
+  - 2 pilihan: **Bayar Lunas** (nominal = sisa) / **Cicil** (input nominal, max = sisa, min 10rb)
+  - List riwayat cicilan (nominal + tanggal + status)
+  - Tombol **Lanjut ke Pembayaran** → buka `PaymentMethodPicker` seperti biasa
+- Untuk invoice SPP atau non-installment: tetap flow lama (langsung picker).
+- `confirmPaySpp`: jika mode cicilan aktif, panggil `spp_pay_installment` (bukan `spp_pay`).
 
-**C. Monitoring Realtime Pembelajaran**
-Ambil dari `teaching_schedules` + `subject_attendance`: daftar kelas berlangsung sekarang (mata pelajaran, guru, jumlah siswa hadir/total, progress bar jam pelajaran).
+### 6. Tampilan Sisa & Detail
+- Tiap invoice di parent dashboard menampilkan progress bar cicilan bila `installment_paid_amount > 0`: "Cicilan: Rp X • Sisa: Rp Y" atau badge "Lunas".
+- Dialog cicilan menampilkan riwayat transaksi (nominal, metode, waktu, status pending/lunas).
 
-**D. Monitoring Kehadiran**
-- Guru: Hadir / Izin / Sakit / Belum Absen / Tidak Hadir (dari `teacher_attendance_logs`).
-- Siswa: ringkasan hari ini + tabel rekap per kelas (dari `attendance_logs` + `classes`).
+### Yang tidak diubah
+- SPP tetap wajib penuh (validasi trigger DB).
+- Bendahara masih bisa catat cicilan offline manual seperti sekarang.
+- Toggle `installment_enabled` per sekolah tetap dihormati.
 
-**E. Dashboard Keuangan**
-Total Tagihan, Total Pembayaran, Tunggakan (`spp_invoices`); Saldo Buku Kas (`cash_book_entries`); Dana Menunggu Pencairan + Riwayat Settlement (`spp_settlements`).
-
-**F. Approval Center**
-Tab: Izin Siswa (`parent_leave_requests`), Pengumuman (`school_announcements` status draft), Pengeluaran Kas (`cash_book_entries` pending jika ada), Surat (skip jika belum ada tabel), Pencairan (`spp_settlements`, `affiliate_withdrawals`). Aksi Setujui / Tolak dengan catatan.
-
-**G. Grafik Bulanan** (Recharts)
-Line/Bar: Absensi Guru, Absensi Siswa, Pembayaran SPP, Pendapatan Kas, Pengeluaran Kas — 6 bulan terakhir.
-
-**H. Notifikasi Penting**
-Guru belum isi jurnal hari ini, kelas belum absen, pembayaran masuk hari ini, approval menunggu.
-
-**I. Ranking Kelas**
-Berdasarkan % kehadiran, kedisiplinan (jumlah terlambat/alfa terendah), % lunas SPP.
-
-**J. Kalender Kegiatan**
-Reuse `school_holidays` + `school_announcements` bertipe agenda + `teaching_schedules` besar → tampilan bulanan sederhana.
-
-**K. Timeline Aktivitas Terbaru**
-Union dari absensi, pembayaran, pengumuman, kas, settlement — 20 item terbaru dengan ikon per jenis.
-
-**L. Menu Laporan Cepat**
-Tombol download: Rekap Absensi Siswa, Rekap Absensi Guru, Rekap SPP, Buku Kas, Settlement, Jurnal Mengajar → memanggil util export yang sudah ada.
-
-### 4. Perlindungan fitur eksisting
-- Tidak menyentuh Dashboard admin/bendahara/wali kelas.
-- Semua akses principal bersifat **read-only** kecuali endpoint approval.
-
-## File yang akan dibuat / diubah
-
-**Baru:**
-- `src/pages/PrincipalDashboard.tsx`
-- `src/components/principal/StatCards.tsx`
-- `src/components/principal/LiveClassMonitor.tsx`
-- `src/components/principal/AttendanceMonitor.tsx`
-- `src/components/principal/FinanceOverview.tsx`
-- `src/components/principal/ApprovalCenter.tsx`
-- `src/components/principal/MonthlyCharts.tsx`
-- `src/components/principal/PrincipalNotifications.tsx`
-- `src/components/principal/ClassRanking.tsx`
-- `src/components/principal/SchoolCalendar.tsx`
-- `src/components/principal/ActivityTimeline.tsx`
-- `src/components/principal/QuickReports.tsx`
-- `src/components/principal/PrincipalSidebar.tsx`
-
-**Diubah minimal:**
-- `App.tsx` (route `/kepsek`)
-- `Login.tsx` / `SelectRole.tsx` (redirect + kartu role)
-- `Register.tsx`, `ManageStaff.tsx` (opsi role)
-- Migration SQL (enum + RLS tambahan)
-
-## Detail teknis
-- Data fetching pakai pola project: `useEffect` + `setLoading(false)` di finally.
-- Chart: `recharts` (sudah dipakai).
-- Realtime: subscribe `attendance_logs`, `teacher_attendance_logs`, `spp_invoices` untuk kartu statistik.
-- Timezone WIB/WITA/WIT dari `schools.timezone`.
-- Semua warna via token; tanpa emoji; ikon Lucide.
-
-## Konfirmasi cepat
-Jalankan plan ini apa adanya, atau ada penyesuaian scope (mis. skip Kalender / Surat)?
+### Catatan teknis
+- Payment link cicilan reuse mekanisme Mayar/Doku/iPaymu yang sama seperti pembayaran full — hanya beda amount + insert baris installment.
+- Setelah invoice fully paid via cumulative cicilan, tidak boleh lagi bikin cicilan baru (validasi di parent-portal).
