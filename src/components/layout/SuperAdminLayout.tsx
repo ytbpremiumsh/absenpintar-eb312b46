@@ -20,48 +20,36 @@ const navItems = [
   // OVERVIEW
   { title: "Dashboard", url: "/super-admin", icon: LayoutGrid, group: "overview" },
 
-  // SEKOLAH & PENGGUNA
-  { title: "Sekolah", url: "/super-admin/sekolah", icon: School, group: "schools" },
+  // MANAJEMEN
+  { title: "Sekolah & Pengguna", url: "/super-admin/sekolah", icon: School, group: "manage" },
+  { title: "Langganan & Add-on", url: "/super-admin/langganan", icon: Wallet, group: "manage" },
 
-  // KEUANGAN
-  { title: "Konfirmasi Bayar", url: "/super-admin/payments", icon: CreditCard, group: "finance" },
-  { title: "Payment Gateway", url: "/super-admin/payment-gateway", icon: Settings, group: "finance" },
-  { title: "Manajemen Bendahara", url: "/super-admin/bendahara", icon: Banknote, group: "finance" },
-  { title: "Langganan & Add-on", url: "/super-admin/langganan", icon: Wallet, group: "finance" },
+  // OPERASIONAL
+  { title: "Keuangan", url: "/super-admin/keuangan", icon: Banknote, group: "ops" },
+  { title: "Komunikasi", url: "/super-admin/komunikasi", icon: MessageCircle, group: "ops" },
+  { title: "Email", url: "/super-admin/email-hub", icon: Mail, group: "ops" },
 
-  // KOMUNIKASI
-  { title: "Pengumuman", url: "/super-admin/announcements", icon: Megaphone, group: "comms" },
-  { title: "Tiket Bantuan", url: "/super-admin/tickets", icon: UsersRound, group: "comms" },
-  { title: "WhatsApp", url: "/super-admin/wa", icon: MessageCircle, group: "comms" },
-  { title: "Email Server (SMTP)", url: "/super-admin/email", icon: Mail, group: "comms" },
-  { title: "Custom Auth Email", url: "/super-admin/auth-email", icon: Mail, group: "comms" },
-
-  // KONTEN PUBLIK
-  { title: "CMS Konten", url: "/super-admin/cms", icon: Palette, group: "content" },
-  { title: "Shortlink & Analytics", url: "/super-admin/shortlinks", icon: Link2, group: "content" },
-  { title: "Meta Pixel & CAPI", url: "/super-admin/meta-pixel", icon: Activity, group: "content" },
+  // KONTEN & MARKETING
+  { title: "CMS & Konten Publik", url: "/super-admin/cms", icon: Palette, group: "content" },
 
   // SISTEM
-  { title: "USB RFID", url: "/super-admin/rfid", icon: Radio, group: "system" },
-  { title: "Backup & Migrasi", url: "/super-admin/backup", icon: Database, group: "system" },
-  { title: "Server Info", url: "/super-admin/server-info", icon: Server, group: "system" },
+  { title: "Backup, Server & Perangkat", url: "/super-admin/sistem", icon: Server, group: "system" },
 ];
 
 
 const groups = [
   { key: "overview", label: "OVERVIEW" },
-  { key: "schools", label: "SEKOLAH & PENGGUNA" },
-  { key: "finance", label: "KEUANGAN" },
-  { key: "comms", label: "KOMUNIKASI" },
-  { key: "content", label: "KONTEN PUBLIK" },
+  { key: "manage", label: "MANAJEMEN" },
+  { key: "ops", label: "OPERASIONAL" },
+  { key: "content", label: "KONTEN & MARKETING" },
   { key: "system", label: "SISTEM" },
 ];
 
 const superAdminFooterItems = [
   { label: "Dashboard", icon: LayoutGrid, path: "/super-admin" },
   { label: "Sekolah", icon: School, path: "/super-admin/sekolah" },
-  { label: "Bayar", icon: CreditCard, path: "/super-admin/payments", isCenter: true },
-  { label: "Tiket", icon: UsersRound, path: "/super-admin/tickets" },
+  { label: "Keuangan", icon: Banknote, path: "/super-admin/keuangan", isCenter: true },
+  { label: "Komunikasi", icon: MessageCircle, path: "/super-admin/komunikasi" },
   { label: "CMS", icon: Palette, path: "/super-admin/cms" },
 ];
 

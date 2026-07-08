@@ -6,6 +6,8 @@ import SuperAdminPenawaran from "./SuperAdminPenawaran";
 import SuperAdminPanduan from "./SuperAdminPanduan";
 import SuperAdminTestimonials from "./SuperAdminTestimonials";
 import SuperAdminAutoCaption from "./SuperAdminAutoCaption";
+import SuperAdminShortlinks from "./SuperAdminShortlinks";
+import SuperAdminMetaPixel from "./SuperAdminMetaPixel";
 
 export default function SuperAdminCMS() {
   const [params, setParams] = useSearchParams();
@@ -21,6 +23,8 @@ export default function SuperAdminCMS() {
         <TabsTrigger value="panduan" className="rounded-lg">Panduan</TabsTrigger>
         <TabsTrigger value="testimoni" className="rounded-lg">Testimoni</TabsTrigger>
         <TabsTrigger value="caption" className="rounded-lg">Auto Caption AI</TabsTrigger>
+        <TabsTrigger value="shortlink" className="rounded-lg">Shortlink</TabsTrigger>
+        <TabsTrigger value="pixel" className="rounded-lg">Meta Pixel</TabsTrigger>
       </TabsList>
       <TabsContent value="landing" className="mt-4"><SuperAdminLanding /></TabsContent>
       <TabsContent value="fitur" className="mt-4"><SuperAdminPresentation /></TabsContent>
@@ -28,6 +32,8 @@ export default function SuperAdminCMS() {
       <TabsContent value="panduan" className="mt-4"><SuperAdminPanduan /></TabsContent>
       <TabsContent value="testimoni" className="mt-4"><SuperAdminTestimonials /></TabsContent>
       <TabsContent value="caption" className="mt-4"><SuperAdminAutoCaption /></TabsContent>
+      <TabsContent value="shortlink" className="mt-4"><SuperAdminShortlinks /></TabsContent>
+      <TabsContent value="pixel" className="mt-4"><SuperAdminMetaPixel /></TabsContent>
     </Tabs>
   );
 }

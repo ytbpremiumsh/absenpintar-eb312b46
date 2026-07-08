@@ -78,6 +78,10 @@ const SuperAdminBendahara = lazy(() => import("./pages/super-admin/SuperAdminBen
 const SuperAdminShortlinks = lazy(() => import("./pages/super-admin/SuperAdminShortlinks"));
 const ShortlinkRedirect = lazy(() => import("./pages/ShortlinkRedirect"));
 const SuperAdminMetaPixel = lazy(() => import("./pages/super-admin/SuperAdminMetaPixel"));
+const SuperAdminKeuanganHub = lazy(() => import("./pages/super-admin/SuperAdminKeuanganHub"));
+const SuperAdminKomunikasiHub = lazy(() => import("./pages/super-admin/SuperAdminKomunikasiHub"));
+const SuperAdminEmailHub = lazy(() => import("./pages/super-admin/SuperAdminEmailHub"));
+const SuperAdminSistemHub = lazy(() => import("./pages/super-admin/SuperAdminSistemHub"));
 const CustomDomain = lazy(() => import("./pages/CustomDomain"));
 const Addons = lazy(() => import("./pages/Addons"));
 const OrderIdCard = lazy(() => import("./pages/OrderIdCard"));
@@ -270,6 +274,8 @@ function AppRoutes() {
         </Route>
         <Route element={<SuperAdminLayout />}>
           <Route path="/super-admin" element={<SuperAdminDashboard />} />
+
+          {/* MANAJEMEN */}
           <Route path="/super-admin/sekolah" element={<SuperAdminSekolahHub />} />
           <Route path="/super-admin/schools" element={<Navigate to="/super-admin/sekolah?tab=schools" replace />} />
           <Route path="/super-admin/branches" element={<Navigate to="/super-admin/sekolah?tab=schools" replace />} />
@@ -278,15 +284,27 @@ function AppRoutes() {
           <Route path="/super-admin/plans" element={<Navigate to="/super-admin/langganan?tab=plans" replace />} />
           <Route path="/super-admin/subscriptions" element={<Navigate to="/super-admin/langganan?tab=schools" replace />} />
           <Route path="/super-admin/addons" element={<Navigate to="/super-admin/langganan?tab=addons" replace />} />
-          <Route path="/super-admin/payments" element={<SuperAdminPayments />} />
-          <Route path="/super-admin/payment-gateway" element={<SuperAdminPaymentGateway />} />
-          <Route path="/super-admin/wa" element={<SuperAdminWhatsAppHub />} />
-          <Route path="/super-admin/whatsapp" element={<Navigate to="/super-admin/wa?tab=api" replace />} />
-          <Route path="/super-admin/registration-wa" element={<Navigate to="/super-admin/wa?tab=aktivasi" replace />} />
-          <Route path="/super-admin/announcements" element={<SuperAdminAnnouncements />} />
-          <Route path="/super-admin/tickets" element={<SuperAdminTickets />} />
-          <Route path="/super-admin/email" element={<SuperAdminEmail />} />
-          <Route path="/super-admin/auth-email" element={<SuperAdminAuthEmail />} />
+
+          {/* OPERASIONAL — Keuangan */}
+          <Route path="/super-admin/keuangan" element={<SuperAdminKeuanganHub />} />
+          <Route path="/super-admin/payments" element={<Navigate to="/super-admin/keuangan?tab=payments" replace />} />
+          <Route path="/super-admin/payment-gateway" element={<Navigate to="/super-admin/keuangan?tab=gateway" replace />} />
+          <Route path="/super-admin/bendahara" element={<Navigate to="/super-admin/keuangan?tab=bendahara" replace />} />
+
+          {/* OPERASIONAL — Komunikasi */}
+          <Route path="/super-admin/komunikasi" element={<SuperAdminKomunikasiHub />} />
+          <Route path="/super-admin/announcements" element={<Navigate to="/super-admin/komunikasi?tab=announcements" replace />} />
+          <Route path="/super-admin/tickets" element={<Navigate to="/super-admin/komunikasi?tab=tickets" replace />} />
+          <Route path="/super-admin/wa" element={<Navigate to="/super-admin/komunikasi?tab=whatsapp" replace />} />
+          <Route path="/super-admin/whatsapp" element={<Navigate to="/super-admin/komunikasi?tab=whatsapp" replace />} />
+          <Route path="/super-admin/registration-wa" element={<Navigate to="/super-admin/komunikasi?tab=whatsapp" replace />} />
+
+          {/* OPERASIONAL — Email */}
+          <Route path="/super-admin/email-hub" element={<SuperAdminEmailHub />} />
+          <Route path="/super-admin/email" element={<Navigate to="/super-admin/email-hub?tab=smtp" replace />} />
+          <Route path="/super-admin/auth-email" element={<Navigate to="/super-admin/email-hub?tab=auth" replace />} />
+
+          {/* KONTEN & MARKETING */}
           <Route path="/super-admin/cms" element={<SuperAdminCMS />} />
           <Route path="/super-admin/landing" element={<Navigate to="/super-admin/cms?tab=landing" replace />} />
           <Route path="/super-admin/fitur" element={<Navigate to="/super-admin/cms?tab=fitur" replace />} />
@@ -294,14 +312,15 @@ function AppRoutes() {
           <Route path="/super-admin/panduan" element={<Navigate to="/super-admin/cms?tab=panduan" replace />} />
           <Route path="/super-admin/testimonials" element={<Navigate to="/super-admin/cms?tab=testimoni" replace />} />
           <Route path="/super-admin/auto-caption" element={<Navigate to="/super-admin/cms?tab=caption" replace />} />
+          <Route path="/super-admin/shortlinks" element={<Navigate to="/super-admin/cms?tab=shortlink" replace />} />
+          <Route path="/super-admin/meta-pixel" element={<Navigate to="/super-admin/cms?tab=pixel" replace />} />
           <Route path="/super-admin/referral" element={<Navigate to="/super-admin" replace />} />
-          
-          <Route path="/super-admin/backup" element={<SuperAdminBackup />} />
-          <Route path="/super-admin/server-info" element={<SuperAdminServerInfo />} />
-          <Route path="/super-admin/bendahara" element={<SuperAdminBendahara />} />
-          <Route path="/super-admin/shortlinks" element={<SuperAdminShortlinks />} />
-          <Route path="/super-admin/meta-pixel" element={<SuperAdminMetaPixel />} />
-          <Route path="/super-admin/rfid" element={<SuperAdminRFID />} />
+
+          {/* SISTEM */}
+          <Route path="/super-admin/sistem" element={<SuperAdminSistemHub />} />
+          <Route path="/super-admin/backup" element={<Navigate to="/super-admin/sistem?tab=backup" replace />} />
+          <Route path="/super-admin/server-info" element={<Navigate to="/super-admin/sistem?tab=server" replace />} />
+          <Route path="/super-admin/rfid" element={<Navigate to="/super-admin/sistem?tab=rfid" replace />} />
         </Route>
 
         <Route path="/s/:code" element={<ShortlinkRedirect />} />
