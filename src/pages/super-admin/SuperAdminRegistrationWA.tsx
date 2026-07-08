@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Save, Send, MessageSquare, Info, Smartphone, Settings2, Power, QrCode, Wifi, WifiOff, RefreshCw, Unplug, BellRing, Wallet } from "lucide-react";
+import { Loader2, Save, Send, MessageSquare, Info, Smartphone, Settings2, Power, QrCode, Wifi, WifiOff, RefreshCw, Unplug, BellRing, Wallet, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -32,8 +32,14 @@ const SuperAdminRegistrationWA = () => {
     admin_notify_ticket_template: "",
     admin_notify_withdrawal_template: "",
     admin_notify_bendahara_template: "",
+    admin_notify_email: "",
+    admin_notify_email_enabled: "true",
+    admin_notify_email_ticket_subject: "",
+    admin_notify_email_ticket_html: "",
   });
   const [adminTesting, setAdminTesting] = useState<"ticket" | "withdrawal" | "bendahara" | null>(null);
+  const [emailTesting, setEmailTesting] = useState(false);
+
 
   // QR state
   const [mpwaNumber, setMpwaNumber] = useState("");
@@ -60,7 +66,10 @@ const SuperAdminRegistrationWA = () => {
         "admin_notify_phone", "admin_notify_enabled",
         "admin_notify_ticket_template", "admin_notify_withdrawal_template",
         "admin_notify_bendahara_template",
+        "admin_notify_email", "admin_notify_email_enabled",
+        "admin_notify_email_ticket_subject", "admin_notify_email_ticket_html",
       ]);
+
 
     const map: Record<string, string> = {};
     ((data as any[]) || []).forEach((item) => { map[item.key] = item.value; });
@@ -349,6 +358,45 @@ const SuperAdminRegistrationWA = () => {
     }
     setAdminTesting(null);
   };
+
+  const handleTestAdminEmail = async () => {
+    if (!settings.admin_notify_email.trim()) {
+      toast.error("Isi dulu Email Admin tujuan");
+      return;
+    }
+    setEmailTesting(true);
+    try {
+      const subjTpl = settings.admin_notify_email_ticket_subject || "Tiket Bantuan Baru — {school}";
+      const htmlTpl = settings.admin_notify_email_ticket_html || "<p>Test</p>";
+      const vars: Record<string, string> = {
+        school: "SDN 1 Jakarta",
+        user: "Budi Santoso",
+        priority: "high",
+        subject: "Tidak bisa scan QR",
+        message: "Ini hanya email tes notifikasi tiket bantuan dari ATSkolla.",
+        time: new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }),
+      };
+      const apply = (t: string) => t.replace(/\{(\w+)\}/g, (_: string, k: string) => vars[k] ?? "");
+      const { data, error } = await supabase.functions.invoke("send-email", {
+        body: {
+          event_type: "broadcast",
+          to: settings.admin_notify_email,
+          subject_override: "[TES] " + apply(subjTpl),
+          html_override: apply(htmlTpl),
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.success || (data as any)?.sent > 0) {
+        toast.success(`Email tes terkirim ke ${settings.admin_notify_email}`);
+      } else {
+        toast.error("Gagal: " + ((data as any)?.error || (data as any)?.errors?.join(", ") || "tidak diketahui"));
+      }
+    } catch (err: any) {
+      toast.error("Gagal kirim email tes: " + (err.message || err));
+    }
+    setEmailTesting(false);
+  };
+
 
   if (loading) {
     return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
@@ -676,6 +724,85 @@ const SuperAdminRegistrationWA = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* ═══ Notifikasi Email Super Admin (Tiket Bantuan) ═══ */}
+      <Card className="border-0 shadow-card">
+        <CardContent className="p-4 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Mail className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground text-sm">Notifikasi Email Super Admin</h3>
+                <p className="text-xs text-muted-foreground">
+                  Kirim email otomatis ke Super Admin setiap ada Tiket Bantuan baru dari sekolah
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={settings.admin_notify_email_enabled === "true"}
+              onCheckedChange={(v) => setSettings({ ...settings, admin_notify_email_enabled: v ? "true" : "false" })}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-xs">Email Super Admin Tujuan</Label>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                value={settings.admin_notify_email}
+                onChange={(e) => setSettings({ ...settings, admin_notify_email: e.target.value })}
+                placeholder="admin@atskolla.com"
+                className="flex-1"
+              />
+              <Button
+                variant="outline"
+                onClick={handleTestAdminEmail}
+                disabled={emailTesting || !settings.admin_notify_email}
+                className="shrink-0"
+              >
+                {emailTesting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
+                Tes Email
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Pastikan SMTP Email sudah aktif di menu <b>Email Server</b>. Bisa isi beberapa email dipisah koma di kolom template subject/HTML.
+            </p>
+          </div>
+
+          <div className="space-y-2 p-3 rounded-lg border border-border bg-muted/30">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-3.5 w-3.5 text-primary" />
+              <Label className="text-xs font-semibold">Subjek Email</Label>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {["{school}", "{user}", "{priority}", "{subject}", "{message}", "{time}"].map((v) => (
+                <Badge key={v} variant="secondary" className="text-[10px]">{v}</Badge>
+              ))}
+            </div>
+            <Input
+              value={settings.admin_notify_email_ticket_subject}
+              onChange={(e) => setSettings({ ...settings, admin_notify_email_ticket_subject: e.target.value })}
+              placeholder="Tiket Bantuan Baru — {school}"
+              className="text-xs"
+            />
+            <Label className="text-xs font-semibold pt-2 block">Template HTML Email</Label>
+            <Textarea
+              value={settings.admin_notify_email_ticket_html}
+              onChange={(e) => setSettings({ ...settings, admin_notify_email_ticket_html: e.target.value })}
+              rows={8}
+              className="resize-none font-mono text-[11px]"
+              placeholder="<div>Tiket Baru: {subject} dari {school}</div>"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              <Info className="h-3 w-3 inline mr-1" />
+              Boleh kosong — sistem akan pakai template default bawaan yang sudah rapi.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
 
       {/* Message Template */}
       <Card className="border-0 shadow-card">
