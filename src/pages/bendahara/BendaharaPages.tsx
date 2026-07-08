@@ -1646,6 +1646,7 @@ export function BendaharaGenerate() {
   const [tariffs, setTariffs] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [existingInvs, setExistingInvs] = useState<any[]>([]);
+  const [discountMap, setDiscountMap] = useState<Map<string, { category: string; amount: number }>>(new Map());
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [mode, setMode] = useState<"single" | "range">("single");
   const currentMonth = new Date().getMonth() + 1;
