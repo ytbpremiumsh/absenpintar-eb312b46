@@ -594,7 +594,7 @@ export default function SuperAdminBendahara() {
                 <div><p className="text-xs text-muted-foreground">Sekolah</p><p className="font-semibold text-xs">{schoolMap[reviewing.school_id]?.name}</p></div>
                 <div><p className="text-xs text-muted-foreground">Total Transaksi</p><p className="font-semibold">{reviewing.total_transactions}</p></div>
                 <div><p className="text-xs text-muted-foreground">Status</p><div><StatusBadge status={reviewing.status} /></div></div>
-                <div><p className="text-xs text-muted-foreground">Net</p><p className="font-semibold">{fmtIDR(reviewing.total_net)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Total</p><p className="font-semibold">{fmtIDR(reviewing.total_gross || reviewing.total_net)}</p></div>
                 <div><p className="text-xs text-muted-foreground">Biaya Tarik</p><p className="font-semibold text-rose-600">-{fmtIDR(reviewing.withdraw_fee)}</p></div>
                 <div className="col-span-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg p-2.5">
                   <p className="text-[11px] text-muted-foreground">Final Payout</p>
