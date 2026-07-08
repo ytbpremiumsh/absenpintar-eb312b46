@@ -3712,7 +3712,27 @@ export function BendaharaSPPDetail() {
                           <Badge variant="outline" className="border-violet-400/50 text-violet-700 bg-violet-50 dark:bg-violet-950/40 dark:text-violet-300">{inv.bill_category || "Lainnya"}</Badge>
                         </TableCell>
                         <TableCell className="text-xs font-mono">{inv.invoice_number}</TableCell>
-                        <TableCell className="font-semibold">{fmtIDR(inv.total_amount)}</TableCell>
+                        <TableCell className="font-semibold">
+                          {fmtIDR(inv.total_amount)}
+                          {inv.allow_installment && (inv.installment_paid_amount ?? 0) > 0 && (() => {
+                            const paidCic = inv.installment_paid_amount || 0;
+                            const sisa = Math.max(0, (inv.total_amount || 0) - paidCic);
+                            const lunas = sisa === 0;
+                            return (
+                              <div className="mt-1 text-[10px] font-normal leading-tight">
+                                <div className="flex items-center gap-1 text-[#5B6CF9]">
+                                  <Wallet className="h-2.5 w-2.5" />
+                                  <span>Cicilan: {fmtIDR(paidCic)}</span>
+                                </div>
+                                {lunas ? (
+                                  <div className="text-emerald-600 font-semibold flex items-center gap-1"><CheckCircle2 className="h-2.5 w-2.5" /> Lunas</div>
+                                ) : (
+                                  <div className="text-amber-600">Sisa: {fmtIDR(sisa)}</div>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </TableCell>
                         <TableCell className="text-xs">{inv.paid_at ? new Date(inv.paid_at).toLocaleDateString("id-ID") : "-"}</TableCell>
                         <TableCell className="text-xs">
                           {(() => {
