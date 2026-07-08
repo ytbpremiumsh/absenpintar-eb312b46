@@ -384,7 +384,7 @@ export default function SuperAdminBendahara() {
                     <TableHead className="font-bold">Kode</TableHead>
                     <TableHead className="font-bold">Sekolah</TableHead>
                     <TableHead className="text-center font-bold">Tx</TableHead>
-                    <TableHead className="text-right font-bold">Net</TableHead>
+                    <TableHead className="text-right font-bold">Total</TableHead>
                     <TableHead className="text-right font-bold">Payout</TableHead>
                     <TableHead className="font-bold">Rekening</TableHead>
                     <TableHead className="text-center font-bold">Status</TableHead>
