@@ -73,6 +73,11 @@ const SchoolCard = ({ school, index, onDetail, onSubscription, onEdit, onSuspend
                 ) : (
                   <Badge variant="outline" className="text-[10px] text-muted-foreground">Belum berlangganan</Badge>
                 )}
+                {school.is_suspended && (
+                  <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[10px]">
+                    <Ban className="h-3 w-3 mr-0.5" /> Ditangguhkan
+                  </Badge>
+                )}
               </div>
               {/* Admin Contact Info */}
               {(school.adminEmail || school.adminPhone) && (
