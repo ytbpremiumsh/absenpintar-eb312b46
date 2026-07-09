@@ -19,6 +19,7 @@ import {
   BookOpen, PartyPopper, Users, Megaphone, Sparkles, GraduationCap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { DateRange } from "react-day-picker";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -62,6 +63,8 @@ const HolidayManagement = () => {
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogDate, setDialogDate] = useState<string | null>(null);
+  const [dialogEndDate, setDialogEndDate] = useState<string | null>(null);
+  const [selectedRange, setSelectedRange] = useState<DateRange | undefined>(undefined);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [form, setForm] = useState<{ label: string; description: string; event_type: EventType; is_holiday: boolean }>({
     label: "",
@@ -138,13 +141,19 @@ const HolidayManagement = () => {
     toast.success(val ? "Mode libur diaktifkan — absensi ditangguhkan" : "Mode libur dinonaktifkan");
   };
 
-  const openCreateDialog = (date: Date) => {
-    if (!canEdit) {
-      // Viewer clicked a date — if there are events, dialog is already showing details via the list below.
-      return;
+  const openCreateDialog = (range: DateRange | Date) => {
+    if (!canEdit) return;
+    let from: Date; let to: Date;
+    if (range instanceof Date) { from = range; to = range; }
+    else {
+      if (!range?.from) return;
+      from = range.from;
+      to = range.to ?? range.from;
     }
     setEditingEvent(null);
-    setDialogDate(toDateKey(date));
+    setDialogDate(toDateKey(from));
+    setDialogEndDate(toDateKey(to));
+    setSelectedRange({ from, to });
     setForm({ label: "", description: "", event_type: "holiday", is_holiday: true });
     setDialogOpen(true);
   };
@@ -153,6 +162,8 @@ const HolidayManagement = () => {
     if (!canEdit) return;
     setEditingEvent(evt);
     setDialogDate(evt.date);
+    setDialogEndDate(evt.date);
+    setSelectedRange(undefined);
     setForm({
       label: evt.label || "",
       description: evt.description || "",
@@ -174,15 +185,15 @@ const HolidayManagement = () => {
   const handleSave = async () => {
     if (!profile?.school_id || !dialogDate || !canEdit) return;
     setSubmitting(true);
-    const payload = {
-      school_id: profile.school_id,
-      date: dialogDate,
-      label: form.label.trim() || null,
-      description: form.description.trim() || null,
-      event_type: form.event_type,
-      is_holiday: form.is_holiday,
-    };
     if (editingEvent) {
+      const payload = {
+        school_id: profile.school_id,
+        date: dialogDate,
+        label: form.label.trim() || null,
+        description: form.description.trim() || null,
+        event_type: form.event_type,
+        is_holiday: form.is_holiday,
+      };
       const { data, error } = await supabase.from("school_holidays")
         .update(payload as any).eq("id", editingEvent.id).select().single();
       setSubmitting(false);
@@ -196,19 +207,31 @@ const HolidayManagement = () => {
       } : e));
       toast.success("Acara diperbarui");
     } else {
+      // Build all dates in the range
+      const start = new Date(dialogDate + "T00:00:00");
+      const end = new Date((dialogEndDate || dialogDate) + "T00:00:00");
+      const dates: string[] = [];
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        dates.push(toDateKey(d));
+      }
+      const rows = dates.map((date) => ({
+        school_id: profile.school_id,
+        date,
+        label: form.label.trim() || null,
+        description: form.description.trim() || null,
+        event_type: form.event_type,
+        is_holiday: form.is_holiday,
+      }));
       const { data, error } = await supabase.from("school_holidays")
-        .insert(payload as any).select().single();
+        .insert(rows as any).select();
       setSubmitting(false);
       if (error) { toast.error("Gagal menambahkan: " + error.message); return; }
-      setEvents((prev) => [...prev, {
-        id: (data as any).id,
-        date: (data as any).date,
-        label: (data as any).label,
-        description: (data as any).description,
-        event_type: (data as any).event_type,
-        is_holiday: (data as any).is_holiday,
-      }].sort((a, b) => a.date.localeCompare(b.date)));
-      toast.success("Acara ditambahkan ke kalender");
+      const inserted = ((data || []) as any[]).map((r) => ({
+        id: r.id, date: r.date, label: r.label,
+        description: r.description, event_type: r.event_type, is_holiday: r.is_holiday,
+      }));
+      setEvents((prev) => [...prev, ...inserted].sort((a, b) => a.date.localeCompare(b.date)));
+      toast.success(dates.length > 1 ? `${dates.length} acara ditambahkan ke kalender` : "Acara ditambahkan ke kalender");
     }
     setDialogOpen(false);
   };
@@ -377,12 +400,16 @@ const HolidayManagement = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div className="rounded-xl border border-border p-2 flex justify-center">
               <Calendar
-                mode="single"
-                onSelect={(d) => d && openCreateDialog(d)}
+                mode="range"
+                selected={selectedRange}
+                onSelect={(r) => {
+                  setSelectedRange(r);
+                  if (r?.from) openCreateDialog(r);
+                }}
                 modifiers={{ holiday: modifiers.holiday, withEvent: modifiers.withEvent }}
                 modifiersClassNames={{
-                  holiday: "bg-red-500 text-white hover:bg-red-600 rounded-full",
-                  withEvent: "ring-2 ring-inset ring-primary/60 rounded-full",
+                  holiday: "bg-red-500 text-white hover:bg-red-600",
+                  withEvent: "ring-2 ring-inset ring-primary/60",
                 }}
                 className="p-0"
               />
@@ -458,7 +485,15 @@ const HolidayManagement = () => {
           <DialogHeader>
             <DialogTitle>{editingEvent ? "Ubah Acara" : "Tambah Acara Kalender"}</DialogTitle>
             <DialogDescription>
-              {dialogDate && new Date(dialogDate + "T00:00:00").toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              {dialogDate && (() => {
+                const start = new Date(dialogDate + "T00:00:00");
+                const end = new Date((dialogEndDate || dialogDate) + "T00:00:00");
+                const sameDay = dialogDate === (dialogEndDate || dialogDate);
+                const fmt = (d: Date) => d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+                if (sameDay) return fmt(start);
+                const days = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+                return `${fmt(start)} — ${fmt(end)} (${days} hari)`;
+              })()}
             </DialogDescription>
           </DialogHeader>
 
