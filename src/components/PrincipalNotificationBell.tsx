@@ -38,7 +38,7 @@ export function PrincipalNotificationBell() {
         <button className="relative p-2 rounded-lg hover:bg-secondary transition-colors" aria-label="Notifikasi Penting">
           <Bell className="h-4 w-4 text-muted-foreground" />
           {count > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center">
+            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
               {count > 9 ? "9+" : count}
             </span>
           )}
