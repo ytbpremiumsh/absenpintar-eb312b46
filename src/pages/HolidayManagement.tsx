@@ -141,13 +141,19 @@ const HolidayManagement = () => {
     toast.success(val ? "Mode libur diaktifkan — absensi ditangguhkan" : "Mode libur dinonaktifkan");
   };
 
-  const openCreateDialog = (date: Date) => {
-    if (!canEdit) {
-      // Viewer clicked a date — if there are events, dialog is already showing details via the list below.
-      return;
+  const openCreateDialog = (range: DateRange | Date) => {
+    if (!canEdit) return;
+    let from: Date; let to: Date;
+    if (range instanceof Date) { from = range; to = range; }
+    else {
+      if (!range?.from) return;
+      from = range.from;
+      to = range.to ?? range.from;
     }
     setEditingEvent(null);
-    setDialogDate(toDateKey(date));
+    setDialogDate(toDateKey(from));
+    setDialogEndDate(toDateKey(to));
+    setSelectedRange({ from, to });
     setForm({ label: "", description: "", event_type: "holiday", is_holiday: true });
     setDialogOpen(true);
   };
@@ -156,6 +162,8 @@ const HolidayManagement = () => {
     if (!canEdit) return;
     setEditingEvent(evt);
     setDialogDate(evt.date);
+    setDialogEndDate(evt.date);
+    setSelectedRange(undefined);
     setForm({
       label: evt.label || "",
       description: evt.description || "",
