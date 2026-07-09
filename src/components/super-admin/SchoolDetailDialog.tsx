@@ -114,22 +114,43 @@ const SchoolDetailDialog = ({ school, onClose, getStatusBadge }: SchoolDetailDia
           </div>
         </div>
 
-        {(school.adminName || school.adminEmail || school.adminPhone) && (
-          <div className="rounded-lg border bg-muted/30 p-3 mb-3 space-y-1.5">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Admin Sekolah Terdaftar</p>
-            {school.adminName && <p className="text-sm font-semibold text-foreground">{school.adminName}</p>}
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-              {school.adminEmail && (
-                <a href={`mailto:${school.adminEmail}`} className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
-                  <Mail className="h-3.5 w-3.5" />{school.adminEmail}
-                </a>
-              )}
-              {school.adminPhone && (
-                <a href={`https://wa.me/${school.adminPhone.replace(/^0/, '62').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
-                  <Phone className="h-3.5 w-3.5" />{school.adminPhone}
-                </a>
-              )}
-            </div>
+        {((school as any).email || (school as any).whatsapp || school.adminName || school.adminEmail || school.adminPhone) && (
+          <div className="rounded-lg border bg-muted/30 p-3 mb-3 space-y-2">
+            {((school as any).email || (school as any).whatsapp) && (
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Kontak Sekolah Terdaftar</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  {(school as any).email && (
+                    <a href={`mailto:${(school as any).email}`} className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
+                      <Mail className="h-3.5 w-3.5" />{(school as any).email}
+                    </a>
+                  )}
+                  {(school as any).whatsapp && (
+                    <a href={`https://wa.me/${String((school as any).whatsapp).replace(/^0/, '62').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
+                      <Phone className="h-3.5 w-3.5" />{(school as any).whatsapp}
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+            {(school.adminName || school.adminEmail || school.adminPhone) && (
+              <div className="space-y-1 pt-2 border-t border-border/50">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Penanggung Jawab</p>
+                {school.adminName && <p className="text-sm font-semibold text-foreground">{school.adminName}</p>}
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  {school.adminEmail && (
+                    <a href={`mailto:${school.adminEmail}`} className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
+                      <Mail className="h-3.5 w-3.5" />{school.adminEmail}
+                    </a>
+                  )}
+                  {school.adminPhone && (
+                    <a href={`https://wa.me/${school.adminPhone.replace(/^0/, '62').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
+                      <Phone className="h-3.5 w-3.5" />{school.adminPhone}
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
