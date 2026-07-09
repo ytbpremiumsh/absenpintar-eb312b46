@@ -70,6 +70,7 @@ const KalenderAkademik = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [dateMode, setDateMode] = useState<"single" | "range">("single");
 
   useEffect(() => {
     if (!profile?.school_id) { setLoading(false); return; }
@@ -147,10 +148,12 @@ const KalenderAkademik = () => {
       from = range.from;
       to = range.to ?? range.from;
     }
+    const isRange = toDateKey(from) !== toDateKey(to);
     setEditingEvent(null);
     setDialogDate(toDateKey(from));
     setDialogEndDate(toDateKey(to));
     setSelectedRange({ from, to });
+    setDateMode(isRange ? "range" : "single");
     setForm({ label: "", description: "", event_type: "holiday", is_holiday: true });
     setDialogOpen(true);
   };
@@ -519,26 +522,67 @@ const KalenderAkademik = () => {
           <div className="space-y-4">
             {!editingEvent && (
               <div className="rounded-lg border border-border bg-secondary/30 p-3 space-y-2">
-                <Label className="text-xs font-semibold">Pilih Rentang Tanggal</Label>
+                <div className="flex items-center justify-between gap-2">
+                  <Label className="text-xs font-semibold">Pilih Tanggal</Label>
+                  <div className="inline-flex rounded-md border border-border bg-background p-0.5 text-[11px] font-medium">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDateMode("single");
+                        const base = selectedRange?.from ?? (dialogDate ? new Date(dialogDate + "T00:00:00") : new Date());
+                        setSelectedRange({ from: base, to: base });
+                        setDialogDate(toDateKey(base));
+                        setDialogEndDate(toDateKey(base));
+                      }}
+                      className={`px-2.5 py-1 rounded-[5px] transition ${dateMode === "single" ? "bg-[#5B6CF9] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      1 Hari
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDateMode("range")}
+                      className={`px-2.5 py-1 rounded-[5px] transition ${dateMode === "range" ? "bg-[#5B6CF9] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      Rentang
+                    </button>
+                  </div>
+                </div>
                 <p className="text-[11px] text-muted-foreground">
-                  Klik tanggal mulai, lalu tarik/klik tanggal akhir untuk memilih rentang.
+                  {dateMode === "single"
+                    ? "Klik satu tanggal untuk membuat acara pada hari tersebut."
+                    : "Klik tanggal mulai, lalu klik tanggal akhir untuk memilih rentang."}
                 </p>
                 <div className="flex justify-center">
-                  <Calendar
-                    mode="range"
-                    selected={selectedRange}
-                    onSelect={(r) => {
-                      setSelectedRange(r);
-                      if (r?.from) {
-                        setDialogDate(toDateKey(r.from));
-                        setDialogEndDate(toDateKey(r.to ?? r.from));
-                      }
-                    }}
-                    numberOfMonths={1}
-                    className="p-0 pointer-events-auto"
-                  />
+                  {dateMode === "single" ? (
+                    <Calendar
+                      mode="single"
+                      selected={selectedRange?.from}
+                      onSelect={(d) => {
+                        if (!d) return;
+                        setSelectedRange({ from: d, to: d });
+                        setDialogDate(toDateKey(d));
+                        setDialogEndDate(toDateKey(d));
+                      }}
+                      numberOfMonths={1}
+                      className="p-0 pointer-events-auto"
+                    />
+                  ) : (
+                    <Calendar
+                      mode="range"
+                      selected={selectedRange}
+                      onSelect={(r) => {
+                        setSelectedRange(r);
+                        if (r?.from) {
+                          setDialogDate(toDateKey(r.from));
+                          setDialogEndDate(toDateKey(r.to ?? r.from));
+                        }
+                      }}
+                      numberOfMonths={1}
+                      className="p-0 pointer-events-auto"
+                    />
+                  )}
                 </div>
-                {dialogDate && dialogEndDate && dialogEndDate !== dialogDate && (
+                {dateMode === "range" && dialogDate && dialogEndDate && dialogEndDate !== dialogDate && (
                   <p className="text-[11px] text-muted-foreground text-center">
                     Rentang: <strong className="text-foreground">{Math.round((new Date(dialogEndDate + "T00:00:00").getTime() - new Date(dialogDate + "T00:00:00").getTime()) / 86400000) + 1} hari</strong> — akan dibuat 1 entri per tanggal.
                   </p>
