@@ -20,7 +20,7 @@ export default function LaporanJurnal() {
     (async () => {
       setLoading(true);
       const [schedQ, subjQ, clsQ, teacherQ, attQ] = await Promise.all([
-        supabase.from("teaching_schedules").select("id, teacher_id, subject_id, class_id, day_of_week, start_time, end_time, is_active").eq("school_id", schoolId),
+        supabase.from("teaching_schedules").select("id, teacher_id, subject_id, class_id, day_of_week, start_time, end_time, is_active, notes").eq("school_id", schoolId),
         supabase.from("subjects").select("id, name").eq("school_id", schoolId),
         supabase.from("classes").select("id, name").eq("school_id", schoolId),
         supabase.from("profiles").select("user_id, full_name").eq("school_id", schoolId),
@@ -35,6 +35,8 @@ export default function LaporanJurnal() {
       (attQ.data || []).forEach((a: any) => {
         const sch: any = schedM.get(a.teaching_schedule_id); if (!sch) return;
         const key = `${a.teaching_schedule_id}|${a.date}`;
+        const scheduleNote = (sch.notes || "").trim();
+        const sessionNote = (a.notes || "").trim();
         if (!perKey[key]) perKey[key] = {
           Tanggal: a.date, Hari: DAYS[sch.day_of_week] || "-",
           Guru: tM.get(sch.teacher_id) || "-",
@@ -42,14 +44,25 @@ export default function LaporanJurnal() {
           Kelas: clsM.get(sch.class_id) || "-",
           Jam: `${String(sch.start_time).slice(0, 5)}-${String(sch.end_time).slice(0, 5)}`,
           Hadir: 0, Izin: 0, Sakit: 0, Alfa: 0, Total: 0,
-          Catatan: a.notes || "-",
+          Catatan: sessionNote || scheduleNote || "-",
+          _sessionNote: sessionNote,
+          _scheduleNote: scheduleNote,
         };
         perKey[key].Total++;
         if (a.status === "hadir") perKey[key].Hadir++;
         else if (a.status === "izin") perKey[key].Izin++;
         else if (a.status === "sakit") perKey[key].Sakit++;
         else if (a.status === "alfa") perKey[key].Alfa++;
-        if (a.notes && perKey[key].Catatan === "-") perKey[key].Catatan = a.notes;
+        if (sessionNote && !perKey[key]._sessionNote) {
+          perKey[key]._sessionNote = sessionNote;
+          perKey[key].Catatan = sessionNote;
+        }
+      });
+      Object.values(perKey).forEach((r: any) => {
+        if (r._sessionNote && r._scheduleNote && r._sessionNote !== r._scheduleNote) {
+          r.Catatan = `${r._sessionNote} — (Jadwal: ${r._scheduleNote})`;
+        }
+        delete r._sessionNote; delete r._scheduleNote;
       });
       setRows(Object.values(perKey).sort((a: any, b: any) => (b.Tanggal + b.Jam).localeCompare(a.Tanggal + a.Jam)));
       setLoading(false);
