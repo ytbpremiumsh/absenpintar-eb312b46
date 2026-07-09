@@ -43,6 +43,7 @@ const PublicClassMonitoring = lazy(() => import("./pages/PublicClassMonitoring")
 const PublicAttendanceMonitoring = lazy(() => import("./pages/PublicAttendanceMonitoring"));
 const SchoolSettings = lazy(() => import("./pages/SchoolSettings"));
 const HolidayManagement = lazy(() => import("./pages/HolidayManagement"));
+const KalenderAkademik = lazy(() => import("./pages/KalenderAkademik"));
 const AttendanceTime = lazy(() => import("./pages/AttendanceTime"));
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
 const SuperAdminDashboard = lazy(() => import("./pages/super-admin/SuperAdminDashboard"));
@@ -381,6 +382,7 @@ function AppRoutes() {
           <Route path="/all-features" element={<AllFeatures />} />
           <Route path="/school-settings" element={<SchoolSettings />} />
           <Route path="/holidays" element={<HolidayManagement />} />
+          <Route path="/kalender-akademik" element={<KalenderAkademik />} />
           <Route path="/attendance-time" element={<AttendanceTime />} />
           <Route path="/rfid-devices" element={<Navigate to="/dashboard" replace />} />
           <Route path="/rfid-cards" element={<RFIDCards />} />
