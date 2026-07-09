@@ -1,0 +1,1 @@
+ALTER TABLE public.school_holidays DROP CONSTRAINT IF EXISTS school_holidays_school_id_date_key;
