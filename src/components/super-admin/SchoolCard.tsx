@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { School, Users, User, Eye, CreditCard, Pencil, Mail, Phone, Ban, PlayCircle, Trash2 } from "lucide-react";
+import { School, Users, Eye, CreditCard, Pencil, Ban, PlayCircle, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export interface SchoolData {
@@ -90,30 +90,6 @@ const SchoolCard = ({ school, index, onDetail, onSubscription, onEdit, onSuspend
                   </span>
                 )}
               </div>
-              {/* Admin Contact Info */}
-              {(school.adminEmail || school.adminPhone || school.adminName) && (
-                <div className="mt-2 flex flex-col gap-1">
-                  {school.adminName && (
-                    <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <User className="h-3 w-3" />
-                      <span className="font-medium text-foreground">{school.adminName}</span>
-                      <span className="text-muted-foreground/70">· Penanggung Jawab</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-3 flex-wrap">
-                    {school.adminEmail && (
-                      <a href={`mailto:${school.adminEmail}`} className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline break-all">
-                        <Mail className="h-3 w-3" />{school.adminEmail}
-                      </a>
-                    )}
-                    {school.adminPhone && (
-                      <a href={`https://wa.me/${school.adminPhone.replace(/^0/, '62').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline">
-                        <Phone className="h-3 w-3" />{school.adminPhone}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
             <div className="flex gap-1 shrink-0 flex-wrap justify-end">
               <Button variant="ghost" size="icon" className="h-8 w-8" title="Detail" onClick={() => onDetail(school)}>
