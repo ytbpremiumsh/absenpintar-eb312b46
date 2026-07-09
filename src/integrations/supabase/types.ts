@@ -2133,21 +2133,30 @@ export type Database = {
         Row: {
           created_at: string
           date: string
+          description: string | null
+          event_type: string
           id: string
+          is_holiday: boolean
           label: string | null
           school_id: string
         }
         Insert: {
           created_at?: string
           date: string
+          description?: string | null
+          event_type?: string
           id?: string
+          is_holiday?: boolean
           label?: string | null
           school_id: string
         }
         Update: {
           created_at?: string
           date?: string
+          description?: string | null
+          event_type?: string
           id?: string
+          is_holiday?: boolean
           label?: string | null
           school_id?: string
         }
