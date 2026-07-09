@@ -1398,6 +1398,7 @@ export default function ParentDashboard() {
         open={!!paymentIframe}
         paymentUrl={paymentIframe}
         title="Pembayaran Tagihan — QRIS / Transfer Bank"
+        method={paymentMethod}
         pollIntervalMs={4000}
         checkPaid={async () => {
           if (!payingInvoiceId || !selectedStudent) return false;
@@ -1408,7 +1409,7 @@ export default function ParentDashboard() {
           } catch { return false; }
         }}
         onPaid={() => { /* refresh dilakukan saat onClose */ }}
-        onClose={() => { setPaymentIframe(null); setPayingInvoiceId(null); loadTab(); }}
+        onClose={() => { setPaymentIframe(null); setPayingInvoiceId(null); setPaymentMethod(null); loadTab(); }}
       />
 
       <PaymentMethodPicker
