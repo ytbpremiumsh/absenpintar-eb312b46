@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Wallet } from "lucide-react";
 import { Landmark, ArrowDownToLine, FileText, Loader2, Receipt, TrendingUp, Banknote, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
