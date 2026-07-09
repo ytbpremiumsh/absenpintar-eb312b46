@@ -346,19 +346,24 @@ const KalenderAkademik = () => {
                 </div>
               ) : (
                 <div className="max-h-[420px] overflow-y-auto space-y-2 pr-1">
-                  {events.map((e) => {
-                    const meta = EVENT_META[e.event_type];
+                  {groupedEvents.map((g) => {
+                    const first = g.items[0];
+                    const meta = EVENT_META[first.event_type];
                     const Icon = meta.icon;
-                    const dateObj = new Date(e.date + "T00:00:00");
+                    const startObj = new Date(g.startDate + "T00:00:00");
+                    const endObj = new Date(g.endDate + "T00:00:00");
+                    const isRange = g.items.length > 1;
+                    const fmtFull = (d: Date) => d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+                    const fmtShort = (d: Date) => d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
                     return (
-                      <div key={e.id} className="group relative flex items-stretch gap-3 rounded-xl bg-card px-3 py-2.5 border border-border/60 shadow-sm hover:shadow-md hover:border-[#5B6CF9]/30 transition-all overflow-hidden">
+                      <div key={g.key} className="group relative flex items-stretch gap-3 rounded-xl bg-card px-3 py-2.5 border border-border/60 shadow-sm hover:shadow-md hover:border-[#5B6CF9]/30 transition-all overflow-hidden">
                         <div className={`absolute left-0 top-0 bottom-0 w-1 ${meta.dot}`} />
                         <div className={`shrink-0 h-12 w-12 rounded-xl flex flex-col items-center justify-center ${meta.solid}`}>
-                          <span className="text-[9px] font-semibold uppercase leading-none opacity-90">
-                            {dateObj.toLocaleDateString("id-ID", { month: "short" })}
+                          <span className="text-[9px] font-semibold uppercase leading-none opacity-80">
+                            {startObj.toLocaleDateString("id-ID", { month: "short" })}
                           </span>
                           <span className="text-lg font-bold leading-none mt-0.5">
-                            {dateObj.getDate()}
+                            {isRange ? `${startObj.getDate()}–${endObj.getDate()}` : startObj.getDate()}
                           </span>
                         </div>
                         <div className="min-w-0 flex-1 pl-1">
@@ -366,22 +371,39 @@ const KalenderAkademik = () => {
                             <span className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold ${meta.badge}`}>
                               <Icon className="h-2.5 w-2.5" /> {meta.label}
                             </span>
-                            {e.is_holiday && (
-                              <Badge className="bg-gradient-to-r from-red-500 to-rose-600 text-white border-0 text-[9px] h-4 px-1.5 shadow-sm">Libur</Badge>
+                            {first.is_holiday && (
+                              <Badge className="bg-red-50 text-red-600 border border-red-100 text-[9px] h-4 px-1.5 dark:bg-red-950/30 dark:text-red-300 dark:border-red-900/50">Libur</Badge>
+                            )}
+                            {isRange && (
+                              <span className="inline-flex items-center rounded-full bg-secondary text-muted-foreground text-[9px] font-medium px-1.5 py-0.5 border border-border/60">
+                                {g.items.length} hari
+                              </span>
                             )}
                           </div>
                           <p className="text-[11px] font-medium text-muted-foreground mt-1">
-                            {dateObj.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                            {isRange ? `${fmtShort(startObj)} — ${fmtShort(endObj)}` : fmtFull(startObj)}
                           </p>
-                          {e.label && <p className="text-xs font-semibold text-foreground mt-0.5 truncate">{e.label}</p>}
-                          {e.description && <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{e.description}</p>}
+                          {first.label && <p className="text-xs font-semibold text-foreground mt-0.5 truncate">{first.label}</p>}
+                          {first.description && <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{first.description}</p>}
                         </div>
                         {canEdit && (
                           <div className="flex flex-col gap-1 shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(e)}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(first)}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemove(e.id)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={async () => {
+                                if (isRange) {
+                                  if (!confirm(`Hapus semua ${g.items.length} acara dalam rentang ini?`)) return;
+                                  for (const it of g.items) await handleRemove(it.id);
+                                } else {
+                                  await handleRemove(first.id);
+                                }
+                              }}
+                            >
                               <Trash2 className="h-3.5 w-3.5 text-destructive" />
                             </Button>
                           </div>
