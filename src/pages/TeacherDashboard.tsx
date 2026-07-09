@@ -418,8 +418,11 @@ const TeacherDashboard = () => {
             </CardContent>
           </Card>
         ) : (() => {
-          const featured = todaySchedules.find(s => getStatus(s.start_time, s.end_time, now) === "active")
-            || todaySchedules.find(s => getStatus(s.start_time, s.end_time, now) === "upcoming");
+          const activeSched = todaySchedules.find(s => getStatus(s.start_time, s.end_time, now) === "active");
+          const upcomingSched = todaySchedules.find(s => getStatus(s.start_time, s.end_time, now) === "upcoming");
+          const doneList = todaySchedules.filter(s => getStatus(s.start_time, s.end_time, now) === "done");
+          const latestDone = doneList.length ? doneList[doneList.length - 1] : null;
+          const featured = activeSched || upcomingSched || latestDone;
           const others = todaySchedules.filter(s => s.id !== featured?.id);
           const featuredStatus = featured ? getStatus(featured.start_time, featured.end_time, now) : null;
           const currentMin = now.getHours() * 60 + now.getMinutes();
