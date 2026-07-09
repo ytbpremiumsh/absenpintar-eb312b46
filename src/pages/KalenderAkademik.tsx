@@ -274,7 +274,7 @@ const KalenderAkademik = () => {
               )}
             </div>
           </div>
-          </div>
+
         </CardContent>
       </Card>
 
