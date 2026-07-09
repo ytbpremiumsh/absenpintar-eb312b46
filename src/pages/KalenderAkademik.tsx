@@ -240,32 +240,36 @@ const KalenderAkademik = () => {
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-card">
-        <CardHeader className="flex flex-row items-start justify-between gap-3">
-          <div>
-            <CardTitle className="text-base flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-primary" />
-              Kalender
-            </CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">
-              {canEdit
-                ? "Lihat semua acara akademik. Untuk menambahkan, gunakan tombol Tambah Kalender."
-                : "Kalender lengkap semua acara akademik sekolah."}
-            </p>
+      <Card className="border-0 shadow-card overflow-hidden">
+        <div className="relative bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] px-5 py-4 text-white">
+          <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "18px 18px" }} />
+          <div className="relative flex flex-row items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center shadow-lg">
+                <CalendarDays className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold tracking-tight">Kalender Akademik</h2>
+                <p className="text-[11px] text-white/70 mt-0.5">
+                  {canEdit ? "Kelola agenda sekolah dari tombol Tambah Kalender." : "Agenda akademik sekolah — hanya untuk dilihat."}
+                </p>
+              </div>
+            </div>
+            {canEdit && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/15 border border-white/25 text-white px-2 py-0.5 text-[10px] font-medium backdrop-blur">
+                <Pencil className="h-3 w-3" /> Mode Admin
+              </span>
+            )}
           </div>
-          {canEdit && (
-            <Badge variant="secondary" className="text-[10px] gap-1">
-              <Pencil className="h-3 w-3" /> Mode Admin
-            </Badge>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2">
+        </div>
+        <CardContent className="space-y-4 pt-5">
+          <div className="flex flex-wrap gap-1.5">
             {EVENT_TYPES.map((t) => {
               const meta = EVENT_META[t];
               const Icon = meta.icon;
               return (
-                <span key={t} className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${meta.badge}`}>
+                <span key={t} className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold shadow-sm ${meta.badge}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
                   <Icon className="h-3 w-3" /> {meta.label}
                 </span>
               );
@@ -273,18 +277,23 @@ const KalenderAkademik = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="rounded-xl border border-border p-2 flex justify-center">
+            <div className="rounded-2xl border border-border bg-gradient-to-br from-background via-background to-[#5B6CF9]/[0.04] p-3 shadow-inner flex justify-center">
               <Calendar
                 mode="default"
                 onDayClick={() => { /* view only — tambah lewat tombol Tambah Kalender */ }}
-                modifiers={{ holiday: modifiers.holiday, withEvent: modifiers.withEvent }}
+                modifiers={modifiers}
                 modifiersClassNames={{
-                  holiday: "bg-red-500 text-white hover:bg-red-600",
-                  withEvent: "ring-2 ring-inset ring-primary/60",
+                  holiday:      "!bg-gradient-to-br !from-red-500 !to-rose-600 !text-white font-bold shadow-md shadow-red-500/30 hover:!from-red-600 hover:!to-rose-700",
+                  exam:         "!bg-gradient-to-br !from-amber-400 !to-orange-500 !text-white font-bold shadow-md shadow-amber-500/30",
+                  event:        "!bg-gradient-to-br !from-emerald-400 !to-teal-500 !text-white font-bold shadow-md shadow-emerald-500/30",
+                  meeting:      "!bg-gradient-to-br !from-sky-400 !to-blue-500 !text-white font-bold shadow-md shadow-sky-500/30",
+                  announcement: "!bg-gradient-to-br !from-violet-400 !to-fuchsia-500 !text-white font-bold shadow-md shadow-violet-500/30",
+                  other:        "!bg-gradient-to-br !from-slate-400 !to-zinc-500 !text-white font-bold shadow-md shadow-slate-500/30",
                 }}
                 className="p-0"
               />
             </div>
+
 
             <div>
               <div className="flex items-center justify-between mb-2">
