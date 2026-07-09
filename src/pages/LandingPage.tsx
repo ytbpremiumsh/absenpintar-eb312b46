@@ -31,7 +31,7 @@ const NAV = [
 ];
 
 const TRUST_BADGES = [
-  { icon: CheckCircle2, label: "Tanpa Biaya Lisensi" },
+  { icon: CheckCircle2, label: "Tanpa Biaya Langganan" },
   { icon: Zap, label: "Implementasi Cepat" },
   { icon: ShieldCheck, label: "Support Seluruh Indonesia" },
 ];
@@ -131,7 +131,7 @@ const ROLES = [
 const FAQ = [
   {
     q: "Benarkah ATSkolla gratis?",
-    a: "Ya. Sekolah dapat menggunakan platform inti ATSkolla sepenuhnya gratis, tanpa biaya lisensi bulanan dan tanpa komitmen berlangganan.",
+    a: "Ya. Sekolah dapat menggunakan platform inti ATSkolla sepenuhnya gratis, tanpa biaya langganan bulanan dan tanpa komitmen.",
   },
   {
     q: "Bagaimana sistem pembayaran SPP bekerja?",
@@ -834,7 +834,7 @@ function WhyFree() {
             Mengapa ATSkolla <span className="text-[#5B6CF9]">gratis</span>?
           </h2>
           <p className="mt-5 text-base lg:text-lg text-[#0b1020]/70 leading-relaxed">
-            ATSkolla dapat digunakan sekolah sepenuhnya gratis — tanpa biaya lisensi, tanpa biaya setup, dan tanpa komitmen berlangganan.
+            ATSkolla dapat digunakan sekolah sepenuhnya gratis — tanpa biaya langganan, tanpa biaya setup, dan tanpa komitmen.
           </p>
 
           <div className="mt-8 grid sm:grid-cols-3 gap-4">
@@ -856,7 +856,7 @@ function WhyFree() {
             <div className="absolute -top-10 -right-10 w-56 h-56 bg-[#5B6CF9] rounded-full blur-[100px] opacity-20" />
             <div className="relative space-y-5">
               {[
-                { l: "Biaya lisensi sekolah", v: "Rp 0", accent: true },
+                { l: "Biaya langganan sekolah", v: "Rp 0", accent: true },
                 { l: "Setup & onboarding", v: "Gratis" },
                 { l: "Update platform", v: "Otomatis" },
                 { l: "Support dasar", v: "24/7" },
@@ -928,7 +928,7 @@ function FinalCTA() {
           Siap Membangun Sekolah Digital <span className="text-[#5B6CF9]">Bersama ATSkolla</span>?
         </h2>
         <p className="mt-5 text-lg text-[#0b1020]/65 max-w-xl mx-auto">
-          Aktifkan platform hari ini — tanpa biaya lisensi, tanpa komitmen jangka panjang.
+          Aktifkan platform hari ini — tanpa biaya langganan, tanpa komitmen jangka panjang.
         </p>
         <div className="mt-8 flex flex-wrap gap-3 justify-center">
           <button
