@@ -229,24 +229,14 @@ export const PaymentIframeDialog = ({
                 </div>
 
                 <div className="rounded-xl bg-muted/60 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">Tata Cara Pembayaran</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">{stepInfo.title}</p>
                   <ol className="space-y-2 text-xs text-foreground/90">
-                    <li className="flex gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">1</span>
-                      <span>Klik tombol <b>Buka Halaman Pembayaran</b> di bawah.</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">2</span>
-                      <span>Pilih metode pembayaran (QRIS, Virtual Account, atau Retail) sesuai yang tersedia.</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">3</span>
-                      <span>Selesaikan pembayaran sesuai instruksi (scan QRIS / transfer sesuai nominal ke Virtual Account).</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">4</span>
-                      <span><b>Jangan menutup jendela ini.</b> Setelah pembayaran berhasil, tagihan akan otomatis tervalidasi dan jendela ini akan tertutup sendiri.</span>
-                    </li>
+                    {stepInfo.steps.map((s, i) => (
+                      <li key={i} className="flex gap-2">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">{i + 1}</span>
+                        <span dangerouslySetInnerHTML={{ __html: s }} />
+                      </li>
+                    ))}
                   </ol>
                 </div>
 
