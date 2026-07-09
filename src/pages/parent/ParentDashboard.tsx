@@ -1144,7 +1144,7 @@ export default function ParentDashboard() {
                 <Card className="p-4 border-0 shadow-card rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white">
                   <p className="text-[11px] uppercase tracking-wider text-white/80 font-semibold">Total Tunggakan SPP & Tagihan</p>
                   <p className="text-2xl font-extrabold mt-1">Rp {total.toLocaleString("id-ID")}</p>
-                  <p className="text-xs text-white/85 mt-1">{uniq.length} tagihan belum lunas (termasuk sisa cicilan)</p>
+                  <p className="text-xs text-white/85 mt-1">{uniq.length} tagihan belum lunas&nbsp;</p>
                 </Card>
               );
             })()}
