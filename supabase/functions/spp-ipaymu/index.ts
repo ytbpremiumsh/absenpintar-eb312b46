@@ -146,11 +146,20 @@ async function createIpaymuPayment(
   const baseNo = String(inv.invoice_number || `SPP-${(inv.id || "").slice(0, 8)}`).replace(/[^A-Za-z0-9-]/g, "-");
   const referenceId = `${baseNo}-${Date.now().toString(36).slice(-4)}`;
 
-  const buyerName = (inv.student_name || inv.parent_name || "Siswa").slice(0, 100);
+  const studentName = String(inv.student_name || "").trim();
+  const parentName = String(inv.parent_name || "").trim();
+  // Nama siswa jadi identitas utama pembeli agar tampil jelas pada halaman VA / QRIS iPaymu.
+  const buyerName = (studentName || parentName || "Siswa").slice(0, 100);
   const buyerPhone = String(inv.parent_phone || "081234567890").replace(/\D/g, "").slice(0, 15) || "081234567890";
   const buyerEmail = `spp-${(inv.id || "x").slice(0, 8)}@atskolla.com`;
   const isCustom = (inv.bill_type || "spp") === "custom";
-  const productName = `${isCustom ? (inv.bill_category || "Tagihan") : "SPP"} ${inv.period_label || ""} - ${inv.student_name || ""}`.trim();
+  const billLabel = isCustom ? (inv.bill_category || "Tagihan") : "SPP";
+  // Nama produk diawali Nama Siswa supaya jelas atas nama siapa pembayaran ini.
+  const productName = (
+    studentName
+      ? `${studentName} - ${billLabel} ${inv.period_label || ""}`
+      : `${billLabel} ${inv.period_label || ""}`
+  ).replace(/\s+/g, " ").trim().slice(0, 100);
 
   const chMap = channelToIpaymu(channel, subChannel);
   const body: any = {
