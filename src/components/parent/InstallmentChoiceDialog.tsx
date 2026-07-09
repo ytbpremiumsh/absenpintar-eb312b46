@@ -65,10 +65,16 @@ export function InstallmentChoiceDialog({ open, onClose, invoice, loading, summa
             {/* Progress ringkasan */}
             <div className="rounded-xl bg-gradient-to-br from-[#5B6CF9]/10 to-[#5B6CF9]/5 border border-[#5B6CF9]/20 p-3 space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Sudah dibayar</span>
+                <span className="text-muted-foreground">Sudah dibayar (valid)</span>
                 <span className="font-bold">{fmtIDR(paid)} / {fmtIDR(total)}</span>
               </div>
               <Progress value={pct} className="h-2" />
+              {pendingAmt > 0 && (
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-muted-foreground">Menunggu pembayaran</span>
+                  <span className="font-semibold text-amber-600">{fmtIDR(pendingAmt)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Sisa</span>
                 <span className={`font-bold ${remaining > 0 ? "text-amber-600" : "text-emerald-600"}`}>
