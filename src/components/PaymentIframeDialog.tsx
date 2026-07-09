@@ -172,20 +172,59 @@ export const PaymentIframeDialog = ({
         </div>
 
         {openOutside ? (
-          <div className="min-h-0 flex-1 bg-muted/30 flex items-center justify-center p-6">
-            <div className="max-w-sm text-center space-y-4">
-              <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                <ExternalLink className="h-5 w-5" />
+          <div className="min-h-0 flex-1 overflow-y-auto bg-muted/30 p-5 sm:p-6">
+            <div className="mx-auto max-w-md space-y-4">
+              <div className="rounded-2xl border bg-card p-5 shadow-sm space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-foreground">Informasi Pembayaran</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Halaman pembayaran akan terbuka di tab baru. Silakan ikuti tata cara di bawah, status pembayaran akan otomatis terdeteksi.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-muted/60 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">Tata Cara Pembayaran</p>
+                  <ol className="space-y-2 text-xs text-foreground/90">
+                    <li className="flex gap-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">1</span>
+                      <span>Klik tombol <b>Buka Halaman Pembayaran</b> di bawah.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">2</span>
+                      <span>Pilih metode pembayaran (QRIS, Virtual Account, atau Retail) sesuai yang tersedia.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">3</span>
+                      <span>Selesaikan pembayaran sesuai instruksi (scan QRIS / transfer sesuai nominal ke Virtual Account).</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">4</span>
+                      <span><b>Jangan menutup jendela ini.</b> Setelah pembayaran berhasil, tagihan akan otomatis tervalidasi dan jendela ini akan tertutup sendiri.</span>
+                    </li>
+                  </ol>
+                </div>
+
+                <Button className="w-full h-11" onClick={() => window.open(paymentUrl, "_blank", "noopener,noreferrer")}>
+                  <ExternalLink className="h-4 w-4 mr-2" /> Buka Halaman Pembayaran
+                </Button>
+
+                <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  </span>
+                  Menunggu konfirmasi pembayaran secara otomatis…
+                </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-foreground">Halaman pembayaran dibuka di tab baru</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Gateway ini tidak mengizinkan tampil di dalam modal. Selesaikan pembayaran pada tab baru, lalu kembali ke halaman ini.
-                </p>
-              </div>
-              <Button className="w-full" onClick={() => window.open(paymentUrl, "_blank", "noopener,noreferrer")}>
-                <ExternalLink className="h-4 w-4 mr-2" /> Buka Pembayaran
-              </Button>
+
+              <p className="text-center text-[11px] text-muted-foreground">
+                Transaksi diproses aman oleh gateway pembayaran resmi.
+              </p>
             </div>
           </div>
         ) : (
