@@ -22,7 +22,8 @@ const navItems = [
 
   // MANAJEMEN
   { title: "Sekolah & Pengguna", url: "/super-admin/sekolah", icon: School, group: "manage" },
-  { title: "Langganan & Add-on", url: "/super-admin/langganan", icon: Wallet, group: "manage" },
+  { title: "Paket Sekolah", url: "/super-admin/paket-sekolah", icon: Wallet, group: "manage" },
+  { title: "Add-on", url: "/super-admin/addons", icon: Wallet, group: "manage" },
 
   // OPERASIONAL
   { title: "Keuangan", url: "/super-admin/keuangan", icon: Banknote, group: "ops" },

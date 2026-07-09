@@ -22,6 +22,8 @@ export interface SchoolData {
   adminEmail?: string | null;
   adminPhone?: string | null;
   adminName?: string | null;
+  package_type?: string | null;
+  package_status?: string | null;
   subscription?: {
     id: string;
     plan_id: string;
@@ -71,16 +73,23 @@ const SchoolCard = ({ school, index, onDetail, onSubscription, onEdit, onSuspend
                   </span>
                 </div>
 
-                {school.subscription ? (
-                  <>
-                    <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
-                      {school.subscription.plan_name}
+                {(() => {
+                  const isMandiri = school.package_type === "mandiri";
+                  return (
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide border ${
+                        isMandiri
+                          ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                          : "border-primary/20 bg-primary/10 text-primary"
+                      }`}
+                    >
+                      {isMandiri ? "Mandiri" : "Payment"}
                     </span>
-                    {getStatusBadge(school.subscription.status)}
-                  </>
-                ) : (
-                  <span className="inline-flex items-center rounded-full border border-border bg-background px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Belum berlangganan
+                  );
+                })()}
+                {school.package_status === "pending_activation" && (
+                  <span className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                    Menunggu Aktivasi
                   </span>
                 )}
 

@@ -73,16 +73,11 @@ const whatsappNav = [
   { title: "WhatsApp", url: "/whatsapp", icon: MessageCircle, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
 ];
 
-const settingsNavSubscription = [
+const settingsNav = [
   { title: "Mode Libur", url: "/holidays", icon: CalendarOff, accent: "from-amber-500/85 to-amber-600" },
   { title: "Kalender Akademik", url: "/kalender-akademik", icon: CalendarDays, accent: "from-indigo-500/85 to-indigo-600" },
   { title: "Paket Sekolah", url: "/paket-sekolah", icon: Package, accent: "from-emerald-500/85 to-emerald-600" },
-  { title: "Langganan & Add-on", url: "/langganan", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
-];
-const settingsNavAllFeatures = [
-  { title: "Mode Libur", url: "/holidays", icon: CalendarOff, accent: "from-amber-500/85 to-amber-600" },
-  { title: "Kalender Akademik", url: "/kalender-akademik", icon: CalendarDays, accent: "from-indigo-500/85 to-indigo-600" },
-  { title: "Paket Sekolah", url: "/paket-sekolah", icon: Package, accent: "from-emerald-500/85 to-emerald-600" },
+  { title: "Add-on", url: "/addons", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
   { title: "Semua Fitur", url: "/all-features", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
 ];
 
@@ -99,7 +94,7 @@ export function AppSidebar() {
   const [platformLogo, setPlatformLogo] = useState<string | null>(null);
   const [isWaliKelas, setIsWaliKelas] = useState(false);
 
-  const isPremiumBrand = ["School", "Premium"].includes(features.planName);
+  const isPremiumBrand = true; // Sistem tier dihapus — semua sekolah dianggap premium branding
 
   useEffect(() => {
     supabase.from("platform_settings").select("key, value").in("key", ["login_logo_url"]).then(({ data }) => {
@@ -192,12 +187,7 @@ export function AppSidebar() {
               <span className="text-[13px] font-extrabold text-white tracking-tight truncate leading-tight">
                 {isPremiumBrand && schoolData ? schoolData.name : "ATSkolla"}
               </span>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="inline-flex items-center gap-1 text-[9px] font-bold text-white/90 bg-white/20 backdrop-blur-sm px-1.5 py-[1px] rounded-md border border-white/15">
-                  <Crown className="h-2.5 w-2.5" />
-                  {features.planName === "Free" ? "Free Plan" : `${features.planName}`}
-                </span>
-              </div>
+              {/* Badge tier langganan dihapus — sistem paket berbasis Free/Premium tidak dipakai lagi */}
             </div>
           </div>
         </div>
@@ -326,7 +316,7 @@ export function AppSidebar() {
             <SidebarGroup>
               {renderGroupLabel("Pengaturan")}
               <SidebarGroupContent>
-                <SidebarMenu className="space-y-1">{renderNavItems(features.subscriptionEnabled ? settingsNavSubscription : settingsNavAllFeatures)}</SidebarMenu>
+                <SidebarMenu className="space-y-1">{renderNavItems(settingsNav)}</SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
           </>

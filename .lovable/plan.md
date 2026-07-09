@@ -1,83 +1,50 @@
-# Sistem Paket Sekolah ATSkolla
 
-Menambahkan sistem dua paket sekolah tanpa mengubah/menghapus fitur existing (Free/Basic/Premium/School tetap berjalan). Ini adalah **lapisan baru** untuk model bisnis payment-based.
+## Tujuan
+1. Hilangkan sistem langganan berpaket (Free / Basic / School / Premium) dari sisi user (Admin Sekolah, Guru, Wali Kelas, Bendahara, dll).
+2. Semua sekolah hanya mengenal dua mode: **ATSkolla Payment** (gratis, wajib pakai payment gateway) atau **ATSkolla Mandiri** (bayar per siswa / bulan).
+3. Semua fitur dianggap aktif untuk semua sekolah (tidak ada lagi gating berdasarkan tier langganan).
+4. Badge "Premium / School / Free" tidak muncul lagi di UI user. Info paket (Payment vs Mandiri) hanya ditampilkan di panel Super Admin.
 
-## 1. Konsep Paket
+## Perubahan Frontend
 
-| Paket | Biaya | Wajib Payment ATSkolla | Konsekuensi |
-|---|---|---|---|
-| **ATSkolla Payment** | Gratis | Ya | Auto-suspend jika 90 hari tanpa aktivitas payment |
-| **ATSkolla Mandiri** | Rp 1.000/siswa/bulan | Tidak | Tidak ada suspend berbasis payment |
+### Yang dihapus / disembunyikan dari user
+- **`ActivePlanBadge`** (dipakai di sidebar / header) → tidak dirender lagi di layout user.
+- **`PremiumGate`** → ubah jadi pass-through (langsung render `children`), tidak pernah blokir. Ini menghindari harus edit puluhan tempat pemanggilan.
+- **Halaman `Subscription.tsx`** & **`LanggananCombined.tsx`** → route `/subscription` dan menu "Langganan" di sidebar dihapus. Add-on (`/addons`) tetap ada sebagai halaman berdiri sendiri.
+- **`PlanCardsGrid`**, banner trial premium, countdown trial di dashboard → dihapus dari `Dashboard.tsx`.
+- Kartu "premium glassmorphism" di `AppSidebar` yang menampilkan nama tier → diganti kartu ringkas tanpa tier, atau dihapus.
+- Referensi tier di `MobileFooterNav`, `PageHeader`, notifikasi, dsb.
 
-Semua fitur tetap aktif di kedua paket.
+### Yang tetap ada untuk user
+- Halaman **Paket Sekolah** (`/paket-sekolah`) tetap → pilih Payment vs Mandiri (sudah ada, tidak berubah).
+- Halaman **Add-on** (`/addons`) tetap.
+- Halaman **WA Credit**, **Custom Domain**, **ID Card** tetap (add-on murni, bukan paket langganan).
 
-## 2. Database (migrasi baru)
+### Yang tetap untuk Super Admin
+- `SuperAdminPaketSekolah` tetap (kelola Payment/Mandiri).
+- `SuperAdminSubscriptions` & `SuperAdminPlans` & `SuperAdminSubscriptionsHub` → route dihapus dari sidebar Super Admin (file boleh tetap ada di codebase agar tidak break, tapi tidak diakses dari menu).
+- Di kartu sekolah (`SchoolCard`) & dialog detail: badge tier "Free/Basic/School/Premium" diganti badge **Payment / Mandiri** (sudah ada di halaman Paket Sekolah, tinggal ditarik ke SchoolCard).
 
-**Tambah kolom di `schools`:**
-- `package_type` text default `'payment'` — `'payment' | 'mandiri'`
-- `package_status` text default `'active'` — `'active' | 'pending_activation'`
-- `package_status_changed_at` timestamptz
-- `last_payment_activity_at` timestamptz — di-update oleh trigger dari `spp_invoices`, `payment_transactions`, `spp_settlements`
-- `mandiri_monthly_rate` bigint default 1000
+## Perubahan Hook / Logic
 
-**Tabel baru `package_settings` (global, 1 row):**
-- `grace_period_days` int default 90
-- `disabled_features` jsonb default `["attendance_create","scan_qr","face_recognition","rfid"]`
+- **`useSubscriptionFeatures`** → di-refactor jadi selalu return:
+  ```
+  { planName: "Payment"|"Mandiri", loading: false, features: { all: true }, isPaid: true, ... }
+  ```
+  Semua flag fitur (`canScanQR`, `canFaceRecognition`, `canRfid`, dsb) di-hardcode `true`, jadi komponen existing yang cek flag tidak error.
+- Trial premium logic, downgrade otomatis ke Free → dinonaktifkan (tidak dijalankan).
+- Registrasi sekolah baru → tidak lagi auto-grant "Trial Premium"; default `package_type = 'payment'`, `package_status = 'active'`.
 
-**Tabel baru `package_audit_log`:**
-- `school_id`, `action` (`suspended|reactivated|package_changed`), `old_value`, `new_value`, `reason`, `actor_user_id`, `created_at`
+## Perubahan Database / Backend
+- Tidak menghapus tabel `subscription_plans` / `school_subscriptions` (agar histori tetap aman & tidak break edge functions lain), hanya tidak lagi dipakai dari UI user.
+- Edge function terkait trial / plan expiry: dibiarkan tapi tidak dijadwalkan dari UI (opsional dimatikan di iterasi berikutnya).
+- Tidak ada migrasi schema di iterasi ini kecuali user memintanya.
 
-**Trigger `touch_payment_activity`:** update `schools.last_payment_activity_at = now()` saat insert `spp_invoices`, insert `payment_transactions` (status paid), insert `spp_settlements`.
+## Memory yang harus di-update
+- Tambah rule Core: "Tidak ada sistem langganan berpaket. Semua sekolah pakai model Payment atau Mandiri. Semua fitur aktif untuk semua sekolah. Badge tier tidak boleh muncul di UI user."
+- Hapus / mark obsolete: `mem://features/subscription-management`, `mem://features/subscription-visibility`, `mem://constraints/subscription-tiers`, `mem://features/school-registration` bagian "auto-grant Trial Premium".
 
-## 3. Edge Function + Cron
-
-**`check-package-status`** (edge function, cron harian 01:00 WIB):
-- Untuk semua sekolah `package_type='payment'` & `package_status='active'`:
-  - Jika `last_payment_activity_at < now() - grace_period_days` → set `pending_activation`, log ke audit.
-- Untuk sekolah `pending_activation` yang punya aktivitas baru → auto-reactivate + log.
-
-## 4. Frontend — Enforcement
-
-**Hook baru `usePackageStatus.ts`** — fetch `package_type`, `package_status`, `disabled_features`.
-
-**Guard di halaman absensi:** `Scan.tsx`, `PublicMonitoring.tsx`, RFID scan endpoint, face recognition — jika `package_status='pending_activation'` dan feature termasuk di `disabled_features`, tampilkan banner + block action.
-
-**Banner komponen `PackageStatusBanner.tsx`** di `AppLayout`:
-- Muncul saat `pending_activation`
-- CTA: "Aktifkan Pembayaran ATSkolla" (arah ke `/bendahara`) & "Beralih ke Paket Mandiri" (dialog konfirmasi).
-
-## 5. Halaman Admin Sekolah
-
-**`/paket-sekolah`** (baru, di menu Pengaturan):
-- Info paket saat ini, status, hari sejak aktivitas payment terakhir.
-- Tombol ubah paket (Payment ↔ Mandiri) dengan konfirmasi.
-- Estimasi biaya Mandiri: jumlah siswa × Rp 1.000.
-
-## 6. Super Admin
-
-**`/super-admin/paket-sekolah`** (baru):
-- Tabel semua sekolah: nama, package_type, package_status, `days_since_payment`, tombol **Aktifkan Kembali** & **Ubah Paket**.
-- Panel pengaturan global: `grace_period_days`, checklist fitur yang dinonaktifkan.
-- Filter status.
-- Semua aksi tercatat di `package_audit_log`.
-- Link ke halaman audit log paket.
-
-## 7. Detail Teknis
-
-- Reuse `useSubscriptionFeatures` — tidak diubah. Package baru bersifat orthogonal.
-- Route baru didaftarkan di `src/App.tsx`.
-- Menu sidebar admin: item "Paket Sekolah" di grup Pengaturan.
-- Menu SuperAdmin sidebar: item "Paket Sekolah" di hub Sekolah/Langganan.
-- Cron dijadwalkan via `pg_cron` + `pg_net` memanggil edge function.
-- Tidak ada data yang dihapus saat suspend — hanya action yang di-block.
-- RLS: `package_settings` & `package_audit_log` hanya super_admin write; sekolah read miliknya sendiri.
-
-## 8. Urutan Implementasi
-
-1. Migrasi DB (kolom + tabel + trigger + grants + RLS).
-2. Edge function `check-package-status` + jadwalkan cron.
-3. Hook `usePackageStatus` + `PackageStatusBanner` di `AppLayout`.
-4. Guard di halaman scan/RFID/face.
-5. Halaman admin `/paket-sekolah`.
-6. Halaman super admin `/super-admin/paket-sekolah` + audit log viewer.
-7. Registrasi route + item sidebar.
+## Konfirmasi yang saya butuhkan sebelum implementasi
+1. **Route `/subscription`**: hapus total dari sidebar & App.tsx, atau redirect ke `/paket-sekolah`?
+2. **Sekolah existing** yang saat ini `subscription_plan_id` = Premium/School/Basic: perlu di-set default `package_type = 'payment'` sekalian, atau biarkan apa adanya?
+3. **`SuperAdminSubscriptions` / `SuperAdminPlans`**: benar-benar dihapus dari menu, atau tetap ada untuk lihat histori?
