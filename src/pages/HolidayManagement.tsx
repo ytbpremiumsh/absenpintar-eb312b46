@@ -400,12 +400,16 @@ const HolidayManagement = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div className="rounded-xl border border-border p-2 flex justify-center">
               <Calendar
-                mode="single"
-                onSelect={(d) => d && openCreateDialog(d)}
+                mode="range"
+                selected={selectedRange}
+                onSelect={(r) => {
+                  setSelectedRange(r);
+                  if (r?.from) openCreateDialog(r);
+                }}
                 modifiers={{ holiday: modifiers.holiday, withEvent: modifiers.withEvent }}
                 modifiersClassNames={{
-                  holiday: "bg-red-500 text-white hover:bg-red-600 rounded-full",
-                  withEvent: "ring-2 ring-inset ring-primary/60 rounded-full",
+                  holiday: "bg-red-500 text-white hover:bg-red-600",
+                  withEvent: "ring-2 ring-inset ring-primary/60",
                 }}
                 className="p-0"
               />
