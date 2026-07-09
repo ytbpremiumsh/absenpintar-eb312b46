@@ -114,7 +114,7 @@ export default function SuperAdminPaketSekolah() {
   return (
     <div className="space-y-4">
       <PageHeader title="Manajemen Paket Sekolah" subtitle="Kelola paket ATSkolla Payment / Mandiri dan status aktivasi." icon={Package}
-        actions={<Button variant="outline" onClick={runCheck} className="gap-2"><RefreshCw className="h-4 w-4" /> Jalankan Cek Status</Button>} />
+        actions={<Button onClick={runCheck} className="gap-2 bg-white text-slate-900 hover:bg-white/90"><RefreshCw className="h-4 w-4" /> Jalankan Cek Status</Button>} />
 
       <Card className="p-5 rounded-2xl">
         <div className="flex items-center gap-2 mb-3">
