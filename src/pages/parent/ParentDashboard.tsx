@@ -659,7 +659,11 @@ export default function ParentDashboard() {
                 // Dedupe by id (tunggakan bisa masuk juga ke aktif kalau server mengubah kategori)
                 const seen = new Set<string>();
                 const uniq = unpaid.filter((i: any) => (seen.has(i.id) ? false : (seen.add(i.id), true)));
-                const total = uniq.reduce((s: number, i: any) => s + (Number(i.total_amount) || 0), 0);
+                const total = uniq.reduce((s: number, i: any) => {
+                  const paid = Number(i.installment_paid_amount) || 0;
+                  const sisa = Math.max(0, (Number(i.total_amount) || 0) - paid);
+                  return s + sisa;
+                }, 0);
                 if (total <= 0) return null;
                 return (
                   <button
@@ -1124,13 +1128,26 @@ export default function ParentDashboard() {
             <SectionTitle icon={Wallet} title="Pembayaran SPP & Tagihan" />
 
             {/* Ringkasan Tunggakan */}
-            {sppData.total_tunggakan > 0 && (
-              <Card className="p-4 border-0 shadow-card rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white">
-                <p className="text-[11px] uppercase tracking-wider text-white/80 font-semibold">Total Tunggakan SPP & Tagihan</p>
-                <p className="text-2xl font-extrabold mt-1">Rp {sppData.total_tunggakan.toLocaleString("id-ID")}</p>
-                <p className="text-xs text-white/85 mt-1">{sppData.tunggakan.length} bulan belum dibayar</p>
-              </Card>
-            )}
+            {(() => {
+              const unpaid = [
+                ...(sppData.tunggakan || []),
+                ...(sppData.aktif || []).filter((i: any) => i.status === "pending" || i.status === "expired"),
+              ];
+              const seen = new Set<string>();
+              const uniq = unpaid.filter((i: any) => (seen.has(i.id) ? false : (seen.add(i.id), true)));
+              const total = uniq.reduce((s: number, i: any) => {
+                const paid = Number(i.installment_paid_amount) || 0;
+                return s + Math.max(0, (Number(i.total_amount) || 0) - paid);
+              }, 0);
+              if (total <= 0) return null;
+              return (
+                <Card className="p-4 border-0 shadow-card rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white">
+                  <p className="text-[11px] uppercase tracking-wider text-white/80 font-semibold">Total Tunggakan SPP & Tagihan</p>
+                  <p className="text-2xl font-extrabold mt-1">Rp {total.toLocaleString("id-ID")}</p>
+                  <p className="text-xs text-white/85 mt-1">{uniq.length} tagihan belum lunas (termasuk sisa cicilan)</p>
+                </Card>
+              );
+            })()}
 
             {/* Tagihan Aktif */}
             <SectionTitle icon={AlertCircle} title="Tagihan Aktif" />
