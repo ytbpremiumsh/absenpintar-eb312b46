@@ -837,4 +837,10 @@ const ScanQR = () => {
   );
 };
 
-export default ScanQR;
+import { PackageFeatureBlock } from "@/components/PackageFeatureBlock";
+const ScanQRGuarded = () => (
+  <PackageFeatureBlock feature="scan_qr" label="Scan Absensi">
+    <ScanQR />
+  </PackageFeatureBlock>
+);
+export default ScanQRGuarded;
