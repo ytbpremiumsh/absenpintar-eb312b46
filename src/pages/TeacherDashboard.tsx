@@ -201,15 +201,17 @@ const TeacherDashboard = () => {
     const todayStr = today.toISOString().split("T")[0];
     const { data: existing } = await supabase
       .from("subject_attendance")
-      .select("student_id, status")
+      .select("student_id, status, notes")
       .eq("teaching_schedule_id", schedule.id)
       .eq("date", todayStr);
 
     const existMap: Record<string, string> = {};
     const attMap: Record<string, string> = {};
+    let existingNote = "";
     (existing || []).forEach((e: any) => {
       existMap[e.student_id] = e.status;
       attMap[e.student_id] = e.status;
+      if (e.notes && !existingNote) existingNote = e.notes;
     });
 
     studentsList.forEach(s => {
@@ -218,6 +220,7 @@ const TeacherDashboard = () => {
 
     setExistingAttendance(existMap);
     setAttendanceMap(attMap);
+    setSessionNote(existingNote);
     setLoadingStudents(false);
   };
 
