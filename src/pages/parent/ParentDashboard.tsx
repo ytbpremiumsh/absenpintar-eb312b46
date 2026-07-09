@@ -89,7 +89,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
 const PRIMARY_TABS = [
   { id: "home", label: "Beranda", icon: Sparkles },
   { id: "attendance", label: "Absensi", icon: ClipboardList },
-  { id: "spp", label: "SPP", icon: Wallet },
+  { id: "spp", label: "SPP & Tagihan", icon: Wallet },
   { id: "schedule", label: "Jadwal", icon: CalendarDays },
 ];
 
@@ -530,7 +530,7 @@ export default function ParentDashboard() {
             { id: "card", label: "Kartu Pelajar", icon: CreditCard },
             { id: "attendance", label: "Absensi", icon: ClipboardList },
             { id: "schedule", label: "Jadwal", icon: CalendarDays },
-            { id: "spp", label: "SPP", icon: Wallet },
+            { id: "spp", label: "SPP & Tagihan", icon: Wallet },
             { id: "info", label: "Pengumuman", icon: Megaphone },
             { id: "leave", label: "Pengajuan Izin", icon: FileText },
             { id: "contact", label: "Wali Kelas", icon: Phone },
@@ -1121,12 +1121,12 @@ export default function ParentDashboard() {
         {/* SPP */}
         {tab === "spp" && (
           <Card className="p-4 md:p-5 border-0 shadow-card rounded-2xl space-y-3">
-            <SectionTitle icon={Wallet} title="Pembayaran SPP" />
+            <SectionTitle icon={Wallet} title="Pembayaran SPP & Tagihan" />
 
             {/* Ringkasan Tunggakan */}
             {sppData.total_tunggakan > 0 && (
               <Card className="p-4 border-0 shadow-card rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white">
-                <p className="text-[11px] uppercase tracking-wider text-white/80 font-semibold">Total Tunggakan</p>
+                <p className="text-[11px] uppercase tracking-wider text-white/80 font-semibold">Total Tunggakan SPP & Tagihan</p>
                 <p className="text-2xl font-extrabold mt-1">Rp {sppData.total_tunggakan.toLocaleString("id-ID")}</p>
                 <p className="text-xs text-white/85 mt-1">{sppData.tunggakan.length} bulan belum dibayar</p>
               </Card>
@@ -1361,7 +1361,7 @@ export default function ParentDashboard() {
                 <SheetMenuItem icon={FileText} label="Pengajuan Izin" color="#8B5CF6" bg="#F1ECFE" onClick={() => { setTab("leave"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
                 <SheetMenuItem icon={Phone} label="Wali Kelas" color="#0EA5E9" bg="#E1F4FE" onClick={() => { setTab("contact"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
                 <SheetMenuItem icon={CalendarDays} label="Jadwal" color="#10B981" bg="#E6FAF3" onClick={() => { setTab("schedule"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
-                <SheetMenuItem icon={Wallet} label="SPP" color="#F59E0B" bg="#FEF5E1" onClick={() => { setTab("spp"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
+                <SheetMenuItem icon={Wallet} label="SPP & Tagihan" color="#F59E0B" bg="#FEF5E1" onClick={() => { setTab("spp"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
                 <SheetMenuItem icon={CreditCard} label="Kartu Pelajar" color="#5B6CF9" bg="#EEF0FE" onClick={() => { setTab("card"); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); }} />
                 <SheetMenuItem icon={LogOut} label="Keluar" color="#EF4444" bg="#FEE7E7" onClick={logout} />
               </div>
@@ -1369,7 +1369,7 @@ export default function ParentDashboard() {
           </Sheet>
 
           {/* Right 2 tabs */}
-          <FabNavBtn icon={Wallet} label="SPP" active={tab === "spp"} color="#F59E0B" onClick={() => setTab("spp")} />
+          <FabNavBtn icon={Wallet} label="SPP & Tagihan" active={tab === "spp"} color="#F59E0B" onClick={() => setTab("spp")} />
           <FabNavBtn icon={CalendarDays} label="Jadwal" active={tab === "schedule"} color="#5B6CF9" onClick={() => setTab("schedule")} />
         </div>
       </nav>
