@@ -1435,6 +1435,13 @@ export default function ParentDashboard() {
         loading={installmentLoading}
         summary={installmentSummary}
         onContinue={onInstallmentContinue}
+        onResumePending={(inst) => {
+          if (!inst?.mayar_payment_url) return;
+          setPayingInvoiceId(installmentInvoice?.id || null);
+          setPaymentMethod(inst.payment_channel || null);
+          setPaymentIframe(inst.mayar_payment_url);
+          setInstallmentOpen(false);
+        }}
       />
 
     </div>
