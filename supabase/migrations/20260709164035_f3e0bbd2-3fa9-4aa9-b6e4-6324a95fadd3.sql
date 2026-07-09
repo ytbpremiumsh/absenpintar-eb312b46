@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Super admins view all profiles" ON public.profiles;
+CREATE POLICY "Super admins view all profiles" ON public.profiles FOR SELECT USING (public.has_role(auth.uid(), 'super_admin'::app_role));
