@@ -185,15 +185,15 @@ const HolidayManagement = () => {
   const handleSave = async () => {
     if (!profile?.school_id || !dialogDate || !canEdit) return;
     setSubmitting(true);
-    const payload = {
-      school_id: profile.school_id,
-      date: dialogDate,
-      label: form.label.trim() || null,
-      description: form.description.trim() || null,
-      event_type: form.event_type,
-      is_holiday: form.is_holiday,
-    };
     if (editingEvent) {
+      const payload = {
+        school_id: profile.school_id,
+        date: dialogDate,
+        label: form.label.trim() || null,
+        description: form.description.trim() || null,
+        event_type: form.event_type,
+        is_holiday: form.is_holiday,
+      };
       const { data, error } = await supabase.from("school_holidays")
         .update(payload as any).eq("id", editingEvent.id).select().single();
       setSubmitting(false);
@@ -207,19 +207,31 @@ const HolidayManagement = () => {
       } : e));
       toast.success("Acara diperbarui");
     } else {
+      // Build all dates in the range
+      const start = new Date(dialogDate + "T00:00:00");
+      const end = new Date((dialogEndDate || dialogDate) + "T00:00:00");
+      const dates: string[] = [];
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        dates.push(toDateKey(d));
+      }
+      const rows = dates.map((date) => ({
+        school_id: profile.school_id,
+        date,
+        label: form.label.trim() || null,
+        description: form.description.trim() || null,
+        event_type: form.event_type,
+        is_holiday: form.is_holiday,
+      }));
       const { data, error } = await supabase.from("school_holidays")
-        .insert(payload as any).select().single();
+        .insert(rows as any).select();
       setSubmitting(false);
       if (error) { toast.error("Gagal menambahkan: " + error.message); return; }
-      setEvents((prev) => [...prev, {
-        id: (data as any).id,
-        date: (data as any).date,
-        label: (data as any).label,
-        description: (data as any).description,
-        event_type: (data as any).event_type,
-        is_holiday: (data as any).is_holiday,
-      }].sort((a, b) => a.date.localeCompare(b.date)));
-      toast.success("Acara ditambahkan ke kalender");
+      const inserted = ((data || []) as any[]).map((r) => ({
+        id: r.id, date: r.date, label: r.label,
+        description: r.description, event_type: r.event_type, is_holiday: r.is_holiday,
+      }));
+      setEvents((prev) => [...prev, ...inserted].sort((a, b) => a.date.localeCompare(b.date)));
+      toast.success(dates.length > 1 ? `${dates.length} acara ditambahkan ke kalender` : "Acara ditambahkan ke kalender");
     }
     setDialogOpen(false);
   };
