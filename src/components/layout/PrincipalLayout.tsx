@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { SchoolAccessGate } from "@/components/SchoolAccessGate";
 
 function HeaderInner() {
-  const { schoolName, refresh, loading } = usePrincipalData();
+  const { schoolName } = usePrincipalData();
   return (
     <div className="flex items-center gap-2 min-w-0 flex-1">
       <div className="flex flex-col leading-tight min-w-0">
@@ -32,9 +32,6 @@ function HeaderInner() {
           Kepala Sekolah<span className="hidden sm:inline"> · Ringkasan Sekolah</span>
         </span>
       </div>
-      <Button size="icon" variant="ghost" className="h-7 w-7 ml-1 shrink-0" onClick={refresh} disabled={loading} title="Segarkan data">
-        <RefreshCcw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-      </Button>
     </div>
   );
 }
