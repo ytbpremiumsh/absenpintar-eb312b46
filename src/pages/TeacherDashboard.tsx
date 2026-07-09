@@ -450,6 +450,10 @@ const TeacherDashboard = () => {
                           <Badge className="bg-white/25 backdrop-blur-sm text-white border-white/30 text-[10px] gap-1 animate-pulse">
                             <PlayCircle className="h-3 w-3" /> SEDANG BERLANGSUNG
                           </Badge>
+                        ) : featuredStatus === "done" ? (
+                          <Badge className="bg-white/25 backdrop-blur-sm text-white border-white/30 text-[10px] gap-1">
+                            <CheckCircle className="h-3 w-3" /> SELESAI · MASIH BISA ABSEN
+                          </Badge>
                         ) : (
                           <Badge className="bg-white/25 backdrop-blur-sm text-white border-white/30 text-[10px] gap-1">
                             <Timer className="h-3 w-3" /> JADWAL BERIKUTNYA
