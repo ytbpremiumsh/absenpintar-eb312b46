@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -79,6 +81,7 @@ const TeacherDashboard = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [attendanceMap, setAttendanceMap] = useState<Record<string, string>>({});
   const [existingAttendance, setExistingAttendance] = useState<Record<string, string>>({});
+  const [sessionNote, setSessionNote] = useState<string>("");
   const [savingAttendance, setSavingAttendance] = useState(false);
   const [loadingStudents, setLoadingStudents] = useState(false);
 
@@ -200,15 +203,17 @@ const TeacherDashboard = () => {
     const todayStr = today.toISOString().split("T")[0];
     const { data: existing } = await supabase
       .from("subject_attendance")
-      .select("student_id, status")
+      .select("student_id, status, notes")
       .eq("teaching_schedule_id", schedule.id)
       .eq("date", todayStr);
 
     const existMap: Record<string, string> = {};
     const attMap: Record<string, string> = {};
+    let existingNote = "";
     (existing || []).forEach((e: any) => {
       existMap[e.student_id] = e.status;
       attMap[e.student_id] = e.status;
+      if (e.notes && !existingNote) existingNote = e.notes;
     });
 
     studentsList.forEach(s => {
@@ -217,6 +222,7 @@ const TeacherDashboard = () => {
 
     setExistingAttendance(existMap);
     setAttendanceMap(attMap);
+    setSessionNote(existingNote);
     setLoadingStudents(false);
   };
 
@@ -225,6 +231,7 @@ const TeacherDashboard = () => {
     setSavingAttendance(true);
 
     const todayStr = today.toISOString().split("T")[0];
+    const trimmedNote = sessionNote.trim();
     const records = students.map(s => ({
       student_id: s.id,
       teaching_schedule_id: selectedSchedule.id,
@@ -232,6 +239,7 @@ const TeacherDashboard = () => {
       teacher_id: user.id,
       date: todayStr,
       status: attendanceMap[s.id] || "hadir",
+      notes: trimmedNote || null,
     }));
 
     const { error } = await supabase
@@ -312,11 +320,19 @@ const TeacherDashboard = () => {
       {/* HERO REMINDER: Absensi MAPEL — only 15 min before start or during active teaching schedule */}
       {(() => {
         const currentMin = now.getHours() * 60 + now.getMinutes();
-        const relevant = todaySchedules.find(s => {
+        // Prioritas: aktif > akan datang (≤15 mnt) > terakhir yang sudah selesai (agar tetap bisa absen susulan)
+        const active = todaySchedules.find(s => {
           const start = timeToMinutes(s.start_time);
           const end = timeToMinutes(s.end_time);
-          return (currentMin >= start && currentMin < end) || (start - currentMin > 0 && start - currentMin <= 15);
+          return currentMin >= start && currentMin < end;
         });
+        const upcoming = todaySchedules.find(s => {
+          const start = timeToMinutes(s.start_time);
+          return start - currentMin > 0 && start - currentMin <= 15;
+        });
+        const doneArr = todaySchedules.filter(s => currentMin >= timeToMinutes(s.end_time));
+        const lastDone = doneArr.length ? doneArr[doneArr.length - 1] : null;
+        const relevant = active || upcoming || lastDone;
         if (!relevant) return null;
         const relevantStatus = getStatus(relevant.start_time, relevant.end_time, now);
         const minutesToStart = timeToMinutes(relevant.start_time) - currentMin;
@@ -344,11 +360,12 @@ const TeacherDashboard = () => {
                           </span>
                         </div>
                         <h3 className="text-lg sm:text-xl font-bold leading-tight">
-                          {isComplete ? `Absensi ${relevant.subject_name} Selesai` : relevantStatus === "active" ? `Waktunya Absensi: ${relevant.subject_name}` : `Sebentar Lagi: ${relevant.subject_name}`}
+                          {isComplete ? `Absensi ${relevant.subject_name} Selesai` : relevantStatus === "active" ? `Waktunya Absensi: ${relevant.subject_name}` : relevantStatus === "done" ? `Absen Susulan: ${relevant.subject_name}` : `Sebentar Lagi: ${relevant.subject_name}`}
                         </h3>
                         <p className="text-xs sm:text-sm text-white/80 mt-0.5">
                           Kelas {relevant.class_name} • {relevant.start_time.slice(0,5)}–{relevant.end_time.slice(0,5)}
                           {relevantStatus === "upcoming" && minutesToStart > 0 ? ` • mulai dalam ${minutesToStart} mnt` : ""}
+                          {relevantStatus === "done" ? " • sesi sudah selesai, masih bisa diabsen" : ""}
                           {total > 0 ? ` • ${done}/${total} siswa tercatat` : ""}
                         </p>
                         {total > 0 && (
@@ -410,8 +427,11 @@ const TeacherDashboard = () => {
             </CardContent>
           </Card>
         ) : (() => {
-          const featured = todaySchedules.find(s => getStatus(s.start_time, s.end_time, now) === "active")
-            || todaySchedules.find(s => getStatus(s.start_time, s.end_time, now) === "upcoming");
+          const activeSched = todaySchedules.find(s => getStatus(s.start_time, s.end_time, now) === "active");
+          const upcomingSched = todaySchedules.find(s => getStatus(s.start_time, s.end_time, now) === "upcoming");
+          const doneList = todaySchedules.filter(s => getStatus(s.start_time, s.end_time, now) === "done");
+          const latestDone = doneList.length ? doneList[doneList.length - 1] : null;
+          const featured = activeSched || upcomingSched || latestDone;
           const others = todaySchedules.filter(s => s.id !== featured?.id);
           const featuredStatus = featured ? getStatus(featured.start_time, featured.end_time, now) : null;
           const currentMin = now.getHours() * 60 + now.getMinutes();
@@ -438,6 +458,10 @@ const TeacherDashboard = () => {
                         {featuredStatus === "active" ? (
                           <Badge className="bg-white/25 backdrop-blur-sm text-white border-white/30 text-[10px] gap-1 animate-pulse">
                             <PlayCircle className="h-3 w-3" /> SEDANG BERLANGSUNG
+                          </Badge>
+                        ) : featuredStatus === "done" ? (
+                          <Badge className="bg-white/25 backdrop-blur-sm text-white border-white/30 text-[10px] gap-1">
+                            <CheckCircle className="h-3 w-3" /> SELESAI · MASIH BISA ABSEN
                           </Badge>
                         ) : (
                           <Badge className="bg-white/25 backdrop-blur-sm text-white border-white/30 text-[10px] gap-1">
@@ -506,7 +530,7 @@ const TeacherDashboard = () => {
                           onClick={() => openAttendance(s)}
                           className={cn(
                             "w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all hover:bg-muted/50 group",
-                            status === "done" && "opacity-60",
+                            status === "done" && "opacity-80",
                           )}
                         >
                           <div className="flex flex-col items-center justify-center w-14 shrink-0 py-1 rounded-lg bg-muted/50 font-mono">
@@ -518,15 +542,12 @@ const TeacherDashboard = () => {
                             <p className="font-semibold text-sm truncate">{s.subject_name}</p>
                             <p className="text-[11px] text-muted-foreground truncate">
                               Kelas {s.class_name}{s.room ? ` • ${s.room}` : ""}
+                              {status === "done" ? " • selesai" : ""}
                             </p>
                           </div>
-                          {status === "done" ? (
-                            <Badge variant="secondary" className="text-[9px] shrink-0">Selesai</Badge>
-                          ) : (
-                            <Button size="sm" variant="ghost" className="h-8 px-2 text-[11px] gap-1 shrink-0 group-hover:bg-primary group-hover:text-primary-foreground">
-                              Absen <ChevronRight className="h-3 w-3" />
-                            </Button>
-                          )}
+                          <Button size="sm" variant="ghost" className="h-8 px-2 text-[11px] gap-1 shrink-0 group-hover:bg-primary group-hover:text-primary-foreground">
+                            {status === "done" ? "Absen Susulan" : "Absen"} <ChevronRight className="h-3 w-3" />
+                          </Button>
                         </button>
                       );
                     })}
@@ -617,6 +638,24 @@ const TeacherDashboard = () => {
                   );
                 })}
               </div>
+
+              {/* Catatan Jurnal — tersinkron ke laporan kepala sekolah */}
+              <div className="mt-3 space-y-1.5">
+                <Label htmlFor="session-note" className="text-xs font-semibold flex items-center gap-1">
+                  <BookOpen className="h-3.5 w-3.5 text-primary" />
+                  Catatan Jurnal Mengajar
+                  <span className="text-[10px] font-normal text-muted-foreground">(tersinkron ke Kepsek)</span>
+                </Label>
+                <Textarea
+                  id="session-note"
+                  value={sessionNote}
+                  onChange={(e) => setSessionNote(e.target.value)}
+                  placeholder="Materi yang diajarkan, kendala, atau catatan lain..."
+                  className="rounded-xl text-sm min-h-[80px] resize-none"
+                  rows={3}
+                />
+              </div>
+
 
               <Button
                 onClick={handleSaveAttendance}
