@@ -91,18 +91,27 @@ const SchoolCard = ({ school, index, onDetail, onSubscription, onEdit, onSuspend
                 )}
               </div>
               {/* Admin Contact Info */}
-              {(school.adminEmail || school.adminPhone) && (
-                <div className="flex items-center gap-3 mt-2 flex-wrap">
-                  {school.adminEmail && (
-                    <a href={`mailto:${school.adminEmail}`} className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline">
-                      <Mail className="h-3 w-3" />{school.adminEmail}
-                    </a>
+              {(school.adminEmail || school.adminPhone || school.adminName) && (
+                <div className="mt-2 flex flex-col gap-1">
+                  {school.adminName && (
+                    <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <User className="h-3 w-3" />
+                      <span className="font-medium text-foreground">{school.adminName}</span>
+                      <span className="text-muted-foreground/70">· Penanggung Jawab</span>
+                    </div>
                   )}
-                  {school.adminPhone && (
-                    <a href={`https://wa.me/${school.adminPhone.replace(/^0/, '62').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline">
-                      <Phone className="h-3 w-3" />{school.adminPhone}
-                    </a>
-                  )}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {school.adminEmail && (
+                      <a href={`mailto:${school.adminEmail}`} className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline break-all">
+                        <Mail className="h-3 w-3" />{school.adminEmail}
+                      </a>
+                    )}
+                    {school.adminPhone && (
+                      <a href={`https://wa.me/${school.adminPhone.replace(/^0/, '62').replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline">
+                        <Phone className="h-3 w-3" />{school.adminPhone}
+                      </a>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
