@@ -212,7 +212,8 @@ export function PrincipalDataProvider({ children }: { children: ReactNode }) {
       const readyOnline = invoices
         .filter((i: any) => i.status === "paid" && !i.settlement_id && !isOfflineMethod(i.payment_method))
         .reduce((s: number, i: any) => s + (i.total_amount || 0), 0);
-      const saldoKas = (cashIn - cashOut) + readyOnline;
+      // Saldo Buku Kas = murni kas manual (in - out), sinkron dengan halaman Buku Kas Bendahara
+      const saldoKas = cashIn - cashOut;
       // Menunggu Pencairan = saldo online siap dicairkan (sama definisi dg availableBalance Bendahara)
       const danaPending = readyOnline;
       setFinance({ totalTagihan, totalPembayaran, tunggakan, saldoKas, danaPending });
