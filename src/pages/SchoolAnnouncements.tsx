@@ -211,53 +211,69 @@ const SchoolAnnouncements = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {items.map((a, i) => {
             const cfg = TYPE_OPTIONS.find(t => t.value === a.type) || TYPE_OPTIONS[0];
             const Icon = cfg.icon;
+            const accentSolid = cfg.bg.replace("/10", "");
+            const audienceLabel = AUDIENCE_OPTIONS.find(o => o.value === (a.target_audience || "staff"))?.label || "Staf & Guru";
+            const dateObj = new Date(a.created_at);
+            const dateStr = dateObj.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+            const timeStr = dateObj.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
             return (
-              <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-                <Card className={cn("rounded-2xl border shadow-sm hover:shadow-md transition-all overflow-hidden", a.is_pinned && "ring-1 ring-amber-400/40 bg-gradient-to-br from-amber-50/30 to-transparent dark:from-amber-950/15")}>
-                  <CardContent className="p-0">
-                    <div className="flex items-stretch">
-                      <div className={cn("w-1.5 shrink-0", cfg.bg.replace("/10", ""))} />
-                      <div className="flex-1 p-4 sm:p-5">
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <div className="flex items-start gap-3 min-w-0 flex-1">
-                            <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", cfg.bg)}>
-                              <Icon className={cn("h-5 w-5", cfg.color)} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                                {a.is_pinned && (
-                                  <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30 text-[10px] h-5 px-1.5 gap-0.5">
-                                    <Pin className="h-3 w-3" /> Disematkan
-                                  </Badge>
-                                )}
-                                <Badge variant="outline" className={cn("text-[10px] h-5 px-1.5", cfg.badge)}>{cfg.label}</Badge>
-                                <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-[#5B6CF9]/10 text-[#5B6CF9] border-[#5B6CF9]/30">
-                                  {AUDIENCE_OPTIONS.find(o => o.value === (a.target_audience || "staff"))?.label || "Staf & Guru"}
-                                </Badge>
-                                <span className="text-[11px] text-muted-foreground">
-                                  {new Date(a.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                                </span>
-                              </div>
-                              <h3 className="text-base font-bold text-foreground">{a.title}</h3>
-                              <RichContent html={a.message} className="mt-1 line-clamp-3 [&_img]:hidden [&_*]:!text-sm [&_*]:!text-muted-foreground" />
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" onClick={() => togglePin(a)} title={a.is_pinned ? "Lepas pin" : "Sematkan"}>
-                              <Pin className={cn("h-3.5 w-3.5", a.is_pinned ? "text-amber-600 fill-amber-500" : "text-muted-foreground")} />
-                            </Button>
-                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" onClick={() => openEdit(a)}>
-                              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-                            </Button>
-                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg hover:text-destructive" onClick={() => setDeleteId(a.id)}>
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
+              <motion.div key={a.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
+                <Card className={cn(
+                  "group relative rounded-3xl border border-border/60 bg-card shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 overflow-hidden h-full",
+                  a.is_pinned && "ring-2 ring-amber-400/50 shadow-amber-500/10"
+                )}>
+                  {/* Decorative accent */}
+                  <div className={cn("absolute -top-16 -right-16 h-40 w-40 rounded-full blur-3xl opacity-40 group-hover:opacity-70 transition-opacity", accentSolid)} />
+                  <div className={cn("absolute top-0 left-0 right-0 h-1", accentSolid)} />
+
+                  <CardContent className="relative p-5 sm:p-6 flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={cn("h-11 w-11 rounded-2xl flex items-center justify-center shrink-0 ring-1 ring-inset ring-border/50", cfg.bg)}>
+                          <Icon className={cn("h-5 w-5", cfg.color)} />
+                        </div>
+                        <div className="min-w-0">
+                          <Badge variant="outline" className={cn("text-[10px] h-5 px-2 font-medium tracking-wide uppercase", cfg.badge)}>{cfg.label}</Badge>
+                          <div className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1.5">
+                            <span>{dateStr}</span>
+                            <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/50" />
+                            <span>{timeStr}</span>
                           </div>
                         </div>
+                      </div>
+                      {a.is_pinned && (
+                        <div className="flex items-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-full">
+                          <Pin className="h-3 w-3 fill-current" /> Pinned
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Body */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[15px] sm:text-base font-bold text-foreground leading-snug mb-1.5 line-clamp-2">{a.title}</h3>
+                      <RichContent html={a.message} className="line-clamp-3 [&_img]:hidden [&_*]:!text-[13px] [&_*]:!leading-relaxed [&_*]:!text-muted-foreground" />
+                    </div>
+
+                    {/* Footer */}
+                    <div className="mt-5 pt-4 border-t border-dashed border-border/70 flex items-center justify-between gap-2">
+                      <Badge variant="outline" className="text-[10px] h-6 px-2 gap-1 bg-[#5B6CF9]/10 text-[#5B6CF9] border-[#5B6CF9]/25 font-medium">
+                        <Send className="h-3 w-3" /> {audienceLabel}
+                      </Badge>
+                      <div className="flex items-center gap-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
+                        <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl" onClick={() => togglePin(a)} title={a.is_pinned ? "Lepas pin" : "Sematkan"}>
+                          <Pin className={cn("h-3.5 w-3.5", a.is_pinned ? "text-amber-600 fill-amber-500" : "text-muted-foreground")} />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl" onClick={() => openEdit(a)}>
+                          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl hover:text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(a.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
