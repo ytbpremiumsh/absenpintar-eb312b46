@@ -160,74 +160,67 @@ export function SchoolAnnouncementsWidget({ schoolId, isAdmin = false }: Props) 
               )}
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {items.map((a, i) => {
                 const cfg = TYPE_STYLES[a.type] || TYPE_STYLES.info;
                 const Icon = cfg.icon;
                 return (
                   <motion.button
                     key={a.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.06, type: "spring", stiffness: 260 }}
-                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05, type: "spring", stiffness: 260, damping: 22 }}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.985 }}
                     onClick={() => setSelected(a)}
                     className={cn(
-                      "w-full text-left relative overflow-hidden rounded-2xl border bg-background hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all group",
+                      "w-full text-left relative overflow-hidden rounded-2xl border transition-all group",
+                      "bg-gradient-to-br from-background via-background to-muted/30",
+                      "hover:shadow-[0_8px_28px_-12px_hsl(var(--primary)/0.25)]",
                       a.is_pinned
-                        ? "border-amber-300/60 bg-gradient-to-br from-amber-50 via-card to-card dark:from-amber-950/30"
+                        ? "border-amber-400/50 ring-1 ring-amber-400/20"
                         : "border-border/50 hover:border-primary/40"
                     )}
                   >
-                    {/* Animated colored bar */}
-                    <div className={cn("absolute left-0 top-0 bottom-0 w-1.5 rounded-r", cfg.bar)} />
-                    {/* Glow on hover */}
-                    <div
-                      className={cn(
-                        "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none",
-                        cfg.bar.includes("sky") && "bg-gradient-to-r from-sky-500/5 to-transparent",
-                        cfg.bar.includes("violet") && "bg-gradient-to-r from-violet-500/5 to-transparent",
-                        cfg.bar.includes("red") && "bg-gradient-to-r from-red-500/5 to-transparent",
-                      )}
-                    />
+                    {/* Ambient accent glow */}
+                    <div className={cn(
+                      "absolute -top-8 -right-8 h-24 w-24 rounded-full opacity-0 group-hover:opacity-100 blur-2xl transition-opacity",
+                      cfg.bar.includes("sky") && "bg-sky-500/30",
+                      cfg.bar.includes("violet") && "bg-violet-500/30",
+                      cfg.bar.includes("red") && "bg-red-500/30",
+                    )} />
 
-                    <div className="relative flex items-start gap-3 p-3.5 pl-4">
+                    <div className="relative flex items-center gap-3 p-3">
+                      {/* Compact rounded icon tile */}
                       <div className={cn(
-                        "h-11 w-11 rounded-2xl flex items-center justify-center shrink-0 shadow-md ring-2 ring-white dark:ring-card transition-transform group-hover:scale-110 group-hover:rotate-[-6deg]",
+                        "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105",
                         cfg.iconBg
                       )}>
-                        <Icon className="h-5 w-5 text-white" />
+                        <Icon className="h-4.5 w-4.5 text-white" strokeWidth={2.4} />
                       </div>
+
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                        <div className="flex items-center gap-1.5 mb-0.5">
                           {a.is_pinned && (
-                            <Badge className="bg-amber-500 text-white border-0 text-[9px] h-4 px-1.5 gap-0.5 shadow-sm">
-                              <Pin className="h-2.5 w-2.5" /> Disematkan
-                            </Badge>
+                            <Pin className="h-3 w-3 text-amber-500 shrink-0" fill="currentColor" />
                           )}
-                          <Badge variant="outline" className={cn("text-[9px] h-4 px-1.5 border font-semibold", cfg.badge)}>
-                            {cfg.label}
-                          </Badge>
+                          <p className="text-[13px] font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                            {a.title}
+                          </p>
                         </div>
-                        <p className="text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
-                          {a.title}
-                        </p>
-                        <RichContent
-                          html={a.message}
-                          className="mt-1 line-clamp-2 [&_img]:hidden [&_*]:!text-[12px] [&_*]:!text-muted-foreground [&_*]:!my-0 [&_*]:!leading-snug"
-                        />
+                        <div className="flex items-center gap-1.5 text-[10.5px] text-muted-foreground">
+                          <span className={cn(
+                            "inline-flex items-center h-4 px-1.5 rounded-md font-semibold border",
+                            cfg.badge
+                          )}>
+                            {cfg.label}
+                          </span>
+                          <span className="h-0.5 w-0.5 rounded-full bg-muted-foreground/40" />
+                          <span className="font-medium">{formatRelative(a.created_at)}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col items-end gap-2 shrink-0 self-stretch justify-between py-0.5">
-                        <span className="text-[10px] text-muted-foreground font-medium whitespace-nowrap">
-                          {formatRelative(a.created_at)}
-                        </span>
-                        <span className={cn(
-                          "inline-flex items-center gap-1 h-7 px-3 rounded-full text-[11px] font-semibold text-white shadow-sm transition-all group-hover:shadow-md group-hover:translate-x-0.5 whitespace-nowrap",
-                          cfg.iconBg
-                        )}>
-                          Baca selengkapnya <ChevronRight className="h-3 w-3" />
-                        </span>
-                      </div>
+
+                      <ChevronRight className="h-4 w-4 text-muted-foreground/50 shrink-0 transition-all group-hover:text-primary group-hover:translate-x-0.5" />
                     </div>
                   </motion.button>
                 );
