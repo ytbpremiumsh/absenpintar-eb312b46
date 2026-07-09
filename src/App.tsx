@@ -38,6 +38,8 @@ const WaliKelasAttendance = lazy(() => import("./pages/WaliKelasAttendance"));
 const WaliKelasStudents = lazy(() => import("./pages/WaliKelasStudents"));
 const LeaveRequests = lazy(() => import("./pages/LeaveRequests"));
 const Subscription = lazy(() => import("./pages/Subscription"));
+const PaketSekolah = lazy(() => import("./pages/PaketSekolah"));
+const SuperAdminPaketSekolah = lazy(() => import("./pages/super-admin/SuperAdminPaketSekolah"));
 const PublicMonitoring = lazy(() => import("./pages/PublicMonitoring"));
 const PublicClassMonitoring = lazy(() => import("./pages/PublicClassMonitoring"));
 const PublicAttendanceMonitoring = lazy(() => import("./pages/PublicAttendanceMonitoring"));
@@ -275,6 +277,7 @@ function AppRoutes() {
         </Route>
         <Route element={<SuperAdminLayout />}>
           <Route path="/super-admin" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/paket-sekolah" element={<SuperAdminPaketSekolah />} />
 
           {/* MANAJEMEN */}
           <Route path="/super-admin/sekolah" element={<SuperAdminSekolahHub />} />
@@ -380,6 +383,7 @@ function AppRoutes() {
           <Route path="/subscription" element={<Navigate to="/langganan?tab=paket" replace />} />
           <Route path="/addons" element={<Navigate to="/langganan?tab=addon" replace />} />
           <Route path="/all-features" element={<AllFeatures />} />
+          <Route path="/paket-sekolah" element={<PaketSekolah />} />
           <Route path="/school-settings" element={<SchoolSettings />} />
           <Route path="/holidays" element={<HolidayManagement />} />
           <Route path="/kalender-akademik" element={<KalenderAkademik />} />

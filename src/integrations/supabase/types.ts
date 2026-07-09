@@ -1140,6 +1140,78 @@ export type Database = {
           },
         ]
       }
+      package_audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          reason: string | null
+          school_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          reason?: string | null
+          school_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          reason?: string | null
+          school_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_audit_log_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_audit_log_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      package_settings: {
+        Row: {
+          disabled_features: Json
+          grace_period_days: number
+          id: number
+          mandiri_monthly_rate: number
+          updated_at: string
+        }
+        Insert: {
+          disabled_features?: Json
+          grace_period_days?: number
+          id?: number
+          mandiri_monthly_rate?: number
+          updated_at?: string
+        }
+        Update: {
+          disabled_features?: Json
+          grace_period_days?: number
+          id?: number
+          mandiri_monthly_rate?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       panduan_content: {
         Row: {
           color: string
@@ -2328,9 +2400,14 @@ export type Database = {
           id: string
           installment_enabled: boolean
           is_suspended: boolean
+          last_payment_activity_at: string | null
           logo: string | null
+          mandiri_monthly_rate: number
           name: string
           npsn: string | null
+          package_status: string
+          package_status_changed_at: string | null
+          package_type: string
           principal_name: string | null
           province: string | null
           rfid_mode: string
@@ -2355,9 +2432,14 @@ export type Database = {
           id?: string
           installment_enabled?: boolean
           is_suspended?: boolean
+          last_payment_activity_at?: string | null
           logo?: string | null
+          mandiri_monthly_rate?: number
           name: string
           npsn?: string | null
+          package_status?: string
+          package_status_changed_at?: string | null
+          package_type?: string
           principal_name?: string | null
           province?: string | null
           rfid_mode?: string
@@ -2382,9 +2464,14 @@ export type Database = {
           id?: string
           installment_enabled?: boolean
           is_suspended?: boolean
+          last_payment_activity_at?: string | null
           logo?: string | null
+          mandiri_monthly_rate?: number
           name?: string
           npsn?: string | null
+          package_status?: string
+          package_status_changed_at?: string | null
+          package_type?: string
           principal_name?: string | null
           province?: string | null
           rfid_mode?: string
@@ -3553,6 +3640,7 @@ export type Database = {
     }
     Functions: {
       _fmt_idr: { Args: { amt: number }; Returns: string }
+      check_package_status: { Args: never; Returns: undefined }
       cleanup_old_logs: { Args: never; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
