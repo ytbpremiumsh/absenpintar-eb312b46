@@ -229,6 +229,7 @@ const TeacherDashboard = () => {
     setSavingAttendance(true);
 
     const todayStr = today.toISOString().split("T")[0];
+    const trimmedNote = sessionNote.trim();
     const records = students.map(s => ({
       student_id: s.id,
       teaching_schedule_id: selectedSchedule.id,
@@ -236,6 +237,7 @@ const TeacherDashboard = () => {
       teacher_id: user.id,
       date: todayStr,
       status: attendanceMap[s.id] || "hadir",
+      notes: trimmedNote || null,
     }));
 
     const { error } = await supabase
