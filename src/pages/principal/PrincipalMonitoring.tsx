@@ -70,6 +70,9 @@ export default function PrincipalMonitoring() {
           <TabsTrigger value="pembelajaran" className="gap-1.5 rounded-xl px-4 py-2 text-foreground/70 hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-[#5B6CF9] data-[state=active]:text-white data-[state=active]:shadow-md">
             <BookOpen className="h-4 w-4" /> Pembelajaran
           </TabsTrigger>
+          <TabsTrigger value="jadwal" className="gap-1.5 rounded-xl px-4 py-2 text-foreground/70 hover:text-foreground data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-[#5B6CF9] data-[state=active]:text-white data-[state=active]:shadow-md">
+            <CalendarDays className="h-4 w-4" /> Jadwal Lengkap
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="kehadiran" className="mt-4">
@@ -77,6 +80,9 @@ export default function PrincipalMonitoring() {
         </TabsContent>
         <TabsContent value="pembelajaran" className="mt-4">
           {active === "pembelajaran" && <PrincipalPembelajaran />}
+        </TabsContent>
+        <TabsContent value="jadwal" className="mt-4">
+          {active === "jadwal" && <PrincipalJadwal />}
         </TabsContent>
       </Tabs>
     </div>
