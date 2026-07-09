@@ -46,60 +46,13 @@ interface StudentData {
   photo_url: string | null;
 }
 
-const TrialCountdownBanner = ({ trialDaysLeft, expiresAt, onUpgrade }: { trialDaysLeft: number; expiresAt: string | null; onUpgrade: () => void }) => {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const totalHours = expiresAt ? Math.max(0, Math.floor((new Date(expiresAt).getTime() - now) / (1000 * 60 * 60))) : 0;
-  const days = Math.floor(totalHours / 24);
-  const hours = totalHours % 24;
-  // Progress: assume 14 day trial max
-  const totalTrialMs = 14 * 24 * 60 * 60 * 1000;
-  const remainingMs = expiresAt ? Math.max(0, new Date(expiresAt).getTime() - now) : 0;
-  const progressPct = Math.round((remainingMs / totalTrialMs) * 100);
-  const isUrgent = trialDaysLeft <= 3;
-
-  return (
-    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-      <Card className={`border shadow-sm overflow-hidden ${isUrgent ? "border-orange-300/50 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/20 dark:border-orange-800/40" : "border-violet-200/50 bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-950/30 dark:to-indigo-950/20 dark:border-violet-800/40"}`}>
-        <CardContent className="p-3 sm:p-4">
-          <div className="flex items-center gap-3">
-            <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${isUrgent ? "bg-gradient-to-br from-orange-400 to-amber-500 shadow-md shadow-orange-300/30" : "bg-gradient-to-br from-violet-500 to-indigo-500 shadow-md shadow-violet-300/30"}`}>
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
-            <div className="flex-1 min-w-0 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <p className={`text-xs sm:text-sm font-bold ${isUrgent ? "text-orange-700 dark:text-orange-300" : "text-violet-700 dark:text-violet-300"}`}>
-                  Trial Premium — {days} hari {hours} jam tersisa
-                </p>
-                <Button size="sm" variant="outline" className={`shrink-0 text-[10px] sm:text-xs h-6 sm:h-7 rounded-lg ${isUrgent ? "border-orange-300 text-orange-700 hover:bg-orange-100 dark:border-orange-700 dark:text-orange-300" : "border-violet-300 text-violet-700 hover:bg-violet-100 dark:border-violet-700 dark:text-violet-300"}`} onClick={onUpgrade}>
-                  Upgrade
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <Progress value={progressPct} className={`h-1.5 flex-1 ${isUrgent ? "[&>div]:bg-gradient-to-r [&>div]:from-orange-400 [&>div]:to-amber-500 bg-orange-200/50 dark:bg-orange-900/30" : "[&>div]:bg-gradient-to-r [&>div]:from-violet-500 [&>div]:to-indigo-500 bg-violet-200/50 dark:bg-violet-900/30"}`} />
-                <span className={`text-[10px] font-medium tabular-nums ${isUrgent ? "text-orange-600 dark:text-orange-400" : "text-violet-600 dark:text-violet-400"}`}>{progressPct}%</span>
-              </div>
-              <p className={`text-[10px] ${isUrgent ? "text-orange-600/80 dark:text-orange-400/70" : "text-violet-600/70 dark:text-violet-400/60"}`}>
-                {isUrgent ? "Segera upgrade agar fitur tetap aktif!" : "Nikmati semua fitur premium secara gratis."}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-};
+// TrialCountdownBanner removed — trial system deprecated.
 
 const DAY_NAMES = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 const Dashboard = () => {
   const { profile } = useAuth();
   const subFeatures = useSubscriptionFeatures();
-  const [showTrialPopup, setShowTrialPopup] = useState(false);
   const [totalStudents, setTotalStudents] = useState(0);
   const [totalClasses, setTotalClasses] = useState(0);
   const [waliKelasList, setWaliKelasList] = useState<{ name: string; class_name: string }[]>([]);
@@ -201,13 +154,7 @@ const Dashboard = () => {
     setPeriodLogs(filtered);
   }, [profile?.school_id, chartPeriod]);
 
-  // Show trial popup on first load if user is on trial
-  useEffect(() => {
-    if (!subFeatures.loading && subFeatures.isTrial && subFeatures.trialDaysLeft !== null) {
-      const dismissed = sessionStorage.getItem('trial_popup_dismissed');
-      if (!dismissed) setShowTrialPopup(true);
-    }
-  }, [subFeatures.loading, subFeatures.isTrial, subFeatures.trialDaysLeft]);
+  // Trial popup removed — trial system deprecated.
 
   useEffect(() => {
     fetchData();
@@ -333,57 +280,6 @@ const Dashboard = () => {
   return (
     <MotionConfig transition={{ duration: 0 }}>
     <div className="no-motion space-y-6">
-      <AnimatePresence>
-        {showTrialPopup && subFeatures.isTrial && subFeatures.trialDaysLeft !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-            onClick={() => { setShowTrialPopup(false); sessionStorage.setItem('trial_popup_dismissed', '1'); }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-card border border-border rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center space-y-4"
-            >
-              <button onClick={() => { setShowTrialPopup(false); sessionStorage.setItem('trial_popup_dismissed', '1'); }} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
-                <X className="h-5 w-5" />
-              </button>
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
-                <Crown className="h-8 w-8 text-amber-600 dark:text-amber-400" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground">Masa Trial Aktif!</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Anda sedang dalam masa <span className="font-semibold text-primary">Trial Premium</span> selama{" "}
-                <span className="font-bold text-foreground">{subFeatures.trialDaysLeft} hari lagi</span>.
-                Nikmati semua fitur premium secara gratis!
-              </p>
-              {subFeatures.trialDaysLeft <= 3 && (
-                <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 text-xs text-warning font-medium">
-                  Masa trial hampir berakhir! Upgrade sekarang agar fitur tetap aktif.
-                </div>
-              )}
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => { setShowTrialPopup(false); sessionStorage.setItem('trial_popup_dismissed', '1'); }}>
-                  Nanti
-                </Button>
-                <Button className="flex-1 gradient-primary text-primary-foreground" onClick={() => { setShowTrialPopup(false); sessionStorage.setItem('trial_popup_dismissed', '1'); navigate("/subscription"); }}>
-                  <Crown className="h-4 w-4 mr-1" /> Lihat Paket
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Trial Banner */}
-      {subFeatures.isTrial && subFeatures.trialDaysLeft !== null && (
-        <TrialCountdownBanner trialDaysLeft={subFeatures.trialDaysLeft} expiresAt={subFeatures.trialExpiresAt} onUpgrade={() => navigate("/subscription")} />
-      )}
-
       {/* Holiday Banner */}
       {holidayStatus.isHoliday && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>

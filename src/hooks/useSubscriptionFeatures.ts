@@ -4,8 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 
 export interface PlanFeatures {
   planName: string;
+  /** @deprecated Trial system removed — always false. Kept for backward compatibility. */
   isTrial: boolean;
+  /** @deprecated Trial system removed — always null. */
   trialDaysLeft: number | null;
+  /** @deprecated Trial system removed — always null. */
   trialExpiresAt: string | null;
   canImportExport: boolean;
   canUploadPhoto: boolean;
@@ -111,9 +114,6 @@ export function invalidateSubscriptionEnabledCache() {
 export function useSubscriptionFeatures(): PlanFeatures {
   const { profile } = useAuth();
   const [planName, setPlanName] = useState("Free");
-  const [isTrial, setIsTrial] = useState(false);
-  const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
-  const [trialExpiresAt, setTrialExpiresAt] = useState<string | null>(null);
   const [subscriptionEnabled, setSubscriptionEnabled] = useState<boolean>(true);
   const [loading, setLoading] = useState(true);
 
@@ -130,7 +130,7 @@ export function useSubscriptionFeatures(): PlanFeatures {
         .from("school_subscriptions")
         .select("*, subscription_plans(name)")
         .eq("school_id", profile.school_id)
-        .in("status", ["active", "trial"])
+        .eq("status", "active")
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -138,26 +138,10 @@ export function useSubscriptionFeatures(): PlanFeatures {
       if (data) {
         const sub = data as any;
         const name = sub.subscription_plans?.name || "Free";
-        const isTrialSub = sub.status === "trial";
-
         if (sub.expires_at && new Date(sub.expires_at) < new Date()) {
           setPlanName("Free");
-          setIsTrial(false);
-          setTrialDaysLeft(null);
-          setTrialExpiresAt(null);
         } else {
           setPlanName(name);
-          setIsTrial(isTrialSub);
-          setTrialExpiresAt(sub.expires_at || null);
-          if (isTrialSub && sub.expires_at) {
-            const days = Math.ceil(
-              (new Date(sub.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-            );
-            setTrialDaysLeft(Math.max(0, days));
-          } else {
-            setTrialDaysLeft(null);
-            setTrialExpiresAt(null);
-          }
         }
       }
       setLoading(false);
@@ -179,7 +163,14 @@ export function useSubscriptionFeatures(): PlanFeatures {
   }
 
   const baseFeatures = PLAN_FEATURES[planName] || PLAN_FEATURES.Free;
-  const features = isTrial ? { ...baseFeatures, canFaceRecognition: true } : baseFeatures;
 
-  return { planName, isTrial, trialDaysLeft, trialExpiresAt, subscriptionEnabled, loading, ...features };
+  return {
+    planName,
+    isTrial: false,
+    trialDaysLeft: null,
+    trialExpiresAt: null,
+    subscriptionEnabled,
+    loading,
+    ...baseFeatures,
+  };
 }
