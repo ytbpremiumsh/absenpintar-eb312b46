@@ -78,12 +78,16 @@ const History = () => {
     (async () => {
       const [{ data: sched }, { data: homeroom }] = await Promise.all([
         supabase.from("teaching_schedules").select("class_id").eq("teacher_id", user.id).eq("is_active", true),
-        supabase.from("class_teachers").select("class_id").eq("teacher_id", user.id),
+        supabase.from("class_teachers").select("class_name").eq("user_id", user.id),
       ]);
-      const classIds = [...new Set([...(sched || []).map((d: any) => d.class_id), ...(homeroom || []).map((d: any) => d.class_id)])];
-      if (classIds.length === 0) { setTeacherClasses([]); return; }
-      const { data: classData } = await supabase.from("classes").select("name").in("id", classIds);
-      setTeacherClasses(classData?.map(d => d.name) || []);
+      const homeroomNames = (homeroom || []).map((d: any) => d.class_name).filter(Boolean);
+      const classIds = [...new Set((sched || []).map((d: any) => d.class_id))];
+      let schedNames: string[] = [];
+      if (classIds.length > 0) {
+        const { data: classData } = await supabase.from("classes").select("name").in("id", classIds);
+        schedNames = (classData || []).map(d => d.name);
+      }
+      setTeacherClasses([...new Set([...schedNames, ...homeroomNames])]);
     })();
   }, [isTeacherOnly, user]);
 
