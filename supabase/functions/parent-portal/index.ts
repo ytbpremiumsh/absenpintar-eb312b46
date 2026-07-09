@@ -742,8 +742,21 @@ Deno.serve(async (req) => {
       if (!invoiceId) return json({ error: "invoice_id wajib" });
       if (!amount) return json({ error: "amount wajib" });
 
-      // Untuk MVP, cicilan online diarahkan ke Mayar (gateway paling banyak dipakai).
-      const sppRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/spp-mayar`, {
+      // Resolve gateway per channel — sama seperti spp_pay agar cicilan mengikuti
+      // metode aktif (QRIS/VA/Retail) yang di-set admin, tidak selalu Mayar.
+      const ch = (channel || "va").toString().toLowerCase();
+      const channelKey = ch === "qris" ? "gateway_qris" : ch === "retail" ? "gateway_retail" : "gateway_va";
+      const { data: gwRows } = await supabase
+        .from("platform_settings")
+        .select("key,value")
+        .in("key", [channelKey, "active_payment_gateway"]);
+      const gwMap: Record<string, string> = {};
+      (gwRows || []).forEach((r: any) => { gwMap[r.key] = (r.value || "").toLowerCase(); });
+      const rawGw = gwMap[channelKey] || gwMap.active_payment_gateway || "mayar";
+      const gateway = ["mayar", "doku", "ipaymu"].includes(rawGw) ? rawGw : "mayar";
+      const fnName = gateway === "doku" ? "spp-doku" : gateway === "ipaymu" ? "spp-ipaymu" : "spp-mayar";
+
+      const sppRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/${fnName}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -756,14 +769,15 @@ Deno.serve(async (req) => {
       if (!sppJson?.success) return json({ error: sppJson?.error || "Gagal" });
       return json({
         ok: true,
-        gateway: "mayar",
-        payment_url: sppJson.payment_url,
+        gateway,
+        payment_url: brandPaymentUrl(sppJson.payment_url),
         invoice_id: sppJson.invoice_id,
         installment_id: sppJson.installment_id,
         service_fee: sppJson.service_fee || 0,
         total_charged: sppJson.total_charged || amount,
       });
     }
+
 
     if (action === "school_info") {
       const { data: school } = await supabase
