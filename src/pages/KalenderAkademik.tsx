@@ -17,6 +17,7 @@ import {
 import {
   CalendarOff, CalendarDays, Trash2, Info, Plus, Pencil, Eye,
   BookOpen, PartyPopper, Users, Megaphone, Sparkles, GraduationCap,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { DateRange } from "react-day-picker";
@@ -67,6 +68,7 @@ const KalenderAkademik = () => {
     is_holiday: true,
   });
   const [submitting, setSubmitting] = useState(false);
+  const [year, setYear] = useState<number>(new Date().getFullYear());
 
   useEffect(() => {
     if (!profile?.school_id) { setLoading(false); return; }
@@ -269,27 +271,54 @@ const KalenderAkademik = () => {
       <Card className="border-0 shadow-card overflow-hidden">
         <div className="relative bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] px-5 py-4 text-white">
           <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "18px 18px" }} />
-          <div className="relative flex flex-row items-start justify-between gap-3">
+          <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center shadow-lg">
                 <CalendarDays className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="text-base font-bold tracking-tight">Kalender Akademik</h2>
+                <h2 className="text-base font-bold tracking-tight">Kalender Akademik {year}</h2>
                 <p className="text-[11px] text-white/70 mt-0.5">
                   {canEdit ? "Kelola agenda sekolah dari tombol Tambah Kalender." : "Agenda akademik sekolah — hanya untuk dilihat."}
                 </p>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setYear((y) => y - 1)}
+                className="h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition"
+                aria-label="Tahun sebelumnya"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="min-w-[72px] text-center font-bold text-lg tracking-wide">{year}</div>
+              <button
+                onClick={() => setYear((y) => y + 1)}
+                className="h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition"
+                aria-label="Tahun berikutnya"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              {canEdit && (
+                <Button
+                  size="sm"
+                  className="h-9 ml-2 text-[11px] gap-1 bg-white text-[#0f172a] hover:bg-white/90 border-0 shadow-md font-semibold"
+                  onClick={() => openCreateDialog(new Date())}
+                >
+                  <Plus className="h-3.5 w-3.5" /> Tambah
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-        <CardContent className="space-y-4 pt-5">
+
+        <CardContent className="space-y-5 pt-5">
           <div className="flex flex-wrap gap-1.5">
             {EVENT_TYPES.map((t) => {
               const meta = EVENT_META[t];
               const Icon = meta.icon;
               return (
-                <span key={t} className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold shadow-sm ${meta.badge}`}>
+                <span key={t} className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${meta.badge}`}>
                   <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
                   <Icon className="h-3 w-3" /> {meta.label}
                 </span>
@@ -297,126 +326,140 @@ const KalenderAkademik = () => {
             })}
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="rounded-2xl border border-border bg-gradient-to-br from-background via-background to-[#5B6CF9]/[0.04] p-3 shadow-inner flex justify-center">
-              <Calendar
-                mode="default"
-                onDayClick={() => { /* view only — tambah lewat tombol Tambah Kalender */ }}
-                modifiers={modifiers}
-                modifiersClassNames={{
-                  holiday:      "!bg-red-100 !text-red-700 font-semibold hover:!bg-red-200 dark:!bg-red-950/40 dark:!text-red-300",
-                  exam:         "!bg-amber-100 !text-amber-800 font-semibold hover:!bg-amber-200 dark:!bg-amber-950/40 dark:!text-amber-300",
-                  event:        "!bg-emerald-100 !text-emerald-800 font-semibold hover:!bg-emerald-200 dark:!bg-emerald-950/40 dark:!text-emerald-300",
-                  meeting:      "!bg-sky-100 !text-sky-800 font-semibold hover:!bg-sky-200 dark:!bg-sky-950/40 dark:!text-sky-300",
-                  announcement: "!bg-violet-100 !text-violet-800 font-semibold hover:!bg-violet-200 dark:!bg-violet-950/40 dark:!text-violet-300",
-                  other:        "!bg-slate-100 !text-slate-700 font-semibold hover:!bg-slate-200 dark:!bg-slate-800/60 dark:!text-slate-300",
-                }}
-                className="p-0"
-              />
-            </div>
+          {loading ? (
+            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">Memuat kalender...</div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 12 }, (_, m) => {
+                const monthName = new Date(year, m, 1).toLocaleDateString("id-ID", { month: "long" });
+                const firstDay = new Date(year, m, 1);
+                const daysInMonth = new Date(year, m + 1, 0).getDate();
+                const startOffset = firstDay.getDay(); // 0=Sun
+                const cells: (number | null)[] = [];
+                for (let i = 0; i < startOffset; i++) cells.push(null);
+                for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+                while (cells.length % 7 !== 0) cells.push(null);
 
+                const monthEvents = events.filter((e) => {
+                  const d = new Date(e.date + "T00:00:00");
+                  return d.getFullYear() === year && d.getMonth() === m;
+                });
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[11px] text-muted-foreground">
-                  Total: <span className="font-semibold text-foreground">{events.length}</span> acara
-                </p>
-                {canEdit && (
-                  <Button
-                    size="sm"
-                    className="h-8 text-[11px] gap-1 bg-gradient-to-r from-[#5B6CF9] to-[#4c5ded] hover:from-[#4c5ded] hover:to-[#3f50d8] text-white shadow-md shadow-[#5B6CF9]/30 border-0"
-                    onClick={() => openCreateDialog(new Date())}
-                  >
-                    <Plus className="h-3.5 w-3.5" /> Tambah Kalender
-                  </Button>
-                )}
-              </div>
+                const eventMap: Record<number, CalendarEvent[]> = {};
+                for (const e of monthEvents) {
+                  const day = new Date(e.date + "T00:00:00").getDate();
+                  (eventMap[day] ??= []).push(e);
+                }
 
-              {loading ? (
-                <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">Memuat...</div>
-              ) : events.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border p-8 text-center bg-gradient-to-br from-secondary/30 to-transparent">
-                  <div className="mx-auto h-12 w-12 rounded-2xl bg-[#5B6CF9]/10 flex items-center justify-center mb-2">
-                    <CalendarDays className="h-6 w-6 text-[#5B6CF9]" />
-                  </div>
-                  <p className="text-sm font-semibold text-foreground">Belum ada acara akademik</p>
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    {canEdit ? "Klik tombol Tambah Kalender untuk memulai." : "Menunggu admin sekolah menambahkan acara."}
-                  </p>
-                </div>
-              ) : (
-                <div className="max-h-[420px] overflow-y-auto space-y-2 pr-1">
-                  {groupedEvents.map((g) => {
-                    const first = g.items[0];
-                    const meta = EVENT_META[first.event_type];
-                    const Icon = meta.icon;
-                    const startObj = new Date(g.startDate + "T00:00:00");
-                    const endObj = new Date(g.endDate + "T00:00:00");
-                    const isRange = g.items.length > 1;
-                    const fmtFull = (d: Date) => d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-                    const fmtShort = (d: Date) => d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
-                    return (
-                      <div key={g.key} className="group relative flex items-stretch gap-3 rounded-xl bg-card px-3 py-2.5 border border-border/60 shadow-sm hover:shadow-md hover:border-[#5B6CF9]/30 transition-all overflow-hidden">
-                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${meta.dot}`} />
-                        <div className={`shrink-0 h-12 w-12 rounded-xl flex flex-col items-center justify-center ${meta.solid}`}>
-                          <span className="text-[9px] font-semibold uppercase leading-none opacity-80">
-                            {startObj.toLocaleDateString("id-ID", { month: "short" })}
-                          </span>
-                          <span className="text-lg font-bold leading-none mt-0.5">
-                            {isRange ? `${startObj.getDate()}–${endObj.getDate()}` : startObj.getDate()}
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1 pl-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold ${meta.badge}`}>
-                              <Icon className="h-2.5 w-2.5" /> {meta.label}
-                            </span>
-                            {first.is_holiday && (
-                              <Badge className="bg-red-50 text-red-600 border border-red-100 text-[9px] h-4 px-1.5 dark:bg-red-950/30 dark:text-red-300 dark:border-red-900/50">Libur</Badge>
-                            )}
-                            {isRange && (
-                              <span className="inline-flex items-center rounded-full bg-secondary text-muted-foreground text-[9px] font-medium px-1.5 py-0.5 border border-border/60">
-                                {g.items.length} hari
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[11px] font-medium text-muted-foreground mt-1">
-                            {isRange ? `${fmtShort(startObj)} — ${fmtShort(endObj)}` : fmtFull(startObj)}
-                          </p>
-                          {first.label && <p className="text-xs font-semibold text-foreground mt-0.5 truncate">{first.label}</p>}
-                          {first.description && <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{first.description}</p>}
-                        </div>
-                        {canEdit && (
-                          <div className="flex flex-col gap-1 shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(first)}>
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={async () => {
-                                if (isRange) {
-                                  if (!confirm(`Hapus semua ${g.items.length} acara dalam rentang ini?`)) return;
-                                  for (const it of g.items) await handleRemove(it.id);
-                                } else {
-                                  await handleRemove(first.id);
-                                }
-                              }}
-                            >
-                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                            </Button>
-                          </div>
-                        )}
+                return (
+                  <div key={m} className="rounded-2xl border border-border bg-card p-3 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-baseline justify-between mb-2 px-1">
+                      <h3 className="text-sm font-bold tracking-tight">{monthName}</h3>
+                      <span className="text-[10px] font-mono font-semibold text-muted-foreground">
+                        {String(m + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-bold uppercase tracking-wider mb-1">
+                      {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d, i) => (
+                        <div key={d} className={i === 0 ? "text-red-500 py-1" : "text-muted-foreground py-1"}>{d}</div>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-0.5">
+                      {cells.map((day, idx) => {
+                        if (day === null) return <div key={idx} className="aspect-square" />;
+                        const dayEvents = eventMap[day] || [];
+                        const dow = (startOffset + day - 1) % 7;
+                        const isSunday = dow === 0;
+                        const primary = dayEvents[0];
+                        const isHoliday = dayEvents.some((e) => e.is_holiday) || isSunday;
+                        const meta = primary ? EVENT_META[primary.event_type] : null;
+
+                        let cellClass = "text-foreground";
+                        if (primary?.is_holiday) cellClass = "bg-red-500 text-white font-bold shadow-sm shadow-red-500/40";
+                        else if (primary && meta) cellClass = `${meta.badge} font-semibold`;
+                        else if (isSunday) cellClass = "text-red-500 font-semibold";
+
+                        const title = dayEvents.map((e) => e.label || EVENT_META[e.event_type].label).join(" · ");
+
+                        return (
+                          <button
+                            key={idx}
+                            title={title || undefined}
+                            onClick={() => primary && canEdit && openEditDialog(primary)}
+                            className={`aspect-square rounded-lg text-[11px] flex items-center justify-center transition ${cellClass} ${primary && canEdit ? "cursor-pointer hover:ring-2 hover:ring-[#5B6CF9]/40" : primary ? "cursor-help" : ""}`}
+                          >
+                            {day}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {monthEvents.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-border/60 space-y-1">
+                        {(() => {
+                          // Group consecutive same-meta events into ranges within this month
+                          const sorted = [...monthEvents].sort((a, b) => a.date.localeCompare(b.date));
+                          const groups: { items: CalendarEvent[] }[] = [];
+                          for (const e of sorted) {
+                            const last = groups[groups.length - 1];
+                            const sameMeta = last
+                              && last.items[0].event_type === e.event_type
+                              && last.items[0].is_holiday === e.is_holiday
+                              && (last.items[0].label || "") === (e.label || "");
+                            const prevDay = last ? new Date(last.items[last.items.length - 1].date + "T00:00:00").getDate() : 0;
+                            const curDay = new Date(e.date + "T00:00:00").getDate();
+                            if (sameMeta && curDay - prevDay === 1) last.items.push(e);
+                            else groups.push({ items: [e] });
+                          }
+                          return groups.map((g, gi) => {
+                            const first = g.items[0];
+                            const last = g.items[g.items.length - 1];
+                            const meta = EVENT_META[first.event_type];
+                            const startDay = new Date(first.date + "T00:00:00").getDate();
+                            const endDay = new Date(last.date + "T00:00:00").getDate();
+                            const dayLabel = g.items.length > 1 ? `${startDay}–${endDay}` : String(startDay);
+                            return (
+                              <div key={gi} className="flex items-start gap-2 text-[11px] leading-snug">
+                                <span className={`shrink-0 min-w-[34px] text-center rounded px-1 py-0.5 font-bold ${meta.badge}`}>
+                                  {dayLabel}
+                                </span>
+                                <span className="min-w-0 flex-1 pt-0.5">
+                                  <span className="font-semibold text-foreground">{first.label || meta.label}</span>
+                                  {first.is_holiday && (
+                                    <span className="ml-1 text-[9px] font-semibold text-red-500">• Libur</span>
+                                  )}
+                                </span>
+                                {canEdit && (
+                                  <button
+                                    onClick={async () => {
+                                      if (g.items.length > 1) {
+                                        if (!confirm(`Hapus ${g.items.length} acara?`)) return;
+                                        for (const it of g.items) await handleRemove(it.id);
+                                      } else {
+                                        await handleRemove(first.id);
+                                      }
+                                    }}
+                                    className="opacity-40 hover:opacity-100 shrink-0"
+                                  >
+                                    <Trash2 className="h-3 w-3 text-destructive" />
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          });
+                        })()}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
+
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
