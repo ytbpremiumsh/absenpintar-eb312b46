@@ -148,10 +148,12 @@ const KalenderAkademik = () => {
       from = range.from;
       to = range.to ?? range.from;
     }
+    const isRange = toDateKey(from) !== toDateKey(to);
     setEditingEvent(null);
     setDialogDate(toDateKey(from));
     setDialogEndDate(toDateKey(to));
     setSelectedRange({ from, to });
+    setDateMode(isRange ? "range" : "single");
     setForm({ label: "", description: "", event_type: "holiday", is_holiday: true });
     setDialogOpen(true);
   };
