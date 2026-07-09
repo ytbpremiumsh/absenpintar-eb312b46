@@ -70,6 +70,7 @@ const KalenderAkademik = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [dateMode, setDateMode] = useState<"single" | "range">("single");
 
   useEffect(() => {
     if (!profile?.school_id) { setLoading(false); return; }
