@@ -3,10 +3,11 @@ import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Activity, UserCheck, BookOpen, GraduationCap, Users, Clock, UserX,
+  Activity, UserCheck, BookOpen, GraduationCap, Users, Clock, UserX, CalendarDays,
 } from "lucide-react";
 import PrincipalKehadiran from "./PrincipalKehadiran";
 import PrincipalPembelajaran from "./PrincipalPembelajaran";
+import PrincipalJadwal from "@/components/principal/PrincipalJadwal";
 import { usePrincipalData } from "@/hooks/usePrincipalData";
 
 function OverviewStat({ icon: Icon, label, value, sub, tone }: {
