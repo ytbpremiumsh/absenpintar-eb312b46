@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { School, Users, User, Eye, CreditCard, Pencil, Mail, Phone, Ban, PlayCircle, Trash2 } from "lucide-react";
+import { School, Users, Eye, CreditCard, Pencil, Ban, PlayCircle, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export interface SchoolData {
