@@ -35,12 +35,12 @@ interface CalendarEvent {
 }
 
 const EVENT_META: Record<EventType, { label: string; icon: any; badge: string; solid: string; ring: string; dot: string; tile: string }> = {
-  holiday:      { label: "Libur / Tanggal Merah", icon: CalendarOff,   badge: "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border-red-200 dark:from-red-950/40 dark:to-rose-950/40 dark:text-red-300 dark:border-red-900",                   solid: "bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-md shadow-red-500/30",       ring: "ring-red-400/70",     dot: "bg-red-500",     tile: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-300 dark:border-red-900/60" },
-  exam:         { label: "Ujian",                  icon: GraduationCap, badge: "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-800 border-amber-200 dark:from-amber-950/40 dark:to-yellow-950/40 dark:text-amber-300 dark:border-amber-900",   solid: "bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/30", ring: "ring-amber-400/70",   dot: "bg-amber-500",   tile: "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-900/60" },
-  event:        { label: "Kegiatan / Acara",       icon: PartyPopper,   badge: "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 border-emerald-200 dark:from-emerald-950/40 dark:to-teal-950/40 dark:text-emerald-300 dark:border-emerald-900", solid: "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/30", ring: "ring-emerald-400/70", dot: "bg-emerald-500", tile: "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900/60" },
-  meeting:      { label: "Rapat",                  icon: Users,         badge: "bg-gradient-to-r from-sky-50 to-blue-50 text-sky-800 border-sky-200 dark:from-sky-950/40 dark:to-blue-950/40 dark:text-sky-300 dark:border-sky-900",                     solid: "bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/30",       ring: "ring-sky-400/70",     dot: "bg-sky-500",     tile: "bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900/60" },
-  announcement: { label: "Pengumuman",             icon: Megaphone,     badge: "bg-gradient-to-r from-violet-50 to-fuchsia-50 text-violet-800 border-violet-200 dark:from-violet-950/40 dark:to-fuchsia-950/40 dark:text-violet-300 dark:border-violet-900", solid: "bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white shadow-md shadow-violet-500/30", ring: "ring-violet-400/70",  dot: "bg-violet-500",  tile: "bg-violet-50 text-violet-800 border-violet-200 dark:bg-violet-950/30 dark:text-violet-300 dark:border-violet-900/60" },
-  other:        { label: "Lainnya",                icon: Sparkles,      badge: "bg-gradient-to-r from-slate-50 to-zinc-50 text-slate-700 border-slate-200 dark:from-slate-900/60 dark:to-zinc-900/60 dark:text-slate-300 dark:border-slate-800",         solid: "bg-gradient-to-br from-slate-500 to-zinc-600 text-white shadow-md shadow-slate-500/30",  ring: "ring-slate-400/70",   dot: "bg-slate-500",   tile: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900/40 dark:text-slate-300 dark:border-slate-800" },
+  holiday:      { label: "Libur / Tanggal Merah", icon: CalendarOff,   badge: "bg-red-50 text-red-600 border-red-100 dark:bg-red-950/30 dark:text-red-300 dark:border-red-900/50",             solid: "bg-red-50 text-red-600 border border-red-100 dark:bg-red-950/30 dark:text-red-300 dark:border-red-900/50",           ring: "ring-red-300/60",     dot: "bg-red-400",     tile: "bg-red-50 text-red-600 border-red-100 dark:bg-red-950/20 dark:text-red-300 dark:border-red-900/40" },
+  exam:         { label: "Ujian",                  icon: GraduationCap, badge: "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-900/50",   solid: "bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-900/50", ring: "ring-amber-300/60",   dot: "bg-amber-400",   tile: "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-300 dark:border-amber-900/40" },
+  event:        { label: "Kegiatan / Acara",       icon: PartyPopper,   badge: "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900/50", solid: "bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900/50", ring: "ring-emerald-300/60", dot: "bg-emerald-400", tile: "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-300 dark:border-emerald-900/40" },
+  meeting:      { label: "Rapat",                  icon: Users,         badge: "bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900/50",             solid: "bg-sky-50 text-sky-700 border border-sky-100 dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900/50",         ring: "ring-sky-300/60",     dot: "bg-sky-400",     tile: "bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-950/20 dark:text-sky-300 dark:border-sky-900/40" },
+  announcement: { label: "Pengumuman",             icon: Megaphone,     badge: "bg-violet-50 text-violet-700 border-violet-100 dark:bg-violet-950/30 dark:text-violet-300 dark:border-violet-900/50", solid: "bg-violet-50 text-violet-700 border border-violet-100 dark:bg-violet-950/30 dark:text-violet-300 dark:border-violet-900/50", ring: "ring-violet-300/60",  dot: "bg-violet-400",  tile: "bg-violet-50 text-violet-700 border-violet-100 dark:bg-violet-950/20 dark:text-violet-300 dark:border-violet-900/40" },
+  other:        { label: "Lainnya",                icon: Sparkles,      badge: "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-900/40 dark:text-slate-300 dark:border-slate-800",         solid: "bg-slate-50 text-slate-600 border border-slate-200 dark:bg-slate-900/40 dark:text-slate-300 dark:border-slate-800",   ring: "ring-slate-300/60",   dot: "bg-slate-400",   tile: "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-900/30 dark:text-slate-300 dark:border-slate-800" },
 };
 
 const EVENT_TYPES: EventType[] = ["holiday", "exam", "event", "meeting", "announcement", "other"];
@@ -107,6 +107,32 @@ const KalenderAkademik = () => {
     }
     return { holiday, exam, event, meeting, announcement, other };
   }, [eventsByDate]);
+
+  // Group consecutive dates with identical (event_type, is_holiday, label, description) into one range
+  const groupedEvents = useMemo(() => {
+    const sorted = [...events].sort((a, b) => a.date.localeCompare(b.date));
+    const groups: { key: string; items: CalendarEvent[]; startDate: string; endDate: string }[] = [];
+    for (const e of sorted) {
+      const last = groups[groups.length - 1];
+      const sameMeta = last
+        && last.items[0].event_type === e.event_type
+        && last.items[0].is_holiday === e.is_holiday
+        && (last.items[0].label || "") === (e.label || "")
+        && (last.items[0].description || "") === (e.description || "");
+      const prevDate = last ? new Date(last.endDate + "T00:00:00") : null;
+      const curDate = new Date(e.date + "T00:00:00");
+      const consecutive = prevDate && (curDate.getTime() - prevDate.getTime()) === 86400000;
+      if (sameMeta && consecutive) {
+        last!.items.push(e);
+        last!.endDate = e.date;
+      } else {
+        groups.push({ key: e.id, items: [e], startDate: e.date, endDate: e.date });
+      }
+    }
+    return groups;
+  }, [events]);
+
+
 
 
   const openCreateDialog = (range: DateRange | Date) => {
@@ -278,12 +304,12 @@ const KalenderAkademik = () => {
                 onDayClick={() => { /* view only — tambah lewat tombol Tambah Kalender */ }}
                 modifiers={modifiers}
                 modifiersClassNames={{
-                  holiday:      "!bg-gradient-to-br !from-red-500 !to-rose-600 !text-white font-bold shadow-md shadow-red-500/30 hover:!from-red-600 hover:!to-rose-700",
-                  exam:         "!bg-gradient-to-br !from-amber-400 !to-orange-500 !text-white font-bold shadow-md shadow-amber-500/30",
-                  event:        "!bg-gradient-to-br !from-emerald-400 !to-teal-500 !text-white font-bold shadow-md shadow-emerald-500/30",
-                  meeting:      "!bg-gradient-to-br !from-sky-400 !to-blue-500 !text-white font-bold shadow-md shadow-sky-500/30",
-                  announcement: "!bg-gradient-to-br !from-violet-400 !to-fuchsia-500 !text-white font-bold shadow-md shadow-violet-500/30",
-                  other:        "!bg-gradient-to-br !from-slate-400 !to-zinc-500 !text-white font-bold shadow-md shadow-slate-500/30",
+                  holiday:      "!bg-red-100 !text-red-700 font-semibold hover:!bg-red-200 dark:!bg-red-950/40 dark:!text-red-300",
+                  exam:         "!bg-amber-100 !text-amber-800 font-semibold hover:!bg-amber-200 dark:!bg-amber-950/40 dark:!text-amber-300",
+                  event:        "!bg-emerald-100 !text-emerald-800 font-semibold hover:!bg-emerald-200 dark:!bg-emerald-950/40 dark:!text-emerald-300",
+                  meeting:      "!bg-sky-100 !text-sky-800 font-semibold hover:!bg-sky-200 dark:!bg-sky-950/40 dark:!text-sky-300",
+                  announcement: "!bg-violet-100 !text-violet-800 font-semibold hover:!bg-violet-200 dark:!bg-violet-950/40 dark:!text-violet-300",
+                  other:        "!bg-slate-100 !text-slate-700 font-semibold hover:!bg-slate-200 dark:!bg-slate-800/60 dark:!text-slate-300",
                 }}
                 className="p-0"
               />
@@ -320,19 +346,24 @@ const KalenderAkademik = () => {
                 </div>
               ) : (
                 <div className="max-h-[420px] overflow-y-auto space-y-2 pr-1">
-                  {events.map((e) => {
-                    const meta = EVENT_META[e.event_type];
+                  {groupedEvents.map((g) => {
+                    const first = g.items[0];
+                    const meta = EVENT_META[first.event_type];
                     const Icon = meta.icon;
-                    const dateObj = new Date(e.date + "T00:00:00");
+                    const startObj = new Date(g.startDate + "T00:00:00");
+                    const endObj = new Date(g.endDate + "T00:00:00");
+                    const isRange = g.items.length > 1;
+                    const fmtFull = (d: Date) => d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+                    const fmtShort = (d: Date) => d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
                     return (
-                      <div key={e.id} className="group relative flex items-stretch gap-3 rounded-xl bg-card px-3 py-2.5 border border-border/60 shadow-sm hover:shadow-md hover:border-[#5B6CF9]/30 transition-all overflow-hidden">
+                      <div key={g.key} className="group relative flex items-stretch gap-3 rounded-xl bg-card px-3 py-2.5 border border-border/60 shadow-sm hover:shadow-md hover:border-[#5B6CF9]/30 transition-all overflow-hidden">
                         <div className={`absolute left-0 top-0 bottom-0 w-1 ${meta.dot}`} />
                         <div className={`shrink-0 h-12 w-12 rounded-xl flex flex-col items-center justify-center ${meta.solid}`}>
-                          <span className="text-[9px] font-semibold uppercase leading-none opacity-90">
-                            {dateObj.toLocaleDateString("id-ID", { month: "short" })}
+                          <span className="text-[9px] font-semibold uppercase leading-none opacity-80">
+                            {startObj.toLocaleDateString("id-ID", { month: "short" })}
                           </span>
                           <span className="text-lg font-bold leading-none mt-0.5">
-                            {dateObj.getDate()}
+                            {isRange ? `${startObj.getDate()}–${endObj.getDate()}` : startObj.getDate()}
                           </span>
                         </div>
                         <div className="min-w-0 flex-1 pl-1">
@@ -340,22 +371,39 @@ const KalenderAkademik = () => {
                             <span className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold ${meta.badge}`}>
                               <Icon className="h-2.5 w-2.5" /> {meta.label}
                             </span>
-                            {e.is_holiday && (
-                              <Badge className="bg-gradient-to-r from-red-500 to-rose-600 text-white border-0 text-[9px] h-4 px-1.5 shadow-sm">Libur</Badge>
+                            {first.is_holiday && (
+                              <Badge className="bg-red-50 text-red-600 border border-red-100 text-[9px] h-4 px-1.5 dark:bg-red-950/30 dark:text-red-300 dark:border-red-900/50">Libur</Badge>
+                            )}
+                            {isRange && (
+                              <span className="inline-flex items-center rounded-full bg-secondary text-muted-foreground text-[9px] font-medium px-1.5 py-0.5 border border-border/60">
+                                {g.items.length} hari
+                              </span>
                             )}
                           </div>
                           <p className="text-[11px] font-medium text-muted-foreground mt-1">
-                            {dateObj.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                            {isRange ? `${fmtShort(startObj)} — ${fmtShort(endObj)}` : fmtFull(startObj)}
                           </p>
-                          {e.label && <p className="text-xs font-semibold text-foreground mt-0.5 truncate">{e.label}</p>}
-                          {e.description && <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{e.description}</p>}
+                          {first.label && <p className="text-xs font-semibold text-foreground mt-0.5 truncate">{first.label}</p>}
+                          {first.description && <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{first.description}</p>}
                         </div>
                         {canEdit && (
                           <div className="flex flex-col gap-1 shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(e)}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(first)}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemove(e.id)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={async () => {
+                                if (isRange) {
+                                  if (!confirm(`Hapus semua ${g.items.length} acara dalam rentang ini?`)) return;
+                                  for (const it of g.items) await handleRemove(it.id);
+                                } else {
+                                  await handleRemove(first.id);
+                                }
+                              }}
+                            >
                               <Trash2 className="h-3.5 w-3.5 text-destructive" />
                             </Button>
                           </div>
