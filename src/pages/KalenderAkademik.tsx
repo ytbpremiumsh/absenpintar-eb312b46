@@ -366,37 +366,34 @@ const KalenderAkademik = () => {
 
           <div className="space-y-4">
             {!editingEvent && (
-              <div className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-secondary/30 p-3">
-                <div>
-                  <Label className="text-xs">Tanggal Mulai</Label>
-                  <Input
-                    type="date"
-                    value={dialogDate || ""}
-                    onChange={(e) => {
-                      const v = e.target.value || null;
-                      setDialogDate(v);
-                      if (v && (!dialogEndDate || dialogEndDate < v)) setDialogEndDate(v);
+              <div className="rounded-lg border border-border bg-secondary/30 p-3 space-y-2">
+                <Label className="text-xs font-semibold">Pilih Rentang Tanggal</Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Klik tanggal mulai, lalu tarik/klik tanggal akhir untuk memilih rentang.
+                </p>
+                <div className="flex justify-center">
+                  <Calendar
+                    mode="range"
+                    selected={selectedRange}
+                    onSelect={(r) => {
+                      setSelectedRange(r);
+                      if (r?.from) {
+                        setDialogDate(toDateKey(r.from));
+                        setDialogEndDate(toDateKey(r.to ?? r.from));
+                      }
                     }}
-                    className="mt-1 h-9 text-sm"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">Tanggal Selesai</Label>
-                  <Input
-                    type="date"
-                    value={dialogEndDate || dialogDate || ""}
-                    min={dialogDate || undefined}
-                    onChange={(e) => setDialogEndDate(e.target.value || dialogDate)}
-                    className="mt-1 h-9 text-sm"
+                    numberOfMonths={1}
+                    className="p-0 pointer-events-auto"
                   />
                 </div>
                 {dialogDate && dialogEndDate && dialogEndDate !== dialogDate && (
-                  <p className="col-span-2 text-[11px] text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground text-center">
                     Rentang: <strong className="text-foreground">{Math.round((new Date(dialogEndDate + "T00:00:00").getTime() - new Date(dialogDate + "T00:00:00").getTime()) / 86400000) + 1} hari</strong> — akan dibuat 1 entri per tanggal.
                   </p>
                 )}
               </div>
             )}
+
 
             <div>
               <Label className="text-xs">Jenis Acara</Label>
