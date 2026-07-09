@@ -255,6 +255,29 @@ export default function LaporanSettlement() {
         }
       />
 
+      {/* Saldo Aktif - Highlight Card */}
+      {(() => {
+        const activeBalance = paidSummary.unsettledGross;
+        const onlineGross = paidSummary.settledGross + paidSummary.unsettledGross;
+        const lockedGross = paidSummary.settledGross;
+        return (
+          <Card className="border-0 shadow-md bg-gradient-to-br from-[#5B6CF9] via-[#4c5ded] to-[#3D4FE0] text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
+            <CardContent className="p-5 relative">
+              <div className="flex items-center gap-2 mb-1">
+                <Wallet className="h-4 w-4" />
+                <p className="text-xs font-medium opacity-90">Saldo Aktif (Siap Dicairkan)</p>
+                <span className="ml-auto inline-flex items-center gap-1 text-[10px] bg-white/20 px-2 py-0.5 rounded-full">
+                  <span className="h-1.5 w-1.5 bg-white rounded-full animate-pulse" /> LIVE
+                </span>
+              </div>
+              <p className="text-3xl md:text-4xl font-extrabold tracking-tight">{fmtIDR(activeBalance)}</p>
+              <p className="text-[11px] opacity-80 mt-1">Total Bruto {fmtIDR(onlineGross)} − Sudah/akan dicairkan {fmtIDR(lockedGross)}</p>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:w-fit gap-1 bg-indigo-50 dark:bg-indigo-950/40 p-1 rounded-xl border border-indigo-200/60 dark:border-indigo-800/60">
           <TabsTrigger
