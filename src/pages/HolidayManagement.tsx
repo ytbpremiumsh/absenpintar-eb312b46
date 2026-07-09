@@ -485,7 +485,15 @@ const HolidayManagement = () => {
           <DialogHeader>
             <DialogTitle>{editingEvent ? "Ubah Acara" : "Tambah Acara Kalender"}</DialogTitle>
             <DialogDescription>
-              {dialogDate && new Date(dialogDate + "T00:00:00").toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              {dialogDate && (() => {
+                const start = new Date(dialogDate + "T00:00:00");
+                const end = new Date((dialogEndDate || dialogDate) + "T00:00:00");
+                const sameDay = dialogDate === (dialogEndDate || dialogDate);
+                const fmt = (d: Date) => d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+                if (sameDay) return fmt(start);
+                const days = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+                return `${fmt(start)} — ${fmt(end)} (${days} hari)`;
+              })()}
             </DialogDescription>
           </DialogHeader>
 
