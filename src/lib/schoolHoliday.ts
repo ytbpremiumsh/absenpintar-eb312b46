@@ -21,7 +21,7 @@ const DAY_LABELS: Record<number, string> = {
 export async function fetchSchoolHolidayStatus(schoolId: string, when: Date = new Date()): Promise<HolidayStatus> {
   const [sRes, hRes] = await Promise.all([
     supabase.from("schools").select("holiday_mode, holiday_mode_label, holiday_days").eq("id", schoolId).maybeSingle(),
-    supabase.from("school_holidays").select("date, label").eq("school_id", schoolId).eq("date", dateKey(when)).maybeSingle(),
+    supabase.from("school_holidays").select("date, label").eq("school_id", schoolId).eq("date", dateKey(when)).eq("is_holiday", true).limit(1).maybeSingle(),
   ]);
   const s: any = sRes.data || {};
   const mode = !!s.holiday_mode;
