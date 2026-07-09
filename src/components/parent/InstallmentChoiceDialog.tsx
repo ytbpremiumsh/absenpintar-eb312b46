@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, CheckCircle2, Clock, Loader2, ArrowRight, Coins } from "lucide-react";
+import { Wallet, CheckCircle2, Clock, Loader2, ArrowRight, Coins, ExternalLink } from "lucide-react";
 
 const fmtIDR = (n: number) => `Rp ${(n || 0).toLocaleString("id-ID")}`;
 
@@ -13,6 +13,8 @@ export type InstallmentSummary = {
   invoice: any;
   installments: any[];
   locked_amount: number;
+  paid_amount?: number;
+  pending_amount?: number;
   remaining: number;
 };
 
@@ -23,9 +25,10 @@ interface Props {
   loading: boolean;
   summary: InstallmentSummary | null;
   onContinue: (mode: "full" | "installment", amount: number) => void;
+  onResumePending?: (installment: any) => void;
 }
 
-export function InstallmentChoiceDialog({ open, onClose, invoice, loading, summary, onContinue }: Props) {
+export function InstallmentChoiceDialog({ open, onClose, invoice, loading, summary, onContinue, onResumePending }: Props) {
   const [mode, setMode] = useState<"full" | "installment">("installment");
   const [amount, setAmount] = useState("");
 
@@ -36,7 +39,8 @@ export function InstallmentChoiceDialog({ open, onClose, invoice, loading, summa
   if (!invoice) return null;
   const total = invoice.total_amount || 0;
   const remaining = summary?.remaining ?? total;
-  const paid = total - remaining;
+  const paid = summary?.paid_amount ?? Math.max(0, total - remaining);
+  const pendingAmt = summary?.pending_amount ?? 0;
   const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
   const nominal = mode === "full" ? remaining : (Number(amount.replace(/\D/g, "")) || 0);
   const canContinue = nominal >= 10000 && nominal <= remaining && remaining > 0;
@@ -62,10 +66,16 @@ export function InstallmentChoiceDialog({ open, onClose, invoice, loading, summa
             {/* Progress ringkasan */}
             <div className="rounded-xl bg-gradient-to-br from-[#5B6CF9]/10 to-[#5B6CF9]/5 border border-[#5B6CF9]/20 p-3 space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Sudah dibayar</span>
+                <span className="text-muted-foreground">Sudah dibayar (valid)</span>
                 <span className="font-bold">{fmtIDR(paid)} / {fmtIDR(total)}</span>
               </div>
               <Progress value={pct} className="h-2" />
+              {pendingAmt > 0 && (
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-muted-foreground">Menunggu pembayaran</span>
+                  <span className="font-semibold text-amber-600">{fmtIDR(pendingAmt)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Sisa</span>
                 <span className={`font-bold ${remaining > 0 ? "text-amber-600" : "text-emerald-600"}`}>
@@ -146,22 +156,36 @@ export function InstallmentChoiceDialog({ open, onClose, invoice, loading, summa
                 {summary.installments.map((r) => {
                   const isPaid = r.status === "paid";
                   const isPending = r.status === "pending";
+                  const expiredMs = r.expired_at ? new Date(r.expired_at).getTime() : 0;
+                  const canResume = isPending && r.mayar_payment_url && (!expiredMs || expiredMs > Date.now());
                   return (
-                    <div key={r.id} className="flex items-center justify-between rounded-lg border p-2 text-xs">
-                      <div>
-                        <p className="font-bold">{fmtIDR(r.amount)}</p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {r.paid_at
-                            ? new Date(r.paid_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })
-                            : new Date(r.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}
-                        </p>
+                    <div key={r.id} className="rounded-lg border p-2 text-xs space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold">{fmtIDR(r.amount)}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {r.paid_at
+                              ? new Date(r.paid_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })
+                              : new Date(r.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}
+                          </p>
+                        </div>
+                        {isPaid ? (
+                          <Badge className="bg-emerald-500 text-white border-0 gap-1"><CheckCircle2 className="h-2.5 w-2.5" /> Lunas</Badge>
+                        ) : isPending ? (
+                          <Badge className="bg-amber-500 text-white border-0 gap-1"><Clock className="h-2.5 w-2.5" /> Menunggu</Badge>
+                        ) : (
+                          <Badge variant="outline">{r.status}</Badge>
+                        )}
                       </div>
-                      {isPaid ? (
-                        <Badge className="bg-emerald-500 text-white border-0 gap-1"><CheckCircle2 className="h-2.5 w-2.5" /> Lunas</Badge>
-                      ) : isPending ? (
-                        <Badge className="bg-amber-500 text-white border-0 gap-1"><Clock className="h-2.5 w-2.5" /> Menunggu</Badge>
-                      ) : (
-                        <Badge variant="outline">{r.status}</Badge>
+                      {canResume && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full h-8 text-[11px] border-[#5B6CF9]/40 text-[#5B6CF9] hover:bg-[#5B6CF9]/10"
+                          onClick={() => onResumePending?.(r)}
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" /> Lanjutkan Pembayaran
+                        </Button>
                       )}
                     </div>
                   );

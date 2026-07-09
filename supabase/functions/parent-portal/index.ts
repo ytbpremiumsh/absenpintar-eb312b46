@@ -726,13 +726,25 @@ Deno.serve(async (req) => {
         .eq("invoice_id", invoiceId)
         .order("created_at", { ascending: false });
       const nowMs = Date.now();
-      const locked = (rows || []).reduce((s: number, r: any) => {
-        if (r.status === "paid") return s + (r.amount || 0);
-        if (r.status === "pending" && (!r.expired_at || new Date(r.expired_at).getTime() > nowMs)) return s + (r.amount || 0);
-        return s;
-      }, 0);
+      let paidAmount = 0;
+      let pendingAmount = 0;
+      for (const r of (rows || [])) {
+        if (r.status === "paid") paidAmount += (r.amount || 0);
+        else if (r.status === "pending" && (!r.expired_at || new Date(r.expired_at).getTime() > nowMs)) {
+          pendingAmount += (r.amount || 0);
+        }
+      }
+      const locked = paidAmount + pendingAmount;
       const remaining = Math.max(0, (inv.total_amount || 0) - locked);
-      return json({ ok: true, invoice: inv, installments: rows || [], locked_amount: locked, remaining });
+      return json({
+        ok: true,
+        invoice: inv,
+        installments: rows || [],
+        locked_amount: locked,
+        paid_amount: paidAmount,
+        pending_amount: pendingAmount,
+        remaining,
+      });
     }
 
     if (action === "spp_pay_installment") {
