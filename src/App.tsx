@@ -382,6 +382,7 @@ function AppRoutes() {
           <Route path="/all-features" element={<AllFeatures />} />
           <Route path="/school-settings" element={<SchoolSettings />} />
           <Route path="/holidays" element={<HolidayManagement />} />
+          <Route path="/kalender-akademik" element={<KalenderAkademik />} />
           <Route path="/attendance-time" element={<AttendanceTime />} />
           <Route path="/rfid-devices" element={<Navigate to="/dashboard" replace />} />
           <Route path="/rfid-cards" element={<RFIDCards />} />
