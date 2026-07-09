@@ -252,22 +252,28 @@ const KalenderAkademik = () => {
           : "Lihat jadwal libur & kegiatan akademik sekolah"}
       />
 
-      <Card className="border-0 shadow-card bg-gradient-to-br from-[#5B6CF9]/5 to-transparent">
+      <Card className="border border-amber-200/60 dark:border-amber-900/40 shadow-none bg-[#fdfbf5] dark:bg-amber-950/10 border-l-4 border-l-amber-500/80 rounded-lg">
         <CardContent className="p-4 flex gap-3">
-          <div className="h-9 w-9 rounded-xl bg-[#5B6CF9]/10 flex items-center justify-center shrink-0">
-            {canEdit ? <Info className="h-4 w-4 text-[#5B6CF9]" /> : <Eye className="h-4 w-4 text-[#5B6CF9]" />}
+          <div className="h-9 w-9 rounded-lg bg-amber-100/70 dark:bg-amber-900/30 border border-amber-200/60 dark:border-amber-900/40 flex items-center justify-center shrink-0">
+            {canEdit ? <BookOpen className="h-4 w-4 text-amber-700 dark:text-amber-300" /> : <Eye className="h-4 w-4 text-amber-700 dark:text-amber-300" />}
           </div>
-          <div className="text-sm text-muted-foreground">
-            {canEdit ? (
-              <>
-                Klik tanggal (atau tarik rentang) di kalender untuk menambah acara. Pilih jenis acara (libur, ujian, kegiatan, rapat, pengumuman)
-                dan aktifkan <span className="font-semibold text-foreground">"Tandai sebagai Hari Libur"</span> bila acara tersebut menangguhkan absensi.
-              </>
-            ) : (
-              <>
-                Halaman ini hanya untuk dilihat. Penambahan atau perubahan kalender akademik hanya bisa dilakukan oleh <span className="font-semibold text-foreground">Admin Sekolah</span>.
-              </>
-            )}
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-amber-700/80 dark:text-amber-300/80 mb-1">
+              Catatan Akademik
+            </p>
+            <div className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 font-serif">
+              {canEdit ? (
+                <>
+                  Klik tanggal (atau tarik rentang) di kalender untuk menambah acara. Pilih jenis acara (libur, ujian, kegiatan, rapat, pengumuman)
+                  dan aktifkan <span className="font-semibold text-foreground">"Tandai sebagai Hari Libur"</span> bila acara tersebut menangguhkan absensi.
+                </>
+              ) : (
+                <>
+                  Halaman ini hanya untuk dilihat. Penambahan atau perubahan kalender akademik hanya bisa dilakukan oleh <span className="font-semibold text-foreground">Admin Sekolah</span>.
+                </>
+              )}
+            </div>
+          </div>
           </div>
         </CardContent>
       </Card>
