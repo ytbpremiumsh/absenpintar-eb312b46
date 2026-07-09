@@ -4350,7 +4350,8 @@ export function BendaharaSaldo() {
   const settledGross = settledItems.reduce((s, x) => s + (x.total_amount || 0), 0);
   const settledCount = settledItems.length;
   const settledFeePencairan = settlements.filter(s => s.status === "paid").reduce((s, x) => s + (x.withdraw_fee || 0), 0);
-  const pendingPayout = settlements.filter(s => ["pending", "approved"].includes(s.status)).reduce((s, x) => s + (x.total_amount || x.total_net || 0), 0);
+  // Menunggu Pencairan = paid online yang belum di-settle (selaras dengan dashboard Kepsek)
+  const pendingPayout = activeTotals.gross;
   const activeBalance = Math.max(0, activeTotals.gross);
   const lockedGross = Math.max(0, totals.gross - activeTotals.gross);
 
@@ -4408,7 +4409,7 @@ export function BendaharaSaldo() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <StatCard label="Total Bruto SPP" value={fmtIDR(totals.gross)} sub={`${txCount} transaksi`} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
         <StatCard label="Sudah Dicairkan" value={fmtIDR(settledGross)} sub={`${settledCount} transaksi`} icon={ArrowDownToLine} gradient="from-violet-500 to-purple-600" />
-        <StatCard label="Pending Pencairan" value={fmtIDR(pendingPayout)} sub="menunggu admin" icon={Loader2} gradient="from-amber-500 to-orange-600" />
+        <StatCard label="Pending Pencairan" value={fmtIDR(pendingPayout)} sub="siap dicairkan" icon={Loader2} gradient="from-amber-500 to-orange-600" />
       </div>
 
       {/* Tabel Riwayat */}
