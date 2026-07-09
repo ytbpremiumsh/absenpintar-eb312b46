@@ -283,24 +283,7 @@ const Subscription = () => {
         </motion.div>
       )}
 
-      {/* Trial Warning Banner */}
-      {isTrialSub && daysLeft !== null && daysLeft <= 3 && (
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-          <Card className="border-0 shadow-card bg-warning/10 border-warning/30">
-            <div className="p-4 flex items-center gap-3">
-              <AlertTriangle className="h-6 w-6 shrink-0 text-warning" />
-              <div className="flex-1">
-                <p className="text-sm font-bold text-foreground">
-                  Masa Trial Berakhir {daysLeft} Hari Lagi!
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Segera upgrade ke paket berbayar agar fitur premium tetap aktif. Setelah trial berakhir, akun akan otomatis pindah ke paket Free.
-                </p>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      )}
+      {/* Trial warning banner removed — trial system deprecated. */}
 
       {/* Header: Current Plan Status - Mobile Optimized */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -314,7 +297,7 @@ const Subscription = () => {
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-lg sm:text-xl font-extrabold text-primary-foreground truncate">Paket {planName}</h2>
                    <Badge className="bg-white/20 text-primary-foreground border-0 text-[10px]">
-                    {isTrialSub ? "Trial" : hasActiveSub && !isFree ? "Aktif" : isFree ? "Gratis" : "Expired"}
+                    {hasActiveSub && !isFree ? "Aktif" : isFree ? "Gratis" : "Expired"}
                   </Badge>
                 </div>
                 <p className="text-xl sm:text-2xl font-extrabold text-primary-foreground mt-0.5">

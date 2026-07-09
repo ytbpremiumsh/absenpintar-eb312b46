@@ -195,7 +195,9 @@ serve(async (req) => {
         .insert({ user_id: userId, role });
     }
 
-    // Create dismissal_settings, auto-assign Trial subscription, and WA gateway for new school
+    // Create dismissal_settings and assign default Free subscription for new school
+    // Trial system removed — new schools receive Premium access via the global
+    // `subscription_enabled=false` platform toggle, so no expiring trial row is needed.
     if (resolvedSchoolId) {
       const { data: existingSettings } = await supabaseAdmin
         .from('dismissal_settings')
@@ -209,44 +211,13 @@ serve(async (req) => {
           .insert({ school_id: resolvedSchoolId, is_active: false });
       }
 
-      // Get trial_days from platform_settings (default 14)
-      let trialDays = 14;
-      const { data: trialSetting } = await supabaseAdmin
-        .from('platform_settings')
-        .select('value')
-        .eq('key', 'trial_days')
-        .maybeSingle();
-      if (trialSetting?.value) {
-        const parsed = parseInt(trialSetting.value, 10);
-        if (!isNaN(parsed) && parsed > 0) trialDays = parsed;
-      }
-
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + trialDays);
-
-      // Auto-assign Trial subscription with Premium plan
-      const { data: premiumPlan } = await supabaseAdmin
-        .from('subscription_plans')
-        .select('id')
-        .eq('name', 'Premium')
-        .eq('is_active', true)
-        .maybeSingle();
-
       const { data: existingSub } = await supabaseAdmin
         .from('school_subscriptions')
         .select('id')
         .eq('school_id', resolvedSchoolId)
         .maybeSingle();
 
-      if (!existingSub && premiumPlan) {
-        await supabaseAdmin.from('school_subscriptions').insert({
-          school_id: resolvedSchoolId,
-          plan_id: premiumPlan.id,
-          status: 'trial',
-          expires_at: expiresAt.toISOString(),
-        });
-      } else if (!existingSub) {
-        // Fallback to Free plan if Premium not found
+      if (!existingSub) {
         const { data: freePlan } = await supabaseAdmin
           .from('subscription_plans')
           .select('id')
@@ -264,7 +235,8 @@ serve(async (req) => {
         }
       }
 
-      // Auto-create WhatsApp Gateway (OneSender) integration for trial schools
+
+      // Auto-create WhatsApp Gateway (OneSender) integration for new schools
       const { data: existingIntegration } = await supabaseAdmin
         .from('school_integrations')
         .select('id')
