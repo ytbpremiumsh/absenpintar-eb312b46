@@ -35,18 +35,18 @@ const STEPS = [
   {
     icon: Wallet,
     title: "Memilih Metode Pembayaran",
-    desc: "Orang tua memilih metode pembayaran yang tersedia melalui iPaymu, seperti:",
+    desc: "Orang tua memilih metode pembayaran yang tersedia melalui Payment Gateway, seperti:",
     list: ["Virtual Account", "QRIS", "E-Wallet", "Retail Outlet"],
   },
   {
     icon: Send,
-    title: "Proses Pembayaran melalui iPaymu",
-    desc: "ATSkolla mengirimkan data transaksi ke iPaymu. Selanjutnya orang tua menyelesaikan pembayaran menggunakan metode yang dipilih.",
+    title: "Proses Pembayaran melalui Payment Gateway",
+    desc: "ATSkolla mengirimkan data transaksi ke Payment Gateway. Selanjutnya orang tua menyelesaikan pembayaran menggunakan metode yang dipilih.",
   },
   {
     icon: CheckCircle2,
     title: "Konfirmasi Pembayaran",
-    desc: "Setelah pembayaran berhasil, iPaymu mengirimkan notifikasi (Callback/Webhook) ke ATSkolla. ATSkolla kemudian:",
+    desc: "Setelah pembayaran berhasil, Payment Gateway mengirimkan notifikasi (Callback/Webhook) ke ATSkolla. ATSkolla kemudian:",
     list: [
       "Mengubah status tagihan menjadi Lunas.",
       "Mencatat transaksi pada riwayat pembayaran.",
@@ -75,7 +75,7 @@ export default function FlowBisnis() {
             Flow Bisnis ATSkolla
           </h1>
           <p className="text-slate-600 max-w-2xl mx-auto">
-            Alur lengkap proses layanan ATSkolla dari pendaftaran sekolah hingga konfirmasi pembayaran otomatis melalui iPaymu.
+            Alur lengkap proses layanan ATSkolla dari pendaftaran sekolah hingga konfirmasi pembayaran otomatis melalui Payment Gateway.
           </p>
         </div>
 
