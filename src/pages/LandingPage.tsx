@@ -26,7 +26,7 @@ const NAV = [
   { label: "Platform", href: "#ekosistem" },
   { label: "Modul", href: "#modul" },
   { label: "Pembayaran", href: "#pembayaran" },
-  { label: "Hardware", href: "#hardware" },
+  
   { label: "FAQ", href: "#faq" },
 ];
 
