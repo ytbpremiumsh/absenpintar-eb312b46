@@ -390,8 +390,7 @@ const KalenderAkademik = () => {
                         const meta = primary ? EVENT_META[primary.event_type] : null;
 
                         let cellClass = "text-foreground";
-                        if (primary?.is_holiday) cellClass = "bg-red-500 text-white font-bold shadow-sm shadow-red-500/40";
-                        else if (primary && meta) cellClass = `${meta.badge} font-semibold`;
+                        if (primary && meta) cellClass = `${meta.tile} font-semibold border`;
                         else if (isSunday) cellClass = "text-red-500 font-semibold";
 
                         const dateLabel = new Date(year, m, day).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
