@@ -115,6 +115,8 @@ export default function ParentDashboard() {
   const [leaves, setLeaves] = useState<any[]>([]);
   const [grades, setGrades] = useState<any[]>([]);
   const [homeroom, setHomeroom] = useState<any>(null);
+  const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
+  const [calendarYear, setCalendarYear] = useState<number>(new Date().getFullYear());
   const [statPeriod, setStatPeriod] = useState<"day" | "week" | "month">("week");
   const [uploadingFile, setUploadingFile] = useState(false);
   const [sppData, setSppData] = useState<{ aktif: any[]; tunggakan: any[]; lunas: any[]; total_tunggakan: number }>({ aktif: [], tunggakan: [], lunas: [], total_tunggakan: 0 });
