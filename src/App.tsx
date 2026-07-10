@@ -70,6 +70,7 @@ const LegalRefund = lazy(() => import("./pages/legal/Refund"));
 const LegalFAQ = lazy(() => import("./pages/legal/FAQ"));
 const LegalContact = lazy(() => import("./pages/legal/Contact"));
 const TentangKami = lazy(() => import("./pages/TentangKami"));
+const FlowBisnis = lazy(() => import("./pages/FlowBisnis"));
 
 const Penawaran = lazy(() => import("./pages/Penawaran"));
 const SuperAdminPenawaran = lazy(() => import("./pages/super-admin/SuperAdminPenawaran"));
