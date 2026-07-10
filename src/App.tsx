@@ -252,6 +252,7 @@ function AppRoutes() {
         <Route path="/kebijakan-refund" element={<LegalRefund />} />
         <Route path="/faq" element={<LegalFAQ />} />
         <Route path="/kontak" element={<LegalContact />} />
+        <Route path="/tentang" element={<TentangKami />} />
         <Route path="/parent/login" element={<ParentLogin />} />
         <Route path="/parent" element={<ParentDashboard />} />
         {/* Bendahara */}
