@@ -26,8 +26,9 @@ const NAV = [
   { label: "Platform", href: "#ekosistem" },
   { label: "Fitur", href: "#modul" },
   
-  { label: "Tentang", href: "/tentang" },
   { label: "FAQ", href: "#faq" },
+  { label: "Tentang", href: "/tentang" },
+  { label: "Kontak", href: "/kontak" },
 ];
 
 const TRUST_BADGES = [
