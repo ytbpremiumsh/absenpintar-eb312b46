@@ -273,7 +273,7 @@ const KalenderAkademik = () => {
               </>
             ) : (
               <>
-                Halaman ini hanya untuk dilihat. Penambahan atau perubahan kalender akademik hanya bisa dilakukan oleh <span className="font-semibold text-foreground">Admin Sekolah</span>.
+                Halaman ini hanya untuk dilihat. Penambahan atau perubahan kalender akademik hanya bisa dilakukan oleh <span className="font-semibold text-foreground">Operator Sekolah</span>.
               </>
             )}
           </p>
