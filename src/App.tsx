@@ -69,6 +69,7 @@ const LegalTerms = lazy(() => import("./pages/legal/Terms"));
 const LegalRefund = lazy(() => import("./pages/legal/Refund"));
 const LegalFAQ = lazy(() => import("./pages/legal/FAQ"));
 const LegalContact = lazy(() => import("./pages/legal/Contact"));
+const TentangKami = lazy(() => import("./pages/TentangKami"));
 
 const Penawaran = lazy(() => import("./pages/Penawaran"));
 const SuperAdminPenawaran = lazy(() => import("./pages/super-admin/SuperAdminPenawaran"));
@@ -251,6 +252,7 @@ function AppRoutes() {
         <Route path="/kebijakan-refund" element={<LegalRefund />} />
         <Route path="/faq" element={<LegalFAQ />} />
         <Route path="/kontak" element={<LegalContact />} />
+        <Route path="/tentang" element={<TentangKami />} />
         <Route path="/parent/login" element={<ParentLogin />} />
         <Route path="/parent" element={<ParentDashboard />} />
         {/* Bendahara */}

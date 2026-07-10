@@ -26,7 +26,6 @@ const NAV = [
   { label: "Platform", href: "#ekosistem" },
   { label: "Fitur", href: "#modul" },
   { label: "Pembayaran", href: "#pembayaran" },
-  { label: "Tentang Kami", href: "#tentang" },
   { label: "FAQ", href: "#faq" },
 ];
 
@@ -893,58 +892,6 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-// ---------- About ----------
-function About() {
-  const values = [
-    { icon: ShieldCheck, title: "Terpercaya", desc: "Data terenkripsi, backup harian, dan audit log lengkap untuk keamanan sekolah." },
-    { icon: HeartHandshake, title: "Berpihak pada Sekolah", desc: "Platform inti gratis, tanpa komitmen jangka panjang, dan support tanpa biaya tambahan." },
-    { icon: Zap, title: "Cepat & Mudah", desc: "Implementasi 1–3 hari kerja, antarmuka sederhana, siap dipakai semua peran sekolah." },
-    { icon: Sparkles, title: "Terus Berkembang", desc: "Fitur baru dirilis rutin berdasarkan masukan sekolah di seluruh Indonesia." },
-  ];
-  return (
-    <Section id="tentang" className="py-20 lg:py-28 bg-[#f5f7fb]">
-      <div className="grid lg:grid-cols-[1fr_1.2fr] gap-12 items-start">
-        <div>
-          <Eyebrow>Tentang Kami</Eyebrow>
-          <h2 className="mt-4 font-display text-3xl md:text-4xl lg:text-5xl font-bold text-[#0b1020] tracking-tight leading-[1.1]">
-            Kami membangun <span className="text-[#5B6CF9]">sekolah digital</span> untuk Indonesia.
-          </h2>
-          <p className="mt-5 text-[#0b1020]/65 leading-relaxed">
-            ATSkolla lahir dari pengalaman langsung mengelola sekolah — mulai dari absensi manual, tagihan SPP yang menumpuk, hingga laporan keuangan yang tersebar di banyak file. Kami membangun satu platform terpadu yang memudahkan kepala sekolah, bendahara, guru, dan wali murid bekerja dalam satu sistem.
-          </p>
-          <p className="mt-4 text-[#0b1020]/65 leading-relaxed">
-            Hari ini, ATSkolla dipercaya oleh ratusan sekolah di seluruh Indonesia — dari SD, SMP, SMA, hingga pesantren dan madrasah — untuk mendigitalisasi operasional harian mereka.
-          </p>
-          <div className="mt-6 grid grid-cols-3 gap-4 border-t border-slate-200 pt-6">
-            <div>
-              <div className="font-display text-2xl font-bold text-[#0b1020]">500+</div>
-              <div className="text-xs text-[#0b1020]/50 mt-0.5">Sekolah Aktif</div>
-            </div>
-            <div>
-              <div className="font-display text-2xl font-bold text-[#0b1020]">120K+</div>
-              <div className="text-xs text-[#0b1020]/50 mt-0.5">Siswa Terlayani</div>
-            </div>
-            <div>
-              <div className="font-display text-2xl font-bold text-[#0b1020]">34</div>
-              <div className="text-xs text-[#0b1020]/50 mt-0.5">Provinsi</div>
-            </div>
-          </div>
-        </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {values.map((v) => (
-            <div key={v.title} className="rounded-2xl bg-white border border-slate-200 p-6 hover:border-[#5B6CF9]/40 hover:shadow-lg hover:-translate-y-0.5 transition-all">
-              <div className="h-11 w-11 rounded-xl bg-[#5B6CF9]/10 border border-[#5B6CF9]/25 flex items-center justify-center">
-                <v.icon className="h-5 w-5 text-[#5B6CF9]" />
-              </div>
-              <div className="mt-4 font-display font-semibold text-[#0b1020]">{v.title}</div>
-              <p className="mt-1.5 text-sm text-[#0b1020]/60 leading-relaxed">{v.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Section>
-  );
-}
 
 function Faq() {
   return (
@@ -1089,7 +1036,6 @@ export default function LandingPage() {
         <Hardware />
         <DashboardPreview />
         <WhyFree />
-        <About />
         <Faq />
         <FinalCTA />
       </main>
