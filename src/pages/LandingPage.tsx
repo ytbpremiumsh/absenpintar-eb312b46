@@ -24,7 +24,7 @@ import {
 
 const NAV = [
   { label: "Platform", href: "#ekosistem" },
-  { label: "Modul", href: "#modul" },
+  { label: "Fitur", href: "#modul" },
   { label: "Pembayaran", href: "#pembayaran" },
   
   { label: "FAQ", href: "#faq" },
