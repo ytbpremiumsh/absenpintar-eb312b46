@@ -2,7 +2,6 @@ import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TeachingSchedule from "./TeachingSchedule";
 import LiveSchedule from "./LiveSchedule";
-import KalenderAkademik from "./KalenderAkademik";
 
 export default function JadwalCombined() {
   const [params, setParams] = useSearchParams();
@@ -15,11 +14,9 @@ export default function JadwalCombined() {
         <TabsList className="rounded-xl">
           <TabsTrigger value="mengajar" className="rounded-lg">Jadwal Mengajar</TabsTrigger>
           <TabsTrigger value="live" className="rounded-lg">Jadwal Live</TabsTrigger>
-          <TabsTrigger value="kalender" className="rounded-lg">Kalender Akademik</TabsTrigger>
         </TabsList>
         <TabsContent value="mengajar" className="mt-4"><TeachingSchedule /></TabsContent>
         <TabsContent value="live" className="mt-4"><LiveSchedule /></TabsContent>
-        <TabsContent value="kalender" className="mt-4"><KalenderAkademik /></TabsContent>
       </Tabs>
     </div>
   );

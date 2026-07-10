@@ -67,6 +67,7 @@ const dataNav = [
 
 const scheduleNav = [
   { title: "Jadwal", url: "/jadwal", icon: CalendarDays, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
+  { title: "Kalender Akademik", url: "/kalender-akademik", icon: CalendarDays, accent: "from-indigo-500/85 to-indigo-600" },
 ];
 
 const whatsappNav = [
