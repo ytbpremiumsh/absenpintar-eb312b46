@@ -291,7 +291,7 @@ function Hero() {
           <Eyebrow>Platform Digital Sekolah Terintegrasi</Eyebrow>
 
           <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-[#0b1020] leading-[1.05] tracking-tight">
-            ATSkolla — Platform Digital Sekolah <span className="text-[#5B6CF9]">Terintegrasi</span>.
+            Platform Digital Sekolah <span className="text-[#5B6CF9]">Terintegrasi</span>.
           </h1>
 
           <p className="text-base md:text-lg text-[#0b1020]/65 max-w-xl leading-relaxed">
