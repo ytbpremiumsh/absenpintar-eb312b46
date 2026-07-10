@@ -25,7 +25,7 @@ const FAQS: QA[] = [
   // Umum
   { category: "Umum", q: "Apa itu ATSkolla?", a: "ATSkolla adalah platform digital sekolah terintegrasi yang menyatukan absensi (QR, Face Recognition, RFID), pembayaran SPP online, manajemen keuangan, jadwal mengajar, pengumuman, dan portal wali murid dalam satu aplikasi." },
   { category: "Umum", q: "Sekolah apa saja yang bisa menggunakan ATSkolla?", a: "Semua jenjang: PAUD/TK, SD, SMP, SMA/SMK, hingga pesantren dan lembaga pendidikan non-formal." },
-  { category: "Umum", q: "Apakah ada uji coba gratis?", a: "Ya. Setiap sekolah yang mendaftar otomatis mendapatkan akses Premium Trial untuk mencoba seluruh fitur premium selama periode tertentu." },
+  { category: "Umum", q: "Apakah ada uji coba gratis?", a: "Bisa langsung digunakan, karena gratis. ATSkolla tidak menerapkan sistem langganan berpaket — seluruh fitur (absensi QR, Face Recognition, RFID, manajemen keuangan, portal wali murid, dll) aktif untuk semua sekolah tanpa batas waktu." },
 
   // SPP
   { category: "Pembayaran SPP", q: "Bagaimana cara wali murid membayar SPP?", a: "Wali murid login ke portal wali murid, memilih tagihan yang ingin dibayar, lalu memilih metode pembayaran (VA bank, QRIS, atau retail). Setelah bayar, status tagihan otomatis terupdate." },
