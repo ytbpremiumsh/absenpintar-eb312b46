@@ -77,7 +77,7 @@ const settingsNav = [
   { title: "Mode Libur", url: "/holidays", icon: CalendarOff, accent: "from-amber-500/85 to-amber-600" },
   { title: "Kalender Akademik", url: "/kalender-akademik", icon: CalendarDays, accent: "from-indigo-500/85 to-indigo-600" },
   { title: "Paket Sekolah", url: "/paket-sekolah", icon: Package, accent: "from-emerald-500/85 to-emerald-600" },
-  { title: "Add-on", url: "/addons", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
+  
   { title: "Semua Fitur", url: "/all-features", icon: Sparkles, accent: "from-[#5B6CF9]/85 to-[#4c5ded]" },
 ];
 
