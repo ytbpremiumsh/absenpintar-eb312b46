@@ -818,6 +818,21 @@ Deno.serve(async (req) => {
       return json({ ok: true, message: data });
     }
 
+    if (action === "calendar") {
+      const year = Number(body.year || url.searchParams.get("year") || new Date().getFullYear());
+      const start = `${year}-01-01`;
+      const end = `${year}-12-31`;
+      const { data, error } = await supabase
+        .from("school_holidays")
+        .select("id, date, label, description, event_type, is_holiday")
+        .eq("school_id", schoolId)
+        .gte("date", start)
+        .lte("date", end)
+        .order("date");
+      if (error) return json({ error: error.message });
+      return json({ ok: true, events: data || [] });
+    }
+
     return json({ error: "Action tidak dikenal" });
   } catch (e) {
     console.error("parent-portal error", e);

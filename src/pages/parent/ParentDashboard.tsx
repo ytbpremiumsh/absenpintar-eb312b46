@@ -94,6 +94,7 @@ const PRIMARY_TABS = [
 ];
 
 const MORE_TABS = [
+  { id: "calendar", label: "Kalender Akademik", icon: BookOpen, desc: "Libur, ujian, kegiatan sekolah" },
   { id: "info", label: "Pengumuman", icon: Megaphone, desc: "Info & berita sekolah" },
   { id: "leave", label: "Pengajuan Izin", icon: FileText, desc: "Ajukan izin/sakit" },
   { id: "contact", label: "Kontak Wali Kelas", icon: Phone, desc: "Hubungi guru" },
@@ -114,6 +115,8 @@ export default function ParentDashboard() {
   const [leaves, setLeaves] = useState<any[]>([]);
   const [grades, setGrades] = useState<any[]>([]);
   const [homeroom, setHomeroom] = useState<any>(null);
+  const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
+  const [calendarYear, setCalendarYear] = useState<number>(new Date().getFullYear());
   const [statPeriod, setStatPeriod] = useState<"day" | "week" | "month">("week");
   const [uploadingFile, setUploadingFile] = useState(false);
   const [sppData, setSppData] = useState<{ aktif: any[]; tunggakan: any[]; lunas: any[]; total_tunggakan: number }>({ aktif: [], tunggakan: [], lunas: [], total_tunggakan: 0 });
@@ -209,8 +212,11 @@ export default function ParentDashboard() {
     } else if (tab === "spp") {
       const d = await invoke("spp_list", body);
       setSppData({ aktif: d.aktif || [], tunggakan: d.tunggakan || [], lunas: d.lunas || [], total_tunggakan: d.total_tunggakan || 0 });
+    } else if (tab === "calendar") {
+      const d = await invoke("calendar", { ...body, year: calendarYear });
+      setCalendarEvents(d.events || []);
     }
-  }, [tab, selectedStudent, invoke]);
+  }, [tab, selectedStudent, invoke, calendarYear]);
 
   // Membuka picker channel pembayaran (sebelum benar-benar membuat link Mayar).
   const paySpp = async (invoiceOrId: any) => {
@@ -532,6 +538,7 @@ export default function ParentDashboard() {
             { id: "card", label: "Kartu Pelajar", icon: CreditCard },
             { id: "attendance", label: "Absensi", icon: ClipboardList },
             { id: "schedule", label: "Jadwal", icon: CalendarDays },
+            { id: "calendar", label: "Kalender Akademik", icon: BookOpen },
             { id: "spp", label: "SPP & Tagihan", icon: Wallet },
             { id: "info", label: "Pengumuman", icon: Megaphone },
             { id: "leave", label: "Pengajuan Izin", icon: FileText },
@@ -1019,7 +1026,128 @@ export default function ParentDashboard() {
           </Card>
         )}
 
-        {/* INFO */}
+        {/* CALENDAR AKADEMIK (read-only) */}
+        {tab === "calendar" && (
+          <Card className="p-4 md:p-5 border-0 shadow-card rounded-2xl space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <SectionTitle icon={BookOpen} title="Kalender Akademik" />
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setCalendarYear((y) => y - 1)}
+                  className="h-8 w-8 rounded-lg bg-muted/60 hover:bg-muted flex items-center justify-center"
+                  aria-label="Tahun sebelumnya"
+                >‹</button>
+                <div className="min-w-[56px] text-center font-bold text-sm">{calendarYear}</div>
+                <button
+                  onClick={() => setCalendarYear((y) => y + 1)}
+                  className="h-8 w-8 rounded-lg bg-muted/60 hover:bg-muted flex items-center justify-center"
+                  aria-label="Tahun berikutnya"
+                >›</button>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground -mt-2">
+              Jadwal libur, ujian, kegiatan, rapat, dan pengumuman sekolah. Hanya untuk dilihat.
+            </p>
+
+            {(() => {
+              const meta: Record<string, { label: string; cls: string; dot: string }> = {
+                holiday:      { label: "Libur",       cls: "bg-red-50 text-red-600 border-red-100",             dot: "bg-red-400" },
+                exam:         { label: "Ujian",       cls: "bg-amber-50 text-amber-700 border-amber-100",       dot: "bg-amber-400" },
+                event:        { label: "Kegiatan",    cls: "bg-emerald-50 text-emerald-700 border-emerald-100", dot: "bg-emerald-400" },
+                meeting:      { label: "Rapat",       cls: "bg-sky-50 text-sky-700 border-sky-100",             dot: "bg-sky-400" },
+                announcement: { label: "Pengumuman",  cls: "bg-violet-50 text-violet-700 border-violet-100",    dot: "bg-violet-400" },
+                other:        { label: "Lainnya",     cls: "bg-slate-50 text-slate-600 border-slate-200",       dot: "bg-slate-400" },
+              };
+              const byDate: Record<string, any[]> = {};
+              for (const e of calendarEvents) (byDate[e.date] ??= []).push(e);
+
+              return (
+                <>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Object.entries(meta).map(([k, m]) => (
+                      <span key={k} className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold", m.cls)}>
+                        <span className={cn("h-1.5 w-1.5 rounded-full", m.dot)} /> {m.label}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 12 }, (_, m) => {
+                      const monthName = new Date(calendarYear, m, 1).toLocaleDateString("id-ID", { month: "long" });
+                      const firstDay = new Date(calendarYear, m, 1);
+                      const daysInMonth = new Date(calendarYear, m + 1, 0).getDate();
+                      const startOffset = firstDay.getDay();
+                      const cells: (number | null)[] = [];
+                      for (let i = 0; i < startOffset; i++) cells.push(null);
+                      for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+                      return (
+                        <div key={m} className="rounded-xl border border-border/60 bg-card p-2.5">
+                          <div className="text-[11px] font-bold mb-1.5 text-center">{monthName} {calendarYear}</div>
+                          <div className="grid grid-cols-7 text-center text-[9px] text-muted-foreground mb-1">
+                            {["M","S","S","R","K","J","S"].map((d, i) => <div key={i}>{d}</div>)}
+                          </div>
+                          <div className="grid grid-cols-7 gap-0.5">
+                            {cells.map((day, i) => {
+                              if (!day) return <div key={i} className="h-7" />;
+                              const key = `${calendarYear}-${String(m + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                              const evs = byDate[key];
+                              const primary = evs?.[0];
+                              const type = primary?.is_holiday ? "holiday" : (primary?.event_type || "other");
+                              const mm = evs ? meta[type as keyof typeof meta] : null;
+                              return (
+                                <div
+                                  key={i}
+                                  title={evs?.map((e) => e.label || meta[e.is_holiday ? "holiday" : (e.event_type || "other")]?.label).join(", ") || ""}
+                                  className={cn(
+                                    "h-7 flex items-center justify-center text-[10.5px] rounded-md",
+                                    mm ? cn("font-bold border", mm.cls) : "text-foreground/70"
+                                  )}
+                                >
+                                  {day}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-3">
+                    <p className="text-[11px] font-bold text-muted-foreground mb-2">Daftar Agenda</p>
+                    {calendarEvents.length === 0 ? (
+                      <EmptyMini text="Belum ada agenda pada tahun ini." />
+                    ) : (
+                      <div className="space-y-2">
+                        {calendarEvents.map((e) => {
+                          const type = e.is_holiday ? "holiday" : (e.event_type || "other");
+                          const mm = meta[type as keyof typeof meta] || meta.other;
+                          return (
+                            <div key={e.id} className={cn("flex items-start gap-2.5 rounded-xl border p-2.5", mm.cls)}>
+                              <span className={cn("h-2 w-2 rounded-full mt-1.5 shrink-0", mm.dot)} />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-[11px] font-bold">
+                                    {new Date(e.date + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                                  </span>
+                                  <span className="text-[9px] uppercase tracking-wider font-semibold opacity-70">{mm.label}</span>
+                                </div>
+                                {e.label && <div className="text-sm font-semibold mt-0.5">{e.label}</div>}
+                                {e.description && <div className="text-[11px] opacity-80 mt-0.5 whitespace-pre-wrap">{e.description}</div>}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
+          </Card>
+        )}
+
+
         {tab === "info" && (
           <Card className="p-4 md:p-5 border-0 shadow-card rounded-2xl space-y-3">
             <SectionTitle icon={Megaphone} title="Informasi dari Sekolah" />
