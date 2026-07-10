@@ -48,7 +48,7 @@ const FAQS: QA[] = [
 
   // Akun
   { category: "Akun", q: "Bagaimana cara mendaftarkan sekolah?", a: "Kunjungi halaman Daftar Gratis, isi data sekolah (nama, NPSN, WhatsApp admin), dan akun langsung aktif. Gratis digunakan tanpa sistem langganan berpaket — sekolah tinggal memilih mode ATSkolla Payment (gratis, memakai payment gateway) atau ATSkolla Mandiri." },
-  { category: "Akun", q: "Bagaimana wali murid mendapatkan akun?", a: "Sekolah menginput data siswa dan orang tua. Wali murid login menggunakan nomor WhatsApp/NIS sesuai konfigurasi sekolah." },
+  { category: "Akun", q: "Bagaimana wali murid mendapatkan akun?", a: "Sekolah menginput data siswa dan orang tua. Wali murid login menggunakan nomor WhatsApp/Nomor Kartu Identitas sesuai konfigurasi sekolah." },
   { category: "Akun", q: "Lupa password, bagaimana?", a: "Gunakan menu Lupa Password. Kode OTP akan dikirim ke nomor WhatsApp yang terdaftar." },
 ];
 
