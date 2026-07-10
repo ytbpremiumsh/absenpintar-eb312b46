@@ -29,7 +29,7 @@ const FAQS: QA[] = [
 
   // SPP
   { category: "Pembayaran SPP", q: "Bagaimana cara wali murid membayar SPP?", a: "Wali murid login ke portal wali murid, memilih tagihan yang ingin dibayar, lalu memilih metode pembayaran (VA bank, QRIS, atau retail). Setelah bayar, status tagihan otomatis terupdate." },
-  { category: "Pembayaran SPP", q: "Apakah pembayaran langsung masuk ke rekening sekolah?", a: "Ya. Dana masuk ke saldo sekolah dan dapat dicairkan (withdraw) ke rekening resmi sekolah melalui menu Bendahara." },
+  { category: "Pembayaran SPP", q: "Apakah pembayaran langsung masuk ke rekening sekolah?", a: "Bisa dan ya. Dana masuk ke saldo sekolah dan dapat dicairkan (withdraw) ke rekening resmi sekolah melalui menu Bendahara. Proses pencairan membutuhkan waktu 2x24 jam setelah pengajuan withdraw." },
   { category: "Pembayaran SPP", q: "Bagaimana jika wali murid salah transfer nominal?", a: "Sistem hanya menerima nominal yang sesuai tagihan. Untuk VA, nominal sudah terkunci sehingga tidak bisa salah bayar." },
 
   // VA & QRIS
