@@ -229,9 +229,11 @@ async function createDokuPayment(
   };
 
   const methods = paymentMethodsFor(channel, cfg);
-  // null → jangan kirim override_configuration (semua metode Doku Dashboard aktif tampil)
+  // Sesuai dokumentasi Doku Checkout: filter metode wajib dikirim di
+  // `payment.payment_method_types`. Key lain (mis. override_configuration)
+  // diabaikan silent → semua metode di Dashboard ikut tampil.
   if (methods && methods.length) {
-    body.override_configuration = { payment_method_types: methods };
+    body.payment.payment_method_types = methods;
   }
 
   const res = await dokuFetch(cfg, "/checkout/v1/payment", body);
