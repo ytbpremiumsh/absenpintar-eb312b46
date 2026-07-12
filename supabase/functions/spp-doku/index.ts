@@ -135,21 +135,20 @@ async function dokuFetch(cfg: { clientId: string; secretKey: string; baseUrl: st
 // Default Doku Checkout payment_method_types per channel.
 // Admin bisa override via platform_settings key `doku_va_methods` /
 // `doku_qris_methods` / `doku_retail_methods` (comma-separated).
-// Set nilainya menjadi "*" atau kosong untuk MENGIZINKAN semua metode
-// yang aktif di Doku Merchant Dashboard tampil di halaman checkout
-// (rekomendasi: kalau Mandiri / bank tertentu tidak muncul, gunakan "*").
+// Catatan: nilai "*" / "all" TIDAK lagi membuka semua metode karena alur
+// wali murid harus strict sesuai channel yang dipilih (VA / QRIS / Retail).
 const DEFAULT_VA_METHODS = [
   "VIRTUAL_ACCOUNT_BCA",
   "VIRTUAL_ACCOUNT_BANK_MANDIRI",
-  "VIRTUAL_ACCOUNT_MANDIRI",
   "VIRTUAL_ACCOUNT_DOKU",
   "VIRTUAL_ACCOUNT_BRI",
   "VIRTUAL_ACCOUNT_BNI",
   "VIRTUAL_ACCOUNT_BANK_PERMATA",
   "VIRTUAL_ACCOUNT_BANK_CIMB",
-  "VIRTUAL_ACCOUNT_BANK_SYARIAH_INDONESIA",
   "VIRTUAL_ACCOUNT_BANK_SYARIAH_MANDIRI",
   "VIRTUAL_ACCOUNT_BANK_DANAMON",
+  "VIRTUAL_ACCOUNT_BTN",
+  "VIRTUAL_ACCOUNT_BNC",
 ];
 // Strictly QRIS only — sesuai permintaan: pilih QRIS = tampil QRIS saja
 // (tanpa e-wallet terpisah). E-wallet tetap bisa scan QRIS di halaman checkout.
@@ -157,14 +156,15 @@ const DEFAULT_QRIS_METHODS = [
   "QRIS",
 ];
 const DEFAULT_RETAIL_METHODS = [
-  "ONLINE_TO_OFFLINE_ALFA", "PERURI_INDOMARET",
+  "ONLINE_TO_OFFLINE_ALFA", "ONLINE_TO_OFFLINE_INDOMARET",
 ];
 
 function parseMethodOverride(raw: string, fallback: string[]): string[] | null {
   const v = (raw || "").trim();
   if (!v) return fallback;
-  // "*" atau "all" berarti JANGAN kirim filter → semua metode aktif tampil
-  if (v === "*" || v.toLowerCase() === "all") return null;
+  // "*" / "all" dulu berarti tanpa filter. Sekarang dipaksa kembali ke
+  // fallback agar DOKU tidak menampilkan semua metode lintas channel.
+  if (v === "*" || v.toLowerCase() === "all") return fallback;
   return v.split(",").map((s) => s.trim().toUpperCase()).filter(Boolean);
 }
 
