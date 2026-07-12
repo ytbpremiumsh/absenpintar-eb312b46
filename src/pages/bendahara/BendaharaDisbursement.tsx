@@ -402,16 +402,37 @@ export default function BendaharaDisbursement() {
                       ) : (
                         <Badge className="bg-slate-500 hover:bg-slate-500 gap-1"><Clock className="h-3 w-3" /> Menunggu Verifikasi</Badge>
                       )}
+                      {v !== "verified" && !a.doku_bank_account_settlement_id && (
+                        <Button size="sm" variant="outline" onClick={async () => {
+                          const { data, error } = await supabase.functions.invoke("doku-bank-account", {
+                            body: { action: "create", account_id: a.id },
+                          });
+                          if (error || data?.error) { toast.error(data?.error || error?.message || "Gagal daftar ke DOKU"); return; }
+                          toast.success("Rekening didaftarkan ke DOKU");
+                          setRefreshKey((k) => k + 1);
+                        }}>Daftar ke DOKU</Button>
+                      )}
+                      {a.doku_bank_account_settlement_id && v !== "verified" && (
+                        <Button size="sm" variant="outline" onClick={async () => {
+                          const { data, error } = await supabase.functions.invoke("doku-bank-account", {
+                            body: { action: "get", account_id: a.id },
+                          });
+                          if (error || data?.error) { toast.error(data?.error || error?.message || "Gagal sync"); return; }
+                          toast.success("Status disinkronkan");
+                          setRefreshKey((k) => k + 1);
+                        }}>Sync Status</Button>
+                      )}
                       {isSuperAdmin && v !== "verified" && (
                         <Button size="sm" variant="outline" onClick={async () => {
                           await supabase.from("bendahara_bank_accounts" as any)
                             .update({ verification_status: "verified", verified_at: new Date().toISOString(), verified_by: user?.id })
                             .eq("id", a.id);
-                          toast.success("Rekening diverifikasi");
+                          toast.success("Rekening diverifikasi manual");
                           setRefreshKey((k) => k + 1);
-                        }}>Verifikasi</Button>
+                        }}>Verifikasi Manual</Button>
                       )}
                     </div>
+
                   </div>
                 );
               })}
