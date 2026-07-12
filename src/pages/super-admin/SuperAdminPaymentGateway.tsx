@@ -556,6 +556,20 @@ const SuperAdminPaymentGateway = () => {
           </div>
 
           <div className="rounded-lg bg-secondary/40 p-3">
+          <div className="grid gap-1.5">
+            <Label className="text-xs">Domain Utama (Return URL)</Label>
+            <Input
+              value={appBaseUrl}
+              onChange={(e) => setAppBaseUrl(e.target.value)}
+              placeholder="https://domain-vps-anda.com"
+              className="font-mono text-xs"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              Domain yang dipakai tombol "Kembali ke Halaman Merchant" di halaman pembayaran iPaymu. Kosongkan untuk memakai <code>https://absenpintar.online</code>.
+            </p>
+          </div>
+
+          <div className="rounded-lg bg-secondary/40 p-3">
             <p className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1.5"><Webhook className="h-3 w-3" /> Notify URL iPaymu (WAJIB didaftarkan)</p>
             <div className="flex items-center gap-2 mt-1.5">
               <code className="text-[11px] bg-background px-2 py-1 rounded border truncate flex-1">{ipaymuNotifyUrl}</code>
