@@ -285,7 +285,7 @@ async function ensureFreshLink(
   const totalCharged = (Number(inv.total_amount) || 0) + serviceFee;
   const supaUrl = Deno.env.get("SUPABASE_URL")!;
   const notifyUrl = `${supaUrl}/functions/v1/ipaymu-webhook`;
-  const returnUrl = "https://absenpintar.online/parent";
+  const returnUrl = `${await getAppBaseUrl(admin)}/parent`;
   const created = await createIpaymuPayment(cfg, { ...inv, _amount_override: totalCharged }, channel, notifyUrl, returnUrl, subChannel);
   await admin.from("spp_logs").insert({
     school_id: inv.school_id, invoice_id: inv.id,
