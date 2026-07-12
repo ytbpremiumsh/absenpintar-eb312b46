@@ -386,7 +386,7 @@ serve(async (req) => {
       const totalCharged = amount + serviceFee;
       const supaUrl = Deno.env.get("SUPABASE_URL")!;
       const notifyUrl = `${supaUrl}/functions/v1/ipaymu-webhook`;
-      const returnUrl = "https://absenpintar.online/parent";
+      const returnUrl = `${await getAppBaseUrl(admin)}/parent`;
       const cicilanInv = {
         ...inv,
         _amount_override: totalCharged,
