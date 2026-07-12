@@ -291,6 +291,9 @@ export type Database = {
           responsible_user_id: string | null
           school_id: string
           updated_at: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           account_holder: string
@@ -306,6 +309,9 @@ export type Database = {
           responsible_user_id?: string | null
           school_id: string
           updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           account_holder?: string
@@ -321,6 +327,9 @@ export type Database = {
           responsible_user_id?: string | null
           school_id?: string
           updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
