@@ -1,7 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SuperAdminPayments from "./SuperAdminPayments";
-import SuperAdminPaymentGateway from "./SuperAdminPaymentGateway";
 import SuperAdminBendahara from "./SuperAdminBendahara";
 
 export default function SuperAdminKeuanganHub() {
@@ -13,11 +12,9 @@ export default function SuperAdminKeuanganHub() {
     <Tabs value={tab} onValueChange={setTab}>
       <TabsList className="rounded-xl flex-wrap h-auto">
         <TabsTrigger value="payments" className="rounded-lg">Konfirmasi Bayar</TabsTrigger>
-        <TabsTrigger value="gateway" className="rounded-lg">Payment Gateway</TabsTrigger>
         <TabsTrigger value="bendahara" className="rounded-lg">Bendahara</TabsTrigger>
       </TabsList>
       <TabsContent value="payments" className="mt-4"><SuperAdminPayments /></TabsContent>
-      <TabsContent value="gateway" className="mt-4"><SuperAdminPaymentGateway /></TabsContent>
       <TabsContent value="bendahara" className="mt-4"><SuperAdminBendahara /></TabsContent>
     </Tabs>
   );

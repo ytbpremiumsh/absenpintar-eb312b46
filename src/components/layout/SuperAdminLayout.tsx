@@ -27,6 +27,7 @@ const navItems = [
 
   // OPERASIONAL
   { title: "Keuangan", url: "/super-admin/keuangan", icon: Banknote, group: "ops" },
+  { title: "Payment Gateway", url: "/super-admin/payment-gateway", icon: CreditCard, group: "ops" },
   { title: "Komunikasi", url: "/super-admin/komunikasi", icon: MessageCircle, group: "ops" },
   { title: "Email", url: "/super-admin/email-hub", icon: Mail, group: "ops" },
 

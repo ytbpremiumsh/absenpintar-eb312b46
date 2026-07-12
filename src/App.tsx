@@ -296,7 +296,7 @@ function AppRoutes() {
           {/* OPERASIONAL — Keuangan */}
           <Route path="/super-admin/keuangan" element={<SuperAdminKeuanganHub />} />
           <Route path="/super-admin/payments" element={<Navigate to="/super-admin/keuangan?tab=payments" replace />} />
-          <Route path="/super-admin/payment-gateway" element={<Navigate to="/super-admin/keuangan?tab=gateway" replace />} />
+          <Route path="/super-admin/payment-gateway" element={<SuperAdminPaymentGateway />} />
           <Route path="/super-admin/bendahara" element={<Navigate to="/super-admin/keuangan?tab=bendahara" replace />} />
 
           {/* OPERASIONAL — Komunikasi */}
