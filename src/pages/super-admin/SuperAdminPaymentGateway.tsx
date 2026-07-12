@@ -91,6 +91,7 @@ const SuperAdminPaymentGateway = () => {
       setIpaymuApiKeyMasked(d.ipaymu_api_key_masked || "");
       setHasIpaymuVa(!!d.has_ipaymu_va);
       setHasIpaymuApiKey(!!d.has_ipaymu_api_key);
+      setAppBaseUrl(d.app_base_url || "");
       setFeeVa(d.fee_va || "5000");
       setFeeQris(d.fee_qris || "5000");
       setFeeQrisPercent(d.fee_qris_percent || "1");
