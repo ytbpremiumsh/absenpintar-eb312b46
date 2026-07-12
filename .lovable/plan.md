@@ -1,50 +1,70 @@
+# Modul Disbursement Otomatis ke Rekening Sekolah
 
-## Tujuan
-1. Hilangkan sistem langganan berpaket (Free / Basic / School / Premium) dari sisi user (Admin Sekolah, Guru, Wali Kelas, Bendahara, dll).
-2. Semua sekolah hanya mengenal dua mode: **ATSkolla Payment** (gratis, wajib pakai payment gateway) atau **ATSkolla Mandiri** (bayar per siswa / bulan).
-3. Semua fitur dianggap aktif untuk semua sekolah (tidak ada lagi gating berdasarkan tier langganan).
-4. Badge "Premium / School / Free" tidak muncul lagi di UI user. Info paket (Payment vs Mandiri) hanya ditampilkan di panel Super Admin.
+Mengganti tab **Pencairan** di `/bendahara/withdraw` menjadi modul **Disbursement Otomatis** yang siap diintegrasikan ke API Payment Gateway (DOKU Disbursement, dll), tanpa memanggil API sungguhan.
 
-## Perubahan Frontend
+## Yang Dibangun
 
-### Yang dihapus / disembunyikan dari user
-- **`ActivePlanBadge`** (dipakai di sidebar / header) → tidak dirender lagi di layout user.
-- **`PremiumGate`** → ubah jadi pass-through (langsung render `children`), tidak pernah blokir. Ini menghindari harus edit puluhan tempat pemanggilan.
-- **Halaman `Subscription.tsx`** & **`LanggananCombined.tsx`** → route `/subscription` dan menu "Langganan" di sidebar dihapus. Add-on (`/addons`) tetap ada sebagai halaman berdiri sendiri.
-- **`PlanCardsGrid`**, banner trial premium, countdown trial di dashboard → dihapus dari `Dashboard.tsx`.
-- Kartu "premium glassmorphism" di `AppSidebar` yang menampilkan nama tier → diganti kartu ringkas tanpa tier, atau dihapus.
-- Referensi tier di `MobileFooterNav`, `PageHeader`, notifikasi, dsb.
+### 1. Halaman baru: `BendaharaDisbursement.tsx`
+Menggantikan komponen `BendaharaPencairan` di tab Pencairan (tab Saldo & Riwayat tetap).
 
-### Yang tetap ada untuk user
-- Halaman **Paket Sekolah** (`/paket-sekolah`) tetap → pilih Payment vs Mandiri (sudah ada, tidak berubah).
-- Halaman **Add-on** (`/addons`) tetap.
-- Halaman **WA Credit**, **Custom Domain**, **ID Card** tetap (add-on murni, bukan paket langganan).
+### 2. Dashboard Ringkasan (5 kartu)
+Dihitung otomatis dari `spp_settlements` sekolah:
+- Saldo Siap Dicairkan (dari invoice paid online tanpa settlement)
+- Saldo Sedang Diproses (settlement `pending`/`approved`)
+- Total Berhasil Dicairkan (settlement `paid`)
+- Total Gagal Dicairkan (settlement `rejected`)
+- Total Transaksi Disbursement (jumlah baris settlement)
 
-### Yang tetap untuk Super Admin
-- `SuperAdminPaketSekolah` tetap (kelola Payment/Mandiri).
-- `SuperAdminSubscriptions` & `SuperAdminPlans` & `SuperAdminSubscriptionsHub` → route dihapus dari sidebar Super Admin (file boleh tetap ada di codebase agar tidak break, tapi tidak diakses dari menu).
-- Di kartu sekolah (`SchoolCard`) & dialog detail: badge tier "Free/Basic/School/Premium" diganti badge **Payment / Mandiri** (sudah ada di halaman Paket Sekolah, tinggal ditarik ke SchoolCard).
+### 3. Tabel Daftar Pencairan
+Kolom: ID/Kode, Bank, No. Rek, Pemilik, Jumlah, Biaya, Total Dikirim, Status (badge warna: hijau/kuning/abu/merah), Tanggal Pengajuan, Tanggal Berhasil.
+Fitur: search (kode/bank/pemilik), filter status, filter tanggal (from/to), pagination 10/page.
 
-## Perubahan Hook / Logic
+### 4. Dialog Detail Pencairan
+Tiga section:
+- **Informasi Sekolah**: nama, NPSN, bendahara (dari profile), rekening, bank, pemilik
+- **Informasi Dana**: total masuk, fee gateway, biaya disbursement, dana bersih, nominal dikirim
+- **Riwayat & API**: timeline (dibuat/diproses/berhasil-gagal), response API placeholder (JSON `disbursement_response`)
 
-- **`useSubscriptionFeatures`** → di-refactor jadi selalu return:
-  ```
-  { planName: "Payment"|"Mandiri", loading: false, features: { all: true }, isPaid: true, ... }
-  ```
-  Semua flag fitur (`canScanQR`, `canFaceRecognition`, `canRfid`, dsb) di-hardcode `true`, jadi komponen existing yang cek flag tidak error.
-- Trial premium logic, downgrade otomatis ke Free → dinonaktifkan (tidak dijalankan).
-- Registrasi sekolah baru → tidak lagi auto-grant "Trial Premium"; default `package_type = 'payment'`, `package_status = 'active'`.
+### 5. Pengajuan Pencairan
+Tombol **Ajukan Pencairan** → hitung saldo tersedia, pilih rekening terverifikasi, konfirmasi. Insert row `spp_settlements` dengan `disbursement_status='pending'`. Log ke `spp_logs`. Tetap pakai flow OTP existing.
 
-## Perubahan Database / Backend
-- Tidak menghapus tabel `subscription_plans` / `school_subscriptions` (agar histori tetap aman & tidak break edge functions lain), hanya tidak lagi dipakai dari UI user.
-- Edge function terkait trial / plan expiry: dibiarkan tapi tidak dijadwalkan dari UI (opsional dimatikan di iterasi berikutnya).
-- Tidak ada migrasi schema di iterasi ini kecuali user memintanya.
+### 6. Rekening Pencairan (Verifikasi)
+Tambah kolom `verification_status` (`pending`/`verified`/`rejected`) + `verified_at` pada `bendahara_bank_accounts`. Hanya rekening `verified` yang boleh dipilih untuk pencairan. Super Admin memverifikasi (untuk sekarang: default `pending`, admin sekolah tandai request; verifikasi manual via update — tombol verifikasi ditampilkan hanya utk super_admin).
 
-## Memory yang harus di-update
-- Tambah rule Core: "Tidak ada sistem langganan berpaket. Semua sekolah pakai model Payment atau Mandiri. Semua fitur aktif untuk semua sekolah. Badge tier tidak boleh muncul di UI user."
-- Hapus / mark obsolete: `mem://features/subscription-management`, `mem://features/subscription-visibility`, `mem://constraints/subscription-tiers`, `mem://features/school-registration` bagian "auto-grant Trial Premium".
+### 7. Struktur API-Ready (client-side helper)
+`src/lib/disbursement.ts` — builder payload berisi:
+```
+{ beneficiaryName, bankCode, accountNumber, amount, referenceId, notes, callbackUrl }
+```
+Dipakai saat pengajuan (payload disimpan ke `disbursement_response.request` sebagai placeholder). Tidak ada fetch ke gateway.
 
-## Konfirmasi yang saya butuhkan sebelum implementasi
-1. **Route `/subscription`**: hapus total dari sidebar & App.tsx, atau redirect ke `/paket-sekolah`?
-2. **Sekolah existing** yang saat ini `subscription_plan_id` = Premium/School/Basic: perlu di-set default `package_type = 'payment'` sekalian, atau biarkan apa adanya?
-3. **`SuperAdminSubscriptions` / `SuperAdminPlans`**: benar-benar dihapus dari menu, atau tetap ada untuk lihat histori?
+### 8. Export
+Tombol Export **PDF** (jsPDF+autotable), **Excel** (xlsx), **CSV** untuk data tabel yang difilter.
+
+### 9. Validasi
+- Cek rekening terverifikasi
+- Cek saldo > 0
+- `spp_invoices.settlement_id` guard (sudah ada) mencegah double-cair
+- Semua aktivitas dicatat ke `spp_logs`
+
+## Detail Teknis
+
+**Files baru:**
+- `src/pages/bendahara/BendaharaDisbursement.tsx` (module utama)
+- `src/lib/disbursement.ts` (payload builder + bank code map)
+
+**Files diubah:**
+- `src/pages/bendahara/BendaharaWithdraw.tsx` — pakai `BendaharaDisbursement` untuk tab Pencairan
+- `src/components/layout/BendaharaSidebar.tsx` — rename menu "Saldo & Penarikan" → "Disbursement"
+
+**Migration:**
+- `ALTER TABLE bendahara_bank_accounts ADD verification_status text DEFAULT 'pending', ADD verified_at timestamptz, ADD verified_by uuid`
+
+**Tidak diubah:**
+- Skema `spp_settlements` (semua field sudah tersedia)
+- Flow OTP & edge functions
+- Komponen `BendaharaSaldo` di tab Saldo & Riwayat
+
+## Bukan Lingkup
+- Tidak memanggil DOKU Disbursement API (payload disiapkan saja)
+- Tidak membuat callback endpoint (siap ditambah kemudian)
