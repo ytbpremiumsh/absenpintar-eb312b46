@@ -284,7 +284,10 @@ export type Database = {
           bank_name: string
           created_at: string
           created_by: string | null
+          doku_bank_account_settlement_id: string | null
           doku_bank_code: string | null
+          doku_response: Json | null
+          doku_synced_at: string | null
           id: string
           is_default: boolean
           notes: string | null
@@ -302,7 +305,10 @@ export type Database = {
           bank_name: string
           created_at?: string
           created_by?: string | null
+          doku_bank_account_settlement_id?: string | null
           doku_bank_code?: string | null
+          doku_response?: Json | null
+          doku_synced_at?: string | null
           id?: string
           is_default?: boolean
           notes?: string | null
@@ -320,7 +326,10 @@ export type Database = {
           bank_name?: string
           created_at?: string
           created_by?: string | null
+          doku_bank_account_settlement_id?: string | null
           doku_bank_code?: string | null
+          doku_response?: Json | null
+          doku_synced_at?: string | null
           id?: string
           is_default?: boolean
           notes?: string | null
