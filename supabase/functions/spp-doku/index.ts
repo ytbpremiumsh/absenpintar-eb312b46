@@ -391,8 +391,12 @@ async function ensureFreshLink(
     message: created.raw?.message || null,
   });
   if (!created.ok || !created.url) {
-    const msg = created.raw?.message || created.raw?.error?.message || JSON.stringify(created.raw).slice(0, 300);
-    return { success: false, error: `Gagal buat pembayaran Doku: ${msg}` };
+    const raw = created.raw?.message || created.raw?.error?.message || JSON.stringify(created.raw).slice(0, 300);
+    const upper = String(raw).toUpperCase();
+    const friendly = upper.includes("PAYMENT CHANNEL IS INACTIVE")
+      ? `Channel ${String(channel || "").toUpperCase() || "pembayaran"} belum aktif di akun Doku merchant. Hubungi Super Admin untuk mengaktifkan channel ini di dashboard Doku, atau pilih metode lain.`
+      : raw;
+    return { success: false, error: `Gagal buat pembayaran Doku: ${friendly}` };
   }
   await supabaseAdmin.from("spp_invoices").update({
     mayar_invoice_id: created.dokuInvoiceId,
