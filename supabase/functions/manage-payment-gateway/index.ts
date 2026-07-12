@@ -17,6 +17,8 @@ const KEYS = [
   "ipaymu_va",
   "ipaymu_api_key",
   "ipaymu_env",
+  // App base URL (return URL untuk halaman pembayaran)
+  "app_base_url",
   // Fees
   "fee_va",
   "fee_qris",
