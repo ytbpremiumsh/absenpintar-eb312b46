@@ -753,7 +753,21 @@ export default function BendaharaDisbursement() {
       </Dialog>
 
       {/* Add account dialog */}
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+      <Dialog open={addOpen} onOpenChange={(o) => {
+        setAddOpen(o);
+        if (o && bankList.length === 0 && !bankListLoading) {
+          setBankListLoading(true);
+          supabase.functions.invoke("doku-bank-account", { body: { action: "list_banks" } })
+            .then(({ data, error }) => {
+              if (error || !data?.banks) {
+                toast.error("Gagal memuat daftar bank");
+                return;
+              }
+              setBankList(data.banks);
+            })
+            .finally(() => setBankListLoading(false));
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Tambah Rekening Pencairan</DialogTitle>
@@ -762,7 +776,24 @@ export default function BendaharaDisbursement() {
           <div className="space-y-3">
             <div>
               <Label>Nama Bank</Label>
-              <Input value={addBank} onChange={(e) => setAddBank(e.target.value)} placeholder="Mandiri, BCA, BNI, BRI, BSI…" />
+              <Select
+                value={addBankCode}
+                onValueChange={(v) => {
+                  setAddBankCode(v);
+                  const b = bankList.find((x) => x.code === v);
+                  setAddBank(b?.name || "");
+                }}
+                disabled={bankListLoading || bankList.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={bankListLoading ? "Memuat daftar bank…" : "Pilih bank"} />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {bankList.map((b) => (
+                    <SelectItem key={b.code} value={b.code}>{b.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Nomor Rekening</Label>
@@ -780,7 +811,7 @@ export default function BendaharaDisbursement() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>Batal</Button>
             <Button
-              disabled={addSaving || !addBank || !addNumber || !addHolder}
+              disabled={addSaving || !addBank || !addBankCode || !addNumber || !addHolder}
               className="bg-[#5B6CF9] hover:bg-[#4a5ce8]"
               onClick={async () => {
                 if (!profile?.school_id) return;
@@ -796,13 +827,13 @@ export default function BendaharaDisbursement() {
                     account_number: addNumber.trim(),
                     account_holder: addHolder.trim(),
                     is_default: addDefault,
-                    doku_bank_code: resolveBankCode(addBank),
+                    doku_bank_code: addBankCode || resolveBankCode(addBank),
                     verification_status: "pending",
                   } as any);
                   if (error) { toast.error(error.message); return; }
                   toast.success("Rekening ditambahkan. Klik 'Verifikasi' untuk memproses.");
                   setAddOpen(false);
-                  setAddBank(""); setAddNumber(""); setAddHolder(""); setAddDefault(false);
+                  setAddBank(""); setAddBankCode(""); setAddNumber(""); setAddHolder(""); setAddDefault(false);
                   setRefreshKey((k) => k + 1);
                 } finally {
                   setAddSaving(false);
@@ -817,3 +848,4 @@ export default function BendaharaDisbursement() {
     </div>
   );
 }
+
