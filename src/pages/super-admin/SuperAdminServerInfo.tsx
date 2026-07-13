@@ -105,7 +105,7 @@ export default function SuperAdminServerInfo() {
       // Approximate stats from known tables
       const tableNames = [
         "schools", "students", "classes", "attendance_logs", "profiles",
-        "support_tickets", "payment_transactions", "school_subscriptions",
+        "support_tickets", "payment_transactions",
         "wa_message_logs", "notifications", "login_logs", "affiliates",
         "wa_credits", "school_addons", "id_card_orders"
       ];
