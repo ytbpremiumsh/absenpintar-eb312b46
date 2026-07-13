@@ -142,8 +142,8 @@ export function PaymentMethodPicker({
         </div>
 
         <p className="text-[11px] text-muted-foreground leading-snug">
-          Biaya layanan ditanggung wali murid dan sudah termasuk pada total bayar. Pastikan memilih metode
-          pembayaran sesuai channel yang akan digunakan di halaman Mayar.
+          Catatan: mungkin akan ada biaya tambahan dari bank saat transfer. Pilih metode pembayaran
+          sesuai channel yang ingin digunakan di halaman pembayaran.
         </p>
 
         <Button
