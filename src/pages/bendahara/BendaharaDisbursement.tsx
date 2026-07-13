@@ -124,7 +124,33 @@ export default function BendaharaDisbursement() {
   const [addDefault, setAddDefault] = useState(false);
   const [addSaving, setAddSaving] = useState(false);
   const [verifyingIds, setVerifyingIds] = useState<Set<string>>(new Set());
-  const [bankList, setBankList] = useState<Array<{ code: string; name: string }>>([]);
+  const FALLBACK_BANKS: Array<{ code: string; name: string }> = [
+    { code: "014", name: "BCA" },
+    { code: "008", name: "Mandiri" },
+    { code: "009", name: "BNI" },
+    { code: "002", name: "BRI" },
+    { code: "451", name: "BSI" },
+    { code: "022", name: "CIMB Niaga" },
+    { code: "013", name: "Permata" },
+    { code: "011", name: "Danamon" },
+    { code: "200", name: "BTN" },
+    { code: "028", name: "OCBC NISP" },
+    { code: "016", name: "Maybank" },
+    { code: "019", name: "Panin" },
+    { code: "426", name: "Mega" },
+    { code: "542", name: "Jago" },
+    { code: "535", name: "SeaBank" },
+    { code: "213", name: "Jenius (BTPN)" },
+    { code: "490", name: "Bank Neo Commerce" },
+    { code: "147", name: "Muamalat" },
+    { code: "441", name: "Bukopin" },
+    { code: "153", name: "Sinarmas" },
+    { code: "111", name: "Bank DKI" },
+    { code: "110", name: "Bank BJB" },
+    { code: "112", name: "Bank Jateng" },
+    { code: "114", name: "Bank Jatim" },
+  ];
+  const [bankList, setBankList] = useState<Array<{ code: string; name: string }>>(FALLBACK_BANKS);
   const [bankListLoading, setBankListLoading] = useState(false);
 
 
@@ -783,7 +809,6 @@ export default function BendaharaDisbursement() {
                   const b = bankList.find((x) => x.code === v);
                   setAddBank(b?.name || "");
                 }}
-                disabled={bankListLoading || bankList.length === 0}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={bankListLoading ? "Memuat daftar bank…" : "Pilih bank"} />
