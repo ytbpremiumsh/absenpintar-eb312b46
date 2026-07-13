@@ -4912,7 +4912,7 @@ export function BendaharaPencairan() {
                 <p className="text-[11px] uppercase tracking-wider font-semibold text-emerald-700 dark:text-emerald-400">Rincian Perhitungan</p>
                 <div className="flex justify-between text-sm"><span className="text-muted-foreground">Total Tagihan Lunas</span><span className="font-semibold">{available.count} transaksi</span></div>
                 <div className="flex justify-between text-sm"><span className="text-muted-foreground">Total Bruto (dari siswa)</span><span className="font-bold">{fmtIDR(available.gross)}</span></div>
-                <div className="flex justify-between text-sm text-rose-600 dark:text-rose-400"><span>(−) Biaya Pencairan</span><span className="font-semibold">−{fmtIDR(3000)}</span></div>
+                <div className="flex justify-between text-sm text-rose-600 dark:text-rose-400"><span>(−) Biaya Pencairan</span><span className="font-semibold">−{fmtIDR(DEFAULT_WITHDRAW_FEE)}</span></div>
                 <div className="border-t-2 border-emerald-400 dark:border-emerald-600 pt-2 flex justify-between items-center"><span className="text-sm font-semibold">Diterima di Rekening</span><span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">{fmtIDR(finalPayout)}</span></div>
               </div>
 
