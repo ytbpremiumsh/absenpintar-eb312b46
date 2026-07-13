@@ -308,7 +308,7 @@ async function ensureFreshLink(
     service_fee: serviceFee,
     payment_channel: channel,
   }).eq("id", inv.id);
-  const { data: anyPlan } = await admin.from("subscription_plans").select("id").limit(1).maybeSingle();
+  const { data: anyPlan } = Promise.resolve({ data: null });
   await admin.from("payment_transactions").insert({
     school_id: inv.school_id,
     plan_id: anyPlan?.id || inv.school_id,
@@ -424,7 +424,7 @@ serve(async (req) => {
       }).select("id").single();
       if (insErr) return err("Gagal simpan cicilan: " + insErr.message);
 
-      const { data: anyPlan } = await admin.from("subscription_plans").select("id").limit(1).maybeSingle();
+      const { data: anyPlan } = Promise.resolve({ data: null });
       await admin.from("payment_transactions").insert({
         school_id: inv.school_id,
         plan_id: anyPlan?.id || inv.school_id,

@@ -415,7 +415,7 @@ serve(async (req) => {
       if (insErr) return err("Gagal simpan cicilan: " + insErr.message);
 
       // Bridge ke payment_transactions agar webhook Mayar tetap dapat menandai lunas
-      const { data: anyPlan } = await supabaseAdmin.from("subscription_plans").select("id").limit(1).maybeSingle();
+      const { data: anyPlan } = Promise.resolve({ data: null });
       await supabaseAdmin.from("payment_transactions").insert({
         school_id: inv.school_id,
         plan_id: anyPlan?.id || inv.school_id,
@@ -582,7 +582,7 @@ async function ensureFreshLink(
   }).eq("id", inv.id);
 
   // Bridge to payment_transactions for webhook compatibility
-  const { data: anyPlan } = await supabaseAdmin.from("subscription_plans").select("id").limit(1).maybeSingle();
+  const { data: anyPlan } = Promise.resolve({ data: null });
   await supabaseAdmin.from("payment_transactions").insert({
     school_id: inv.school_id,
     plan_id: anyPlan?.id || inv.school_id,
