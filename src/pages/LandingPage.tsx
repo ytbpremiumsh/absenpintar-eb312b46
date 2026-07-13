@@ -126,7 +126,7 @@ const HARDWARE = [
 const ROLES = [
   { key: "kepsek", label: "Kepala Sekolah", metric: { top: "Kehadiran hari ini", val: "94,8%", sub: "1.204 dari 1.270 siswa" }, blocks: ["Ringkasan operasional", "Trend absensi", "Aktivitas terbaru"] },
   { key: "bendahara", label: "Bendahara", metric: { top: "SPP Bulan Ini", val: "Rp 312 Jt", sub: "87% terkumpul • 42 tunggakan" }, blocks: ["Tagihan aktif", "Cash flow harian", "Laporan periode"] },
-  { key: "guru", label: "Guru", metric: { top: "Kelas hari ini", val: "5 sesi", sub: "3 selesai • 2 mendatang" }, blocks: ["Jadwal mengajar", "Rekap kehadiran kelas", "Nilai siswa"] },
+  { key: "guru", label: "Guru", metric: { top: "Kelas hari ini", val: "5 sesi", sub: "3 selesai • 2 mendatang" }, blocks: ["Jadwal mengajar", "Rekap kehadiran kelas", "Leaderboard kelas"] },
   { key: "ortu", label: "Orang Tua", metric: { top: "Status anak", val: "Hadir 07:12", sub: "Kelas 6B • SDN 1 Cendikia" }, blocks: ["Absensi anak", "Tagihan SPP", "Pengumuman sekolah"] },
   
 ];
