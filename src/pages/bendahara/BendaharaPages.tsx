@@ -4739,7 +4739,7 @@ export function BendaharaPencairan() {
   };
 
   const badge = (s: string) => {
-    const map: any = { pending: "bg-amber-500", approved: "bg-blue-500", paid: "bg-emerald-500", rejected: "bg-red-500" };
+    const map: any = { pending: "bg-amber-500", approved: "bg-blue-500", paid: "bg-emerald-500", rejected: "bg-red-500", cancelled: "bg-slate-400" };
     return <Badge className={map[s] || "bg-slate-500"}>{s.toUpperCase()}</Badge>;
   };
 
