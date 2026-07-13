@@ -57,11 +57,10 @@ const StudentDetail = () => {
 
   const fetchData = async () => {
     if (!id || !profile?.school_id) return;
-    const [studentRes, logsRes, schoolRes, instrRes, classesRes, studentsRes] = await Promise.all([
+    const [studentRes, logsRes, schoolRes, classesRes, studentsRes] = await Promise.all([
       supabase.from("students").select("*").eq("id", id).eq("school_id", profile.school_id).single(),
       supabase.from("attendance_logs").select("*").eq("student_id", id).eq("school_id", profile.school_id).order("date", { ascending: false }).order("time", { ascending: false }).limit(30),
       supabase.from("schools").select("name, logo, address").eq("id", profile.school_id).single(),
-      supabase.from("qr_instructions").select("instruction_text").eq("school_id", profile.school_id).order("sort_order"),
       supabase.from("classes").select("name").eq("school_id", profile.school_id).order("name"),
       supabase.from("students").select("class").eq("school_id", profile.school_id),
     ]);
@@ -73,7 +72,7 @@ const StudentDetail = () => {
     setStudent(studentRes.data);
     setAttendanceHistory(logsRes.data || []);
     setSchool(schoolRes.data);
-    if (instrRes.data?.length) setQrInstructions(instrRes.data.map((r: any) => r.instruction_text));
+
     if (studentRes.data) {
       setEditForm({
         name: studentRes.data.name, class: studentRes.data.class, student_id: studentRes.data.student_id,
