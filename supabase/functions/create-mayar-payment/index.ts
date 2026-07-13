@@ -144,11 +144,11 @@ serve(async (req) => {
         payment_method: "addon_custom_domain",
       }).select("id").single();
 
-      const subRes = await supabaseAdmin.from("school_subscriptions").select("expires_at").eq("school_id", schoolId).in("status", ["active", "trial"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
       await supabaseAdmin.from("school_addons").upsert({
         school_id: schoolId, addon_type: "custom_domain", status: "pending", amount: addonAmount,
-        payment_transaction_id: txn?.id || null, expires_at: subRes?.data?.expires_at || null,
+        payment_transaction_id: txn?.id || null, expires_at: null,
       }, { onConflict: "school_id,addon_type" });
+
 
       return ok({ payment_url: brandPaymentUrl(paymentLink.link), transaction_id: txn?.id || null });
     }
