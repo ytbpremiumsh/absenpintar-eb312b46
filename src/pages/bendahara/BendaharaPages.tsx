@@ -4539,43 +4539,36 @@ export function BendaharaPencairan() {
       if (cancelled) return;
 
       const allPaid = (paidRes.data || []) as any[];
-      const isOffline = (m: string | null) => {
-        const v = (m || "").toLowerCase();
-        return v === "offline_cash" || v === "offline_transfer";
-      };
-      const online = allPaid.filter((x) => !isOffline(x.payment_method));
-      const offline = allPaid.filter((x) => isOffline(x.payment_method));
+      const online = allPaid.filter((x) => !isOfflinePayment(x.payment_method));
+      const offline = allPaid.filter((x) => isOfflinePayment(x.payment_method));
       const availableList = online.filter((x) => !x.settlement_id);
 
       setAvailableItems(availableList);
-      setAvailable({
-        count: availableList.length,
-        gross: availableList.reduce((s, i) => s + (i.total_amount || 0), 0),
-        fee: availableList.reduce((s, i) => s + (i.gateway_fee || 0), 0),
-        net: availableList.reduce((s, i) => s + (i.net_amount || 0), 0),
-      });
+      // Pakai helper yang sama dengan Bendahara Saldo & Super Admin agar angka konsisten.
+      setAvailable(computeAvailableSaldo(availableList, DEFAULT_WITHDRAW_FEE));
 
       const invoiceBySettlement = online.reduce((map, x) => {
         if (!x.settlement_id) return map;
         const current = map.get(x.settlement_id) || { count: 0, gross: 0, fee: 0, net: 0 };
+        const netVal = x.net_amount ?? (x.total_amount || 0);
         current.count += 1;
         current.gross += x.total_amount || 0;
         current.fee += x.gateway_fee || 0;
-        current.net += x.net_amount || 0;
+        current.net += netVal;
         map.set(x.settlement_id, current);
         return map;
       }, new Map<string, { count: number; gross: number; fee: number; net: number }>());
 
       const reconciledHistory = ((hRes.data || []) as any[]).map((s) => {
         const inv = invoiceBySettlement.get(s.id) || { count: 0, gross: 0, fee: 0, net: 0 };
-        const withdrawFee = s.withdraw_fee ?? 3000;
+        const withdrawFee = s.withdraw_fee ?? DEFAULT_WITHDRAW_FEE;
         return {
           ...s,
           total_transactions: inv.count,
           total_gross: inv.gross,
           total_gateway_fee: inv.fee,
           total_net: inv.net,
-          final_payout: Math.max(0, inv.net - withdrawFee),
+          final_payout: Math.max(0, inv.net - (inv.count > 0 ? withdrawFee : 0)),
         };
       });
 
