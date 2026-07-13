@@ -494,7 +494,7 @@ export default function BendaharaDisbursement() {
                               if (error || data?.error) { toast.error(data?.error || error?.message || "Gagal daftar ke DOKU"); return; }
                               toast.success("Rekening didaftarkan ke DOKU");
                               setRefreshKey((k) => k + 1);
-                            }}><Send className="h-3.5 w-3.5" /> Daftar ke DOKU</Button>
+                            }}><Send className="h-3.5 w-3.5" /> Verifikasi</Button>
                           )}
                           {a.doku_bank_account_settlement_id && (
                             <Button size="sm" variant="outline" className="gap-1" onClick={async () => {
