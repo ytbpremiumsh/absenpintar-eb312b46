@@ -4345,15 +4345,14 @@ export function BendaharaSaldo() {
     net: acc.net + (i.net_amount || i.total_amount || 0),
   }), { gross: 0, net: 0 });
 
-  // Saldo — sumber kebenaran tunggal: helper shared (dipakai juga di Super Admin)
-  // Saldo aktif = net_amount online yang belum ter-settle − biaya admin (sekali per pencairan)
+  // Saldo — sumber kebenaran tunggal: helper shared (dipakai juga di Super Admin & Pencairan)
   const available = computeAvailableSaldo(items, DEFAULT_WITHDRAW_FEE);
-  const activeBalance = available.finalPayout;
   // "Sudah Dicairkan" = jumlah final_payout dari settlement berstatus paid
   const settledPayout = sumDisbursed(settlements);
   const settledCount = settlements.filter((s) => s.status === "paid").length;
-  // Menunggu Pencairan = final_payout dari settlement requested/approved/processing
+  // Menunggu Pencairan = final_payout dari settlement pending/requested/approved/processing
   const pendingPayout = sumPendingPayout(settlements);
+  const pendingCount = countPendingPayout(settlements);
   const settledFeePencairan = settlements.filter((s) => s.status === "paid").reduce((s, x) => s + (x.withdraw_fee || 0), 0);
 
   // Banner info: dismiss selama 7 hari via localStorage
