@@ -4385,6 +4385,7 @@ export function BendaharaSaldo() {
             </span>
           </div>
           <p className="text-3xl md:text-4xl font-extrabold tracking-tight">{fmtIDR(available.net)}</p>
+          <p className="text-[11px] opacity-80 mt-1">{available.count} transaksi online siap dicairkan</p>
         </CardContent>
       </Card>
 
