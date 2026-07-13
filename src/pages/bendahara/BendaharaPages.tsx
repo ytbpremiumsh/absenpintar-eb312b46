@@ -4393,7 +4393,7 @@ export function BendaharaSaldo() {
       {/* Ringkasan Saldo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <StatCard label="Total Bruto SPP" value={fmtIDR(totals.gross)} sub={`${txCount} transaksi`} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
-        <StatCard label="Sudah Dicairkan" value={fmtIDR(settledGross)} sub={`${settledCount} transaksi`} icon={ArrowDownToLine} gradient="from-violet-500 to-purple-600" />
+        <StatCard label="Sudah Dicairkan" value={fmtIDR(settledPayout)} sub={`${settledCount} pencairan`} icon={ArrowDownToLine} gradient="from-violet-500 to-purple-600" />
         <StatCard label="Pending Pencairan" value={fmtIDR(pendingPayout)} sub="siap dicairkan" icon={Loader2} gradient="from-amber-500 to-orange-600" />
       </div>
 
