@@ -30,13 +30,13 @@ async function listPublicTables(supabase: any): Promise<string[]> {
     'parent_leave_requests', 'parent_messages',
     'payment_transactions', 'dismissal_logs', 'dismissal_settings',
     'platform_settings', 'point_transactions', 'profiles',
-    'promo_content', 'qr_instructions', 'referrals',
+    'referrals',
     'reward_claims', 'rewards',
     'school_addons', 'school_announcements', 'school_groups',
-    'school_integrations', 'school_subscriptions', 'schools',
+    'school_integrations', 'schools',
     'spp_invoices', 'spp_logs', 'spp_settlements', 'spp_tariffs',
     'student_grades', 'students', 'subject_attendance', 'subjects',
-    'subscription_plans', 'support_tickets', 'teaching_schedules',
+    'support_tickets', 'teaching_schedules',
     'ticket_replies', 'user_roles', 'wa_credits', 'wa_message_logs',
   ]
 }
@@ -192,7 +192,7 @@ Deno.serve(async (req) => {
 
       // Dependency order: parents first, children last.
       const RESTORE_ORDER = [
-        'subscription_plans', 'schools', 'school_groups', 'school_subscriptions',
+        'schools', 'school_groups', 'school_subscriptions',
         'profiles', 'user_roles',
         'classes', 'subjects', 'teaching_schedules', 'class_teachers',
         'students', 'student_grades',
@@ -203,7 +203,7 @@ Deno.serve(async (req) => {
         'bendahara_settings', 'bendahara_bank_accounts',
         'id_card_designs', 'id_card_orders', 'id_card_order_items',
         'landing_content', 'landing_testimonials', 'landing_trusted_schools',
-        'promo_content', 'panduan_content', 'qr_instructions',
+        'panduan_content', 'qr_instructions',
         'platform_settings', 'email_settings', 'email_logs',
         'notifications', 'login_logs',
         'affiliates', 'affiliate_commissions', 'affiliate_withdrawals', 'referrals',

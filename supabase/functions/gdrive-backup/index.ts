@@ -8,12 +8,12 @@ const corsHeaders = {
 const TABLES = [
   'schools', 'profiles', 'user_roles', 'students', 'classes', 'class_teachers',
   'attendance_logs', 'dismissal_logs', 'dismissal_settings', 'school_integrations',
-  'school_subscriptions', 'subscription_plans', 'payment_transactions',
+  'payment_transactions',
   'notifications', 'support_tickets', 'ticket_replies', 'wa_message_logs',
   'landing_content', 'landing_testimonials', 'landing_trusted_schools',
   'platform_settings', 'referrals', 'point_transactions', 'rewards',
   'reward_claims', 'affiliates', 'affiliate_commissions', 'affiliate_withdrawals',
-  'login_logs', 'promo_content', 'qr_instructions', 'school_groups',
+  'login_logs', 'school_groups',
 ]
 
 async function uploadToGoogleDrive(accessToken: string, fileName: string, content: string, folderId?: string) {
