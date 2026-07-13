@@ -111,20 +111,10 @@ serve(async (req) => {
     const totalAlfa = autoAlfa2 ? dbAlfa + remaining : dbAlfa;
     const totalBelum = autoAlfa2 ? 0 : remaining;
 
-    // Determine plan features
-    const sub = subRes.data as any;
-    let planName = 'Free';
-    let isActiveTrial = false;
-    if (sub?.subscription_plans?.name) {
-      const expired = sub.expires_at && new Date(sub.expires_at) < new Date();
-      if (expired) {
-        planName = 'Free';
-      } else {
-        planName = sub.subscription_plans.name;
-        isActiveTrial = sub.status === 'trial';
-      }
-    }
-    const canFaceRecognition = planName === 'Premium' || planName === 'School' || isActiveTrial;
+    // Sistem langganan berpaket dihapus; semua fitur aktif.
+    const planName = 'Payment';
+    const canFaceRecognition = true;
+
 
     return new Response(JSON.stringify({
       school: schoolRes.data,
