@@ -217,7 +217,10 @@ async function createDokuPayment(
     },
     payment: {
       payment_due_date: DOKU_LINK_TTL_MIN,
+      // Paksa bahasa Indonesia pada halaman checkout Doku (default sering English).
+      language: "ID",
     },
+    locale: "id_ID",
     customer: {
       // Doku VA menampilkan customer.name sebagai pemilik VA. Pakai nama SISWA
       // supaya tampilan mutasi bank / halaman pembayaran menampilkan nama anak,
