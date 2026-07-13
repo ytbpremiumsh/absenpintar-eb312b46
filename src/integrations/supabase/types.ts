@@ -284,13 +284,19 @@ export type Database = {
           bank_name: string
           created_at: string
           created_by: string | null
+          doku_bank_account_settlement_id: string | null
           doku_bank_code: string | null
+          doku_response: Json | null
+          doku_synced_at: string | null
           id: string
           is_default: boolean
           notes: string | null
           responsible_user_id: string | null
           school_id: string
           updated_at: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           account_holder: string
@@ -299,13 +305,19 @@ export type Database = {
           bank_name: string
           created_at?: string
           created_by?: string | null
+          doku_bank_account_settlement_id?: string | null
           doku_bank_code?: string | null
+          doku_response?: Json | null
+          doku_synced_at?: string | null
           id?: string
           is_default?: boolean
           notes?: string | null
           responsible_user_id?: string | null
           school_id: string
           updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           account_holder?: string
@@ -314,13 +326,19 @@ export type Database = {
           bank_name?: string
           created_at?: string
           created_by?: string | null
+          doku_bank_account_settlement_id?: string | null
           doku_bank_code?: string | null
+          doku_response?: Json | null
+          doku_synced_at?: string | null
           id?: string
           is_default?: boolean
           notes?: string | null
           responsible_user_id?: string | null
           school_id?: string
           updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
