@@ -1541,7 +1541,7 @@ export default function ParentDashboard() {
       <PaymentIframeDialog
         open={!!paymentIframe}
         paymentUrl={paymentIframe}
-        title="Pembayaran Tagihan — QRIS / Transfer Bank"
+        title={`Pembayaran Tagihan — ${paymentMethod === "qris" ? "QRIS" : paymentMethod === "retail" ? "Retail (Alfamart / Indomaret)" : "Virtual Account / Transfer Bank"}`}
         method={paymentMethod}
         pollIntervalMs={4000}
         checkPaid={async () => {
