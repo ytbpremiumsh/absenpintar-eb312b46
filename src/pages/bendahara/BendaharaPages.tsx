@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/PageHeader";
 import { toast } from "sonner";
+import { computeAvailableSaldo, sumDisbursed, sumPendingPayout, DEFAULT_WITHDRAW_FEE } from "@/lib/bendaharaSaldo";
 import {
   TrendingUp, Wallet, AlertCircle, CheckCircle2, Loader2, Plus, Search, Link as LinkIcon,
   Receipt, ArrowDownToLine, Banknote, RefreshCw, FileText, MessageCircle, Mail, Copy,
@@ -4344,16 +4345,16 @@ export function BendaharaSaldo() {
     net: acc.net + (i.net_amount || i.total_amount || 0),
   }), { gross: 0, net: 0 });
 
-  // Saldo — sumber kebenaran: spp_invoices (sinkron dengan halaman Pencairan)
-  // "Sudah Dicairkan" = invoice online lunas yang sudah terikat settlement
-  const settledItems = items.filter((i) => !!i.settlement_id);
-  const settledGross = settledItems.reduce((s, x) => s + (x.total_amount || 0), 0);
-  const settledCount = settledItems.length;
-  const settledFeePencairan = settlements.filter(s => s.status === "paid").reduce((s, x) => s + (x.withdraw_fee || 0), 0);
-  // Menunggu Pencairan = paid online yang belum di-settle (selaras dengan dashboard Kepsek)
-  const pendingPayout = activeTotals.gross;
-  const activeBalance = Math.max(0, activeTotals.gross);
-  const lockedGross = Math.max(0, totals.gross - activeTotals.gross);
+  // Saldo — sumber kebenaran tunggal: helper shared (dipakai juga di Super Admin)
+  // Saldo aktif = net_amount online yang belum ter-settle − biaya admin (sekali per pencairan)
+  const available = computeAvailableSaldo(items, DEFAULT_WITHDRAW_FEE);
+  const activeBalance = available.finalPayout;
+  // "Sudah Dicairkan" = jumlah final_payout dari settlement berstatus paid
+  const settledPayout = sumDisbursed(settlements);
+  const settledCount = settlements.filter((s) => s.status === "paid").length;
+  // Menunggu Pencairan = final_payout dari settlement requested/approved/processing
+  const pendingPayout = sumPendingPayout(settlements);
+  const settledFeePencairan = settlements.filter((s) => s.status === "paid").reduce((s, x) => s + (x.withdraw_fee || 0), 0);
 
   // Banner info: dismiss selama 7 hari via localStorage
   const [showSaldoInfo, setShowSaldoInfo] = useState(() => {
@@ -4384,7 +4385,7 @@ export function BendaharaSaldo() {
             </span>
           </div>
           <p className="text-3xl md:text-4xl font-extrabold tracking-tight">{fmtIDR(activeBalance)}</p>
-          <p className="text-[11px] opacity-80 mt-1">Total Bruto {fmtIDR(totals.gross)} − Sudah/akan dicairkan {fmtIDR(lockedGross)}</p>
+          <p className="text-[11px] opacity-80 mt-1">Net Rp {fmtIDR(available.net)} − Biaya admin {fmtIDR(available.count > 0 ? DEFAULT_WITHDRAW_FEE : 0)} • {available.count} transaksi online</p>
         </CardContent>
       </Card>
 
@@ -4392,7 +4393,7 @@ export function BendaharaSaldo() {
       {/* Ringkasan Saldo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <StatCard label="Total Bruto SPP" value={fmtIDR(totals.gross)} sub={`${txCount} transaksi`} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
-        <StatCard label="Sudah Dicairkan" value={fmtIDR(settledGross)} sub={`${settledCount} transaksi`} icon={ArrowDownToLine} gradient="from-violet-500 to-purple-600" />
+        <StatCard label="Sudah Dicairkan" value={fmtIDR(settledPayout)} sub={`${settledCount} pencairan`} icon={ArrowDownToLine} gradient="from-violet-500 to-purple-600" />
         <StatCard label="Pending Pencairan" value={fmtIDR(pendingPayout)} sub="siap dicairkan" icon={Loader2} gradient="from-amber-500 to-orange-600" />
       </div>
 
