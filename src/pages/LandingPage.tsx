@@ -78,7 +78,7 @@ const MODULES = [
     items: [
       { icon: ScanLine, title: "Absensi", desc: "RFID, Face Recognition, QR Code" },
       { icon: CalendarDays, title: "Jadwal", desc: "Live schedule per guru & kelas" },
-      { icon: FileBarChart, title: "Nilai", desc: "Rekap per mata pelajaran & rapor" },
+      { icon: FileBarChart, title: "Rekap & Laporan", desc: "Rekap kehadiran 1-31, export Excel & PDF" },
       { icon: Megaphone, title: "Pengumuman", desc: "Broadcast ke wali murid & guru" },
     ],
   },
