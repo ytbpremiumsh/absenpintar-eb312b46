@@ -254,11 +254,24 @@ async function createDokuPayment(
     res = await dokuFetch(cfg, "/checkout/v1/payment", body);
   }
 
-  const url =
+  let url: string | null =
     res.json?.response?.payment?.url ||
     res.json?.payment?.url ||
     res.json?.response?.payment?.payment_url ||
     null;
+  // Paksa bahasa Indonesia pada halaman checkout Doku via query param `?lang=ID`
+  // (payload API tidak mengubah default English; harus di URL).
+  if (url) {
+    try {
+      const u = new URL(url);
+      u.searchParams.set("lang", "ID");
+      u.searchParams.set("language", "ID");
+      url = u.toString();
+    } catch {
+      const sep = url.includes("?") ? "&" : "?";
+      url = `${url}${sep}lang=ID&language=ID`;
+    }
+  }
   const dokuInvoiceId =
     res.json?.response?.order?.invoice_number ||
     res.json?.order?.invoice_number ||
