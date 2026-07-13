@@ -558,9 +558,8 @@ function Ecosystem() {
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-[#5B6CF9]/25 blur-2xl" />
               <div className="relative h-28 w-28 lg:h-36 lg:w-36 rounded-3xl bg-white border border-[#5B6CF9]/40 flex flex-col items-center justify-center shadow-2xl">
-                <div className="h-10 w-10 rounded-xl bg-[#5B6CF9] flex items-center justify-center mb-1">
-                  <Sparkles className="h-5 w-5 text-white" />
-                </div>
+                <img src={atskollaPlatformLogo.url} alt="ATSkolla" className="h-12 w-12 lg:h-14 lg:w-14 object-contain mb-1" />
+
                 <div className="font-display font-bold text-[#0b1020] text-sm">ATSkolla</div>
                 <div className="text-[9px] text-[#0b1020]/50 uppercase tracking-widest">Core Platform</div>
               </div>
