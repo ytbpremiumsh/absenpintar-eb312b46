@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/PageHeader";
 import { toast } from "sonner";
-import { computeAvailableSaldo, sumDisbursed, sumPendingPayout, DEFAULT_WITHDRAW_FEE } from "@/lib/bendaharaSaldo";
+import { computeAvailableSaldo, sumDisbursed, sumPendingPayout, countPendingPayout, isOfflinePayment, DEFAULT_WITHDRAW_FEE } from "@/lib/bendaharaSaldo";
 import {
   TrendingUp, Wallet, AlertCircle, CheckCircle2, Loader2, Plus, Search, Link as LinkIcon,
   Receipt, ArrowDownToLine, Banknote, RefreshCw, FileText, MessageCircle, Mail, Copy,
@@ -4345,15 +4345,14 @@ export function BendaharaSaldo() {
     net: acc.net + (i.net_amount || i.total_amount || 0),
   }), { gross: 0, net: 0 });
 
-  // Saldo — sumber kebenaran tunggal: helper shared (dipakai juga di Super Admin)
-  // Saldo aktif = net_amount online yang belum ter-settle − biaya admin (sekali per pencairan)
+  // Saldo — sumber kebenaran tunggal: helper shared (dipakai juga di Super Admin & Pencairan)
   const available = computeAvailableSaldo(items, DEFAULT_WITHDRAW_FEE);
-  const activeBalance = available.finalPayout;
   // "Sudah Dicairkan" = jumlah final_payout dari settlement berstatus paid
   const settledPayout = sumDisbursed(settlements);
   const settledCount = settlements.filter((s) => s.status === "paid").length;
-  // Menunggu Pencairan = final_payout dari settlement requested/approved/processing
+  // Menunggu Pencairan = final_payout dari settlement pending/requested/approved/processing
   const pendingPayout = sumPendingPayout(settlements);
+  const pendingCount = countPendingPayout(settlements);
   const settledFeePencairan = settlements.filter((s) => s.status === "paid").reduce((s, x) => s + (x.withdraw_fee || 0), 0);
 
   // Banner info: dismiss selama 7 hari via localStorage
@@ -4394,7 +4393,7 @@ export function BendaharaSaldo() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <StatCard label="Total Bruto SPP" value={fmtIDR(totals.gross)} sub={`${txCount} transaksi`} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
         <StatCard label="Sudah Dicairkan" value={fmtIDR(settledPayout)} sub={`${settledCount} pencairan`} icon={ArrowDownToLine} gradient="from-violet-500 to-purple-600" />
-        <StatCard label="Pending Pencairan" value={fmtIDR(pendingPayout)} sub="siap dicairkan" icon={Loader2} gradient="from-amber-500 to-orange-600" />
+        <StatCard label="Pending Pencairan" value={fmtIDR(pendingPayout)} sub={`${pendingCount} pengajuan`} icon={Loader2} gradient="from-amber-500 to-orange-600" />
       </div>
 
       {/* Tabel Riwayat */}
@@ -4440,7 +4439,7 @@ export function BendaharaSaldo() {
 // ============ PENCAIRAN + RIWAYAT (gabungan) ============
 export function BendaharaPencairan() {
   const { profile, user } = useAuth();
-  const [available, setAvailable] = useState({ count: 0, gross: 0, fee: 0, net: 0 });
+  const [available, setAvailable] = useState({ count: 0, gross: 0, fee: 0, net: 0, finalPayout: 0 });
   const [availableItems, setAvailableItems] = useState<any[]>([]);
   const [breakdown, setBreakdown] = useState({ onlineTotal: 0, onlineSettled: 0, offlineCount: 0, offlineGross: 0 });
   const [open, setOpen] = useState(false);
@@ -4540,43 +4539,36 @@ export function BendaharaPencairan() {
       if (cancelled) return;
 
       const allPaid = (paidRes.data || []) as any[];
-      const isOffline = (m: string | null) => {
-        const v = (m || "").toLowerCase();
-        return v === "offline_cash" || v === "offline_transfer";
-      };
-      const online = allPaid.filter((x) => !isOffline(x.payment_method));
-      const offline = allPaid.filter((x) => isOffline(x.payment_method));
+      const online = allPaid.filter((x) => !isOfflinePayment(x.payment_method));
+      const offline = allPaid.filter((x) => isOfflinePayment(x.payment_method));
       const availableList = online.filter((x) => !x.settlement_id);
 
       setAvailableItems(availableList);
-      setAvailable({
-        count: availableList.length,
-        gross: availableList.reduce((s, i) => s + (i.total_amount || 0), 0),
-        fee: availableList.reduce((s, i) => s + (i.gateway_fee || 0), 0),
-        net: availableList.reduce((s, i) => s + (i.net_amount || 0), 0),
-      });
+      // Pakai helper yang sama dengan Bendahara Saldo & Super Admin agar angka konsisten.
+      setAvailable(computeAvailableSaldo(availableList, DEFAULT_WITHDRAW_FEE));
 
       const invoiceBySettlement = online.reduce((map, x) => {
         if (!x.settlement_id) return map;
         const current = map.get(x.settlement_id) || { count: 0, gross: 0, fee: 0, net: 0 };
+        const netVal = x.net_amount ?? (x.total_amount || 0);
         current.count += 1;
         current.gross += x.total_amount || 0;
         current.fee += x.gateway_fee || 0;
-        current.net += x.net_amount || 0;
+        current.net += netVal;
         map.set(x.settlement_id, current);
         return map;
       }, new Map<string, { count: number; gross: number; fee: number; net: number }>());
 
       const reconciledHistory = ((hRes.data || []) as any[]).map((s) => {
         const inv = invoiceBySettlement.get(s.id) || { count: 0, gross: 0, fee: 0, net: 0 };
-        const withdrawFee = s.withdraw_fee ?? 3000;
+        const withdrawFee = s.withdraw_fee ?? DEFAULT_WITHDRAW_FEE;
         return {
           ...s,
           total_transactions: inv.count,
           total_gross: inv.gross,
           total_gateway_fee: inv.fee,
           total_net: inv.net,
-          final_payout: Math.max(0, inv.net - withdrawFee),
+          final_payout: Math.max(0, inv.net - (inv.count > 0 ? withdrawFee : 0)),
         };
       });
 
@@ -4621,7 +4613,7 @@ export function BendaharaPencairan() {
     return () => { supabase.removeChannel(channel); };
   }, [profile?.school_id]);
 
-  const finalPayout = Math.max(0, available.gross - 3000);
+  const finalPayout = available.finalPayout;
 
   const handleSelectAccount = (id: string) => {
     setSelectedAccountId(id);
@@ -4671,19 +4663,58 @@ export function BendaharaPencairan() {
       setSubmitting(false); return;
     }
     // 2) Eksekusi pencairan
-    const code = `STL-${Date.now().toString().slice(-8)}`;
+    const randSuffix = (typeof crypto !== "undefined" && "randomUUID" in crypto)
+      ? crypto.randomUUID().replace(/-/g, "").slice(0, 4).toUpperCase()
+      : Math.random().toString(36).slice(2, 6).toUpperCase();
+    const code = `STL-${Date.now().toString().slice(-8)}-${randSuffix}`;
     const invoiceIds = availableItems.map((item) => item.id).filter(Boolean);
     if (invoiceIds.length === 0) { toast.error("Tidak ada saldo"); setSubmitting(false); return; }
+
+    // Insert settlement dengan snapshot awal (status default = 'pending')
     const { data: settlement, error } = await supabase.from("spp_settlements").insert({
       school_id: profile!.school_id, settlement_code: code,
       total_transactions: available.count, total_gross: available.gross,
       total_gateway_fee: available.fee, total_net: available.net,
-      withdraw_fee: 3000, final_payout: finalPayout,
+      withdraw_fee: DEFAULT_WITHDRAW_FEE, final_payout: available.finalPayout,
       ...bank, requested_by: user?.id,
     }).select().single();
     if (error || !settlement) { toast.error(error?.message || "Gagal"); setSubmitting(false); return; }
+
+    // Link invoice → settlement (hanya yang masih NULL, hindari double-link race)
     await supabase.from("spp_invoices").update({ settlement_id: settlement.id })
       .eq("school_id", profile!.school_id).in("id", invoiceIds).is("settlement_id", null);
+
+    // Rekonsiliasi: baca invoice yang benar-benar ter-link, koreksi total settlement
+    // agar angka di DB (dipakai Super Admin/notifikasi) selalu akurat sekalipun ada race.
+    const { data: linked } = await supabase.from("spp_invoices")
+      .select("total_amount, gateway_fee, net_amount")
+      .eq("settlement_id", settlement.id);
+    if (linked && linked.length > 0) {
+      const totals = linked.reduce((acc, x: any) => {
+        const netVal = x.net_amount ?? (x.total_amount || 0);
+        return {
+          count: acc.count + 1,
+          gross: acc.gross + (x.total_amount || 0),
+          fee: acc.fee + (x.gateway_fee || 0),
+          net: acc.net + netVal,
+        };
+      }, { count: 0, gross: 0, fee: 0, net: 0 });
+      const realFinal = Math.max(0, totals.net - DEFAULT_WITHDRAW_FEE);
+      await supabase.from("spp_settlements").update({
+        total_transactions: totals.count,
+        total_gross: totals.gross,
+        total_gateway_fee: totals.fee,
+        total_net: totals.net,
+        final_payout: realFinal,
+      }).eq("id", settlement.id);
+    } else {
+      // Semua invoice keburu ter-link ke settlement lain → batalkan pengajuan ini.
+      await supabase.from("spp_settlements").delete().eq("id", settlement.id);
+      toast.error("Saldo sudah dicairkan pada pengajuan lain. Silakan cek riwayat.");
+      setSubmitting(false); setRefreshKey(k => k + 1);
+      return;
+    }
+
     toast.success("Pencairan berhasil diajukan, sedang diproses");
     setConfirmOpen(false); setSubmitting(false); setRefreshKey(k => k + 1);
     setOtpStep(false); setOtpCode(""); setOtpPhoneMasked("");
@@ -4747,7 +4778,7 @@ export function BendaharaPencairan() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <StatCard label="Transaksi Siap Cair" value={String(available.count)} icon={Receipt} gradient="from-violet-500 to-purple-600" />
         <StatCard label="Total Bruto" value={fmtIDR(available.gross)} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
-        <StatCard label="Final Payout" value={fmtIDR(finalPayout)} icon={Banknote} sub="setelah biaya pencairan Rp 3.000" gradient="from-amber-500 to-orange-600" />
+        <StatCard label="Final Payout" value={fmtIDR(finalPayout)} icon={Banknote} sub={`setelah biaya pencairan ${fmtIDR(DEFAULT_WITHDRAW_FEE)}`} gradient="from-amber-500 to-orange-600" />
       </div>
 
 
@@ -4774,7 +4805,7 @@ export function BendaharaPencairan() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div><p className="text-xs text-muted-foreground">Total Transaksi</p><p className="font-bold">{available.count}</p></div>
                 <div><p className="text-xs text-muted-foreground">Total Bruto</p><p className="font-bold">{fmtIDR(available.gross)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Biaya Pencairan</p><p className="font-bold">- {fmtIDR(3000)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Biaya Pencairan</p><p className="font-bold">- {fmtIDR(DEFAULT_WITHDRAW_FEE)}</p></div>
                 <div className="col-span-2 md:col-span-3 border-t pt-2">
                   <p className="text-xs text-muted-foreground">Final Payout</p>
                   <p className="text-xl font-extrabold text-emerald-600">{fmtIDR(finalPayout)}</p>
@@ -4829,8 +4860,9 @@ export function BendaharaPencairan() {
                   <TableBody>
                     {history.length === 0 && <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Belum ada settlement</TableCell></TableRow>}
                     {history.map(s => {
-                      const withdrawFee = s.withdraw_fee ?? 3000;
-                      const finalPayoutGross = Math.max(0, (s.total_gross || 0) - withdrawFee);
+                      const withdrawFee = s.withdraw_fee ?? DEFAULT_WITHDRAW_FEE;
+                      // Angka final_payout sudah direkonsiliasi dari invoice terkait (net − fee)
+                      const rowFinal = s.final_payout ?? 0;
                       return (
                         <TableRow key={s.id} onClick={() => openSettlementDetail(s)} className="[&_td]:whitespace-nowrap cursor-pointer hover:bg-muted/50 transition-colors">
                           <TableCell className="text-xs font-mono">{s.settlement_code}</TableCell>
@@ -4838,7 +4870,7 @@ export function BendaharaPencairan() {
                           <TableCell>{s.total_transactions}</TableCell>
                           <TableCell className="text-xs">{fmtIDR(s.total_gross)}</TableCell>
                           <TableCell className="text-xs">{fmtIDR(withdrawFee)}</TableCell>
-                          <TableCell className="font-semibold text-emerald-600">{fmtIDR(finalPayoutGross)}</TableCell>
+                          <TableCell className="font-semibold text-emerald-600">{fmtIDR(rowFinal)}</TableCell>
                           <TableCell>{badge(s.status)}</TableCell>
                         </TableRow>
                       );
@@ -4880,7 +4912,7 @@ export function BendaharaPencairan() {
                 <p className="text-[11px] uppercase tracking-wider font-semibold text-emerald-700 dark:text-emerald-400">Rincian Perhitungan</p>
                 <div className="flex justify-between text-sm"><span className="text-muted-foreground">Total Tagihan Lunas</span><span className="font-semibold">{available.count} transaksi</span></div>
                 <div className="flex justify-between text-sm"><span className="text-muted-foreground">Total Bruto (dari siswa)</span><span className="font-bold">{fmtIDR(available.gross)}</span></div>
-                <div className="flex justify-between text-sm text-rose-600 dark:text-rose-400"><span>(−) Biaya Pencairan</span><span className="font-semibold">−{fmtIDR(3000)}</span></div>
+                <div className="flex justify-between text-sm text-rose-600 dark:text-rose-400"><span>(−) Biaya Pencairan</span><span className="font-semibold">−{fmtIDR(DEFAULT_WITHDRAW_FEE)}</span></div>
                 <div className="border-t-2 border-emerald-400 dark:border-emerald-600 pt-2 flex justify-between items-center"><span className="text-sm font-semibold">Diterima di Rekening</span><span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">{fmtIDR(finalPayout)}</span></div>
               </div>
 
@@ -5058,7 +5090,7 @@ export function BendaharaPencairan() {
             <DialogTitle>Detail Pencairan {detailSettlement?.settlement_code}</DialogTitle>
             {detailSettlement && (
               <p className="text-xs text-muted-foreground">
-                {new Date(detailSettlement.requested_at).toLocaleString("id-ID")} • {detailSettlement.total_transactions} transaksi • Final {fmtIDR(Math.max(0, (detailSettlement.total_gross || 0) - (detailSettlement.withdraw_fee ?? 3000)))}
+                {new Date(detailSettlement.requested_at).toLocaleString("id-ID")} • {detailSettlement.total_transactions} transaksi • Final {fmtIDR(detailSettlement.final_payout ?? 0)}
               </p>
             )}
           </DialogHeader>
