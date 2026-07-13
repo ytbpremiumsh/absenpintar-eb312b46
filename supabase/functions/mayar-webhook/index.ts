@@ -526,120 +526,12 @@ serve(async (req) => {
       });
     }
 
-    // ═══════════════════════════════════════════
-    // SUBSCRIPTION Payment — existing logic
-    // ═══════════════════════════════════════════
-    const { data: planRes } = await supabaseAdmin.from('subscription_plans').select('name').eq('id', payment.plan_id).single();
-    const planName = planRes?.name || 'Unknown';
-
-    // Create or extend school subscription
-    const { data: existingSub } = await supabaseAdmin
-      .from('school_subscriptions')
-      .select('id, expires_at')
-      .eq('school_id', payment.school_id)
-      .eq('status', 'active')
-      .maybeSingle();
-
-    const now = new Date();
-    let expiresAt: Date;
-
-    if (existingSub?.expires_at) {
-      const currentExpiry = new Date(existingSub.expires_at);
-      expiresAt = currentExpiry > now ? currentExpiry : now;
-    } else {
-      expiresAt = now;
-    }
-    expiresAt.setMonth(expiresAt.getMonth() + 1);
-
-    if (existingSub) {
-      await supabaseAdmin
-        .from('school_subscriptions')
-        .update({ plan_id: payment.plan_id, expires_at: expiresAt.toISOString() })
-        .eq('id', existingSub.id);
-    } else {
-      await supabaseAdmin
-        .from('school_subscriptions')
-        .insert({
-          school_id: payment.school_id,
-          plan_id: payment.plan_id,
-          status: 'active',
-          expires_at: expiresAt.toISOString(),
-        });
-    }
-
-    const expiresFormatted = expiresAt.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-
-    // Auto-provision WhatsApp integration for Basic/School/Premium plans
-    if (['Basic', 'School', 'Premium'].includes(planName)) {
-      const { data: existingInt } = await supabaseAdmin
-        .from('school_integrations')
-        .select('id')
-        .eq('school_id', payment.school_id)
-        .eq('integration_type', 'onesender')
-        .maybeSingle();
-
-      if (!existingInt) {
-        const { data: refInt } = await supabaseAdmin
-          .from('school_integrations')
-          .select('api_key, api_url')
-          .eq('integration_type', 'onesender')
-          .eq('is_active', true)
-          .limit(1)
-          .maybeSingle();
-
-        if (refInt?.api_key && refInt?.api_url) {
-          await supabaseAdmin.from('school_integrations').insert({
-            school_id: payment.school_id,
-            integration_type: 'onesender',
-            api_key: refInt.api_key,
-            api_url: refInt.api_url,
-            is_active: true,
-            wa_enabled: true,
-          });
-        }
-      } else {
-        await supabaseAdmin.from('school_integrations')
-          .update({ is_active: true })
-          .eq('id', existingInt.id);
-      }
-
-      // Auto-provision 5000 WA credits for Basic/School/Premium
-      const { data: existingCredits } = await supabaseAdmin.from('wa_credits')
-        .select('id, balance, total_purchased')
-        .eq('school_id', payment.school_id)
-        .maybeSingle();
-
-      if (!existingCredits) {
-        await supabaseAdmin.from('wa_credits').insert({
-          school_id: payment.school_id,
-          balance: 5000,
-          total_purchased: 5000,
-          total_used: 0,
-        });
-        console.log(`WA Credits 5000 auto-provisioned for school ${payment.school_id} (${planName})`);
-      }
-    }
-
-
-    await supabaseAdmin.from('notifications').insert({
-      school_id: payment.school_id,
-      title: 'Pembayaran Berhasil — Upgrade Sukses',
-      message: `Paket ${planName} telah aktif untuk ${schoolName}. Langganan berlaku hingga ${expiresFormatted}. Terima kasih atas pembayaran sebesar ${amountFormatted}.`,
-      type: 'success',
-    });
-
-    await supabaseAdmin.from('notifications').insert({
-      school_id: null,
-      title: 'Pembayaran Masuk — Auto Approved',
-      message: `${schoolName} telah membayar Paket ${planName} sebesar ${amountFormatted}. Langganan otomatis diaktifkan hingga ${expiresFormatted}.`,
-      type: 'info',
-    });
-
-    console.log(`Payment ${payment.id} auto-approved. Plan: ${planName}, School: ${schoolName}, Expires: ${expiresFormatted}`);
-
-    return new Response(JSON.stringify({ success: true, expires_at: expiresAt.toISOString() }), {
+    // Sistem paket langganan sudah dihapus. Jalur webhook subscription tidak lagi didukung.
+    console.warn(`mayar-webhook: subscription payment received for payment ${payment.id} — subscription system removed, ignoring subscription-side effects.`);
+    return new Response(JSON.stringify({ success: true, note: 'subscription system removed' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
     console.error('Webhook error:', error);
     const message = error instanceof Error ? error.message : String(error);
