@@ -192,7 +192,7 @@ Deno.serve(async (req) => {
 
       // Dependency order: parents first, children last.
       const RESTORE_ORDER = [
-        'schools', 'school_groups', 'school_subscriptions',
+        'schools', 'school_groups', 
         'profiles', 'user_roles',
         'classes', 'subjects', 'teaching_schedules', 'class_teachers',
         'students', 'student_grades',
@@ -203,7 +203,7 @@ Deno.serve(async (req) => {
         'bendahara_settings', 'bendahara_bank_accounts',
         'id_card_designs', 'id_card_orders', 'id_card_order_items',
         'landing_content', 'landing_testimonials', 'landing_trusted_schools',
-        'panduan_content', 'qr_instructions',
+        'panduan_content',
         'platform_settings', 'email_settings', 'email_logs',
         'notifications', 'login_logs',
         'affiliates', 'affiliate_commissions', 'affiliate_withdrawals', 'referrals',
