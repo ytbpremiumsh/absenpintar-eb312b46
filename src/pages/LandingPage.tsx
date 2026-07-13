@@ -955,53 +955,77 @@ function FinalCTA() {
 // ---------- Footer ----------
 function Footer() {
   return (
-    <footer className="bg-white border-t border-slate-100 text-[#0b1020]/55">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-14 grid md:grid-cols-4 gap-10">
-        <div>
-          <div className="flex items-center mb-4">
-            <img src={ATSKOLLA_LOGO_URL} alt="ATSkolla" width={160} height={40} loading="lazy" decoding="async" className="h-10 w-auto object-contain" />
+    <footer className="relative bg-gradient-to-br from-[#4a5cf0] via-[#5B6CF9] to-[#7c8dff] text-white/85">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-16 pb-8 grid md:grid-cols-12 gap-10">
+        {/* Brand + Company Info */}
+        <div className="md:col-span-4">
+          <div className="inline-flex items-center justify-center rounded-xl bg-white/95 backdrop-blur px-3 py-2 mb-5 shadow-sm">
+            <img src={ATSKOLLA_LOGO_URL} alt="ATSkolla" width={140} height={36} loading="lazy" decoding="async" className="h-9 w-auto object-contain" />
           </div>
-          <p className="text-sm leading-relaxed">Platform Digital Sekolah Terintegrasi untuk sekolah di seluruh Indonesia.</p>
-        </div>
-        <div>
-          <div className="font-display font-semibold text-[#0b1020] text-sm mb-4">Platform</div>
-          <ul className="space-y-2 text-sm">
-            <li><a href="#modul" className="hover:text-[#5B6CF9]">Modul</a></li>
-            <li><a href="#pembayaran" className="hover:text-[#5B6CF9]">Pembayaran</a></li>
-            <li><a href="#hardware" className="hover:text-[#5B6CF9]">Hardware</a></li>
-            <li><a href="#dashboard" className="hover:text-[#5B6CF9]">Dashboard</a></li>
+          <p className="text-[15px] font-semibold text-white mb-1">CV Prestais Kita Bersama</p>
+          <p className="text-sm leading-relaxed text-white/75 mb-4">
+            Platform Digital Sekolah Terintegrasi<br />
+            untuk sekolah di seluruh Indonesia.
+          </p>
+          <ul className="space-y-2 text-sm text-white/85">
+            <li className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0" /> +62 888 6117 537</li>
+            <li className="flex items-center gap-2"><Mail className="h-4 w-4 shrink-0" /> halo@atskolla.com</li>
+            <li className="flex items-start gap-2"><MapPin className="h-4 w-4 shrink-0 mt-0.5" /> <span>Indonesia</span></li>
           </ul>
         </div>
-        <div>
-          <div className="font-display font-semibold text-[#0b1020] text-sm mb-4">Perusahaan</div>
-          <ul className="space-y-2 text-sm">
-            <li><a href="/panduan" className="hover:text-[#5B6CF9]">Panduan</a></li>
-            <li><a href="/faq" className="hover:text-[#5B6CF9]">FAQ</a></li>
-            <li><a href="/syarat-ketentuan" className="hover:text-[#5B6CF9]">Syarat & Ketentuan</a></li>
-            <li><a href="/kebijakan-refund" className="hover:text-[#5B6CF9]">Kebijakan Refund</a></li>
-            <li><a href="/kontak" className="hover:text-[#5B6CF9]">Kontak</a></li>
-            <li><a href="/login" className="hover:text-[#5B6CF9]">Masuk</a></li>
-            <li><a href="/register" className="hover:text-[#5B6CF9]">Daftar Gratis</a></li>
+
+        {/* Platform */}
+        <div className="md:col-span-2">
+          <div className="font-display font-bold text-white text-[15px] mb-4">Platform</div>
+          <ul className="space-y-2.5 text-sm">
+            <li><a href="#modul" className="text-white/75 hover:text-white transition-colors">Modul</a></li>
+            <li><a href="#pembayaran" className="text-white/75 hover:text-white transition-colors">Pembayaran</a></li>
+            <li><a href="#hardware" className="text-white/75 hover:text-white transition-colors">Hardware</a></li>
+            <li><a href="#dashboard" className="text-white/75 hover:text-white transition-colors">Dashboard</a></li>
           </ul>
         </div>
-        <div>
-          <div className="font-display font-semibold text-[#0b1020] text-sm mb-4">Kontak</div>
-          <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-[#5B6CF9]" /> +62 888 6117 537</li>
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-[#5B6CF9]" /> halo@atskolla.com</li>
-            <li className="flex items-center gap-2"><MapPin className="h-4 w-4 text-[#5B6CF9]" /> Indonesia</li>
+
+        {/* Panduan */}
+        <div className="md:col-span-2">
+          <div className="font-display font-bold text-white text-[15px] mb-4">Panduan</div>
+          <ul className="space-y-2.5 text-sm">
+            <li><a href="/panduan" className="text-white/75 hover:text-white transition-colors">Panduan</a></li>
+            <li><a href="/faq" className="text-white/75 hover:text-white transition-colors">FAQ</a></li>
+            <li><a href="/kontak" className="text-white/75 hover:text-white transition-colors">Kontak</a></li>
+            <li><a href="/kebijakan-refund" className="text-white/75 hover:text-white transition-colors">Kebijakan Refund</a></li>
+          </ul>
+        </div>
+
+        {/* Perusahaan */}
+        <div className="md:col-span-2">
+          <div className="font-display font-bold text-white text-[15px] mb-4">Perusahaan</div>
+          <ul className="space-y-2.5 text-sm">
+            <li><a href="/syarat-ketentuan" className="text-white/75 hover:text-white transition-colors">Syarat & Ketentuan</a></li>
+            <li><a href="/kebijakan-refund" className="text-white/75 hover:text-white transition-colors">Kebijakan Privasi</a></li>
+            <li><a href="/kontak" className="text-white/75 hover:text-white transition-colors">Hubungi Kami</a></li>
+          </ul>
+        </div>
+
+        {/* Akun */}
+        <div className="md:col-span-2">
+          <div className="font-display font-bold text-white text-[15px] mb-4">Akun</div>
+          <ul className="space-y-2.5 text-sm">
+            <li><a href="/login" className="text-white/75 hover:text-white transition-colors">Masuk</a></li>
+            <li><a href="/register" className="text-white/75 hover:text-white transition-colors">Daftar Gratis</a></li>
           </ul>
         </div>
       </div>
-      <div className="border-t border-slate-100 py-6">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex flex-col md:flex-row justify-between gap-3 text-xs text-[#0b1020]/40">
-          <div>© {new Date().getFullYear()} ATSkolla. Platform Digital Sekolah Terintegrasi.</div>
+
+      <div className="border-t border-white/15">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/60">
+          <div>© {new Date().getFullYear()} CV Prestais Kita Bersama. All rights reserved.</div>
           <div>Made with care for Indonesian schools.</div>
         </div>
       </div>
     </footer>
   );
 }
+
 
 // ---------- Page ----------
 export default function LandingPage() {
