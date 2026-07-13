@@ -17,6 +17,7 @@ import {
 import {
   ArrowDownToLine, Search, Wallet, Clock, CheckCircle2, XCircle, ListChecks, Eye,
   FileDown, FileSpreadsheet, FileText, ShieldCheck, ShieldAlert, Send, Building2, Landmark,
+  Star, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { buildDisbursementPayload, resolveBankCode } from "@/lib/disbursement";
@@ -433,6 +434,34 @@ export default function BendaharaDisbursement() {
                       )}
                     </div>
 
+                    <div className="flex items-center gap-2 ml-2">
+                      {!a.is_default && (
+                        <Button size="sm" variant="ghost" title="Jadikan Utama" onClick={async () => {
+                          const { error: e1 } = await supabase.from("bendahara_bank_accounts" as any)
+                            .update({ is_default: false }).eq("school_id", a.school_id);
+                          if (e1) { toast.error(e1.message); return; }
+                          const { error: e2 } = await supabase.from("bendahara_bank_accounts" as any)
+                            .update({ is_default: true }).eq("id", a.id);
+                          if (e2) { toast.error(e2.message); return; }
+                          toast.success("Rekening utama diperbarui");
+                          setRefreshKey((k) => k + 1);
+                        }}>
+                          <Star className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {v !== "verified" && (
+                        <Button size="sm" variant="ghost" title="Hapus rekening" onClick={async () => {
+                          if (!confirm(`Hapus rekening ${a.bank_name} — ${a.account_number}?`)) return;
+                          const { error } = await supabase.from("bendahara_bank_accounts" as any)
+                            .delete().eq("id", a.id);
+                          if (error) { toast.error(error.message); return; }
+                          toast.success("Rekening dihapus");
+                          setRefreshKey((k) => k + 1);
+                        }}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
