@@ -22,6 +22,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { formatPaymentMethodLabel } from "@/lib/paymentMethod";
+import {
+  isOfflinePayment,
+  sumDisbursed,
+  sumPendingPayout,
+  DEFAULT_WITHDRAW_FEE,
+} from "@/lib/bendaharaSaldo";
 
 const fmtIDR = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n || 0);
@@ -110,14 +116,31 @@ export default function SuperAdminBendahara() {
 
   useEffect(() => { fetchAll(); }, []);
 
+  // Realtime: refresh saat ada perubahan settlement/invoice, tapi JANGAN saat
+  // super admin sedang mengisi dialog review agar state form tidak reset.
+  useEffect(() => {
+    const ch = supabase
+      .channel("super-admin-bendahara")
+      .on("postgres_changes", { event: "*", schema: "public", table: "spp_settlements" }, () => {
+        if (!reviewOpen) fetchAll();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "spp_invoices" }, () => {
+        if (!reviewOpen) fetchAll();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [reviewOpen]);
+
   const schoolMap = useMemo(() => {
     const m: Record<string, SchoolRow> = {};
     schools.forEach((s) => (m[s.id] = s));
     return m;
   }, [schools]);
 
-  // Compute saldo per school: sum(total_amount) of paid invoices not yet linked to a paid settlement
-  // NOTE: fee gateway lama sudah dihilangkan — sumber saldo = total_amount penuh (samakan dgn Dashboard Bendahara).
+  // Perhitungan saldo — HARUS konsisten dengan Dashboard Bendahara sekolah:
+  // - Hanya invoice online (bukan offline_cash/offline_transfer)
+  // - Saldo aktif pakai net_amount (setelah gateway fee) dikurangi withdraw_fee sekali per rencana pencairan
+  // - Total dicairkan pakai final_payout apa adanya (tanpa fallback yang membiaskan)
   const balances = useMemo(() => {
     const map: Record<string, {
       school_id: string; total_paid_invoices: number; total_gross: number;
@@ -129,23 +152,29 @@ export default function SuperAdminBendahara() {
         saldo_pending: 0, total_disbursed: 0, pending_settlement: 0,
       };
     }
-    // Saldo aktif = HANYA pembayaran online (gateway). Pembayaran offline
-    // (tunai/transfer manual) tidak masuk saldo karena uangnya sudah di sekolah.
-    // Filter ini WAJIB sama dengan Dashboard Bendahara sekolah.
-    const OFFLINE_METHODS = new Set(["offline_cash", "offline_transfer"]);
+    // Kumpulkan net per sekolah untuk invoice online yang belum ter-link settlement
+    const availableNet: Record<string, { net: number; count: number }> = {};
     for (const inv of invoices) {
       if (inv.status !== "paid") continue;
       const m = map[inv.school_id]; if (!m) continue;
-      const isOffline = OFFLINE_METHODS.has((inv.payment_method || "").toLowerCase());
-      const amt = inv.total_amount || inv.net_amount || 0;
+      const amt = inv.total_amount || 0;
       m.total_paid_invoices += 1;
-      m.total_gross += amt;
-      if (isOffline) continue; // uang offline tidak masuk saldo yg bisa dicairkan
-      if (!inv.settlement_id) m.saldo_pending += amt;
+      m.total_gross += amt; // Total diterima menampilkan gross apa adanya (termasuk offline)
+      if (isOfflinePayment(inv.payment_method)) continue;
+      if (!inv.settlement_id) {
+        const cur = availableNet[inv.school_id] || { net: 0, count: 0 };
+        cur.net += inv.net_amount ?? amt;
+        cur.count += 1;
+        availableNet[inv.school_id] = cur;
+      }
+    }
+    for (const [sid, v] of Object.entries(availableNet)) {
+      const m = map[sid]; if (!m) continue;
+      m.saldo_pending = Math.max(0, v.net - (v.count > 0 ? DEFAULT_WITHDRAW_FEE : 0));
     }
     for (const st of settlements) {
       const m = map[st.school_id]; if (!m) continue;
-      const payout = st.final_payout || st.total_gross || st.total_net || 0;
+      const payout = st.final_payout || 0;
       if (st.status === "paid") m.total_disbursed += payout;
       else if (["requested", "approved", "processing"].includes(st.status))
         m.pending_settlement += payout;
@@ -192,16 +221,17 @@ export default function SuperAdminBendahara() {
       .map((s) => ({ school: s, setting: bySchool[s.id] }));
   }, [schools, settings, search]);
 
-  // Aggregate KPIs
+  // KPI — pakai helper shared supaya konsisten dengan tabel per-baris.
   const kpi = useMemo(() => {
     const totalSaldo = balances.reduce((a, b) => a + b.saldo_pending, 0);
     const totalGross = balances.reduce((a, b) => a + b.total_gross, 0);
-    const totalDisbursed = balances.reduce((a, b) => a + b.total_disbursed, 0);
-    const pendingPayouts = settlements.filter((s) => ["requested", "approved", "processing"].includes(s.status));
+    const totalDisbursed = sumDisbursed(settlements);
+    const pendingPayoutAmount = sumPendingPayout(settlements);
+    const pendingPayoutCount = settlements.filter((s) => ["requested", "approved", "processing"].includes(s.status)).length;
     return {
       totalSaldo, totalGross, totalDisbursed,
-      pendingPayoutCount: pendingPayouts.length,
-      pendingPayoutAmount: pendingPayouts.reduce((a, s) => a + s.final_payout, 0),
+      pendingPayoutCount,
+      pendingPayoutAmount,
       totalPaidInvoices: invoices.filter((i) => i.status === "paid").length,
     };
   }, [balances, settlements, invoices]);
@@ -211,6 +241,7 @@ export default function SuperAdminBendahara() {
     setAdminNote(s.admin_notes || "");
     setReviewOpen(true);
   };
+
 
 
   const toggleSchoolFlag = async (schoolId: string, field: "bendahara_wa_enabled" | "bendahara_offline_enabled" | "installment_enabled", next: boolean) => {
@@ -242,14 +273,28 @@ export default function SuperAdminBendahara() {
       const { error } = await supabase.from("spp_settlements").update(patch).eq("id", reviewing.id);
       if (error) throw error;
 
-      // When paid, mark invoices as settled
+      // CATATAN: JANGAN me-link invoice tambahan saat approve "paid".
+      // Invoice sudah di-link ke settlement saat bendahara mengajukan pencairan
+      // (lihat BendaharaPages.tsx). Me-link ulang di sini akan menarik invoice
+      // baru yang lunas setelah pengajuan → saldo sekolah "hilang" dan tidak
+      // bisa dicairkan lagi (data corruption).
+      // Safety-net legacy: kalau ada settlement lama yang belum ter-link
+      // sama sekali, link hanya invoice yang lunas SEBELUM pengajuan.
       if (newStatus === "paid") {
-        await supabase.from("spp_invoices")
-          .update({ settlement_id: reviewing.id })
-          .eq("school_id", reviewing.school_id)
-          .eq("status", "paid")
-          .is("settlement_id", null);
+        const { count } = await supabase
+          .from("spp_invoices")
+          .select("id", { count: "exact", head: true })
+          .eq("settlement_id", reviewing.id);
+        if (!count || count === 0) {
+          await supabase.from("spp_invoices")
+            .update({ settlement_id: reviewing.id })
+            .eq("school_id", reviewing.school_id)
+            .eq("status", "paid")
+            .is("settlement_id", null)
+            .lte("paid_at", reviewing.requested_at);
+        }
       }
+
 
       // When rejected, release any invoices linked to this settlement so saldo kembali
       if (newStatus === "rejected") {

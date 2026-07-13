@@ -1,0 +1,20 @@
+-- Enable realtime for settlements & invoices (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname='supabase_realtime' AND schemaname='public' AND tablename='spp_settlements'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.spp_settlements;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname='supabase_realtime' AND schemaname='public' AND tablename='spp_invoices'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.spp_invoices;
+  END IF;
+END $$;
+
+ALTER TABLE public.spp_settlements REPLICA IDENTITY FULL;
+ALTER TABLE public.spp_invoices REPLICA IDENTITY FULL;
