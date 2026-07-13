@@ -4458,6 +4458,9 @@ export function BendaharaPencairan() {
   const [detailSettlement, setDetailSettlement] = useState<any>(null);
   const [detailItems, setDetailItems] = useState<any[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [confirmWord, setConfirmWord] = useState("");
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [schoolSettings, setSchoolSettings] = useState<{ withdraw_fee: number; min_payout: number }>({ withdraw_fee: DEFAULT_WITHDRAW_FEE, min_payout: 10000 });
 
   const openSettlementDetail = async (s: any) => {
     setDetailSettlement(s);
