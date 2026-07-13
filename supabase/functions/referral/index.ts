@@ -196,27 +196,8 @@ serve(async (req) => {
           points_used: reward.points_required,
         });
 
-      // Extend subscription
-      if (profile.school_id) {
-        const { data: sub } = await supabaseAdmin
-          .from('school_subscriptions')
-          .select('*')
-          .eq('school_id', profile.school_id)
-          .eq('status', 'active')
-          .order('created_at', { ascending: false })
-          .maybeSingle();
+      // Sistem paket langganan sudah dihapus — reward perpanjangan langganan tidak lagi diterapkan.
 
-        if (sub) {
-          const currentEnd = sub.expires_at ? new Date(sub.expires_at) : new Date();
-          if (currentEnd < new Date()) currentEnd.setTime(Date.now());
-          currentEnd.setDate(currentEnd.getDate() + reward.duration_days);
-
-          await supabaseAdmin
-            .from('school_subscriptions')
-            .update({ expires_at: currentEnd.toISOString() })
-            .eq('id', sub.id);
-        }
-      }
 
       // Notification
       await supabaseAdmin
