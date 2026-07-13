@@ -339,99 +339,79 @@ function Hero() {
           </div>
         </motion.div>
 
-        {/* Right — dashboard + hardware mockup */}
-        <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }} className="relative">
-          <div className="relative bg-slate-50 rounded-3xl border border-[#5B6CF9]/20 p-4 shadow-2xl overflow-hidden group">
-            {/* dashboard mockup */}
-            <div className="bg-white rounded-2xl w-full border border-slate-200 p-5">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-red-500/40" />
-                  <div className="h-2 w-2 rounded-full bg-yellow-500/40" />
-                  <div className="h-2 w-2 rounded-full bg-green-500/40" />
-                  <div className="ml-3 text-[10px] font-mono text-[#0b1020]/40">app.atskolla.com/dashboard</div>
-                </div>
-                <div className="flex gap-1.5">
-                  <div className="w-7 h-7 rounded-lg bg-slate-50" />
-                  <div className="w-7 h-7 rounded-lg bg-slate-50" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3 mb-5">
-                <div className="rounded-xl bg-[#5B6CF9]/10 border border-[#5B6CF9]/25 p-3">
-                  <div className="text-[9px] uppercase tracking-wider text-[#5B6CF9] font-semibold">Kehadiran</div>
-                  <div className="text-[#0b1020] font-display font-bold text-xl mt-1">94.8%</div>
-                  <div className="text-[10px] text-[#0b1020]/40 mt-0.5">1.204 hadir</div>
-                </div>
-                <div className="rounded-xl bg-slate-50 border border-slate-200 p-3">
-                  <div className="text-[9px] uppercase tracking-wider text-[#0b1020]/40 font-semibold">SPP</div>
-                  <div className="text-[#0b1020] font-display font-bold text-xl mt-1">312<span className="text-xs text-[#0b1020]/40">Jt</span></div>
-                  <div className="text-[10px] text-[#0b1020]/40 mt-0.5">87% terkumpul</div>
-                </div>
-                <div className="rounded-xl bg-slate-50 border border-slate-200 p-3">
-                  <div className="text-[9px] uppercase tracking-wider text-[#0b1020]/40 font-semibold">Aktif</div>
-                  <div className="text-[#0b1020] font-display font-bold text-xl mt-1">1.270</div>
-                  <div className="text-[10px] text-[#0b1020]/40 mt-0.5">siswa</div>
-                </div>
-              </div>
-
-              <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 h-32 flex items-end gap-1.5">
-                {[38, 55, 62, 48, 70, 82, 65, 74, 90, 68, 78, 88].map((h, i) => (
-                  <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-[#5B6CF9]/70 to-[#5B6CF9]/20" style={{ height: `${h}%` }} />
-                ))}
-              </div>
-
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-2">
-                  <div className="h-6 w-6 rounded-full bg-[#5B6CF9]/20" />
-                  <div className="h-2 flex-1 rounded-full bg-slate-100">
-                    <div className="h-full w-4/5 rounded-full bg-[#5B6CF9]/60" />
-                  </div>
-                  <div className="text-[10px] text-[#0b1020]/50 font-mono">07:12</div>
-                </div>
-                <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-2">
-                  <div className="h-6 w-6 rounded-full bg-[#5B6CF9]/20" />
-                  <div className="h-2 flex-1 rounded-full bg-slate-100">
-                    <div className="h-full w-3/5 rounded-full bg-[#5B6CF9]/50" />
-                  </div>
-                  <div className="text-[10px] text-[#0b1020]/50 font-mono">07:15</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Floating smart card */}
-            <div className="absolute -bottom-6 -left-6 w-44 h-60 bg-gradient-to-br from-[#5B6CF9] to-[#1a2340] rounded-2xl border border-slate-200 shadow-2xl p-5 flex flex-col justify-between transform -rotate-6 group-hover:rotate-0 transition-transform duration-500">
-              <div className="flex justify-between items-start">
-                <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
-                  <GraduationCap className="h-4 w-4 text-[#0b1020]" />
-                </div>
-                <div className="text-[9px] text-[#0b1020]/65 font-mono tracking-widest">SMART CARD</div>
-              </div>
-              <div className="space-y-1.5">
-                <div className="h-1.5 w-full bg-white/25 rounded-full" />
-                <div className="h-1.5 w-2/3 bg-white/20 rounded-full" />
-              </div>
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-md bg-slate-100 border border-white/25 flex items-center justify-center">
-                  <Radio className="h-4 w-4 text-[#0b1020]/75" />
-                </div>
-                <div className="text-[8px] text-[#0b1020]/75 leading-tight uppercase font-bold tracking-widest">
-                  RFID<br />Secure
-                </div>
-              </div>
-            </div>
-
-            {/* RFID scanner mockup */}
-            <div className="absolute top-14 -right-6 w-36 h-36 bg-slate-50 rounded-2xl border border-[#5B6CF9]/30 shadow-2xl flex items-center justify-center transform rotate-6 group-hover:rotate-0 transition-transform duration-500">
-              <div className="text-center">
-                <div className="w-14 h-16 mx-auto bg-white rounded-lg border border-[#5B6CF9]/25 flex flex-col items-center justify-center gap-2">
-                  <div className="w-7 h-0.5 bg-[#5B6CF9] rounded-full animate-pulse" />
-                  <div className="w-6 h-6 rounded-full border-2 border-[#5B6CF9]/40" />
-                </div>
-                <div className="mt-2 text-[9px] text-[#0b1020]/50 font-bold tracking-widest">RFID SCANNER</div>
-              </div>
-            </div>
+        {/* Right — premium device mockup showcase */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.15 }}
+          className="relative"
+        >
+          {/* Ambient glow */}
+          <div className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none">
+            <div className="w-[520px] h-[520px] rounded-full bg-gradient-to-br from-[#5B6CF9]/35 via-[#7c8dff]/20 to-transparent blur-[110px]" />
           </div>
+          <div className="absolute -top-10 -right-6 -z-10 w-64 h-64 rounded-full bg-[#5B6CF9]/25 blur-[90px] pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 -z-10 w-72 h-72 rounded-full bg-[#a78bfa]/20 blur-[100px] pointer-events-none" />
+
+          {/* Soft grid backdrop */}
+          <div
+            className="absolute inset-6 -z-10 rounded-[32px] opacity-60 pointer-events-none"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(91,108,249,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(91,108,249,.08) 1px, transparent 1px)",
+              backgroundSize: "28px 28px",
+              maskImage: "radial-gradient(ellipse at center, black 40%, transparent 75%)",
+              WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 75%)",
+            }}
+          />
+
+          {/* Device image */}
+          <motion.img
+            src={headerDeviceAsset.url}
+            alt="Dashboard ATSkolla di laptop dan aplikasi mobile"
+            loading="eager"
+            decoding="async"
+            className="relative w-full h-auto drop-shadow-[0_35px_60px_rgba(11,16,32,0.25)] select-none"
+            initial={{ y: 0 }}
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            draggable={false}
+          />
+
+          {/* Reflection */}
+          <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-[70%] h-6 rounded-[50%] bg-[#0b1020]/25 blur-2xl pointer-events-none" />
+
+          {/* Floating stat pill — top left */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="hidden md:flex absolute top-6 -left-2 lg:-left-6 items-center gap-3 bg-white/95 backdrop-blur rounded-2xl border border-slate-200/70 shadow-xl px-4 py-3"
+          >
+            <div className="h-10 w-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+              <Activity className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div>
+              <div className="font-display font-bold text-[#0b1020] text-sm leading-none">Real-time</div>
+              <div className="text-[11px] text-[#0b1020]/55 mt-1">Monitoring absensi</div>
+            </div>
+          </motion.div>
+
+          {/* Floating stat pill — bottom right */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            className="hidden md:flex absolute bottom-10 -right-2 lg:-right-4 items-center gap-3 bg-white/95 backdrop-blur rounded-2xl border border-slate-200/70 shadow-xl px-4 py-3"
+          >
+            <div className="h-10 w-10 rounded-xl bg-[#5B6CF9]/10 border border-[#5B6CF9]/20 flex items-center justify-center">
+              <ShieldCheck className="h-5 w-5 text-[#5B6CF9]" />
+            </div>
+            <div>
+              <div className="font-display font-bold text-[#0b1020] text-sm leading-none">99.9% Uptime</div>
+              <div className="text-[11px] text-[#0b1020]/55 mt-1">Server Indonesia</div>
+            </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>
