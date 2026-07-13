@@ -4788,7 +4788,7 @@ export function BendaharaPencairan() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div><p className="text-xs text-muted-foreground">Total Transaksi</p><p className="font-bold">{available.count}</p></div>
                 <div><p className="text-xs text-muted-foreground">Total Bruto</p><p className="font-bold">{fmtIDR(available.gross)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Biaya Pencairan</p><p className="font-bold">- {fmtIDR(DEFAULT_WITHDRAW_FEE)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Biaya Pencairan</p><p className="font-bold">- {fmtIDR(schoolSettings.withdraw_fee)}</p></div>
                 <div className="col-span-2 md:col-span-3 border-t pt-2">
                   <p className="text-xs text-muted-foreground">Final Payout</p>
                   <p className="text-xl font-extrabold text-emerald-600">{fmtIDR(finalPayout)}</p>
