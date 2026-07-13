@@ -42,15 +42,13 @@ const SchoolSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [qrInstructions, setQrInstructions] = useState<{ id?: string; text: string }[]>([]);
-  const [savingInstructions, setSavingInstructions] = useState(false);
   const [holidayMode, setHolidayMode] = useState(false);
   const [holidayModeLabel, setHolidayModeLabel] = useState("");
   const [holidayDates, setHolidayDates] = useState<{ id: string; date: string; label: string | null }[]>([]);
   const [savingHolidayMode, setSavingHolidayMode] = useState(false);
   const [newHolidayLabel, setNewHolidayLabel] = useState("");
 
-  const maxInstructions = features.planName === "Free" ? 2 : 999;
+
 
   useEffect(() => {
     if (!profile?.school_id) { setLoading(false); return; }
