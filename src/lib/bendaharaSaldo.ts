@@ -62,8 +62,14 @@ export function sumDisbursed(settlements: SaldoSettlement[]) {
  * Nilai pencairan yang sedang menunggu (requested/approved/processing).
  */
 export function sumPendingPayout(settlements: SaldoSettlement[]) {
-  const PENDING = new Set(["requested", "approved", "processing"]);
+  // 'pending' = baru diajukan (default DB); 'requested'/'approved'/'processing' = tahap lanjut sebelum paid.
+  const PENDING = new Set(["pending", "requested", "approved", "processing"]);
   return settlements
     .filter((s) => PENDING.has(s.status))
     .reduce((a, s) => a + (s.final_payout || 0), 0);
+}
+
+export function countPendingPayout(settlements: SaldoSettlement[]) {
+  const PENDING = new Set(["pending", "requested", "approved", "processing"]);
+  return settlements.filter((s) => PENDING.has(s.status)).length;
 }
