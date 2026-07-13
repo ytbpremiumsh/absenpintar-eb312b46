@@ -4345,16 +4345,16 @@ export function BendaharaSaldo() {
     net: acc.net + (i.net_amount || i.total_amount || 0),
   }), { gross: 0, net: 0 });
 
-  // Saldo — sumber kebenaran: spp_invoices (sinkron dengan halaman Pencairan)
-  // "Sudah Dicairkan" = invoice online lunas yang sudah terikat settlement
-  const settledItems = items.filter((i) => !!i.settlement_id);
-  const settledGross = settledItems.reduce((s, x) => s + (x.total_amount || 0), 0);
-  const settledCount = settledItems.length;
-  const settledFeePencairan = settlements.filter(s => s.status === "paid").reduce((s, x) => s + (x.withdraw_fee || 0), 0);
-  // Menunggu Pencairan = paid online yang belum di-settle (selaras dengan dashboard Kepsek)
-  const pendingPayout = activeTotals.gross;
-  const activeBalance = Math.max(0, activeTotals.gross);
-  const lockedGross = Math.max(0, totals.gross - activeTotals.gross);
+  // Saldo — sumber kebenaran tunggal: helper shared (dipakai juga di Super Admin)
+  // Saldo aktif = net_amount online yang belum ter-settle − biaya admin (sekali per pencairan)
+  const available = computeAvailableSaldo(items, DEFAULT_WITHDRAW_FEE);
+  const activeBalance = available.finalPayout;
+  // "Sudah Dicairkan" = jumlah final_payout dari settlement berstatus paid
+  const settledPayout = sumDisbursed(settlements);
+  const settledCount = settlements.filter((s) => s.status === "paid").length;
+  // Menunggu Pencairan = final_payout dari settlement requested/approved/processing
+  const pendingPayout = sumPendingPayout(settlements);
+  const settledFeePencairan = settlements.filter((s) => s.status === "paid").reduce((s, x) => s + (x.withdraw_fee || 0), 0);
 
   // Banner info: dismiss selama 7 hari via localStorage
   const [showSaldoInfo, setShowSaldoInfo] = useState(() => {
