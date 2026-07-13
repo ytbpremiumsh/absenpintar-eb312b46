@@ -1499,13 +1499,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "payment_transactions_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_plans"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "payment_transactions_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -1715,72 +1708,6 @@ export type Database = {
           },
           {
             foreignKeyName: "profiles_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      promo_content: {
-        Row: {
-          created_at: string
-          id: string
-          key: string
-          type: string
-          updated_at: string
-          value: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          key: string
-          type?: string
-          updated_at?: string
-          value?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          key?: string
-          type?: string
-          updated_at?: string
-          value?: string
-        }
-        Relationships: []
-      }
-      qr_instructions: {
-        Row: {
-          created_at: string
-          id: string
-          instruction_text: string
-          school_id: string
-          sort_order: number
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          instruction_text: string
-          school_id: string
-          sort_order?: number
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          instruction_text?: string
-          school_id?: string
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "qr_instructions_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "qr_instructions_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools_public"
@@ -2344,58 +2271,6 @@ export type Database = {
           },
           {
             foreignKeyName: "school_integrations_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      school_subscriptions: {
-        Row: {
-          created_at: string
-          expires_at: string | null
-          id: string
-          plan_id: string
-          school_id: string
-          started_at: string
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          plan_id: string
-          school_id: string
-          started_at?: string
-          status?: string
-        }
-        Update: {
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          plan_id?: string
-          school_id?: string
-          started_at?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "school_subscriptions_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "school_subscriptions_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "school_subscriptions_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools_public"
@@ -3234,48 +3109,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      subscription_plans: {
-        Row: {
-          created_at: string
-          description: string | null
-          features: Json
-          id: string
-          is_active: boolean
-          max_students: number | null
-          name: string
-          price: number
-          show_on_landing: boolean
-          sort_order: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          features?: Json
-          id?: string
-          is_active?: boolean
-          max_students?: number | null
-          name: string
-          price?: number
-          show_on_landing?: boolean
-          sort_order?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          features?: Json
-          id?: string
-          is_active?: boolean
-          max_students?: number | null
-          name?: string
-          price?: number
-          show_on_landing?: boolean
-          sort_order?: number
-          updated_at?: string
-        }
-        Relationships: []
       }
       support_tickets: {
         Row: {
