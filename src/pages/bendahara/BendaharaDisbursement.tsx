@@ -809,7 +809,6 @@ export default function BendaharaDisbursement() {
                   const b = bankList.find((x) => x.code === v);
                   setAddBank(b?.name || "");
                 }}
-                disabled={bankListLoading || bankList.length === 0}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={bankListLoading ? "Memuat daftar bank…" : "Pilih bank"} />
