@@ -494,8 +494,8 @@ export default function BendaharaDisbursement() {
                               setVerifyingIds((s) => new Set(s).add(a.id));
                               try {
                                 const { data, error } = await supabase.functions.invoke("doku-bank-account", { body: { action: "create", account_id: a.id } });
-                                if (error || data?.error) { toast.error(data?.error || error?.message || "Gagal daftar ke DOKU"); return; }
-                                toast.success("Rekening didaftarkan ke DOKU");
+                                if (error || data?.error) { toast.error(data?.error || error?.message || "Gagal memproses verifikasi rekening"); return; }
+                                toast.success("Rekening berhasil diajukan untuk verifikasi");
                                 setRefreshKey((k) => k + 1);
                               } finally {
                                 setVerifyingIds((s) => { const n = new Set(s); n.delete(a.id); return n; });
@@ -796,7 +796,7 @@ export default function BendaharaDisbursement() {
                     verification_status: "pending",
                   } as any);
                   if (error) { toast.error(error.message); return; }
-                  toast.success("Rekening ditambahkan. Klik 'Daftar ke DOKU' untuk verifikasi.");
+                  toast.success("Rekening ditambahkan. Klik 'Verifikasi' untuk memproses.");
                   setAddOpen(false);
                   setAddBank(""); setAddNumber(""); setAddHolder(""); setAddDefault(false);
                   setRefreshKey((k) => k + 1);
