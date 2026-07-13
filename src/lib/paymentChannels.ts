@@ -43,6 +43,15 @@ export type PaymentChannel = {
 
 export const PAYMENT_CHANNELS: PaymentChannel[] = [
   {
+    id: "qris",
+    label: "QRIS",
+    description: "Scan QR dari semua e-wallet & mobile banking (GoPay, OVO, DANA, ShopeePay, dll)",
+    fee: 5000,
+    banks: [
+      { code: "QRIS", name: "QRIS", logo: assetUrl(qrisAsset.url) },
+    ],
+  },
+  {
     id: "va",
     label: "Virtual Account (VA) Bank",
     description: "Transfer via ATM / Mobile Banking / Internet Banking",
@@ -53,15 +62,6 @@ export const PAYMENT_CHANNELS: PaymentChannel[] = [
       { code: "BNI", name: "BNI", logo: assetUrl(bniAsset.url) },
       { code: "BCA", name: "BCA", logo: assetUrl(bcaAsset.url) },
       { code: "BSI", name: "BSI", logo: assetUrl(bsiAsset.url) },
-    ],
-  },
-  {
-    id: "qris",
-    label: "QRIS",
-    description: "Scan QR dari semua e-wallet & mobile banking (GoPay, OVO, DANA, ShopeePay, dll)",
-    fee: 5000,
-    banks: [
-      { code: "QRIS", name: "QRIS", logo: assetUrl(qrisAsset.url) },
     ],
   },
   {
