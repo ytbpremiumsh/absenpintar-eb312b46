@@ -55,7 +55,7 @@ const WaCredit = () => {
       if (profile?.school_id) {
         const [creditRes, historyRes] = await Promise.all([
           supabase.from("wa_credits").select("*").eq("school_id", profile.school_id).maybeSingle(),
-          supabase.from("payment_transactions").select("*, subscription_plans(name)")
+          supabase.from("payment_transactions").select("*")
             .eq("school_id", profile.school_id)
             .like("payment_method", "%wa_credit%")
             .order("created_at", { ascending: false })
