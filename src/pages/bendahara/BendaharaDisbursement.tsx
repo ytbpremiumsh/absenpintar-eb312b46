@@ -112,6 +112,14 @@ export default function BendaharaDisbursement() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detail, setDetail] = useState<Settlement | null>(null);
 
+  // add account dialog
+  const [addOpen, setAddOpen] = useState(false);
+  const [addBank, setAddBank] = useState("");
+  const [addNumber, setAddNumber] = useState("");
+  const [addHolder, setAddHolder] = useState("");
+  const [addDefault, setAddDefault] = useState(false);
+  const [addSaving, setAddSaving] = useState(false);
+
   const withdrawFee = 3000;
   const finalPayout = Math.max(0, available.net - withdrawFee);
 
