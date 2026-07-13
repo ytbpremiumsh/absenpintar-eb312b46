@@ -273,14 +273,28 @@ export default function SuperAdminBendahara() {
       const { error } = await supabase.from("spp_settlements").update(patch).eq("id", reviewing.id);
       if (error) throw error;
 
-      // When paid, mark invoices as settled
+      // CATATAN: JANGAN me-link invoice tambahan saat approve "paid".
+      // Invoice sudah di-link ke settlement saat bendahara mengajukan pencairan
+      // (lihat BendaharaPages.tsx). Me-link ulang di sini akan menarik invoice
+      // baru yang lunas setelah pengajuan → saldo sekolah "hilang" dan tidak
+      // bisa dicairkan lagi (data corruption).
+      // Safety-net legacy: kalau ada settlement lama yang belum ter-link
+      // sama sekali, link hanya invoice yang lunas SEBELUM pengajuan.
       if (newStatus === "paid") {
-        await supabase.from("spp_invoices")
-          .update({ settlement_id: reviewing.id })
-          .eq("school_id", reviewing.school_id)
-          .eq("status", "paid")
-          .is("settlement_id", null);
+        const { count } = await supabase
+          .from("spp_invoices")
+          .select("id", { count: "exact", head: true })
+          .eq("settlement_id", reviewing.id);
+        if (!count || count === 0) {
+          await supabase.from("spp_invoices")
+            .update({ settlement_id: reviewing.id })
+            .eq("school_id", reviewing.school_id)
+            .eq("status", "paid")
+            .is("settlement_id", null)
+            .lte("paid_at", reviewing.requested_at);
+        }
       }
+
 
       // When rejected, release any invoices linked to this settlement so saldo kembali
       if (newStatus === "rejected") {
