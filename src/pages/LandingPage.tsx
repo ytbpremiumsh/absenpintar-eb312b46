@@ -1050,28 +1050,8 @@ function DevicesShowcase() {
           <p className="mt-5 text-base lg:text-lg text-[#0b1020]/70 leading-relaxed">
             Antarmuka responsif yang dirancang untuk admin sekolah di desktop dan wali kelas maupun orang tua di mobile — data selalu tersinkron real-time.
           </p>
-
-          <div className="mt-8 grid sm:grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="h-9 w-9 rounded-xl bg-[#5B6CF9]/10 border border-[#5B6CF9]/20 flex items-center justify-center">
-                  <Activity className="h-4 w-4 text-[#5B6CF9]" />
-                </div>
-                <div className="font-display font-semibold text-[#0b1020]">Desktop</div>
-              </div>
-              <p className="text-xs text-[#0b1020]/60 leading-relaxed">Dashboard lengkap untuk admin & kepala sekolah.</p>
-            </div>
-            <div className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="h-9 w-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                </div>
-                <div className="font-display font-semibold text-[#0b1020]">Mobile</div>
-              </div>
-              <p className="text-xs text-[#0b1020]/60 leading-relaxed">Notifikasi & monitoring untuk guru dan wali murid.</p>
-            </div>
-          </div>
         </motion.div>
+
 
         {/* RIGHT — Device mockup */}
         <motion.div
