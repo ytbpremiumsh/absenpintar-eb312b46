@@ -67,14 +67,13 @@ const SuperAdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       const [
-        schoolsRes, studentsRes, classesRes, subsRes, paymentsRes, rolesRes, integrationsRes,
+        schoolsRes, studentsRes, classesRes, paymentsRes, rolesRes, integrationsRes,
         ticketsRes, settlementsRes, withdrawalsRes, notifRes,
       ] = await Promise.all([
         supabase.from("schools").select("id, name, created_at, logo, address"),
         supabase.from("students").select("id, school_id"),
         supabase.from("classes").select("id, school_id"),
-        supabase.from("school_subscriptions").select("id, school_id, plan_id, status, started_at, expires_at, subscription_plans(name)"),
-        supabase.from("payment_transactions").select("id, school_id, amount, status, paid_at, created_at, schools(name), subscription_plans(name)").order("created_at", { ascending: false }).limit(10),
+        supabase.from("payment_transactions").select("id, school_id, amount, status, paid_at, created_at, schools(name)").order("created_at", { ascending: false }).limit(10),
         supabase.from("user_roles").select("id, role"),
         supabase.from("school_integrations").select("school_id, is_active").eq("is_active", true),
         supabase.from("support_tickets").select("id, subject, priority, status, created_at, schools(name)").in("status", ["open", "pending"]).order("created_at", { ascending: false }).limit(20),
@@ -85,7 +84,6 @@ const SuperAdminDashboard = () => {
 
       const schools = schoolsRes.data || [];
       const students = studentsRes.data || [];
-      const subs = subsRes.data || [];
       const payments = paymentsRes.data || [];
       const roles = rolesRes.data || [];
       const integrations = integrationsRes.data || [];
@@ -94,7 +92,6 @@ const SuperAdminDashboard = () => {
       const withdrawals = withdrawalsRes.data || [];
       const notifications = notifRes.data || [];
 
-      const activeSubs = subs.filter((s: any) => s.status === "active");
       const pendingPayments = payments.filter((p: any) => p.status === "pending");
       const paidPayments = payments.filter((p: any) => p.status === "paid");
       const totalRevenue = paidPayments.reduce((sum: number, p: any) => sum + p.amount, 0);
@@ -108,16 +105,8 @@ const SuperAdminDashboard = () => {
       const staffCount = roles.filter((r: any) => r.role !== "super_admin").length;
       const waActiveSchools = new Set(integrations.map((i: any) => i.school_id)).size;
 
-      const planCounts: Record<string, number> = {};
-      schools.forEach((s: any) => {
-        const sub = activeSubs.find((sub: any) => sub.school_id === s.id);
-        const planName = sub ? (sub as any).subscription_plans?.name || "Gratis" : "Gratis";
-        planCounts[planName] = (planCounts[planName] || 0) + 1;
-      });
-      const PLAN_COLORS = ["hsl(262, 25%, 82%)", "hsl(262, 83%, 58%)", "hsl(280, 70%, 55%)", "hsl(217, 91%, 60%)"];
-      const planDistribution = Object.entries(planCounts).map(([name, value], i) => ({
-        name, value, color: PLAN_COLORS[i % PLAN_COLORS.length],
-      }));
+      const planDistribution: { name: string; value: number; color: string }[] = [];
+      const expiringSoon: any[] = [];
 
       const actionQueue: PendingItem[] = [
         ...tickets.map((t: any) => ({
@@ -140,38 +129,12 @@ const SuperAdminDashboard = () => {
         })),
       ].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
 
-      // Trial & langganan aktif yang akan berakhir dalam 7 hari (paling urgent)
-      const nowMs = Date.now();
-      const in7Days = nowMs + 7 * 86400_000;
-      const schoolNameById: Record<string, string> = {};
-      schools.forEach((s: any) => { schoolNameById[s.id] = s.name; });
-      const expiringSoon = subs
-        .filter((s: any) => s.expires_at && ["trial", "active"].includes(s.status))
-        .map((s: any) => {
-          const exp = new Date(s.expires_at).getTime();
-          const days_left = Math.ceil((exp - nowMs) / 86400_000);
-          return {
-            school_id: s.school_id,
-            school_name: schoolNameById[s.school_id] || "—",
-            plan_name: (s as any).subscription_plans?.name || "—",
-            status: s.status,
-            expires_at: s.expires_at,
-            days_left,
-          };
-        })
-        .filter((s) => {
-          const exp = new Date(s.expires_at).getTime();
-          return exp >= nowMs - 86400_000 && exp <= in7Days;
-        })
-        .sort((a, b) => a.days_left - b.days_left)
-        .slice(0, 8);
-
       setStats({
         totalSchools: schools.length,
         totalStudents: students.length,
         totalStaff: staffCount,
         totalClasses: (classesRes.data || []).length,
-        activeSubscriptions: activeSubs.length,
+        activeSubscriptions: 0,
         pendingPayments: pendingPayments.length,
         totalRevenue, monthlyRevenue,
         paidCount: paidPayments.length,
@@ -184,6 +147,7 @@ const SuperAdminDashboard = () => {
       });
       setLoading(false);
     };
+
     fetchStats();
 
     const channel = supabase
