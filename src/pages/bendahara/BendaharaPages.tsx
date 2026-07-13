@@ -4497,7 +4497,7 @@ export function BendaharaPencairan() {
   const loadAccounts = async () => {
     if (!profile?.school_id) return;
     const { data } = await supabase.from("bendahara_bank_accounts" as any)
-      .select("*").eq("school_id", profile.school_id)
+      .select("*").eq("school_id", profile.school_id).eq("is_active", true)
       .order("is_default", { ascending: false }).order("created_at", { ascending: false });
     const list = (data as any[]) || [];
     setSavedAccounts(list);
