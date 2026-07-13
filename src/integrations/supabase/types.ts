@@ -281,6 +281,7 @@ export type Database = {
           account_holder: string
           account_number: string
           account_type: string
+          archived_at: string | null
           bank_name: string
           created_at: string
           created_by: string | null
@@ -289,6 +290,7 @@ export type Database = {
           doku_response: Json | null
           doku_synced_at: string | null
           id: string
+          is_active: boolean
           is_default: boolean
           notes: string | null
           responsible_user_id: string | null
@@ -302,6 +304,7 @@ export type Database = {
           account_holder: string
           account_number: string
           account_type?: string
+          archived_at?: string | null
           bank_name: string
           created_at?: string
           created_by?: string | null
@@ -310,6 +313,7 @@ export type Database = {
           doku_response?: Json | null
           doku_synced_at?: string | null
           id?: string
+          is_active?: boolean
           is_default?: boolean
           notes?: string | null
           responsible_user_id?: string | null
@@ -323,6 +327,7 @@ export type Database = {
           account_holder?: string
           account_number?: string
           account_type?: string
+          archived_at?: string | null
           bank_name?: string
           created_at?: string
           created_by?: string | null
@@ -331,6 +336,7 @@ export type Database = {
           doku_response?: Json | null
           doku_synced_at?: string | null
           id?: string
+          is_active?: boolean
           is_default?: boolean
           notes?: string | null
           responsible_user_id?: string | null
@@ -381,11 +387,13 @@ export type Database = {
           id: string
           last_test_status: string | null
           last_tested_at: string | null
+          min_payout: number
           school_id: string
           secret_key: string | null
           updated_at: string
           use_platform_key: boolean
           webhook_url: string | null
+          withdraw_fee_default: number
         }
         Insert: {
           api_key?: string | null
@@ -395,11 +403,13 @@ export type Database = {
           id?: string
           last_test_status?: string | null
           last_tested_at?: string | null
+          min_payout?: number
           school_id: string
           secret_key?: string | null
           updated_at?: string
           use_platform_key?: boolean
           webhook_url?: string | null
+          withdraw_fee_default?: number
         }
         Update: {
           api_key?: string | null
@@ -409,11 +419,13 @@ export type Database = {
           id?: string
           last_test_status?: string | null
           last_tested_at?: string | null
+          min_payout?: number
           school_id?: string
           secret_key?: string | null
           updated_at?: string
           use_platform_key?: boolean
           webhook_url?: string | null
+          withdraw_fee_default?: number
         }
         Relationships: []
       }
@@ -2691,6 +2703,9 @@ export type Database = {
           admin_notes: string | null
           approved_at: string | null
           bank_name: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           created_at: string
           disbursement_callback_at: string | null
           disbursement_error: string | null
@@ -2724,6 +2739,9 @@ export type Database = {
           admin_notes?: string | null
           approved_at?: string | null
           bank_name?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           created_at?: string
           disbursement_callback_at?: string | null
           disbursement_error?: string | null
@@ -2757,6 +2775,9 @@ export type Database = {
           admin_notes?: string | null
           approved_at?: string | null
           bank_name?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           created_at?: string
           disbursement_callback_at?: string | null
           disbursement_error?: string | null
