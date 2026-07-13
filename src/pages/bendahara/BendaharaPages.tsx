@@ -4636,9 +4636,14 @@ export function BendaharaPencairan() {
       setBankManageOpen(true);
       return;
     }
+    if (available.finalPayout < schoolSettings.min_payout) {
+      toast.error(`Saldo di bawah minimum pencairan (${fmtIDR(schoolSettings.min_payout)})`);
+      return;
+    }
     const acc = savedAccounts.find((x: any) => x.is_default) || savedAccounts[0];
     setBank({ bank_name: acc.bank_name, account_number: acc.account_number, account_holder: acc.account_holder, notes: acc.notes || "", account_type: acc.account_type || "bank", responsible_user_id: acc.responsible_user_id || "" });
     setSelectedAccountId(acc.id);
+    setConfirmWord("");
     setConfirmOpen(true);
   };
 
