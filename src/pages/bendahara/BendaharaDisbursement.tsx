@@ -489,13 +489,21 @@ export default function BendaharaDisbursement() {
                           )}
                         </div>
                         <div className="flex items-center gap-2 flex-wrap mt-3">
-                          {!a.doku_bank_account_settlement_id && (
+                          {!a.doku_bank_account_settlement_id && !verifyingIds.has(a.id) && (
                             <Button size="sm" className="bg-[#5B6CF9] hover:bg-[#4a5ce8] gap-1" onClick={async () => {
-                              const { data, error } = await supabase.functions.invoke("doku-bank-account", { body: { action: "create", account_id: a.id } });
-                              if (error || data?.error) { toast.error(data?.error || error?.message || "Gagal daftar ke DOKU"); return; }
-                              toast.success("Rekening didaftarkan ke DOKU");
-                              setRefreshKey((k) => k + 1);
+                              setVerifyingIds((s) => new Set(s).add(a.id));
+                              try {
+                                const { data, error } = await supabase.functions.invoke("doku-bank-account", { body: { action: "create", account_id: a.id } });
+                                if (error || data?.error) { toast.error(data?.error || error?.message || "Gagal daftar ke DOKU"); return; }
+                                toast.success("Rekening didaftarkan ke DOKU");
+                                setRefreshKey((k) => k + 1);
+                              } finally {
+                                setVerifyingIds((s) => { const n = new Set(s); n.delete(a.id); return n; });
+                              }
                             }}><Send className="h-3.5 w-3.5" /> Verifikasi</Button>
+                          )}
+                          {verifyingIds.has(a.id) && (
+                            <Badge className="bg-slate-500 hover:bg-slate-500 gap-1"><Clock className="h-3 w-3 animate-spin" /> Memproses verifikasi…</Badge>
                           )}
                           {a.doku_bank_account_settlement_id && (
                             <Button size="sm" variant="outline" className="gap-1" onClick={async () => {
