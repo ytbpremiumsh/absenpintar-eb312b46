@@ -4663,19 +4663,58 @@ export function BendaharaPencairan() {
       setSubmitting(false); return;
     }
     // 2) Eksekusi pencairan
-    const code = `STL-${Date.now().toString().slice(-8)}`;
+    const randSuffix = (typeof crypto !== "undefined" && "randomUUID" in crypto)
+      ? crypto.randomUUID().replace(/-/g, "").slice(0, 4).toUpperCase()
+      : Math.random().toString(36).slice(2, 6).toUpperCase();
+    const code = `STL-${Date.now().toString().slice(-8)}-${randSuffix}`;
     const invoiceIds = availableItems.map((item) => item.id).filter(Boolean);
     if (invoiceIds.length === 0) { toast.error("Tidak ada saldo"); setSubmitting(false); return; }
+
+    // Insert settlement dengan snapshot awal (status default = 'pending')
     const { data: settlement, error } = await supabase.from("spp_settlements").insert({
       school_id: profile!.school_id, settlement_code: code,
       total_transactions: available.count, total_gross: available.gross,
       total_gateway_fee: available.fee, total_net: available.net,
-      withdraw_fee: 3000, final_payout: finalPayout,
+      withdraw_fee: DEFAULT_WITHDRAW_FEE, final_payout: available.finalPayout,
       ...bank, requested_by: user?.id,
     }).select().single();
     if (error || !settlement) { toast.error(error?.message || "Gagal"); setSubmitting(false); return; }
+
+    // Link invoice → settlement (hanya yang masih NULL, hindari double-link race)
     await supabase.from("spp_invoices").update({ settlement_id: settlement.id })
       .eq("school_id", profile!.school_id).in("id", invoiceIds).is("settlement_id", null);
+
+    // Rekonsiliasi: baca invoice yang benar-benar ter-link, koreksi total settlement
+    // agar angka di DB (dipakai Super Admin/notifikasi) selalu akurat sekalipun ada race.
+    const { data: linked } = await supabase.from("spp_invoices")
+      .select("total_amount, gateway_fee, net_amount")
+      .eq("settlement_id", settlement.id);
+    if (linked && linked.length > 0) {
+      const totals = linked.reduce((acc, x: any) => {
+        const netVal = x.net_amount ?? (x.total_amount || 0);
+        return {
+          count: acc.count + 1,
+          gross: acc.gross + (x.total_amount || 0),
+          fee: acc.fee + (x.gateway_fee || 0),
+          net: acc.net + netVal,
+        };
+      }, { count: 0, gross: 0, fee: 0, net: 0 });
+      const realFinal = Math.max(0, totals.net - DEFAULT_WITHDRAW_FEE);
+      await supabase.from("spp_settlements").update({
+        total_transactions: totals.count,
+        total_gross: totals.gross,
+        total_gateway_fee: totals.fee,
+        total_net: totals.net,
+        final_payout: realFinal,
+      }).eq("id", settlement.id);
+    } else {
+      // Semua invoice keburu ter-link ke settlement lain → batalkan pengajuan ini.
+      await supabase.from("spp_settlements").delete().eq("id", settlement.id);
+      toast.error("Saldo sudah dicairkan pada pengajuan lain. Silakan cek riwayat.");
+      setSubmitting(false); setRefreshKey(k => k + 1);
+      return;
+    }
+
     toast.success("Pencairan berhasil diajukan, sedang diproses");
     setConfirmOpen(false); setSubmitting(false); setRefreshKey(k => k + 1);
     setOtpStep(false); setOtpCode(""); setOtpPhoneMasked("");
