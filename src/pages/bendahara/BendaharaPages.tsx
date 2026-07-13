@@ -5090,7 +5090,7 @@ export function BendaharaPencairan() {
             <DialogTitle>Detail Pencairan {detailSettlement?.settlement_code}</DialogTitle>
             {detailSettlement && (
               <p className="text-xs text-muted-foreground">
-                {new Date(detailSettlement.requested_at).toLocaleString("id-ID")} • {detailSettlement.total_transactions} transaksi • Final {fmtIDR(Math.max(0, (detailSettlement.total_gross || 0) - (detailSettlement.withdraw_fee ?? 3000)))}
+                {new Date(detailSettlement.requested_at).toLocaleString("id-ID")} • {detailSettlement.total_transactions} transaksi • Final {fmtIDR(detailSettlement.final_payout ?? 0)}
               </p>
             )}
           </DialogHeader>
