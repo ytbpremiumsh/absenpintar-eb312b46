@@ -122,6 +122,7 @@ export default function BendaharaDisbursement() {
   const [addHolder, setAddHolder] = useState("");
   const [addDefault, setAddDefault] = useState(false);
   const [addSaving, setAddSaving] = useState(false);
+  const [verifyingIds, setVerifyingIds] = useState<Set<string>>(new Set());
 
   const withdrawFee = 3000;
   const finalPayout = Math.max(0, available.net - withdrawFee);
