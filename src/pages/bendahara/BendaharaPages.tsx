@@ -4458,6 +4458,9 @@ export function BendaharaPencairan() {
   const [detailSettlement, setDetailSettlement] = useState<any>(null);
   const [detailItems, setDetailItems] = useState<any[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [confirmWord, setConfirmWord] = useState("");
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [schoolSettings, setSchoolSettings] = useState<{ withdraw_fee: number; min_payout: number }>({ withdraw_fee: DEFAULT_WITHDRAW_FEE, min_payout: 10000 });
 
   const openSettlementDetail = async (s: any) => {
     setDetailSettlement(s);
@@ -4494,7 +4497,7 @@ export function BendaharaPencairan() {
   const loadAccounts = async () => {
     if (!profile?.school_id) return;
     const { data } = await supabase.from("bendahara_bank_accounts" as any)
-      .select("*").eq("school_id", profile.school_id)
+      .select("*").eq("school_id", profile.school_id).eq("is_active", true)
       .order("is_default", { ascending: false }).order("created_at", { ascending: false });
     const list = (data as any[]) || [];
     setSavedAccounts(list);
@@ -4529,12 +4532,13 @@ export function BendaharaPencairan() {
 
     const loadLocal = async () => {
       // Satu query saja: ambil semua paid online sekaligus, lalu bagi di client.
-      const [paidRes, hRes] = await Promise.all([
+      const [paidRes, hRes, sRes] = await Promise.all([
         supabase.from("spp_invoices")
-          .select("id, status, payment_method, settlement_id, total_amount, gateway_fee, net_amount")
+          .select("id, status, payment_method, settlement_id, total_amount, gateway_fee, net_amount, student_name, class_name, period_label, invoice_number, paid_at")
           .eq("school_id", profile.school_id)
           .eq("status", "paid"),
         supabase.from("spp_settlements").select("*").eq("school_id", profile.school_id).order("created_at", { ascending: false }),
+        supabase.from("bendahara_settings" as any).select("withdraw_fee_default, min_payout").eq("school_id", profile.school_id).maybeSingle(),
       ]);
       if (cancelled) return;
 
@@ -4543,9 +4547,13 @@ export function BendaharaPencairan() {
       const offline = allPaid.filter((x) => isOfflinePayment(x.payment_method));
       const availableList = online.filter((x) => !x.settlement_id);
 
+      const fee = Number((sRes.data as any)?.withdraw_fee_default ?? DEFAULT_WITHDRAW_FEE);
+      const minP = Number((sRes.data as any)?.min_payout ?? 10000);
+      setSchoolSettings({ withdraw_fee: fee, min_payout: minP });
+
       setAvailableItems(availableList);
       // Pakai helper yang sama dengan Bendahara Saldo & Super Admin agar angka konsisten.
-      setAvailable(computeAvailableSaldo(availableList, DEFAULT_WITHDRAW_FEE));
+      setAvailable(computeAvailableSaldo(availableList, fee));
 
       const invoiceBySettlement = online.reduce((map, x) => {
         if (!x.settlement_id) return map;
@@ -4628,9 +4636,14 @@ export function BendaharaPencairan() {
       setBankManageOpen(true);
       return;
     }
+    if (available.finalPayout < schoolSettings.min_payout) {
+      toast.error(`Saldo di bawah minimum pencairan (${fmtIDR(schoolSettings.min_payout)})`);
+      return;
+    }
     const acc = savedAccounts.find((x: any) => x.is_default) || savedAccounts[0];
     setBank({ bank_name: acc.bank_name, account_number: acc.account_number, account_holder: acc.account_holder, notes: acc.notes || "", account_type: acc.account_type || "bank", responsible_user_id: acc.responsible_user_id || "" });
     setSelectedAccountId(acc.id);
+    setConfirmWord("");
     setConfirmOpen(true);
   };
 
@@ -4651,74 +4664,42 @@ export function BendaharaPencairan() {
   };
 
   const submit = async () => {
-    if (!user?.id) return;
+    if (!user?.id || !profile?.school_id) return;
     if (otpCode.length !== 6) { toast.error("Masukkan 6 digit kode OTP"); return; }
+    if (!selectedAccountId) { toast.error("Rekening tujuan belum dipilih"); return; }
     setSubmitting(true);
-    // 1) Verifikasi OTP
-    const { data: vData, error: vErr } = await supabase.functions.invoke("verify-bendahara-otp", {
-      body: { user_id: user.id, otp_code: otpCode, responsible_user_id: bank.responsible_user_id },
+    const { data, error } = await supabase.functions.invoke("create-settlement", {
+      body: {
+        school_id: profile.school_id,
+        bank_account_id: selectedAccountId,
+        otp_code: otpCode,
+        confirm_word: "CAIRKAN",
+        notes: null,
+      },
     });
-    if (vErr || vData?.error) {
-      toast.error(vData?.error || vErr?.message || "OTP tidak valid");
-      setSubmitting(false); return;
-    }
-    // 2) Eksekusi pencairan
-    const randSuffix = (typeof crypto !== "undefined" && "randomUUID" in crypto)
-      ? crypto.randomUUID().replace(/-/g, "").slice(0, 4).toUpperCase()
-      : Math.random().toString(36).slice(2, 6).toUpperCase();
-    const code = `STL-${Date.now().toString().slice(-8)}-${randSuffix}`;
-    const invoiceIds = availableItems.map((item) => item.id).filter(Boolean);
-    if (invoiceIds.length === 0) { toast.error("Tidak ada saldo"); setSubmitting(false); return; }
-
-    // Insert settlement dengan snapshot awal (status default = 'pending')
-    const { data: settlement, error } = await supabase.from("spp_settlements").insert({
-      school_id: profile!.school_id, settlement_code: code,
-      total_transactions: available.count, total_gross: available.gross,
-      total_gateway_fee: available.fee, total_net: available.net,
-      withdraw_fee: DEFAULT_WITHDRAW_FEE, final_payout: available.finalPayout,
-      ...bank, requested_by: user?.id,
-    }).select().single();
-    if (error || !settlement) { toast.error(error?.message || "Gagal"); setSubmitting(false); return; }
-
-    // Link invoice → settlement (hanya yang masih NULL, hindari double-link race)
-    await supabase.from("spp_invoices").update({ settlement_id: settlement.id })
-      .eq("school_id", profile!.school_id).in("id", invoiceIds).is("settlement_id", null);
-
-    // Rekonsiliasi: baca invoice yang benar-benar ter-link, koreksi total settlement
-    // agar angka di DB (dipakai Super Admin/notifikasi) selalu akurat sekalipun ada race.
-    const { data: linked } = await supabase.from("spp_invoices")
-      .select("total_amount, gateway_fee, net_amount")
-      .eq("settlement_id", settlement.id);
-    if (linked && linked.length > 0) {
-      const totals = linked.reduce((acc, x: any) => {
-        const netVal = x.net_amount ?? (x.total_amount || 0);
-        return {
-          count: acc.count + 1,
-          gross: acc.gross + (x.total_amount || 0),
-          fee: acc.fee + (x.gateway_fee || 0),
-          net: acc.net + netVal,
-        };
-      }, { count: 0, gross: 0, fee: 0, net: 0 });
-      const realFinal = Math.max(0, totals.net - DEFAULT_WITHDRAW_FEE);
-      await supabase.from("spp_settlements").update({
-        total_transactions: totals.count,
-        total_gross: totals.gross,
-        total_gateway_fee: totals.fee,
-        total_net: totals.net,
-        final_payout: realFinal,
-      }).eq("id", settlement.id);
-    } else {
-      // Semua invoice keburu ter-link ke settlement lain → batalkan pengajuan ini.
-      await supabase.from("spp_settlements").delete().eq("id", settlement.id);
-      toast.error("Saldo sudah dicairkan pada pengajuan lain. Silakan cek riwayat.");
-      setSubmitting(false); setRefreshKey(k => k + 1);
+    setSubmitting(false);
+    if (error || data?.error) {
+      toast.error(data?.error || error?.message || "Gagal memproses pencairan");
       return;
     }
-
-    toast.success("Pencairan berhasil diajukan, sedang diproses");
-    setConfirmOpen(false); setSubmitting(false); setRefreshKey(k => k + 1);
+    toast.success(`Pencairan diajukan · ${data?.settlement_code || ""}`);
+    setConfirmOpen(false); setConfirmWord("");
     setOtpStep(false); setOtpCode(""); setOtpPhoneMasked("");
+    setRefreshKey(k => k + 1);
   };
+
+  const cancelSettlement = async (id: string) => {
+    if (!confirm("Batalkan pengajuan pencairan ini? Invoice akan kembali ke saldo aktif.")) return;
+    setCancellingId(id);
+    const { data, error } = await supabase.functions.invoke("cancel-settlement", {
+      body: { settlement_id: id, reason: "Dibatalkan oleh bendahara" },
+    });
+    setCancellingId(null);
+    if (error || data?.error) { toast.error(data?.error || error?.message || "Gagal membatalkan"); return; }
+    toast.success("Pengajuan dibatalkan");
+    setRefreshKey(k => k + 1);
+  };
+
 
   const saveAccount = async () => {
     const isEw = newAccount.account_type === "ewallet";
@@ -4740,9 +4721,11 @@ export function BendaharaPencairan() {
   };
 
   const deleteAccount = async (id: string) => {
-    const { error } = await supabase.from("bendahara_bank_accounts" as any).delete().eq("id", id);
+    if (!confirm("Nonaktifkan rekening ini? Riwayat pencairan yang sudah ada tetap tersimpan.")) return;
+    const { error } = await supabase.from("bendahara_bank_accounts" as any)
+      .update({ is_active: false, is_default: false, archived_at: new Date().toISOString() }).eq("id", id);
     if (error) { toast.error(error.message); return; }
-    toast.success("Rekening dihapus");
+    toast.success("Rekening dinonaktifkan");
     if (selectedAccountId === id) setSelectedAccountId("");
     loadAccounts();
   };
@@ -4756,7 +4739,7 @@ export function BendaharaPencairan() {
   };
 
   const badge = (s: string) => {
-    const map: any = { pending: "bg-amber-500", approved: "bg-blue-500", paid: "bg-emerald-500", rejected: "bg-red-500" };
+    const map: any = { pending: "bg-amber-500", approved: "bg-blue-500", paid: "bg-emerald-500", rejected: "bg-red-500", cancelled: "bg-slate-400" };
     return <Badge className={map[s] || "bg-slate-500"}>{s.toUpperCase()}</Badge>;
   };
 
@@ -4778,7 +4761,7 @@ export function BendaharaPencairan() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <StatCard label="Transaksi Siap Cair" value={String(available.count)} icon={Receipt} gradient="from-violet-500 to-purple-600" />
         <StatCard label="Total Bruto" value={fmtIDR(available.gross)} icon={TrendingUp} gradient="from-blue-500 to-indigo-600" />
-        <StatCard label="Final Payout" value={fmtIDR(finalPayout)} icon={Banknote} sub={`setelah biaya pencairan ${fmtIDR(DEFAULT_WITHDRAW_FEE)}`} gradient="from-amber-500 to-orange-600" />
+        <StatCard label="Final Payout" value={fmtIDR(finalPayout)} icon={Banknote} sub={`setelah biaya pencairan ${fmtIDR(schoolSettings.withdraw_fee)} · min ${fmtIDR(schoolSettings.min_payout)}`} gradient="from-amber-500 to-orange-600" />
       </div>
 
 
@@ -4805,7 +4788,7 @@ export function BendaharaPencairan() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div><p className="text-xs text-muted-foreground">Total Transaksi</p><p className="font-bold">{available.count}</p></div>
                 <div><p className="text-xs text-muted-foreground">Total Bruto</p><p className="font-bold">{fmtIDR(available.gross)}</p></div>
-                <div><p className="text-xs text-muted-foreground">Biaya Pencairan</p><p className="font-bold">- {fmtIDR(DEFAULT_WITHDRAW_FEE)}</p></div>
+                <div><p className="text-xs text-muted-foreground">Biaya Pencairan</p><p className="font-bold">- {fmtIDR(schoolSettings.withdraw_fee)}</p></div>
                 <div className="col-span-2 md:col-span-3 border-t pt-2">
                   <p className="text-xs text-muted-foreground">Final Payout</p>
                   <p className="text-xl font-extrabold text-emerald-600">{fmtIDR(finalPayout)}</p>
@@ -4851,18 +4834,27 @@ export function BendaharaPencairan() {
         </TabsContent>
 
         <TabsContent value="riwayat" className="space-y-4 mt-4">
+          {/* Legend status */}
+          <div className="rounded-lg border bg-muted/20 p-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px]">
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-500" /> <b>Pending</b> — menunggu review Super Admin</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-blue-500" /> <b>Approved</b> — disetujui, akan segera ditransfer</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" /> <b>Paid</b> — dana sudah masuk rekening</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-red-500" /> <b>Rejected</b> — ditolak (lihat catatan)</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-slate-400" /> <b>Cancelled</b> — dibatalkan oleh pemohon</span>
+          </div>
           <Card className="border-0 shadow-sm">
             <CardContent className="p-0">
               {loadingHistory ? <div className="p-8 text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto" /></div> : (
                 <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader><TableRow className="[&_th]:whitespace-nowrap"><TableHead>Code</TableHead><TableHead>Tgl</TableHead><TableHead>Trx</TableHead><TableHead>Bruto</TableHead><TableHead>Biaya Pencairan</TableHead><TableHead>Final</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow className="[&_th]:whitespace-nowrap"><TableHead>Code</TableHead><TableHead>Tgl</TableHead><TableHead>Trx</TableHead><TableHead>Bruto</TableHead><TableHead>Biaya Pencairan</TableHead><TableHead>Final</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
                   <TableBody>
-                    {history.length === 0 && <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Belum ada settlement</TableCell></TableRow>}
+                    {history.length === 0 && <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Belum ada settlement</TableCell></TableRow>}
                     {history.map(s => {
                       const withdrawFee = s.withdraw_fee ?? DEFAULT_WITHDRAW_FEE;
                       // Angka final_payout sudah direkonsiliasi dari invoice terkait (net − fee)
                       const rowFinal = s.final_payout ?? 0;
+                      const canCancel = s.status === "pending" && s.requested_by === user?.id;
                       return (
                         <TableRow key={s.id} onClick={() => openSettlementDetail(s)} className="[&_td]:whitespace-nowrap cursor-pointer hover:bg-muted/50 transition-colors">
                           <TableCell className="text-xs font-mono">{s.settlement_code}</TableCell>
@@ -4872,6 +4864,19 @@ export function BendaharaPencairan() {
                           <TableCell className="text-xs">{fmtIDR(withdrawFee)}</TableCell>
                           <TableCell className="font-semibold text-emerald-600">{fmtIDR(rowFinal)}</TableCell>
                           <TableCell>{badge(s.status)}</TableCell>
+                          <TableCell className="text-right">
+                            {canCancel && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                                disabled={cancellingId === s.id}
+                                onClick={(e) => { e.stopPropagation(); cancelSettlement(s.id); }}
+                              >
+                                {cancellingId === s.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Batalkan"}
+                              </Button>
+                            )}
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -4883,6 +4888,7 @@ export function BendaharaPencairan() {
           </Card>
         </TabsContent>
       </Tabs>
+
 
       {/* Konfirmasi Pencairan */}
       <Dialog open={confirmOpen} onOpenChange={(o) => { setConfirmOpen(o); if (!o) { setOtpStep(false); setOtpCode(""); setOtpPhoneMasked(""); } }}>
@@ -4912,8 +4918,46 @@ export function BendaharaPencairan() {
                 <p className="text-[11px] uppercase tracking-wider font-semibold text-emerald-700 dark:text-emerald-400">Rincian Perhitungan</p>
                 <div className="flex justify-between text-sm"><span className="text-muted-foreground">Total Tagihan Lunas</span><span className="font-semibold">{available.count} transaksi</span></div>
                 <div className="flex justify-between text-sm"><span className="text-muted-foreground">Total Bruto (dari siswa)</span><span className="font-bold">{fmtIDR(available.gross)}</span></div>
-                <div className="flex justify-between text-sm text-rose-600 dark:text-rose-400"><span>(−) Biaya Pencairan</span><span className="font-semibold">−{fmtIDR(DEFAULT_WITHDRAW_FEE)}</span></div>
+                {available.fee > 0 && (
+                  <div className="flex justify-between text-sm text-muted-foreground"><span>(−) Biaya Gateway</span><span>−{fmtIDR(available.fee)}</span></div>
+                )}
+                <div className="flex justify-between text-sm text-rose-600 dark:text-rose-400"><span>(−) Biaya Pencairan</span><span className="font-semibold">−{fmtIDR(schoolSettings.withdraw_fee)}</span></div>
                 <div className="border-t-2 border-emerald-400 dark:border-emerald-600 pt-2 flex justify-between items-center"><span className="text-sm font-semibold">Diterima di Rekening</span><span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">{fmtIDR(finalPayout)}</span></div>
+              </div>
+
+              {/* Preview daftar invoice */}
+              {availableItems.length > 0 && (
+                <div className="rounded-lg border bg-muted/30 p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">Rincian Transaksi ({availableItems.length})</p>
+                  </div>
+                  <div className="max-h-40 overflow-y-auto divide-y divide-border/60">
+                    {availableItems.slice(0, 10).map((it: any) => (
+                      <div key={it.id} className="flex items-center justify-between py-1.5 text-xs">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium truncate">{it.student_name || "—"} <span className="text-muted-foreground">· {it.class_name || "-"}</span></p>
+                          <p className="text-[10px] text-muted-foreground truncate">{it.period_label || it.invoice_number}</p>
+                        </div>
+                        <p className="font-mono font-semibold shrink-0 ml-2">{fmtIDR(it.total_amount || 0)}</p>
+                      </div>
+                    ))}
+                    {availableItems.length > 10 && (
+                      <p className="text-[10px] text-center text-muted-foreground py-2">+{availableItems.length - 10} transaksi lain</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Ketik CAIRKAN untuk konfirmasi */}
+              <div className="rounded-lg border border-rose-200 dark:border-rose-900 bg-rose-50/60 dark:bg-rose-950/20 p-3 space-y-2">
+                <Label className="text-xs font-semibold text-rose-700 dark:text-rose-300">Ketik kata <span className="font-mono bg-rose-200/60 dark:bg-rose-900/60 px-1.5 py-0.5 rounded">CAIRKAN</span> untuk melanjutkan</Label>
+                <Input
+                  value={confirmWord}
+                  onChange={(e) => setConfirmWord(e.target.value.toUpperCase().slice(0, 10))}
+                  placeholder="CAIRKAN"
+                  className="font-mono tracking-widest text-center"
+                  autoComplete="off"
+                />
               </div>
 
               <p className="text-xs text-center text-muted-foreground">Selanjutnya Anda akan diminta memasukkan kode OTP WhatsApp untuk konfirmasi pencairan.</p>
@@ -4921,13 +4965,20 @@ export function BendaharaPencairan() {
                 <Button variant="outline" onClick={() => { setConfirmOpen(false); setBankManageOpen(true); }} disabled={otpSending}>
                   Periksa / Ubah
                 </Button>
-                <Button onClick={sendOtp} disabled={otpSending} className="bg-emerald-600 hover:bg-emerald-700">
+                <Button onClick={sendOtp} disabled={otpSending || confirmWord.trim() !== "CAIRKAN"} className="bg-emerald-600 hover:bg-emerald-700">
                   {otpSending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Ya, Cairkan"}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="space-y-4 pt-2">
+              {/* Rekening tujuan besar & mencolok di step OTP */}
+              <div className="rounded-lg border-2 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 p-3">
+                <p className="text-[10px] uppercase tracking-wider font-bold text-amber-700 dark:text-amber-400 mb-1">Payout Akan Dikirim Ke</p>
+                <p className="text-lg font-extrabold leading-tight">{fmtIDR(finalPayout)} → {bank.bank_name}</p>
+                <p className="font-mono text-sm">{bank.account_number}</p>
+                <p className="text-xs text-muted-foreground">a.n. {bank.account_holder}</p>
+              </div>
               <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 text-center space-y-1">
                 <p className="text-xs text-muted-foreground">Kode OTP dikirim ke WhatsApp</p>
                 <p className="font-mono font-bold text-emerald-700 dark:text-emerald-300">{otpPhoneMasked || "—"}</p>
