@@ -4547,9 +4547,13 @@ export function BendaharaPencairan() {
       const offline = allPaid.filter((x) => isOfflinePayment(x.payment_method));
       const availableList = online.filter((x) => !x.settlement_id);
 
+      const fee = Number((sRes.data as any)?.withdraw_fee_default ?? DEFAULT_WITHDRAW_FEE);
+      const minP = Number((sRes.data as any)?.min_payout ?? 10000);
+      setSchoolSettings({ withdraw_fee: fee, min_payout: minP });
+
       setAvailableItems(availableList);
       // Pakai helper yang sama dengan Bendahara Saldo & Super Admin agar angka konsisten.
-      setAvailable(computeAvailableSaldo(availableList, DEFAULT_WITHDRAW_FEE));
+      setAvailable(computeAvailableSaldo(availableList, fee));
 
       const invoiceBySettlement = online.reduce((map, x) => {
         if (!x.settlement_id) return map;
