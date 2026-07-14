@@ -956,6 +956,7 @@ function FinalCTA() {
 // ---------- Footer ----------
 function Footer() {
   return (
+    <>
     <footer className="relative bg-gradient-to-br from-[#4a5cf0] via-[#5B6CF9] to-[#7c8dff] text-white/85">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-16 pb-8 grid md:grid-cols-12 gap-10">
         {/* Brand + Company Info */}
