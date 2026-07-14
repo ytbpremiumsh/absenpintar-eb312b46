@@ -1020,7 +1020,7 @@ function Footer() {
 
       <div className="border-t border-white/15">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-4 text-xs text-white/60">
-          Made with care for Indonesian schools. © {new Date().getFullYear()} ATSkolla — CV Prestasi Kita Bersama. Hak cipta dilindungi.
+          © {new Date().getFullYear()} ATSkolla — CV Prestasi Kita Bersama. Hak cipta dilindungi.
         </div>
       </div>
     </footer>
